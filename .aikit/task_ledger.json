@@ -1,5 +1,95 @@
 {
   "version": 1,
-  "active_task": null,
-  "checkpoints": []
+  "active_task": {
+    "task_id": "bootstrap",
+    "last_phase": "phase 4",
+    "active_phase": 5,
+    "status": "completed",
+    "updated_at": 1792866822.6641204,
+    "owner": "claude-code:851e578e",
+    "started_by": "claude-code:851e578e",
+    "continuations": [],
+    "completed_at": 1792866861.7075047
+  },
+  "checkpoints": [
+    {
+      "task_id": "bootstrap",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/5] Plan: M1 storage core (atomic writes, sqlite catalog, hash-verified ingest); M2 HTTP API (token auth, upload, has, sync-state, status); M3 gallery UI + optional Pillow thumbnails; M4 Shortcut setup page + backup command; M5 README, CLI, end-to-end run",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1792864551.113934,
+      "timestamp_str": "2026-10-24 20:55:51",
+      "agent": "claude-code:851e578e",
+      "impact_assessment": {
+        "why": "User wants an iPhone to copy photos to their PC over home Wi-Fi with no app, and to delete from the phone only what the PC verifiably holds",
+        "benefits": "No iPhone app; originals kept; deletion gated on a server-side hash re-check; stdlib-only core",
+        "risks": "contract: Shortcuts may hash/send different bytes than expected; dependency: Pillow/pillow-heif optional; concurrency: parallel uploads of same file; state: sqlite catalog and partial uploads on power loss",
+        "mitigation": "Reject any hash mismatch so nothing unverified is deletable; Pillow imported only in thumbnail adapter; sqlite transactions with unique sha256; uploads stream to .incoming temp, fsync, then os.replace"
+      }
+    },
+    {
+      "task_id": "bootstrap",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[5/5] M1-M5 built: hash-verified store, Shortcut API, gallery, setup guide, backup, README, ADR-001; 45 tests and 4/4 gates pass; live server smoke run passed; checklists: passed; not committed (host requires an explicit commit request)",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1792865329.6742303,
+      "timestamp_str": "2026-10-24 21:08:49",
+      "agent": "claude-code:851e578e",
+      "handoff": {
+        "next": "user commits, then sets up the two Shortcuts on the iPhone",
+        "open": "Shortcuts Generate Hash/upload byte parity untested on a real iPhone"
+      }
+    },
+    {
+      "task_id": "bootstrap",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Re-plan: library browser. M1 API: month timeline, month filter and name search on /api/photos, hashless browser upload; M2 UI: timeline scrubber, search, drag-drop/file-picker upload with progress, screenshot review via Playwright; M3 tests, README, ADR-002",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1792865456.7874901,
+      "timestamp_str": "2026-10-24 21:10:56",
+      "agent": "claude-code:851e578e"
+    },
+    {
+      "task_id": "bootstrap",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] Library browser done: outline/month/kind/name filters, hashless browser upload with EXIF date, sidebar/chips UI, viewer fit fix; 49 tests and 4/4 gates pass; Playwright review on desktop/dark/phone; checklists: passed; not committed (awaiting explicit request)",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1792865883.575677,
+      "timestamp_str": "2026-10-24 21:18:03",
+      "agent": "claude-code:851e578e",
+      "handoff": {
+        "next": "user asks to commit",
+        "open": "Shortcut flow untested on a real iPhone"
+      }
+    },
+    {
+      "task_id": "bootstrap",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] Review fixes (ADR-003): duplicate repair, rel_path clash, download-only non-media, Windows exclusive port, socket timeout, double-corrupt config, scroll stall; 56 tests, 4/4 gates, Edge walkthrough pass; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1792866822.6641204,
+      "timestamp_str": "2026-10-24 21:33:42",
+      "agent": "claude-code:851e578e"
+    },
+    {
+      "task_id": "bootstrap",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'bootstrap' completed successfully.",
+      "status": "completed",
+      "timestamp": 1792866861.707506,
+      "timestamp_str": "2026-10-24 21:34:21",
+      "agent": "claude-code:851e578e"
+    }
+  ]
 }

@@ -1,0 +1,152 @@
+"""The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it."""
+
+import http.client
+import json
+import os
+import shutil
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+
+from photo_harbor.app import HarborApp
+from photo_harbor.config import load_or_create
+from photo_harbor.http_server import HarborServer
+from tests.library_fixture import FIXED_NOW, sha
+
+
+class _NoPreviews:
+    enabled = False
+
+    def preview(self, record, original):
+        return None
+
+
+class ServerTest(unittest.TestCase):
+    def setUp(self):
+        root = Path(tempfile.mkdtemp(prefix="harbor_http_"))
+        self.addCleanup(shutil.rmtree, root, True)
+        self.settings = load_or_create(root)
+        self.app = HarborApp(self.settings, port=0, thumbs=_NoPreviews(), now=lambda: FIXED_NOW)
+        self.addCleanup(self.app.close)
+        self.server = HarborServer(("127.0.0.1", 0), self.app.router, self.app.guard,
+                                   verbose=False)
+        thread = threading.Thread(target=self.server.serve_forever, kwargs={"poll_interval": 0.05})
+        thread.start()
+        self.addCleanup(thread.join)
+        self.addCleanup(self.server.server_close)
+        self.addCleanup(self.server.shutdown)
+
+    def call(self, method, path, body=None, headers=None, key=True):
+        conn = http.client.HTTPConnection("127.0.0.1", self.server.server_address[1], timeout=5)
+        self.addCleanup(conn.close)
+        sent = dict(headers or {})
+        if key:
+            sent["X-Harbor-Key"] = self.settings.key
+        if isinstance(body, dict):
+            body = json.dumps(body).encode()
+            sent["Content-Type"] = "application/json"
+        conn.request(method, path, body=body, headers=sent)
+        response = conn.getresponse()
+        return response, response.read()
+
+    def upload(self, data, name="IMG_0001.HEIC", digest=None):
+        headers = {"X-Name": name, "X-Sha256": digest or sha(data), "X-Taken": "2026-05-01T08:00:00Z"}
+        return self.call("POST", "/api/upload", body=data, headers=headers)
+
+    def test_a_full_sync_round(self):
+        response, body = self.call("POST", "/api/sync/start", body={})
+        start = json.loads(body)
+        self.assertEqual(start["since"], "2000-01-01T00:00:00")
+        response, body = self.upload(b"heic bytes")
+        self.assertEqual((response.status, json.loads(body)["status"]), (200, "stored"))
+        response, body = self.upload(b"heic bytes")
+        self.assertEqual(json.loads(body)["status"], "duplicate")
+        self.call("POST", "/api/sync/done", body={"started_at": start["started_at"]})
+        _, body = self.call("POST", "/api/sync/start", body={})
+        self.assertEqual(json.loads(body)["since"], "2026-10-24T11:50:00+00:00")
+
+    def test_has_answers_yes_only_for_verified_photos(self):
+        self.upload(b"kept")
+        _, body = self.call("GET", f"/api/has?sha256={sha(b'kept')}")
+        self.assertEqual(json.loads(body)["answer"], "yes")
+        _, body = self.call("GET", f"/api/has?sha256={sha(b'not sent')}&name=IMG_6.HEIC")
+        self.assertEqual(json.loads(body)["answer"], "no")
+        self.call("GET", f"/api/has?sha256={sha(b'also not sent')}&name=IMG_7.HEIC&report=1")
+        _, body = self.call("GET", "/api/status")
+        self.assertEqual([m["name"] for m in json.loads(body)["missing"]], ["IMG_7.HEIC"])
+
+    def test_a_mismatched_hash_is_rejected_and_counted(self):
+        response, body = self.upload(b"actual", digest=sha(b"claimed"))
+        self.assertEqual(response.status, 422)
+        self.assertIn("why", json.loads(body))
+        _, body = self.call("GET", "/api/status")
+        self.assertEqual(json.loads(body)["last_day"]["rejected"], 1)
+
+    def test_calls_without_the_key_are_refused_but_the_page_loads(self):
+        response, _ = self.call("GET", "/api/status", key=False)
+        self.assertEqual(response.status, 401)
+        response, body = self.call("GET", "/", key=False)
+        self.assertEqual(response.status, 200)
+        self.assertIn(b"<html", body)
+
+    def test_login_sets_a_cookie_that_opens_the_api(self):
+        response, _ = self.call("POST", "/api/login", body={"key": self.settings.key}, key=False)
+        cookie = response.getheader("Set-Cookie").split(";", 1)[0]
+        response, _ = self.call("GET", "/api/status", headers={"Cookie": cookie}, key=False)
+        self.assertEqual(response.status, 200)
+
+    def test_media_serves_ranges_for_video_scrubbing(self):
+        self.upload(b"0123456789", name="clip.MOV")
+        response, body = self.call("GET", f"/media/{sha(b'0123456789')}", headers={"Range": "bytes=2-4"})
+        self.assertEqual((response.status, body), (206, b"234"))
+        self.assertEqual(response.getheader("Content-Type"), "video/quicktime")
+
+    def test_photos_lists_newest_first_with_paging(self):
+        self.upload(b"a", name="a.jpg")
+        self.upload(b"b", name="b.jpg")
+        _, body = self.call("GET", "/api/photos?limit=1")
+        page = json.loads(body)
+        self.assertEqual((len(page["photos"]), page["next"]), (1, 1))
+
+    def test_a_chunked_upload_is_accepted(self):
+        data = b"chunked photo"
+        framed = b"%x\r\n%s\r\n0\r\n\r\n" % (len(data), data)
+        headers = {"X-Name": "c.jpg", "X-Sha256": sha(data), "Transfer-Encoding": "chunked"}
+        response, body = self.call("POST", "/api/upload", body=framed, headers=headers)
+        self.assertEqual((response.status, json.loads(body)["status"]), (200, "stored"))
+
+    def test_browsing_by_month_kind_and_name(self):
+        self.upload(b"may photo", name="IMG_0001.HEIC")
+        self.call("POST", "/api/upload", body=b"clip", headers={
+            "X-Name": "clip.MOV", "X-Taken": "2025-12-24T20:00:00"})
+        _, body = self.call("GET", "/api/outline")
+        outline = json.loads(body)
+        self.assertEqual([m["month"] for m in outline["months"]], ["2026-05", "2025-12"])
+        self.assertEqual(outline["videos"], 1)
+        _, body = self.call("GET", "/api/photos?month=2025-12")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["clip.MOV"])
+        _, body = self.call("GET", "/api/photos?kind=photo&q=img_")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["IMG_0001.HEIC"])
+        response, _ = self.call("GET", "/api/photos?month=2025-13")
+        self.assertEqual(response.status, 400)
+
+    def test_a_browser_upload_needs_no_hash_and_keeps_a_non_ascii_name(self):
+        response, body = self.call("POST", "/api/upload", body=b"from the browser", headers={
+            "X-Name": "Tatil%20foto%C4%9Fraf%C4%B1.jpg", "X-Modified": "2024-03-02T10:00:00.000Z"})
+        self.assertEqual(json.loads(body)["status"], "stored")
+        _, body = self.call("GET", "/api/photos")
+        photo = json.loads(body)["photos"][0]
+        self.assertEqual((photo["name"], photo["time"][:7]), ("Tatil fotoğrafı.jpg", "2024-03"))
+
+    def test_a_non_media_upload_downloads_instead_of_rendering(self):
+        page = b"<script>alert(1)</script>"
+        self.upload(page, name="evil.html")
+        response, _ = self.call("GET", f"/media/{sha(page)}")
+        self.assertEqual(response.getheader("Content-Type"), "application/octet-stream")
+        self.assertEqual(response.getheader("Content-Disposition"), "attachment")
+
+    @unittest.skipUnless(os.name == "nt", "port sharing is the Windows behaviour")
+    def test_a_second_server_cannot_share_the_port(self):
+        with self.assertRaises(OSError):
+            HarborServer(self.server.server_address, self.app.router, self.app.guard, verbose=False)

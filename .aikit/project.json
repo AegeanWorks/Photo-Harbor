@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "photo-harbor",
-  "test_command": null,
+  "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
     "photos",

@@ -1,0 +1,9 @@
+{
+  "name": "Harbor",
+  "short_name": "Harbor",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f4f0",
+  "theme_color": "#1f6f6b",
+  "icons": [{ "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

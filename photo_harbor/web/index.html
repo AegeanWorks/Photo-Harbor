@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f6f4f0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#121416" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Harbor">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Harbor</title>
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon.svg">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="stylesheet" href="/static/app.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <section id="login" class="login" hidden>
+    <form class="login-card" id="login-form" autocomplete="off">
+      <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 21c3 0 3 2 6 2s3-2 6-2 3 2 6 2 3-2 6-2"/><path d="M16 4v13M10 10h12M11 17a5 5 0 0 0 10 0"/></svg>
+      <h1>Harbor</h1>
+      <p>Enter the library key shown in the PC's Harbor window.</p>
+      <input id="login-key" type="password" placeholder="Library key" required spellcheck="false">
+      <button type="submit" class="primary">Open the library</button>
+      <p class="login-error" id="login-error" role="alert"></p>
+    </form>
+  </section>
+
+  <div id="shell" class="shell" hidden>
+    <header class="topbar">
+      <div class="brand">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 21c3 0 3 2 6 2s3-2 6-2 3 2 6 2 3-2 6-2"/><path d="M16 4v13M10 10h12M11 17a5 5 0 0 0 10 0"/></svg>
+        <span>Harbor</span>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-view="photos" aria-selected="true">Photos</button>
+        <button role="tab" data-view="sync" aria-selected="false">Sync</button>
+        <button role="tab" data-view="setup" aria-selected="false">Setup</button>
+      </nav>
+      <label class="search">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
+        <input id="search" type="search" placeholder="Search by file name" autocomplete="off" spellcheck="false" aria-label="Search by file name">
+      </label>
+      <button class="primary upload-button" id="upload-button" type="button">
+        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 14V4M5.5 8.5L10 4l4.5 4.5M4 16h12"/></svg>
+        <span>Upload</span>
+      </button>
+      <input id="upload-input" type="file" accept="image/*,video/*" multiple hidden>
+    </header>
+
+    <main>
+      <section id="view-photos" class="view browser">
+        <aside class="rail" id="rail" aria-label="Browse the library">
+          <button class="rail-item" data-scope="all" aria-pressed="true"><span>All photos</span><b id="rail-all"></b></button>
+          <button class="rail-item" data-scope="video" aria-pressed="false"><span>Videos</span><b id="rail-videos"></b></button>
+          <div id="rail-years" class="rail-years"></div>
+        </aside>
+        <div class="gallery">
+          <div class="scope" id="scope">
+            <h1 id="scope-title">All photos</h1>
+            <span id="scope-count"></span>
+            <button class="ghost" id="scope-clear" hidden>Show everything</button>
+          </div>
+          <div id="days"></div>
+          <div id="empty" class="empty" hidden>
+            <h2 id="empty-title">No photos yet</h2>
+            <p id="empty-text">Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.</p>
+            <button class="primary" data-goto="setup" id="empty-action">Set up the iPhone</button>
+          </div>
+          <div id="sentinel" class="sentinel" aria-hidden="true"></div>
+        </div>
+      </section>
+
+      <section id="view-sync" class="view narrow" hidden>
+        <div class="cards">
+          <article class="card"><h3>Photos on this PC</h3><p class="figure" id="s-count">–</p></article>
+          <article class="card"><h3>Space used</h3><p class="figure" id="s-bytes">–</p></article>
+          <article class="card"><h3>Last finished sync</h3><p class="figure" id="s-sync">–</p></article>
+          <article class="card"><h3>Last 24 hours</h3><p class="figure small" id="s-day">–</p></article>
+        </div>
+        <article class="panel">
+          <h2>On the iPhone, not yet on the PC</h2>
+          <p class="hint">Found by the weekly cleanup. Each one is uploaded during that same cleanup and disappears from this list once it arrives.</p>
+          <ul id="missing" class="missing"></ul>
+        </article>
+        <p class="hint" id="previews-note"></p>
+      </section>
+
+      <section id="view-setup" class="view narrow" hidden>
+        <article class="panel">
+          <h2>1 · Two values for the Shortcut</h2>
+          <div class="field"><span>Server</span><code id="setup-server">–</code><button class="ghost" data-copy="setup-server">Copy</button></div>
+          <div class="field"><span>Key</span><code id="setup-key">–</code><button class="ghost" data-copy="setup-key">Copy</button></div>
+          <p class="hint">Send both to the iPhone (AirDrop or a note) so they can be pasted, not typed.</p>
+        </article>
+
+        <article class="panel steps">
+          <h2>2 · Shortcut “Harbor Sync”</h2>
+          <p class="hint">In the Shortcuts app tap +, name it Harbor Sync and add these actions in order.</p>
+          <ol>
+            <li><b>Get Network Details</b> → Wi-Fi, Network Name. Then <b>If</b> Network Details <i>is not</i> your home Wi-Fi name → <b>Stop This Shortcut</b>. End If.</li>
+            <li><b>Get Contents of URL</b> <code>[Server]/api/sync/start</code>. Method POST, header <code>X-Harbor-Key</code> = [Key]. Then <b>Get Dictionary Value</b> <i>since</i> → <b>Get Dates from Input</b> → <b>Set Variable</b> <i>Since</i>. <b>Get Dictionary Value</b> <i>started_at</i> from the same result → <b>Set Variable</b> <i>StartedAt</i>.</li>
+            <li><b>Find Photos</b> where <i>Creation Date is after Since</i>, sorted by Creation Date, oldest first.</li>
+            <li><b>Repeat with Each</b> item in Photos:
+              <ol>
+                <li><b>Generate Hash</b> SHA256 of Repeat Item → <b>Set Variable</b> <i>Hash</i>.</li>
+                <li><b>Get Contents of URL</b> <code>[Server]/api/has?sha256=[Hash]</code> (GET, same key header) → <b>Get Dictionary Value</b> <i>answer</i>.</li>
+                <li><b>If</b> answer <i>is not</i> yes:
+                  <b>Get Name</b> of Repeat Item; <b>Format Date</b> Creation Date of Repeat Item as ISO 8601;
+                  <b>Get Contents of URL</b> <code>[Server]/api/upload</code>, POST, headers <code>X-Harbor-Key</code> = [Key], <code>X-Name</code> = Name, <code>X-Sha256</code> = Hash, <code>X-Taken</code> = Formatted Date, Request Body <i>File</i> = Repeat Item.
+                  <b>Get Dictionary Value</b> <i>answer</i>; <b>If</b> it is not yes → <b>Add to Variable</b> <i>Failures</i>.</li>
+              </ol>
+            </li>
+            <li><b>If</b> Failures <i>does not have any value</i> → <b>Get Contents of URL</b> <code>[Server]/api/sync/done</code>, POST, same key header, Request Body JSON <code>started_at</code> = StartedAt.</li>
+          </ol>
+          <p class="hint">If anything failed, the sync is not marked done, so the next run tries those photos again. Photos already on the PC are only hashed, not re-sent.</p>
+        </article>
+
+        <article class="panel steps">
+          <h2>3 · Run it automatically</h2>
+          <p class="hint">Shortcuts → Automation → + → choose the trigger → <b>Run Immediately</b> → Harbor Sync.</p>
+          <ul>
+            <li><b>Wi-Fi</b>: your home network. Runs when she gets home.</li>
+            <li><b>Charger</b>: is connected. Sends what she took while already at home.</li>
+            <li><b>Time of Day</b> (optional): e.g. 12:00, 18:00 and 22:00.</li>
+          </ul>
+        </article>
+
+        <article class="panel steps">
+          <h2>4 · Shortcut “Harbor Cleanup” (free up space)</h2>
+          <ol>
+            <li>The same Wi-Fi check as step 1.</li>
+            <li><b>Adjust Date</b>: Current Date, subtract 30 days. <b>Find Photos</b> where <i>Creation Date is before</i> Adjusted Date.</li>
+            <li><b>Repeat with Each</b>: <b>Generate Hash</b> SHA256; <b>Get Name</b>; <b>Get Contents of URL</b> <code>[Server]/api/has?sha256=[Hash]&amp;name=[Name]&amp;report=1</code>; <b>Get Dictionary Value</b> <i>answer</i>.
+              <b>If</b> answer is yes → <b>Add to Variable</b> <i>Safe</i>. Otherwise → the same upload request as in Harbor Sync (it is kept on the phone this time).</li>
+            <li><b>If</b> Safe has any value → <b>Delete Photos</b> Safe. iOS asks once to confirm.</li>
+          </ol>
+          <p class="hint">Only photos the PC has just re-hashed and found intact are deleted. They stay in Recently Deleted for 30 days. With iCloud Photos on, deleting also removes them from iCloud.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="viewer" class="viewer" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
+    <button class="viewer-close" id="viewer-close" aria-label="Close">✕</button>
+    <button class="viewer-nav prev" id="viewer-prev" aria-label="Previous">‹</button>
+    <figure class="viewer-stage" id="viewer-stage"></figure>
+    <button class="viewer-nav next" id="viewer-next" aria-label="Next">›</button>
+    <footer class="viewer-meta">
+      <span id="viewer-title"></span>
+      <span id="viewer-detail"></span>
+      <a id="viewer-download" class="ghost" download>Download original</a>
+    </footer>
+  </div>
+
+  <div id="drop" class="drop" hidden aria-hidden="true">
+    <div class="drop-card">
+      <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 14V4M5.5 8.5L10 4l4.5 4.5M4 16h12"/></svg>
+      <p>Drop photos and videos to add them to Harbor</p>
+    </div>
+  </div>
+
+  <aside id="uploads" class="uploads" hidden aria-live="polite">
+    <header>
+      <b id="uploads-title">Uploading</b>
+      <button class="icon" id="uploads-close" aria-label="Hide uploads">✕</button>
+    </header>
+    <div class="uploads-bar"><i id="uploads-progress"></i></div>
+    <ul id="uploads-list"></ul>
+  </aside>
+
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
