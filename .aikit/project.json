@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "photo-harbor",
+  "test_command": null,
+  "topics": [
+    "aikit",
+    "photos",
+    "self-hosted",
+    "ios-shortcuts"
+  ],
+  "gates": {},
+  "ui_required": false,
+  "created": "2026-10-24"
+}
