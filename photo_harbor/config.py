@@ -9,6 +9,7 @@ from .atomic_file import write_atomic
 from .errors import HarborError
 
 CONFIG_VERSION = 1
+DEFAULT_LIBRARY = Path.home() / "Pictures" / "Harbor"
 
 
 @dataclass(frozen=True)

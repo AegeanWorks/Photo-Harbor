@@ -10,6 +10,7 @@ import unittest
 from pathlib import Path
 
 from photo_harbor.app import HarborApp
+from photo_harbor.autostart import Autostart
 from photo_harbor.config import load_or_create
 from photo_harbor.http_server import HarborServer
 from tests.library_fixture import FIXED_NOW, sha
@@ -22,12 +23,29 @@ class _NoPreviews:
         return None
 
 
+class _FakeRunKey:
+    def __init__(self):
+        self.value = None
+
+    def read(self):
+        return self.value
+
+    def write(self, command):
+        self.value = command
+
+    def delete(self):
+        self.value = None
+
+
 class ServerTest(unittest.TestCase):
     def setUp(self):
         root = Path(tempfile.mkdtemp(prefix="harbor_http_"))
         self.addCleanup(shutil.rmtree, root, True)
         self.settings = load_or_create(root)
-        self.app = HarborApp(self.settings, port=0, thumbs=_NoPreviews(), now=lambda: FIXED_NOW)
+        self.registry = _FakeRunKey()
+        self.app = HarborApp(self.settings, port=0, thumbs=_NoPreviews(), now=lambda: FIXED_NOW,
+                             autostart=Autostart(self.registry, 'pythonw Harbor.pyw', supported=True),
+                             password_iterations=1000)
         self.addCleanup(self.app.close)
         self.server = HarborServer(("127.0.0.1", 0), self.app.router, self.app.guard,
                                    verbose=False)
@@ -150,3 +168,118 @@ class ServerTest(unittest.TestCase):
     def test_a_second_server_cannot_share_the_port(self):
         with self.assertRaises(OSError):
             HarborServer(self.server.server_address, self.app.router, self.app.guard, verbose=False)
+
+    def add_person(self, name="Ayşe"):
+        _, body = self.call("POST", "/api/profiles", body={"name": name})
+        return json.loads(body)
+
+    def test_a_persons_key_uploads_into_their_own_profile(self):
+        ayse = self.add_person()
+        data = b"her photo"
+        self.call("POST", "/api/upload", body=data, key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "IMG.HEIC", "X-Sha256": sha(data)})
+        _, body = self.call("GET", "/api/photos?profile=ayse")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["IMG.HEIC"])
+        _, body = self.call("POST", "/api/sync/start", body={}, key=False,
+                            headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual(json.loads(body)["since"], "2000-01-01T00:00:00")
+
+    def test_only_the_owner_may_target_or_manage_other_profiles(self):
+        ayse = self.add_person()
+        as_ayse = {"X-Harbor-Key": ayse["key"]}
+        response, _ = self.call("POST", "/api/upload", body=b"x", key=False,
+                                headers={**as_ayse, "X-Name": "a.jpg", "X-Profile": "main"})
+        self.assertEqual(response.status, 403)
+        response, _ = self.call("POST", "/api/profiles", body={"name": "Bob"}, key=False, headers=as_ayse)
+        self.assertEqual(response.status, 403)
+        _, body = self.call("GET", "/api/profiles", key=False, headers=as_ayse)
+        listing = json.loads(body)
+        self.assertEqual((listing["me"], listing["owner"]), ("ayse", False))
+        self.assertEqual([p["id"] for p in listing["profiles"]], ["ayse"])
+        response, body = self.call("POST", "/api/upload", body=b"for her",
+                                   headers={"X-Name": "b.jpg", "X-Profile": "ayse"})
+        self.assertEqual(response.status, 200)
+        self.assertEqual(json.loads(self.call("GET", "/api/profiles")[1])["profiles"][1]["count"], 1)
+
+    def test_a_retired_key_is_refused(self):
+        ayse = self.add_person()
+        self.call("POST", "/api/profiles/ayse", body={"new_key": True})
+        response, _ = self.call("GET", "/api/status", key=False, headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual(response.status, 401)
+
+    def test_a_client_hanging_up_prints_no_traceback(self):
+        import contextlib
+        import io as text_io
+        captured = text_io.StringIO()
+        with contextlib.redirect_stderr(captured):
+            try:
+                raise ConnectionAbortedError("client went away")
+            except ConnectionAbortedError:
+                self.server.handle_error(None, ("127.0.0.1", 1))
+        self.assertEqual(captured.getvalue(), "")
+
+    def test_the_owner_can_turn_starting_with_windows_on_and_off(self):
+        _, body = self.call("GET", "/api/setup")
+        self.assertEqual(json.loads(body)["startup"], {"supported": True, "enabled": False})
+        _, body = self.call("POST", "/api/startup", body={"enabled": True})
+        self.assertTrue(json.loads(body)["enabled"])
+        self.assertEqual(self.registry.value, "pythonw Harbor.pyw")
+        ayse = self.add_person()
+        response, _ = self.call("POST", "/api/startup", body={"enabled": False}, key=False,
+                                headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual(response.status, 403)
+        self.call("POST", "/api/startup", body={"enabled": False})
+        self.assertIsNone(self.registry.value)
+
+    def sign_in(self, profile, password):
+        response, body = self.call("POST", "/api/login", body={"profile": profile, "password": password},
+                                   key=False)
+        cookie = response.getheader("Set-Cookie")
+        return response.status, (cookie.split(";", 1)[0] if cookie else None)
+
+    def test_people_sign_in_with_a_password_and_see_only_their_own_photos(self):
+        self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
+        self.upload(b"main's photo", name="mine.jpg")
+        self.call("POST", "/api/upload", body=b"her photo",
+                  headers={"X-Name": "hers.jpg", "X-Profile": "ayse"})
+        _, body = self.call("GET", "/api/people", key=False)
+        self.assertEqual([p["name"] for p in json.loads(body)["profiles"]], ["Main", "Ayşe"])
+        status, cookie = self.sign_in("ayse", "deniz123")
+        self.assertEqual(status, 200)
+        as_her = {"Cookie": cookie}
+        _, body = self.call("GET", "/api/photos", key=False, headers=as_her)
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["hers.jpg"])
+        response, _ = self.call("GET", "/api/photos?profile=main", key=False, headers=as_her)
+        self.assertEqual(response.status, 403)
+        response, _ = self.call("GET", f"/media/{sha(b'main' + chr(39).encode() + b's photo')}",
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+
+    def test_wrong_passwords_are_refused_then_braked(self):
+        self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
+        for _ in range(5):
+            self.assertEqual(self.sign_in("ayse", "wrong")[0], 401)
+        self.assertEqual(self.sign_in("ayse", "deniz123")[0], 429)
+
+    def test_changing_a_password_needs_the_current_one_and_signs_out_other_browsers(self):
+        self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
+        _, first = self.sign_in("ayse", "deniz123")
+        _, second = self.sign_in("ayse", "deniz123")
+        response, _ = self.call("POST", "/api/password", body={"current": "nope", "new": "yeni-sifre"},
+                                key=False, headers={"Cookie": first})
+        self.assertEqual(response.status, 403)
+        response, _ = self.call("POST", "/api/password", body={"current": "deniz123", "new": "yeni-sifre"},
+                                key=False, headers={"Cookie": first})
+        self.assertEqual(response.status, 200)
+        self.assertEqual(self.call("GET", "/api/status", key=False, headers={"Cookie": first})[0].status, 200)
+        self.assertEqual(self.call("GET", "/api/status", key=False, headers={"Cookie": second})[0].status, 401)
+        self.assertEqual(self.sign_in("ayse", "yeni-sifre")[0], 200)
+
+    def test_the_owner_can_reset_a_password_and_a_key_still_signs_in(self):
+        ayse = self.add_person()
+        response, _ = self.call("POST", "/api/profiles/ayse", body={"password": "12"})
+        self.assertEqual(response.status, 400)
+        self.call("POST", "/api/profiles/ayse", body={"password": "baslangic"})
+        self.assertEqual(self.sign_in("ayse", "baslangic")[0], 200)
+        response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
+        self.assertEqual(response.status, 200)

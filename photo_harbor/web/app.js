@@ -5,7 +5,21 @@ const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
   scope: { kind: null, month: null }, query: "", generation: 0, total: 0,
+  profile: null, people: [], me: null, owner: false,
 };
+
+function personName(id) {
+  const person = state.people.find((p) => p.id === id);
+  return person ? person.name : id;
+}
+
+function initials(name) {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0].toLocaleUpperCase()).join("");
+}
+
+function post(path, body) {
+  return api(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+}
 
 // ---------- server calls ----------
 
@@ -163,6 +177,7 @@ function photosUrl() {
   if (state.scope.kind) params.set("kind", state.scope.kind);
   if (state.scope.month) params.set("month", state.scope.month);
   if (state.query) params.set("q", state.query);
+  if (state.profile) params.set("profile", state.profile);
   return `/api/photos?${params}`;
 }
 
@@ -206,8 +221,10 @@ function scopeTitle() {
 function renderScope() {
   const narrowed = Boolean(state.scope.month || state.scope.kind || state.query);
   const shown = state.photos.length;
-  $("scope-title").textContent = state.query ? `“${state.query}”` : scopeTitle();
-  if (!narrowed) $("scope-count").textContent = state.total.toLocaleString();
+  const title = state.query ? `“${state.query}”` : scopeTitle();
+  $("scope-title").textContent = state.profile ? `${personName(state.profile)} · ${title}` : title;
+  if (!narrowed && !state.profile) $("scope-count").textContent = state.total.toLocaleString();
+  else if (!narrowed) $("scope-count").textContent = (state.people.find((p) => p.id === state.profile)?.count ?? shown).toLocaleString();
   else $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
   $("scope-clear").hidden = !narrowed;
   const empty = shown === 0 && state.next === null;
@@ -223,7 +240,7 @@ function renderScope() {
 
 function markScope() {
   const active = state.scope.month || state.scope.kind || "all";
-  for (const item of document.querySelectorAll(".rail-item")) {
+  for (const item of document.querySelectorAll(".rail-item[data-scope]")) {
     item.setAttribute("aria-pressed", String(item.dataset.scope === active));
   }
 }
@@ -246,7 +263,7 @@ function railButton(scope, label, count) {
 }
 
 async function loadOutline() {
-  const outline = await api("/api/outline");
+  const outline = await api(state.profile ? `/api/outline?profile=${encodeURIComponent(state.profile)}` : "/api/outline");
   const years = $("rail-years");
   years.replaceChildren();
   let year = null;
@@ -260,6 +277,160 @@ async function loadOutline() {
   $("rail-videos").textContent = outline.videos.toLocaleString();
   document.querySelector('[data-scope="video"]').hidden = outline.videos === 0;
   markScope();
+}
+
+// ---------- people ----------
+
+function personButton(id, label, count) {
+  const button = el("button", "rail-item");
+  button.type = "button";
+  button.dataset.person = id || "";
+  button.setAttribute("aria-pressed", String((state.profile || "") === (id || "")));
+  button.append(el("span", "", label), el("b", "", count.toLocaleString()));
+  button.addEventListener("click", () => selectPerson(id));
+  return button;
+}
+
+function selectPerson(id) {
+  state.profile = id;
+  for (const item of document.querySelectorAll("[data-person]")) {
+    item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
+  }
+  state.scope = { kind: null, month: null };
+  markScope();
+  window.scrollTo({ top: 0 });
+  loadOutline().catch(handle);
+  resetPhotos();
+}
+
+function renderPeopleRail() {
+  const rail = $("rail-people");
+  rail.replaceChildren();
+  if (state.people.length < 2) return;
+  rail.append(el("h4", "rail-year", "People"));
+  const total = state.people.reduce((sum, p) => sum + p.count, 0);
+  rail.append(personButton(null, "Everyone", total));
+  for (const person of state.people) rail.append(personButton(person.id, person.name, person.count));
+}
+
+function keyRow(person) {
+  const row = el("div", "person");
+  const code = el("code", "", person.key);
+  const copy = el("button", "ghost", "Copy key");
+  copy.type = "button";
+  copy.addEventListener("click", () => copyText(person.key));
+  row.append(el("b", "", person.name), code, copy);
+  const tools = el("div", "person-tools");
+  if (state.owner) {
+    const path = `/api/profiles/${encodeURIComponent(person.id)}`;
+    tools.append(toolButton("Password", () => inlineEdit(row, "password", `New password for ${person.name}`,
+      (value) => post(path, { password: value }).then(() => toast(`${person.name} can now sign in with it`)))));
+    tools.append(toolButton("Rename", () => inlineEdit(row, "text", person.name,
+      (value) => post(path, { name: value }).then(() => toast(`Renamed; their folder is now "${value}"`)))));
+    if (person.id !== "main") {
+      tools.append(toolButton("New key", async () => {
+        if (!confirm(`Give ${person.name} a new key? Their Shortcut stops working until it gets the new one.`)) return;
+        await post(path, { new_key: true }).catch(handle);
+        loadPeople().catch(handle);
+      }));
+    }
+  }
+  row.append(tools);
+  row.title = `Folder: ${person.folder}`;
+  return row;
+}
+
+function toolButton(label, action) {
+  const button = el("button", "ghost", label);
+  button.type = "button";
+  button.addEventListener("click", action);
+  return button;
+}
+
+// A one-line form under a person's row: Save runs ``save(value)`` and reloads the list.
+function inlineEdit(row, type, placeholder, save) {
+  row.querySelector(".inline-edit")?.remove();
+  const form = el("form", "inline-edit");
+  const input = el("input");
+  input.type = type;
+  input.placeholder = placeholder;
+  if (type === "text") input.value = placeholder;
+  input.required = true;
+  const ok = el("button", "primary", "Save");
+  const cancel = toolButton("Cancel", () => form.remove());
+  form.append(input, ok, cancel);
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      await save(input.value.trim());
+      form.remove();
+      await loadPeople();
+    } catch (error) {
+      handle(error);
+    }
+  });
+  row.append(form);
+  input.focus();
+}
+
+function renderPeopleSetup() {
+  const list = $("setup-people");
+  list.replaceChildren(...state.people.filter((p) => p.key).map(keyRow));
+  $("add-person").hidden = !state.owner;
+  const me = state.people.find((p) => p.id === state.me);
+  if (me) {
+    $("account-name").textContent = me.name;
+    $("account-avatar").textContent = initials(me.name);
+    $("pw-current").hidden = !me.has_password;
+    $("pw-current").required = me.has_password;
+    $("pw-hint").textContent = me.has_password ? "Changing it signs you out on your other devices."
+      : "You have no password yet: choose one so you can sign in with your name.";
+  }
+  const sync = $("sync-people");
+  sync.replaceChildren();
+  for (const person of state.people) {
+    const row = el("li");
+    row.append(el("span", "", `${person.name} · ${person.count.toLocaleString()} items`),
+      el("span", "hint", `synced ${ago(person.last_sync)}`));
+    sync.append(row);
+  }
+}
+
+async function loadPeople() {
+  const listing = await api("/api/profiles");
+  state.people = listing.profiles;
+  state.me = listing.me;
+  state.owner = listing.owner;
+  renderPeopleRail();
+  renderPeopleSetup();
+  renderScope();
+}
+
+function wirePeople() {
+  $("add-person").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const name = $("add-person-name").value.trim();
+    if (!name) return;
+    try {
+      const added = await api("/api/profiles", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name }),
+      });
+      $("add-person-name").value = "";
+      toast(`${added.name} added. Copy their key into their Shortcut.`);
+      await loadPeople();
+    } catch (error) {
+      handle(error);
+    }
+  });
+}
+
+async function copyText(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast("Copied");
+  } catch (_) {
+    toast("Select the text and copy it by hand");
+  }
 }
 
 function wireBrowser() {
@@ -291,6 +462,8 @@ function wireBrowser() {
 // ---------- uploads from the browser ----------
 
 const uploads = { queue: [], running: false, done: 0, total: 0, stored: 0 };
+// A few uploads at once hide per-file latency for many small photos; big videos share the link.
+const PARALLEL_UPLOADS = 3;
 
 function uploadOne(item) {
   return new Promise((resolve) => {
@@ -298,6 +471,7 @@ function uploadOne(item) {
     request.open("POST", "/api/upload");
     // Header values must be Latin-1, so the name travels percent-encoded.
     request.setRequestHeader("X-Name", encodeURIComponent(item.file.name));
+    if (item.profile) request.setRequestHeader("X-Profile", item.profile);
     if (item.file.lastModified) request.setRequestHeader("X-Modified", new Date(item.file.lastModified).toISOString());
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) item.state.textContent = `${Math.round((event.loaded / event.total) * 100)}%`;
@@ -326,7 +500,7 @@ function uploadOne(item) {
 
 function renderUploads() {
   $("uploads-title").textContent = uploads.running
-    ? `Uploading ${Math.min(uploads.done + 1, uploads.total)} of ${uploads.total}`
+    ? `Uploading · ${uploads.done} of ${uploads.total} done · to ${personName(uploadTarget() || state.me)}`
     : `${uploads.stored} added · ${uploads.total - uploads.stored} skipped or failed`;
   $("uploads-progress").style.width = `${uploads.total ? (uploads.done / uploads.total) * 100 : 0}%`;
 }
@@ -334,16 +508,20 @@ function renderUploads() {
 async function runUploads() {
   if (uploads.running) return;
   uploads.running = true;
-  while (uploads.queue.length) {
-    renderUploads();
-    await uploadOne(uploads.queue.shift());
-    uploads.done += 1;
-  }
+  const lane = async () => {
+    while (uploads.queue.length) {
+      renderUploads();
+      await uploadOne(uploads.queue.shift());
+      uploads.done += 1;
+    }
+  };
+  await Promise.all(Array.from({ length: PARALLEL_UPLOADS }, lane));
   uploads.running = false;
   renderUploads();
   if (uploads.stored) {
     toast(`${uploads.stored} added to Harbor`);
     refreshStatus().catch(handle);
+    loadPeople().catch(handle);
     loadOutline().catch(handle);
     resetPhotos();
   }
@@ -366,19 +544,41 @@ function enqueue(files) {
     const label = el("span", "state", "Waiting");
     row.append(el("span", "", file.name), label);
     list.append(row);
-    uploads.queue.push({ file, row, state: label });
+    uploads.queue.push({ file, row, state: label, profile: uploadTarget() });
   }
   uploads.total += media.length;
   $("uploads").hidden = false;
   runUploads();
 }
 
+// The owner uploads into whichever person is selected; everyone else into their own profile.
+function uploadTarget() {
+  return state.owner && state.profile ? state.profile : null;
+}
+
+function toggleUploadMenu(open) {
+  $("upload-menu").hidden = !open;
+  $("upload-button").setAttribute("aria-expanded", String(open));
+  if (open) $("upload-target").textContent = `Goes to ${personName(uploadTarget() || state.me)}`;
+}
+
 function wireUploads() {
-  $("upload-button").addEventListener("click", () => $("upload-input").click());
-  $("upload-input").addEventListener("change", (event) => {
-    enqueue(event.target.files);
-    event.target.value = "";
+  $("upload-button").addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleUploadMenu($("upload-menu").hidden);
   });
+  document.addEventListener("click", () => toggleUploadMenu(false));
+  $("pick-files").addEventListener("click", () => $("upload-input").click());
+  $("pick-folder").addEventListener("click", () => $("upload-folder").click());
+  // iPhone and iPad Safari cannot pick a folder; they offer the photo library instead.
+  $("pick-folder").hidden = /iPhone|iPad|iPod/.test(navigator.userAgent)
+    || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  for (const input of [$("upload-input"), $("upload-folder")]) {
+    input.addEventListener("change", (event) => {
+      enqueue(event.target.files);
+      event.target.value = "";
+    });
+  }
   $("uploads-close").addEventListener("click", () => { $("uploads").hidden = true; });
   let depth = 0;
   const hasFiles = (event) => [...(event.dataTransfer?.types || [])].includes("Files");
@@ -479,6 +679,9 @@ function wireViewer() {
 async function refreshStatus() {
   const s = await api("/api/status");
   state.total = s.count;
+  const gb = (n) => (n / 1024 ** 3).toFixed(n < 10 * 1024 ** 3 ? 1 : 0);
+  $("disk-banner").hidden = !s.disk.low;
+  $("disk-banner").textContent = `Only ${gb(s.disk.free)} GB of ${gb(s.disk.total)} GB left on the photo drive. Free some space or move the library to a bigger drive (Harbor window → Choose…).`;
   $("rail-all").textContent = s.count.toLocaleString();
   $("s-count").textContent = s.count.toLocaleString();
   $("s-bytes").textContent = bytes(s.bytes);
@@ -502,7 +705,25 @@ async function refreshStatus() {
 async function loadSetup() {
   const setup = await api("/api/setup");
   $("setup-server").textContent = setup.server;
-  $("setup-key").textContent = setup.key;
+  await loadPeople();
+  $("this-pc").hidden = !(state.owner && setup.startup.supported);
+  $("startup-toggle").checked = setup.startup.enabled;
+}
+
+function wireStartup() {
+  $("startup-toggle").addEventListener("change", async (event) => {
+    try {
+      const reply = await api("/api/startup", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ enabled: event.target.checked }),
+      });
+      event.target.checked = reply.enabled;
+      toast(reply.enabled ? "Harbor will start when you sign in to Windows" : "Harbor will no longer start with Windows");
+    } catch (error) {
+      event.target.checked = !event.target.checked;
+      handle(error);
+    }
+  });
 }
 
 function show(view) {
@@ -548,12 +769,49 @@ function wireShell() {
 
 function handle(error) {
   if (error instanceof Unauthorised) {
-    $("shell").hidden = true;
-    $("login").hidden = false;
-    $("login-key").focus();
+    showLogin();
     return;
   }
   toast(error.message || "Something went wrong");
+}
+
+const login = { profile: null, useKey: false };
+
+function renderLogin() {
+  $("login-intro").textContent = login.useKey ? "Paste the key shown for you in the Harbor window." : "Who is looking?";
+  $("login-people").hidden = login.useKey;
+  $("login-password").hidden = login.useKey || !login.profile;
+  $("login-key").hidden = !login.useKey;
+  $("login-submit").hidden = !login.useKey && !login.profile;
+  $("login-mode").textContent = login.useKey ? "Sign in with my name and password" : "Sign in with a key instead";
+}
+
+async function showLogin() {
+  $("shell").hidden = true;
+  $("login").hidden = false;
+  let people = [];
+  try { people = (await api("/api/people")).profiles; } catch (_) { /* the key still works */ }
+  const box = $("login-people");
+  box.replaceChildren();
+  for (const person of people) {
+    const choice = el("button");
+    choice.type = "button";
+    choice.setAttribute("role", "radio");
+    choice.setAttribute("aria-checked", String(login.profile === person.id));
+    choice.append(Object.assign(el("span", "avatar", initials(person.name))), el("span", "", person.name));
+    choice.addEventListener("click", () => {
+      login.profile = person.id;
+      $("login-user").value = person.name;
+      for (const other of box.children) other.setAttribute("aria-checked", String(other === choice));
+      $("login-error").textContent = person.has_password ? ""
+        : `${person.name} has no password yet. Ask the main profile to set one, or sign in with your key.`;
+      renderLogin();
+      $("login-password").focus();
+    });
+    box.append(choice);
+  }
+  if (people.length === 0) login.useKey = true;
+  renderLogin();
 }
 
 async function start() {
@@ -568,27 +826,70 @@ async function start() {
   let view = "photos";
   try { view = localStorage.getItem("harbor-view") || "photos"; } catch (_) { /* private mode */ }
   show(view);
+  loadPeople().catch(handle);
   loadOutline().catch(handle);
   resetPhotos();
 }
 
+$("login-mode").addEventListener("click", () => {
+  login.useKey = !login.useKey;
+  $("login-error").textContent = "";
+  renderLogin();
+});
+
 $("login-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   $("login-error").textContent = "";
+  const body = login.useKey ? { key: $("login-key").value.trim() }
+    : { profile: login.profile, password: $("login-password").value };
   try {
-    await api("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key: $("login-key").value.trim() }),
-    });
+    await post("/api/login", body);
+    $("login-password").value = "";
+    $("login-key").value = "";
     start();
   } catch (error) {
-    $("login-error").textContent = error instanceof Unauthorised ? "That key is not right." : error.message;
+    $("login-error").textContent = error instanceof Unauthorised
+      ? (login.useKey ? "That key is not right." : "That password is not right.") : error.message;
   }
 });
 
+function wireAccount() {
+  $("account-button").addEventListener("click", (event) => {
+    event.stopPropagation();
+    const open = $("account-menu").hidden;
+    $("account-menu").hidden = !open;
+    $("account-button").setAttribute("aria-expanded", String(open));
+  });
+  document.addEventListener("click", () => { $("account-menu").hidden = true; });
+  $("menu-password").addEventListener("click", () => {
+    show("setup");
+    $("my-account").scrollIntoView({ behavior: "smooth" });
+    ($("pw-current").hidden ? $("pw-new") : $("pw-current")).focus();
+  });
+  $("menu-signout").addEventListener("click", async () => {
+    await post("/api/logout", {}).catch(() => null);
+    login.profile = null;
+    showLogin();
+  });
+  $("password-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    try {
+      await post("/api/password", { current: $("pw-current").value, new: $("pw-new").value });
+      $("pw-current").value = "";
+      $("pw-new").value = "";
+      toast("Password changed");
+      loadPeople().catch(handle);
+    } catch (error) {
+      handle(error);
+    }
+  });
+}
+
 wireShell();
 wireBrowser();
+wireAccount();
+wirePeople();
+wireStartup();
 wireUploads();
 wireViewer();
 start();

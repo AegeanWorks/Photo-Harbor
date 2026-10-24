@@ -29,7 +29,7 @@ class ParseTakenTest(unittest.TestCase):
         self.assertIsNone(parse_taken("yesterday"))
 
     def test_month_folder_is_zero_padded(self):
-        self.assertEqual(month_folder(datetime(2026, 3, 9)), "2026/03")
+        self.assertEqual(month_folder(datetime(2026, 3, 9)), "2026/2026-03")
 
 
 class MediaTypeTest(unittest.TestCase):

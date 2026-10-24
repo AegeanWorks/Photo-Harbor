@@ -27,7 +27,7 @@ def mirror(source: Path, target: Path) -> BackupReport:
                           "choose a folder on another drive, e.g. E:\\HarborBackup")
     copied = unchanged = total = 0
     for path in sorted(source.rglob("*")):
-        if not path.is_file():
+        if not path.is_file() or any(part.startswith(".") for part in path.relative_to(source).parts):
             continue
         dest = target / path.relative_to(source)
         size = path.stat().st_size

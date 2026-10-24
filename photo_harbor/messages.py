@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import BinaryIO, Optional
 
 from .errors import HarborError
+from .records import Identity
 
 MAX_JSON_BYTES = 64 * 1024
 
@@ -19,6 +20,17 @@ class Request:
     cookies: dict = field(default_factory=dict)
     body: Optional[BinaryIO] = None
     length: Optional[int] = 0  # None: chunked, read until the body ends
+    identity: Optional[Identity] = None
+    client: str = ""
+
+    @property
+    def profile(self) -> str:
+        """The caller's profile id; the owner's when the route is public."""
+        return self.identity.profile if self.identity else "main"
+
+    @property
+    def owner(self) -> bool:
+        return bool(self.identity and self.identity.owner)
 
     def header(self, name: str, default: str = "") -> str:
         return self.headers.get(name.lower(), default)

@@ -18,12 +18,16 @@
 </head>
 <body>
   <section id="login" class="login" hidden>
-    <form class="login-card" id="login-form" autocomplete="off">
+    <form class="login-card" id="login-form" autocomplete="on">
       <svg class="mark" viewBox="0 0 32 32" aria-hidden="true"><path d="M4 21c3 0 3 2 6 2s3-2 6-2 3 2 6 2 3-2 6-2"/><path d="M16 4v13M10 10h12M11 17a5 5 0 0 0 10 0"/></svg>
       <h1>Harbor</h1>
-      <p>Enter the library key shown in the PC's Harbor window.</p>
-      <input id="login-key" type="password" placeholder="Library key" required spellcheck="false">
-      <button type="submit" class="primary">Open the library</button>
+      <p id="login-intro">Who is looking?</p>
+      <div class="who" id="login-people" role="radiogroup" aria-label="Choose your name"></div>
+      <input id="login-user" type="text" autocomplete="username" hidden>
+      <input id="login-password" type="password" autocomplete="current-password" placeholder="Password" hidden>
+      <input id="login-key" type="password" placeholder="Key from the Harbor window" spellcheck="false" hidden>
+      <button type="submit" class="primary" id="login-submit" hidden>Sign in</button>
+      <button type="button" class="link" id="login-mode">Sign in with a key instead</button>
       <p class="login-error" id="login-error" role="alert"></p>
     </form>
   </section>
@@ -43,21 +47,41 @@
         <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
         <input id="search" type="search" placeholder="Search by file name" autocomplete="off" spellcheck="false" aria-label="Search by file name">
       </label>
-      <button class="primary upload-button" id="upload-button" type="button">
-        <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 14V4M5.5 8.5L10 4l4.5 4.5M4 16h12"/></svg>
-        <span>Upload</span>
-      </button>
+      <div class="account-wrap">
+        <button class="account" id="account-button" type="button" aria-haspopup="menu" aria-expanded="false">
+          <span class="avatar" id="account-avatar"></span><span id="account-name"></span>
+        </button>
+        <div class="upload-menu account-menu" id="account-menu" role="menu" hidden>
+          <button role="menuitem" type="button" id="menu-password">Change password…</button>
+          <button role="menuitem" type="button" id="menu-signout">Sign out</button>
+        </div>
+      </div>
+      <div class="upload-wrap">
+        <button class="primary upload-button" id="upload-button" type="button" aria-haspopup="menu" aria-expanded="false">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 14V4M5.5 8.5L10 4l4.5 4.5M4 16h12"/></svg>
+          <span>Upload</span>
+        </button>
+        <div class="upload-menu" id="upload-menu" role="menu" hidden>
+          <button role="menuitem" type="button" id="pick-files">Photos and videos…</button>
+          <button role="menuitem" type="button" id="pick-folder">A whole folder…</button>
+          <p class="hint" id="upload-target"></p>
+        </div>
+      </div>
       <input id="upload-input" type="file" accept="image/*,video/*" multiple hidden>
+      <input id="upload-folder" type="file" webkitdirectory multiple hidden>
     </header>
 
     <main>
       <section id="view-photos" class="view browser">
         <aside class="rail" id="rail" aria-label="Browse the library">
+          <div id="rail-people" class="rail-years"></div>
+          <h4 class="rail-year">Library</h4>
           <button class="rail-item" data-scope="all" aria-pressed="true"><span>All photos</span><b id="rail-all"></b></button>
           <button class="rail-item" data-scope="video" aria-pressed="false"><span>Videos</span><b id="rail-videos"></b></button>
           <div id="rail-years" class="rail-years"></div>
         </aside>
         <div class="gallery">
+          <div class="banner" id="disk-banner" role="status" hidden></div>
           <div class="scope" id="scope">
             <h1 id="scope-title">All photos</h1>
             <span id="scope-count"></span>
@@ -81,6 +105,11 @@
           <article class="card"><h3>Last 24 hours</h3><p class="figure small" id="s-day">–</p></article>
         </div>
         <article class="panel">
+          <h2>People</h2>
+          <p class="hint">Each person's iPhone syncs into their own profile.</p>
+          <ul id="sync-people" class="missing"></ul>
+        </article>
+        <article class="panel">
           <h2>On the iPhone, not yet on the PC</h2>
           <p class="hint">Found by the weekly cleanup. Each one is uploaded during that same cleanup and disappears from this list once it arrives.</p>
           <ul id="missing" class="missing"></ul>
@@ -90,10 +119,34 @@
 
       <section id="view-setup" class="view narrow" hidden>
         <article class="panel">
-          <h2>1 · Two values for the Shortcut</h2>
+          <h2>1 · Server and keys</h2>
           <div class="field"><span>Server</span><code id="setup-server">–</code><button class="ghost" data-copy="setup-server">Copy</button></div>
-          <div class="field"><span>Key</span><code id="setup-key">–</code><button class="ghost" data-copy="setup-key">Copy</button></div>
-          <p class="hint">Send both to the iPhone (AirDrop or a note) so they can be pasted, not typed.</p>
+          <div id="setup-people"></div>
+          <form id="add-person" class="add-person" hidden>
+            <input id="add-person-name" type="text" maxlength="40" placeholder="Name, e.g. Ayşe" required>
+            <button class="primary" type="submit">Add person</button>
+          </form>
+          <p class="hint">Each person's Shortcut uses <b>their own key</b> as <code>[Key]</code> below, so their photos go to their own profile. Send the server and key to their iPhone (AirDrop or a note) so they can be pasted, not typed.</p>
+        </article>
+
+        <article class="panel" id="my-account">
+          <h2>My account</h2>
+          <form class="password-form" id="password-form">
+            <input id="pw-current" type="password" autocomplete="current-password" placeholder="Current password">
+            <input id="pw-new" type="password" autocomplete="new-password" placeholder="New password (6+ characters)" minlength="6" required>
+            <button class="primary" type="submit">Change password</button>
+          </form>
+          <p class="hint" id="pw-hint">Changing it signs you out on your other devices.</p>
+        </article>
+
+        <article class="panel" id="this-pc" hidden>
+          <h2>This PC</h2>
+          <label class="switch">
+            <input type="checkbox" id="startup-toggle">
+            <span class="switch-track" aria-hidden="true"></span>
+            <span>Start Harbor when I sign in to Windows</span>
+          </label>
+          <p class="hint">Harbor opens minimised and starts the server right away, so phones can sync without anyone opening it. The same setting is in the Harbor window.</p>
         </article>
 
         <article class="panel steps">

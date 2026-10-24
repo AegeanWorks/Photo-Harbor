@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from photo_harbor.catalog import Catalog
+from photo_harbor.copies import CopyIndex
 from photo_harbor.database import Database
 from photo_harbor.journal import SyncJournal
 from photo_harbor.records import UploadClaim
@@ -28,7 +29,8 @@ class Library:
         test_case.addCleanup(self.db.close)
         self.catalog = Catalog(self.db)
         self.journal = SyncJournal(self.db)
-        self.store = PhotoStore(self.root, self.catalog, now=lambda: FIXED_NOW,
+        self.copies = CopyIndex(self.db)
+        self.store = PhotoStore(self.root, self.catalog, self.copies, now=lambda: FIXED_NOW,
                                 embedded_date=lambda path: None)
 
     def put(self, data: bytes, name: str = "IMG_0001.HEIC", taken: str = None):

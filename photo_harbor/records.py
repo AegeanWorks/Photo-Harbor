@@ -15,6 +15,7 @@ class PhotoRecord:
     media_type: str
     taken_at: Optional[str]
     received_at: str
+    profile: str = "main"
 
     @property
     def sort_time(self) -> str:
@@ -33,6 +34,7 @@ class UploadClaim:
     sha256: Optional[str] = None
     taken_at: Optional[str] = None
     modified_at: Optional[str] = None
+    profile: str = "main"
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,7 @@ class PhotoFilter:
     month: Optional[str] = None
     query: Optional[str] = None
     kind: Optional[str] = None
+    profile: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -66,3 +69,21 @@ class Outline:
 
     months: tuple
     videos: int
+
+
+@dataclass(frozen=True)
+class Profile:
+    """A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends."""
+
+    id: str
+    name: str
+    key: str
+    folder: str = ""
+
+
+@dataclass(frozen=True)
+class Identity:
+    """Who a request comes from; the owner (library key) may manage every profile."""
+
+    profile: str
+    owner: bool

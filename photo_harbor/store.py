@@ -1,4 +1,8 @@
-"""Receives originals, proves their bytes against the phone's hash, and re-proves them on request."""
+"""Receives originals, proves their bytes against the phone's hash, and re-proves them on request.
+
+Files live in plain folders a person can open in File Explorer: ``<Person>/<YYYY>/<YYYY-MM>/``.
+A photo two people own is one file with two names (an NTFS hard link), so it costs no extra space.
+"""
 
 import hashlib
 import os
@@ -13,12 +17,13 @@ from typing import BinaryIO, Callable, Optional
 
 from .atomic_file import fsync_dir, replace_with_retry
 from .catalog import Catalog
+from .copies import CopyIndex
 from .exif_dates import read_taken
 from .errors import HarborError
 from .naming import media_type, month_folder, parse_taken, safe_name
 from .records import IngestResult, PhotoRecord, UploadClaim
 
-CHUNK = 1 << 20
+CHUNK = 4 << 20
 MIN_FREE_BYTES = 10 * 1024 * 1024
 MAX_UPLOAD_BYTES = 16 * 1024 ** 3
 SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
@@ -48,24 +53,46 @@ def normalise_sha(value: Optional[str]) -> Optional[str]:
     return cleaned
 
 
+def link_or_copy(source: Path, target: Path) -> None:
+    """A second name for the same file (no extra space); a real copy where links are refused."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.link(source, target)
+    except OSError:
+        tmp = target.with_name(f".tmp_{target.name}")
+        shutil.copyfile(source, tmp)
+        replace_with_retry(tmp, target)
+    fsync_dir(target.parent)
+
+
+def _stamp(moment: datetime) -> str:
+    return moment.isoformat(timespec="seconds")
+
+
 class PhotoStore:
-    def __init__(self, library: Path, catalog: Catalog,
+    def __init__(self, library: Path, catalog: Catalog, copies: CopyIndex,
+                 folder_of: Callable[[str], str] = lambda profile: profile,
                  now: Callable[[], datetime] = local_now,
-                 embedded_date: Callable[[Path], Optional[str]] = read_taken) -> None:
-        self.photos_dir = library / "photos"
+                 embedded_date: Callable[[Path], Optional[str]] = read_taken,
+                 on_stored: Optional[Callable[[PhotoRecord], None]] = None) -> None:
+        """``folder_of`` maps a profile id to that person's folder name in the library."""
+        self.root = library
         self._incoming = library / ".harbor" / "incoming"
         self._catalog = catalog
+        self._copies = copies
+        self._folder_of = folder_of
         self._now = now
         self._embedded_date = embedded_date
-        self._place_lock = threading.Lock()
-        self.photos_dir.mkdir(parents=True, exist_ok=True)
+        self.on_stored = on_stored
+        # Held while a file is placed, linked, moved or registered: one change at a time.
+        self.lock = threading.RLock()
         self._incoming.mkdir(parents=True, exist_ok=True)
         for stale in self._incoming.glob(".tmp_upload_*"):
             stale.unlink(missing_ok=True)
 
     def ingest(self, stream: BinaryIO, length: Optional[int], claim: UploadClaim) -> IngestResult:
         """Stream ``length`` bytes (None: until the stream ends) to disk; keep them only when the
-        hash matches the claim."""
+        hash matches the claim. ``on_stored`` hears about every newly stored or repaired file."""
         expected = normalise_sha(claim.sha256)
         self._check_capacity(length)
         tmp = self._incoming / f".tmp_upload_{uuid.uuid4().hex}"
@@ -75,30 +102,51 @@ class PhotoStore:
                 raise HarborError("the photo arrived different from what the phone sent",
                                   "the SHA-256 of the received bytes does not match the phone's",
                                   "nothing was kept; the next sync sends it again", status=422)
-            return self._place(tmp, actual, size, claim)
+            result = self._place(tmp, actual, size, claim)
         finally:
             tmp.unlink(missing_ok=True)
+        if result.status == "stored" and self.on_stored is not None:
+            self.on_stored(result.record)
+        return result
 
     def verify(self, sha256: str) -> bool:
-        """True only when the catalogued file exists and its bytes still hash to ``sha256``."""
-        record = self._catalog.get(sha256)
-        if record is None:
-            return False
-        path = self.photos_dir / record.rel_path
-        try:
-            if path.stat().st_size != record.size:
-                return False
-            return hash_file(path) == sha256
-        except OSError:
-            return False
+        """True only when some catalogued copy exists and its bytes still hash to ``sha256``."""
+        return self._intact(sha256) is not None
 
-    def locate(self, sha256: str) -> Optional[tuple]:
-        """``(path, record)`` of a stored original, or None."""
+    def locate(self, sha256: str, profile: Optional[str] = None) -> Optional[tuple]:
+        """``(path, record)`` of ``profile``'s copy, or of any copy when no profile is given."""
         record = self._catalog.get(sha256)
         if record is None:
             return None
-        path = self.photos_dir / record.rel_path
-        return (path, record) if path.is_file() else None
+        rel = self._copies.path_for(profile, sha256) if profile else record.rel_path
+        if rel is None:
+            return None
+        path = self.root / rel
+        if path.is_file():
+            return path, record
+        if profile is None:
+            for _, other in self._copies.paths_of(sha256):
+                if (self.root / other).is_file():
+                    return self.root / other, record
+        return None
+
+    def ensure_copy(self, profile: str, sha256: str) -> bool:
+        """Make sure ``profile``'s folder holds this photo, linking it from another person's
+        verified copy if needed. False when no intact copy exists on this PC."""
+        source = self._intact(sha256)
+        if source is None:
+            return False
+        with self.lock:
+            own = self._copies.path_for(profile, sha256)
+            if own is not None:
+                if not (self.root / own).is_file():
+                    link_or_copy(source, self.root / own)
+                return True
+            record = self._catalog.get(sha256)
+            self._link_new_copy(source, record, profile, record.original_name)
+            return True
+
+    # ---------- receiving ----------
 
     def _check_capacity(self, length: Optional[int]) -> None:
         if length is None:
@@ -141,6 +189,8 @@ class PhotoStore:
                               "keep the phone on Wi-Fi; the next sync sends it again")
         return digest.hexdigest(), received
 
+    # ---------- placing ----------
+
     def _place(self, tmp: Path, sha256: str, size: int, claim: UploadClaim) -> IngestResult:
         # The phone's date wins; then the date inside the file; then the browser's file date.
         taken = (parse_taken(claim.taken_at) or parse_taken(self._embedded_date(tmp))
@@ -148,45 +198,103 @@ class PhotoStore:
         if taken is not None and taken.tzinfo is not None:
             taken = taken.astimezone()
         received = self._now()
-        name = safe_name(claim.original_name)
-        with self._place_lock:
+        with self.lock:
             existing = self._catalog.get(sha256)
             if existing is not None:
-                if self.verify(sha256):
-                    return IngestResult("duplicate", existing)
-                return IngestResult("stored", self._repair(tmp, existing))
-            folder = self.photos_dir / month_folder(taken or received)
-            folder.mkdir(parents=True, exist_ok=True)
-            stem, suffix = Path(name).stem, Path(name).suffix
-            # A name can be held on disk, or by a catalogued photo whose file is gone.
-            for candidate in (name, f"{stem}-{sha256[:8]}{suffix}", f"{stem}-{sha256}{suffix}"):
-                target = folder / candidate
-                if target.exists():
-                    continue
+                return self._known(tmp, existing, claim)
+            for target in self.candidate_paths(claim.profile, taken or received, claim.original_name,
+                                           sha256):
                 replace_with_retry(tmp, target)
-                fsync_dir(folder)
+                fsync_dir(target.parent)
                 record = PhotoRecord(
-                    sha256=sha256,
-                    rel_path=target.relative_to(self.photos_dir).as_posix(),
-                    size=size,
+                    sha256=sha256, rel_path=self._rel(target), size=size,
                     original_name=claim.original_name[:255],
-                    media_type=media_type(name),
-                    taken_at=taken.isoformat(timespec="seconds") if taken else None,
-                    received_at=received.isoformat(timespec="seconds"),
+                    media_type=media_type(safe_name(claim.original_name)),
+                    taken_at=_stamp(taken) if taken else None, received_at=_stamp(received),
+                    profile=claim.profile,
                 )
                 try:
-                    self._catalog.add(record)
+                    added = self._catalog.add(record)
                 except sqlite3.IntegrityError:
                     replace_with_retry(target, tmp)
                     continue
+                if not added:
+                    # Another process (a CLI import) catalogued the same bytes meanwhile.
+                    target.unlink(missing_ok=True)
+                    return IngestResult("duplicate", self._catalog.get(sha256) or record)
                 return IngestResult("stored", record)
+        raise HarborError(f"no free file name for {claim.original_name}",
+                          "every candidate name is taken", "rename the photo and send it again",
+                          status=409)
+
+    def _known(self, tmp: Path, existing: PhotoRecord, claim: UploadClaim) -> IngestResult:
+        """Bytes the library already has: repair a damaged copy, or give this person their own."""
+        source = self._intact(existing.sha256)
+        repaired = source is None
+        if source is None:
+            source = self.root / existing.rel_path
+            source.parent.mkdir(parents=True, exist_ok=True)
+            replace_with_retry(tmp, source)
+            fsync_dir(source.parent)
+            # Hard links shared the damaged bytes: point every other copy at the repaired file.
+            for _, rel in self._copies.paths_of(existing.sha256):
+                if self.root / rel != source:
+                    (self.root / rel).unlink(missing_ok=True)
+                    link_or_copy(source, self.root / rel)
+        own = self._copies.path_for(claim.profile, existing.sha256)
+        if own is None:
+            return IngestResult("stored", self._link_new_copy(source, existing, claim.profile,
+                                                              claim.original_name[:255]))
+        if not (self.root / own).is_file():
+            link_or_copy(source, self.root / own)
+            repaired = True
+        mine = PhotoRecord(**{**existing.__dict__, "rel_path": own, "profile": claim.profile})
+        return IngestResult("stored" if repaired else "duplicate", mine)
+
+    def _link_new_copy(self, source: Path, record: PhotoRecord, profile: str,
+                       name: str) -> PhotoRecord:
+        moment = parse_taken(record.sort_time) or self._now()
+        for target in self.candidate_paths(profile, moment, name, record.sha256):
+            link_or_copy(source, target)
+            try:
+                added = self._copies.add(profile, record, self._rel(target), name,
+                                         _stamp(self._now()))
+            except sqlite3.IntegrityError:
+                added = False  # that path belongs to another photo: try the next name
+            if added:
+                return PhotoRecord(**{**record.__dict__, "rel_path": self._rel(target),
+                                      "original_name": name, "profile": profile})
+            target.unlink(missing_ok=True)
         raise HarborError(f"no free file name for {name}", "every candidate name is taken",
                           "rename the photo and send it again", status=409)
 
-    def _repair(self, tmp: Path, record: PhotoRecord) -> PhotoRecord:
-        """Put verified bytes back where a catalogued original went missing or was damaged."""
-        target = self.photos_dir / record.rel_path
-        target.parent.mkdir(parents=True, exist_ok=True)
-        replace_with_retry(tmp, target)
-        fsync_dir(target.parent)
-        return record
+    def candidate_paths(self, profile: str, moment: datetime, original: str, sha256: str):
+        """Free paths in the person's month folder: the name, then the name with a hash suffix."""
+        folder = self.root / self._folder_of(profile) / month_folder(moment)
+        folder.mkdir(parents=True, exist_ok=True)
+        name = safe_name(original)
+        stem, suffix = Path(name).stem, Path(name).suffix
+        for candidate in (name, f"{stem}-{sha256[:8]}{suffix}", f"{stem}-{sha256}{suffix}"):
+            if not (folder / candidate).exists():
+                yield folder / candidate
+
+    def _intact(self, sha256: str) -> Optional[Path]:
+        """The first copy whose size and SHA-256 still match, or None."""
+        record = self._catalog.get(sha256)
+        if record is None:
+            return None
+        seen = set()
+        for rel in [record.rel_path] + [rel for _, rel in self._copies.paths_of(sha256)]:
+            if rel in seen:
+                continue
+            seen.add(rel)
+            path = self.root / rel
+            try:
+                if path.stat().st_size == record.size and hash_file(path) == sha256:
+                    return path
+            except OSError:
+                continue
+        return None
+
+    def _rel(self, path: Path) -> str:
+        return path.relative_to(self.root).as_posix()

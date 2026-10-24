@@ -1,5 +1,6 @@
 """The socket side: turns HTTP into a Request, runs the matched endpoint and sends its Reply."""
 
+import dataclasses
 import os
 import sys
 import traceback
@@ -61,11 +62,14 @@ class HarborHandler(BaseHTTPRequestHandler):
             return
         try:
             request = self._request(method, path, url.query)
-            if not route.public and not self.server.guard.admits(request):
-                raise HarborError("the library key is missing or wrong",
-                                  "every call except the gallery page needs the key",
+            identity = self.server.guard.identify(request)
+            if not route.public and identity is None:
+                raise HarborError("the key is missing or wrong",
+                                  "every call except the gallery page needs a profile's key",
                                   "send the X-Harbor-Key header, or sign in on the gallery",
                                   status=401)
+            request = dataclasses.replace(request, identity=identity,
+                                          client=self.client_address[0])
             reply = route.handler(request, route.param) if route.param else route.handler(request)
         except HarborError as error:
             reply = error_reply(error)
@@ -146,3 +150,10 @@ class HarborServer(ThreadingHTTPServer):
         self.guard = guard
         self.verbose = verbose
         super().__init__(address, HarborHandler)
+
+    def handle_error(self, request, client_address) -> None:
+        """A client closing its connection is normal (Windows reports an idle keep-alive closing
+        as ConnectionAbortedError); anything else is still printed."""
+        if isinstance(sys.exc_info()[1], ConnectionError):
+            return
+        super().handle_error(request, client_address)

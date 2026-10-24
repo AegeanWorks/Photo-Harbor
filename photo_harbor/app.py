@@ -4,19 +4,27 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
+from .accounts import ITERATIONS, Passwords, Sessions
 from .auth import KeyGuard
+from .autostart import Autostart
 from .catalog import Catalog
+from .copies import CopyIndex
 from .config import Settings
 from .database import Database
 from .errors import HarborError
+from .importer import ImportLedger
+from .layout import LibraryLayout
 from .journal import SyncJournal
 from .library_api import LibraryApi
 from .messages import Reply, Request
+from .profiles import ProfileBook
+from .profiles_api import ProfilesApi
 from .router import Router
+from .scan import LibraryScanner, ScanSchedule
 from .setup_api import SetupApi
 from .store import PhotoStore, local_now
 from .sync_api import SyncApi
-from .thumbs import Thumbnailer
+from .thumbs import PreviewWarmer, Thumbnailer
 
 WEB_DIR = Path(__file__).parent / "web"
 STATIC_TYPES = {
@@ -39,23 +47,47 @@ class HarborApp:
     """Owns the database connection; ``close`` releases it."""
 
     def __init__(self, settings: Settings, port: int, thumbs: Optional[Thumbnailer] = None,
-                 now: Callable[[], datetime] = local_now) -> None:
+                 now: Callable[[], datetime] = local_now,
+                 autostart: Optional[Autostart] = None,
+                 password_iterations: int = ITERATIONS) -> None:
         self.db = Database(settings.state_dir / "catalog.sqlite3")
         catalog = Catalog(self.db)
         journal = SyncJournal(self.db)
-        store = PhotoStore(settings.library, catalog, now)
+        self.profiles = ProfileBook(self.db, settings.key)
+        self.copies = CopyIndex(self.db)
+        self.store = PhotoStore(settings.library, catalog, self.copies,
+                                folder_of=lambda profile: self.profiles.get(profile).folder, now=now)
         thumbs = thumbs or Thumbnailer(settings.state_dir / "thumbs")
         self.previews = thumbs.enabled
-        self.guard = KeyGuard(settings.key)
+        self.warmer = PreviewWarmer(thumbs, catalog, self.store) if thumbs.enabled else None
+        if self.warmer is not None:
+            self.store.on_stored = self.warmer.add
+        self.imports = ImportLedger(self.db)
+        self.passwords = Passwords(self.db, password_iterations)
+        self.sessions = Sessions(self.db)
+        self.layout = LibraryLayout(settings.library, self.db, self.copies, self.profiles,
+                                    self.store)
+        scanner = LibraryScanner(settings.library, self.db, catalog, self.copies, self.profiles,
+                                 self.store, journal)
+        self.scanner = scanner
+        self.schedule = ScanSchedule(scanner, journal)
+        self.guard = KeyGuard(self.profiles, self.passwords, self.sessions)
         self.router = Router()
-        self._register(SyncApi(store, journal, now), LibraryApi(store, catalog, journal, thumbs, now),
-                       SetupApi(settings.key, port))
+        self._register(SyncApi(self.store, journal, self.profiles, now),
+                       LibraryApi(self.store, catalog, journal, thumbs, now),
+                       ProfilesApi(self.profiles, catalog, journal, self.passwords,
+                                   self.sessions, self.layout),
+                       SetupApi(port, autostart or Autostart()))
 
-    def _register(self, sync: SyncApi, library: LibraryApi, setup: SetupApi) -> None:
+    def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
+                  setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
         add("POST", "/api/login", self.guard.login, public=True)
+        add("GET", "/api/people", self.guard.people, public=True)
+        add("POST", "/api/logout", self.guard.logout, public=True)
+        add("POST", "/api/password", self.guard.change_password)
         add("POST", "/api/sync/start", sync.start)
         add("POST", "/api/upload", sync.upload)
         add("POST", "/api/sync/done", sync.done)
@@ -64,8 +96,15 @@ class HarborApp:
         add("GET", "/api/photos", library.photos)
         add("GET", "/api/outline", library.outline)
         add("GET", "/api/setup", setup.details)
+        add("POST", "/api/startup", setup.startup)
+        add("GET", "/api/profiles", people.listing)
+        add("POST", "/api/profiles", people.create)
+        add("POST", "/api/profiles/", people.update)
         add("GET", "/media/", library.media)
         add("GET", "/thumb/", library.thumb)
 
     def close(self) -> None:
+        self.schedule.stop()
+        if self.warmer is not None:
+            self.warmer.stop()
         self.db.close()

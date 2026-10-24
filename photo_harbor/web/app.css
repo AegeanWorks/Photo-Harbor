@@ -80,6 +80,18 @@ code { font-family: var(--mono); font-size: .88em; }
   background: var(--bg); font-family: var(--mono); text-align: center;
 }
 .login-card .primary { width: 100%; padding: 12px; }
+.who { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+.who button {
+  display: grid; justify-items: center; gap: 6px; border: 0; background: transparent; padding: 8px 6px;
+  border-radius: 14px; min-width: 84px; font-size: 14px; color: var(--ink);
+}
+.who button:hover { background: var(--surface-2); }
+.who button[aria-checked="true"] { background: var(--surface-2); box-shadow: inset 0 0 0 2px var(--accent); }
+.avatar {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink); font-weight: 700; font-size: 17px;
+}
+.link { border: 0; background: none; color: var(--muted); font-size: 13px; text-decoration: underline; padding: 0; }
 .login-error { color: var(--danger) !important; min-height: 1.5em; font-size: 14px; }
 
 /* Shell */
@@ -209,6 +221,58 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .search:focus-within { box-shadow: 0 0 0 2px var(--accent); }
 .upload-button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; }
 .upload-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.upload-wrap, .account-wrap { position: relative; }
+.account {
+  display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent;
+  padding: 4px 10px 4px 4px; border-radius: 999px; font-size: 14px; font-weight: 500;
+}
+.account:hover { background: var(--surface-2); }
+.account .avatar { width: 30px; height: 30px; font-size: 13px; }
+.banner {
+  margin: 16px 0 0; padding: 10px 14px; border-radius: 12px; font-size: 14px;
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface)); color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+}
+.password-form { display: flex; flex-wrap: wrap; gap: 10px; }
+.password-form input {
+  flex: 1 1 180px; min-width: 0; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg);
+}
+.person-tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; min-width: 250px; }
+.inline-edit { grid-column: 1 / -1; display: flex; gap: 8px; }
+.inline-edit input { flex: 1; min-width: 0; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); }
+.upload-menu {
+  position: absolute; right: 0; top: calc(100% + 8px); z-index: 30; min-width: 230px;
+  background: var(--surface); border-radius: 14px; box-shadow: 0 12px 40px rgba(0, 0, 0, .18);
+  padding: 6px; display: grid; animation: fade .12s ease;
+}
+.upload-menu button {
+  border: 0; background: transparent; text-align: left; padding: 9px 12px; border-radius: 9px; font-size: 14px;
+}
+.upload-menu button:hover { background: var(--surface-2); }
+.upload-menu .hint { margin: 4px 12px 6px; font-size: 12px; }
+.person {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto; align-items: center; gap: 10px;
+  padding: 10px 0; border-top: 1px solid var(--line);
+}
+.person b { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person code { background: var(--surface-2); padding: 6px 10px; border-radius: 8px; word-break: break-all; }
+.add-person { display: flex; gap: 10px; padding: 12px 0 4px; border-top: 1px solid var(--line); }
+.add-person input {
+  flex: 1; min-width: 0; padding: 9px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg);
+}
+.switch { display: flex; align-items: center; gap: 12px; cursor: pointer; padding: 6px 0; font-size: 15px; }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch-track {
+  flex: none; width: 44px; height: 26px; border-radius: 999px; background: var(--line); position: relative;
+  transition: background .2s ease;
+}
+.switch-track::after {
+  content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .2s ease;
+}
+.switch input:checked + .switch-track { background: var(--accent); }
+.switch input:checked + .switch-track::after { transform: translateX(18px); }
+.switch input:focus-visible + .switch-track { outline: 2px solid var(--accent); outline-offset: 2px; }
 .icon { border: 0; background: transparent; color: var(--muted); width: 28px; height: 28px; border-radius: 50%; }
 .icon:hover { background: var(--surface-2); color: var(--ink); }
 
@@ -279,10 +343,16 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 }
 @media (max-width: 640px) {
   :root { --gap: 2px; }
+  .person { grid-template-columns: minmax(0, 1fr) auto; }
+  .person code { grid-column: 1 / -1; grid-row: 2; }
+  .person .ghost { justify-self: end; }
+  .person-tools { min-width: 0; grid-column: 1 / -1; justify-content: flex-start; }
   .topbar { gap: 10px; padding-left: 16px; padding-right: 16px; }
   .tabs { margin-left: auto; }
   .search { order: 3; max-width: none; flex-basis: calc(100% - 52px); margin: 0; }
-  .upload-button { order: 4; width: 42px; height: 38px; padding: 0; justify-content: center; }
+  .upload-wrap { order: 4; }
+  .account span:not(.avatar) { display: none; }
+  .upload-button { width: 42px; height: 38px; padding: 0; justify-content: center; }
   .upload-button span { display: none; }
   main { padding-left: 0; padding-right: 0; }
   .rail { margin: 0; padding: 10px 16px; }

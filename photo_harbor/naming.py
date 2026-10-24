@@ -1,4 +1,4 @@
-"""Where an original lands on disk: a safe file name inside a YYYY/MM folder."""
+"""Where an original lands on disk: <Person>/<YYYY>/<YYYY-MM>/<safe file name>."""
 
 import mimetypes
 import re
@@ -38,7 +38,19 @@ def parse_taken(value: Optional[str]) -> Optional[datetime]:
 
 
 def month_folder(moment: datetime) -> str:
-    return f"{moment.year:04d}/{moment.month:02d}"
+    """``2026/2026-10``: the year to browse by, then a month folder that sorts and reads alone."""
+    return f"{moment.year:04d}/{moment.year:04d}-{moment.month:02d}"
+
+
+RESERVED_FOLDERS = {".harbor", "photos"}
+
+
+def folder_name(name: str) -> str:
+    """A person's folder as they would name it, made safe for Windows: ``Ayşe`` stays ``Ayşe``."""
+    cleaned = _FORBIDDEN.sub("_", " ".join(name.split())).strip(" .")[:MAX_STEM] or "Person"
+    if cleaned.upper() in _RESERVED or cleaned.lower() in RESERVED_FOLDERS:
+        cleaned = f"{cleaned} photos"
+    return cleaned
 
 
 def media_type(name: str) -> str:
