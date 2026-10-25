@@ -146,6 +146,7 @@ photo-harbor/
 ├── LICENSE                   <- GNU AGPL-3.0
 ├── Open Photo Browser.url    <- double-click: the gallery at http://localhost:8642
 ├── README.md
+├── COMMERCIAL.md
 ├── photo_harbor/
 │   ├── __init__.py           <- package version
 │   ├── __main__.py           <- `python -m photo_harbor` commands
@@ -232,4 +233,4 @@ these, so on a phone the network sets the pace):
 
 ## 📜 License
 
-GNU Affero General Public License v3.0; see [LICENSE](LICENSE).
+GNU Affero General Public License v3.0; see [LICENSE](LICENSE). For commercial licensing and proprietary rights, see [COMMERCIAL.md](COMMERCIAL.md).
