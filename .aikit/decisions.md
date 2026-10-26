@@ -215,3 +215,9 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: One person's page takes 10-33 ms, outline 26 ms, status 10 ms, people list 9
   ms and search 23 ms at 50,000 photos; a page 45,000 deep takes about 150 ms (OFFSET). The copy
   rows repeat three immutable facts of their photo.
+
+## Licensing migration (agpl-final)
+
+- New versions use the Aegean License 1.1 (AL-1.1); versions up to and including `agpl-final` remain under GNU AGPL-3.0.
+- Rights holder: AegeanWorks; commercial use under ACL-1.0.
+- Counsel review of the 1.1 texts remains pending.

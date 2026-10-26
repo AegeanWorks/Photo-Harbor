@@ -1,6 +1,6 @@
 # photo-harbor
 
-[![Built with AIKit](https://img.shields.io/badge/built%20with-AIKit-6f42c1)](https://github.com/Aegean-E/AIKit)
+[![Built with AIKit](https://img.shields.io/badge/built%20with-AIKit-6f42c1)](https://github.com/AegeanWorks/AIKit)
 
 Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi through Apple Shortcuts, no app needed, with a verified-hash cleanup and a gallery.
 
@@ -143,7 +143,9 @@ photo-harbor/
 ├── .aikit/                   <- this project's memory: record, ledger, decisions
 ├── .gitignore
 ├── Harbor.pyw                <- double-click: the Harbor window (Start/Stop server)
-├── LICENSE                   <- GNU AGPL-3.0
+├── LICENSE                   <- Aegean License 1.1 (AL-1.1): free personal use
+├── LICENSES/                 <- REUSE license texts
+├── REUSE.toml                <- Machine-readable SPDX metadata
 ├── Open Photo Browser.url    <- double-click: the gallery at http://localhost:8642
 ├── README.md
 ├── COMMERCIAL.md
@@ -231,6 +233,8 @@ these, so on a phone the network sets the pace):
 - Thumbnails need Pillow. Without them, Safari still shows HEIC originals; other browsers show a
   placeholder.
 
+> **License history:** versions up to and including `agpl-final` remain available under GNU AGPL-3.0.
+
 ## 📜 License
 
-GNU Affero General Public License v3.0; see [LICENSE](LICENSE). For commercial licensing and proprietary rights, see [COMMERCIAL.md](COMMERCIAL.md).
+Free for personal use under the Aegean License 1.1 (AL-1.1); see [LICENSE](LICENSE). Any commercial use needs the Aegean Commercial License 1.0 (ACL-1.0); see [COMMERCIAL.md](COMMERCIAL.md).
