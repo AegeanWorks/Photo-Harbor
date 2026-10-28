@@ -4,25 +4,25 @@
   "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
+    "source-available",
+    "aegean-license",
+    "commercial-license",
     "ios-shortcuts",
     "photos",
     "self-hosted",
     "iphone",
     "photo-backup",
     "python",
-    "source-available",
     "windows",
     "aegeanworks",
     "home-server",
     "photo-management",
     "privacy",
-    "software",
     "user-interface",
     "web-app",
     "gallery",
-    "photo-gallery",
     "file-sync",
-    "windows-app"
+    "photo-gallery"
   ],
   "gates": {},
   "ui_required": false,
@@ -57,5 +57,10 @@
     "photo-gallery",
     "file-sync",
     "windows-app"
+  ],
+  "license_topics": [
+    "source-available",
+    "aegean-license",
+    "commercial-license"
   ]
 }
