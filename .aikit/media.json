@@ -5,53 +5,48 @@
   "has_ui": true,
   "ui_kind": "web",
   "palette": [
-    "#07111f",
-    "#0e2a47",
-    "#c084fc",
-    "#e2f8ff"
+    "#0a0b10",
+    "#1a1f2e",
+    "#6366f1",
+    "#22d3ee"
   ],
+  "motif": "camera",
+  "layout": "left",
   "assets": {
     "logo": {
       "path": "assets/logo.svg",
       "status": "approved",
       "commit": "",
-      "generated_at": "2026-10-28T08:02:44",
+      "generated_at": "2026-10-28T08:47:10",
       "review": {
         "status": "approved",
         "reviewer": "subagent:vision-review",
         "method": "vision",
-        "notes": "PH monogram in magenta, dark navy, coherent with set.",
-        "score": 93,
-        "reviewed_at": "2026-10-28T08:10:43"
+        "notes": "PH camera, legible",
+        "score": 89,
+        "reviewed_at": "2026-10-28T08:58:21"
       }
     },
     "social_preview": {
       "path": "assets/social-preview.svg",
       "status": "approved",
       "commit": "",
-      "generated_at": "2026-10-28T08:02:44",
+      "generated_at": "2026-10-28T08:47:10",
       "review": {
         "status": "approved",
         "reviewer": "subagent:vision-review",
         "method": "vision",
-        "notes": "PH icon, title, iPhone photo sync description, WEB tag.",
-        "score": 93,
-        "reviewed_at": "2026-10-28T08:10:43"
+        "notes": "Consistent template, legible",
+        "score": 89,
+        "reviewed_at": "2026-10-28T08:58:21"
       }
     },
     "social_preview_png": {
       "path": "assets/social-preview.png",
-      "status": "approved",
+      "status": "pending_review",
       "commit": "",
-      "generated_at": "2026-10-28T08:02:45",
-      "review": {
-        "status": "approved",
-        "reviewer": "subagent:vision-review",
-        "method": "structural",
-        "notes": "Rendered from the approved 1280x640 social SVG; exact dimensions verified.",
-        "score": null,
-        "reviewed_at": "2026-10-28T08:17:06"
-      }
+      "generated_at": "2026-10-28T08:47:11",
+      "review": null
     }
   },
   "screenshots": []
