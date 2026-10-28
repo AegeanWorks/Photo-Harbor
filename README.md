@@ -1,7 +1,7 @@
 # photo-harbor
 
 <!-- aegean:media:start -->
-<p align="center"><img src="assets/logo.png" alt="Photo-Harbor logo" width="96" height="96"></p>
+<p align="center"><img src="assets/logo.jpg" alt="Photo-Harbor logo" width="96" height="96"></p>
 <p align="center"><img src="assets/social-preview.png" alt="Photo-Harbor social preview" width="100%"></p>
 <!-- aegean:media:end -->
 
