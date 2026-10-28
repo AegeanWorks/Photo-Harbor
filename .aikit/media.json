@@ -14,40 +14,20 @@
   "layout": "left",
   "assets": {
     "logo": {
-      "path": "assets/logo.png",
-      "status": "approved",
-      "commit": "",
-      "generated_at": "2026-10-28T13:53:41",
-      "review": {
-        "status": "approved",
-        "reviewer": "subagent:brand-review",
-        "method": "vision",
-        "notes": "PH monogram badge is clean and legible. SELF-HOSTED eyebrow matches project category. Photo Harbor in title case, well-spaced, unclipped. Dark aquatic theme fits photo backup/gallery. No AEGEANWORKS footer.",
-        "score": 92,
-        "reviewed_at": "2026-10-28T14:00:01"
-      }
-    },
-    "social_preview": {
-      "path": "assets/social-preview.png",
-      "status": "approved",
-      "commit": "",
-      "generated_at": "2026-10-28T13:53:41",
-      "review": {
-        "status": "approved",
-        "reviewer": "subagent:brand-review",
-        "method": "vision",
-        "notes": "Self-hosted photo backup card; tagline 'A private, self-hosted harbor for your photos.' No clipping/overlap; title, tagline, chips (ios shortcuts, photos, self hosted), and URL all legible; strong visual hierarchy on dark slate with geometry image right.",
-        "score": 94,
-        "reviewed_at": "2026-10-28T14:00:01"
-      }
-    },
-    "artwork": {
-      "path": "assets/artwork.jpg",
+      "path": "assets/logo.jpg",
       "status": "pending_review",
       "commit": "",
-      "generated_at": "2026-10-28T13:34:30",
+      "generated_at": "2026-10-28T16:34:30",
+      "review": null
+    },
+    "social_preview": {
+      "path": "assets/social-preview.jpg",
+      "status": "pending_review",
+      "commit": "",
+      "generated_at": "2026-10-28T16:34:30",
       "review": null
     }
   },
-  "screenshots": []
+  "screenshots": [],
+  "model": "community/scriptsnsenses-sys/flux-2-dev-free"
 }
