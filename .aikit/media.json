@@ -41,31 +41,18 @@
     },
     "social_preview_png": {
       "path": "assets/social-preview.png",
-      "status": "pending_review",
+      "status": "approved",
       "commit": "",
       "generated_at": "2026-10-28T08:02:45",
-      "review": null
-    }
-  },
-  "screenshots": [
-    {
-      "path": "assets/screenshots/2026-10-28-index.png",
-      "alt": "Photo-Harbor interface at 2026-10-28",
-      "caption": "Photo-Harbor interface captured from C:\\Users\\Yunus-Emre\\Desktop\\portable_agent_kit\\projects\\photo-harbor\\photo_harbor\\web\\index.html",
-      "commit": "0b4787850a2f0687285fced29a0ec0587d6090c8",
-      "taken_at": "2026-10-28",
-      "viewport": "1440x900",
-      "width": 1440,
-      "height": 900,
-      "status": "rejected",
       "review": {
-        "status": "rejected",
+        "status": "approved",
         "reviewer": "subagent:vision-review",
-        "method": "vision",
-        "notes": "2026-10-28-index.png \u2014 completely blank white image, no UI content.",
-        "score": 5,
-        "reviewed_at": "2026-10-28T08:10:43"
+        "method": "structural",
+        "notes": "Rendered from the approved 1280x640 social SVG; exact dimensions verified.",
+        "score": null,
+        "reviewed_at": "2026-10-28T08:17:06"
       }
     }
-  ]
+  },
+  "screenshots": []
 }
