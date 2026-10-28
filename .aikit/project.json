@@ -4,6 +4,7 @@
   "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
+    "aikit-integrated",
     "source-available",
     "aegean-license",
     "commercial-license",
@@ -21,8 +22,7 @@
     "user-interface",
     "web-app",
     "gallery",
-    "file-sync",
-    "photo-gallery"
+    "file-sync"
   ],
   "gates": {},
   "ui_required": false,
