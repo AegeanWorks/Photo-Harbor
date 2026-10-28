@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "photo-harbor",
+  "repo": "Photo-Harbor",
+  "has_ui": true,
+  "ui_kind": "web",
+  "palette": [
+    "#07111f",
+    "#0e2a47",
+    "#c084fc",
+    "#e2f8ff"
+  ],
+  "assets": {
+    "logo": {
+      "path": "assets/logo.svg",
+      "status": "approved",
+      "commit": "",
+      "generated_at": "2026-10-28T08:02:44",
+      "review": {
+        "status": "approved",
+        "reviewer": "subagent:vision-review",
+        "method": "vision",
+        "notes": "PH monogram in magenta, dark navy, coherent with set.",
+        "score": 93,
+        "reviewed_at": "2026-10-28T08:10:43"
+      }
+    },
+    "social_preview": {
+      "path": "assets/social-preview.svg",
+      "status": "approved",
+      "commit": "",
+      "generated_at": "2026-10-28T08:02:44",
+      "review": {
+        "status": "approved",
+        "reviewer": "subagent:vision-review",
+        "method": "vision",
+        "notes": "PH icon, title, iPhone photo sync description, WEB tag.",
+        "score": 93,
+        "reviewed_at": "2026-10-28T08:10:43"
+      }
+    },
+    "social_preview_png": {
+      "path": "assets/social-preview.png",
+      "status": "pending_review",
+      "commit": "",
+      "generated_at": "2026-10-28T08:02:45",
+      "review": null
+    }
+  },
+  "screenshots": [
+    {
+      "path": "assets/screenshots/2026-10-28-index.png",
+      "alt": "Photo-Harbor interface at 2026-10-28",
+      "caption": "Photo-Harbor interface captured from C:\\Users\\Yunus-Emre\\Desktop\\portable_agent_kit\\projects\\photo-harbor\\photo_harbor\\web\\index.html",
+      "commit": "0b4787850a2f0687285fced29a0ec0587d6090c8",
+      "taken_at": "2026-10-28",
+      "viewport": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "status": "rejected",
+      "review": {
+        "status": "rejected",
+        "reviewer": "subagent:vision-review",
+        "method": "vision",
+        "notes": "2026-10-28-index.png \u2014 completely blank white image, no UI content.",
+        "score": 5,
+        "reviewed_at": "2026-10-28T08:10:43"
+      }
+    }
+  ]
+}

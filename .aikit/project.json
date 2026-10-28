@@ -4,11 +4,58 @@
   "test_command": "python -m unittest discover -s tests -t .",
   "topics": [
     "aikit",
+    "ios-shortcuts",
     "photos",
     "self-hosted",
-    "ios-shortcuts"
+    "iphone",
+    "photo-backup",
+    "python",
+    "source-available",
+    "windows",
+    "aegeanworks",
+    "home-server",
+    "photo-management",
+    "privacy",
+    "software",
+    "user-interface",
+    "web-app",
+    "gallery",
+    "photo-gallery",
+    "file-sync",
+    "windows-app"
   ],
   "gates": {},
   "ui_required": false,
-  "created": "2026-10-24"
+  "created": "2026-10-24",
+  "has_ui": true,
+  "ui_kind": "web",
+  "ui_evidence": [
+    "photo_harbor/web/index.html"
+  ],
+  "ui_checked_at": "2026-10-28",
+  "ui_source": "detected",
+  "topics_source": "ai:kilo:2026-10-27",
+  "topics_reviewed_at": "2026-10-28",
+  "topics_choice": [
+    "aegeanworks",
+    "software",
+    "web-app",
+    "user-interface",
+    "privacy",
+    "photo-management",
+    "home-server"
+  ],
+  "topics_choice_round2": [
+    "photo-backup",
+    "gallery",
+    "ios-shortcuts",
+    "windows",
+    "home-server",
+    "privacy"
+  ],
+  "topics_choice_round3": [
+    "photo-gallery",
+    "file-sync",
+    "windows-app"
+  ]
 }
