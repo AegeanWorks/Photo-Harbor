@@ -5,22 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1793293715.1875257,
+    "updated_at": 1793293784.2410908,
     "owner": "opencode",
     "started_by": "opencode",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "bootstrap",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'bootstrap' completed successfully.",
-      "status": "completed",
-      "timestamp": 1792866861.707506,
-      "timestamp_str": "2026-10-24 21:34:21",
-      "agent": "claude-code:851e578e"
-    },
     {
       "task_id": "profiles-panel",
       "phase": "phase 2",
@@ -251,6 +241,17 @@
       "status": "in_progress",
       "timestamp": 1793293715.1875257,
       "timestamp_str": "2026-10-29 20:08:35",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "Reforge run complete: all 5 findings fixed and tested (99 tests); checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793293784.2410908,
+      "timestamp_str": "2026-10-29 20:09:44",
       "agent": "opencode"
     }
   ]
