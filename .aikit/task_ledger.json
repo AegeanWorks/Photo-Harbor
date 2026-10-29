@@ -13,45 +13,6 @@
   "checkpoints": [
     {
       "task_id": "profiles-panel",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/5] Plan: M1 profiles data (catalog v2 migration, ProfileBook, per-profile journal, owner-key compat); M2 profile-aware auth/API + disk importer + CLI import; M3 ServerRunner + tkinter control panel (start/stop, profiles, import folder), Harbor.pyw, Open Photo Browser.url; M4 gallery: people filter, setup per profile, folder upload; M5 tests, Playwright review, README, ADR-004/005, gates",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792867195.7250688,
-      "timestamp_str": "2026-10-24 21:39:55",
-      "agent": "claude-code:851e578e",
-      "impact_assessment": {
-        "why": "User asked for a server start button, a photo browser file, per-person profiles and import from disk",
-        "benefits": "No command line needed; each phone syncs into its own profile; existing photo folders can be brought in",
-        "risks": "contract: library key now also means the main profile, catalog format 1 -> 2; dependency: tkinter (stdlib, may be absent on some installs); concurrency: CLI import alongside a running server writes the same SQLite file; state: in-place schema migration of an existing catalog",
-        "mitigation": "Migration is additive (ALTER ADD COLUMN, new table) in one transaction with .bak copy first; old Shortcut keys keep working as main; WAL + per-row unique sha handles two writers, duplicate placement detected and rolled back; panel degrades to an error message without tkinter"
-      }
-    },
-    {
-      "task_id": "profiles-panel",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[5/5] Profiles (catalog v2, per-person keys/sync), disk import (window, CLI, browser folder), ServerRunner + Harbor window, Harbor.pyw, Open Photo Browser.url; fixes: keep-alive traceback spam, stop-during-import; 74 tests, 4/4 gates, Edge + Tk screenshots, pythonw launch verified; ADR-004/005; checklists: passed; uncommitted pending user request",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792867841.2363455,
-      "timestamp_str": "2026-10-24 21:50:41",
-      "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "profiles-panel",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/3] Re-plan: M1 start with Windows (HKCU Run key via winreg, --startup launch minimised + server + optional browser; setting in window and web Setup); M2 scale to GBs (measure first: multi-GB upload, folder import, 50k catalog; then bigger I/O chunks, import skip-list (catalog v3), background thumbnail warmer, parallel browser uploads); M3 tests, docs, ADR-006, gates, review",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792868014.1907668,
-      "timestamp_str": "2026-10-24 21:53:34",
-      "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "profiles-panel",
       "phase": "phase 4",
       "phase_num": 4,
       "description": "[3/3] Start with Windows (Run key, window + web switch, --startup minimised + immediate server, real registry round-trip verified and removed); GB scale: catalog v3 import skip-list + totals index, NOT INDEXED name search, 4 MB I/O, preview warmer + JPEG draft, 3 parallel browser uploads; measured: re-import 11s->0.0s, people 223->10ms, search 344->14ms, import 66->97MB/s; 82 tests, 4/4 gates; ADR-006; checklists: passed; uncommitted pending user request",
@@ -252,6 +213,39 @@
       "status": "in_progress",
       "timestamp": 1793293784.2410908,
       "timestamp_str": "2026-10-29 20:09:44",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 7",
+      "phase_num": 3,
+      "description": "Reforge stage 7: run resumed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793295218.5203454,
+      "timestamp_str": "2026-10-29 20:33:38",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 8",
+      "phase_num": 3,
+      "description": "Reforge stage 8: window 22, 2 commit(s), 11 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793295232.2576542,
+      "timestamp_str": "2026-10-29 20:33:52",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 8",
+      "phase_num": 3,
+      "description": "Reforge stage 8: run stopped at stage 8; resume it with `reforge resume`",
+      "files_affected": [],
+      "status": "suspended",
+      "timestamp": 1793295291.6489825,
+      "timestamp_str": "2026-10-29 20:34:51",
       "agent": "opencode"
     }
   ]
