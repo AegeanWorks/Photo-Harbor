@@ -133,14 +133,22 @@ class PhotoStore:
     def ensure_copy(self, profile: str, sha256: str) -> bool:
         """Make sure ``profile``'s folder holds this photo, linking it from another person's
         verified copy if needed. False when no intact copy exists on this PC."""
+        own = self._copies.path_for(profile, sha256)
+        if own is not None:
+            try:
+                intact_own = hash_file(self.root / own) == sha256
+            except OSError:
+                intact_own = False
+            if intact_own:
+                return True
         source = self._intact(sha256)
         if source is None:
             return False
         with self.lock:
             own = self._copies.path_for(profile, sha256)
             if own is not None:
-                if not (self.root / own).is_file():
-                    link_or_copy(source, self.root / own)
+                (self.root / own).unlink(missing_ok=True)
+                link_or_copy(source, self.root / own)
                 return True
             record = self._catalog.get(sha256)
             self._link_new_copy(source, record, profile, record.original_name)

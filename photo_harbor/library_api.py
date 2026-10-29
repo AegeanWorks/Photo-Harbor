@@ -90,7 +90,7 @@ class LibraryApi:
         return json_reply({"count": stats.count, "bytes": stats.total_bytes,
                            "last_received": stats.last_received,
                            "last_sync": self._journal.last_sync(profile),
-                           "last_day": self._journal.counts_since(day_ago),
+                           "last_day": self._journal.counts_since(day_ago, profile),
                            "missing": self._journal.missing(profile=profile),
                            "disk": self._disk(),
                            "previews": self._thumbs.enabled})

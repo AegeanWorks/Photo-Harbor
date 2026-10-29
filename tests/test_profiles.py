@@ -5,7 +5,7 @@ import unittest
 from photo_harbor.database import SCHEMA_VERSION, Database
 from photo_harbor.errors import HarborError
 from photo_harbor.importer import find_media, import_folder
-from photo_harbor.journal import SYNC_DONE
+from photo_harbor.journal import STORED, SYNC_DONE
 from photo_harbor.profiles import ProfileBook, profile_id
 from photo_harbor.records import PhotoFilter, UploadClaim
 from tests.library_fixture import Library, sha
@@ -107,6 +107,14 @@ class ProfileStorageTest(unittest.TestCase):
         lib.journal.record("2026-10-24T10:00:00", SYNC_DONE, None, "2026-10-24T09:00:00", "ayse")
         self.assertEqual(lib.journal.last_sync("ayse"), "2026-10-24T09:00:00")
         self.assertIsNone(lib.journal.last_sync("main"))
+
+    def test_last_day_counts_are_kept_per_profile(self):
+        lib = Library(self)
+        lib.journal.record("2026-10-24T10:00:00", STORED, None, None, "ayse")
+        lib.journal.record("2026-10-24T10:00:01", STORED, None, None, "main")
+        self.assertEqual(lib.journal.counts_since("2026-10-24T00:00:00", "ayse")[STORED], 1)
+        self.assertEqual(lib.journal.counts_since("2026-10-24T00:00:00", "main")[STORED], 1)
+        self.assertEqual(lib.journal.counts_since("2026-10-24T00:00:00")[STORED], 2)
 
 
 class ImportTest(unittest.TestCase):

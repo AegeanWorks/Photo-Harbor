@@ -83,7 +83,10 @@ class LibraryLayout:
 
     def rename_person(self, ident: str, name: str) -> Profile:
         """Rename a person and their folder; every catalogued path inside it follows."""
+        from .profiles import clean_name
+
         person = self._profiles.get(ident)
+        name = clean_name(name)
         new_folder = self._profiles.free_folder(name, keep=ident)
         with self._store.lock:
             if new_folder != person.folder:

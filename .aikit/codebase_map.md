@@ -9,8 +9,8 @@
 - **Total Python Modules**: `43`
 - **Total Classes**: `88`
 - **Total Top-Level Functions**: `71`
-- **Total Class Methods**: `315`
-- **Total Source Lines**: `4948`
+- **Total Class Methods**: `317`
+- **Total Source Lines**: `4980`
 
 ---
 
@@ -358,7 +358,7 @@
 ### [`photo_harbor/journal.py`](photo_harbor/journal.py)
 > *What the phone did and when: uploads, finished syncs and photos the PC lacked at cleanup.*
 
-**Size**: `67` lines (`2907` bytes)
+**Size**: `68` lines (`3048` bytes)
 
 **Classes:**
 - `class SyncJournal`
@@ -366,7 +366,7 @@
   - Method `.record(at, kind, sha256, detail, profile)`
   - Method `.last_sync(profile)` - *The start time of the latest finished sync, for one profile or (None) anyone.*
   - Method `.last_event(kind)` - *When the latest event of ``kind`` was recorded.*
-  - Method `.counts_since(since)`
+  - Method `.counts_since(since, profile)`
   - Method `.missing(limit, profile)` - *Photos a phone holds that the PC still lacks, newest report first; one person's*
 
 ---
@@ -374,7 +374,7 @@
 ### [`photo_harbor/layout.py`](photo_harbor/layout.py)
 > *The library as people see it in File Explorer: one folder per person, a year folder, a month*
 
-**Size**: `145` lines (`6342` bytes)
+**Size**: `148` lines (`6416` bytes)
 
 **Classes:**
 - `class LibraryLayout`
@@ -393,7 +393,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `139` lines (`6533` bytes)
+**Size**: `139` lines (`6542` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -587,7 +587,7 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `300` lines (`14152` bytes)
+**Size**: `308` lines (`14436` bytes)
 
 **Classes:**
 - `class PhotoStore`
@@ -706,7 +706,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `285` lines (`14841` bytes)
+**Size**: `297` lines (`15551` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -742,6 +742,7 @@
   - Method `.test_people_sign_in_with_a_password_and_see_only_their_own_photos()`
   - Method `.test_wrong_passwords_are_refused_then_braked()`
   - Method `.test_changing_a_password_needs_the_current_one_and_signs_out_other_browsers()`
+  - Method `.test_last_day_counts_follow_the_signed_in_person()`
   - Method `.test_the_owner_can_reset_a_password_and_a_key_still_signs_in()`
 
 ---
@@ -799,7 +800,7 @@
 ---
 
 ### [`tests/test_profiles.py`](tests/test_profiles.py)
-**Size**: `141` lines (`7002` bytes)
+**Size**: `149` lines (`7523` bytes)
 
 **Classes:**
 - `class ProfileBookTest`
@@ -814,6 +815,7 @@
 - `class ProfileStorageTest`
   - Method `.test_photos_land_in_their_profile_and_filter_by_it()`
   - Method `.test_last_sync_is_kept_per_profile()`
+  - Method `.test_last_day_counts_are_kept_per_profile()`
 - `class ImportTest`
   - Method `.setUp()`
   - Method `.test_finds_media_only_and_skips_hidden_folders()`
@@ -825,7 +827,7 @@
 ### [`tests/test_runner.py`](tests/test_runner.py)
 > *The background server the Harbor window and `serve` use, and the window's saved settings.*
 
-**Size**: `58` lines (`2352` bytes)
+**Size**: `58` lines (`2353` bytes)
 
 **Classes:**
 - `class RunnerTest`

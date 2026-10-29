@@ -42,13 +42,14 @@ class SyncJournal:
                 "SELECT at FROM events WHERE kind = ? ORDER BY id DESC LIMIT 1", (kind,)).fetchone()
         return row[0] if row else None
 
-    def counts_since(self, since: str) -> dict:
+    def counts_since(self, since: str, profile: Optional[str] = None) -> dict:
+        query = "SELECT kind, COUNT(*) FROM events WHERE at >= ? AND kind IN (?, ?, ?)"
+        params = [since, STORED, DUPLICATE, REJECTED]
+        if profile is not None:
+            query += " AND COALESCE(profile, 'main') = ?"
+            params.append(profile)
         with self._db.lock:
-            rows = self._db.conn.execute(
-                "SELECT kind, COUNT(*) FROM events WHERE at >= ? AND kind IN (?, ?, ?)"
-                " GROUP BY kind",
-                (since, STORED, DUPLICATE, REJECTED),
-            ).fetchall()
+            rows = self._db.conn.execute(query + " GROUP BY kind", params).fetchall()
         counts = {STORED: 0, DUPLICATE: 0, REJECTED: 0}
         counts.update({row[0]: row[1] for row in rows})
         return counts

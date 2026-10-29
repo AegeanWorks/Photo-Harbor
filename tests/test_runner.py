@@ -47,7 +47,7 @@ class PrefsTest(unittest.TestCase):
         self.addCleanup(shutil.rmtree, root, True)
         path = root / "panel.json"
         self.assertEqual(load_prefs(path, root)["port"], 8642)
-        save_prefs(path, {"library": "D:\Fotos", "backup": "", "port": 9000, "autostart": True})
+        save_prefs(path, {"library": "D:\\Fotos", "backup": "", "port": 9000, "autostart": True})
         self.assertEqual(load_prefs(path, root)["port"], 9000)
         path.write_text(json.dumps({"version": 99, "port": 1}), encoding="utf-8")
         self.assertEqual(load_prefs(path, root)["port"], 8642)

@@ -634,7 +634,7 @@ function openViewer(index) {
   $("viewer-download").href = photo.media;
   $("viewer-download").setAttribute("download", photo.name);
   $("viewer-prev").disabled = index === 0;
-  $("viewer-next").disabled = index === state.photos.length - 1;
+  $("viewer-next").disabled = index === state.photos.length - 1 && state.next === null;
   $("viewer").hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -646,10 +646,10 @@ function closeViewer() {
   state.viewing = -1;
 }
 
-function step(delta) {
+async function step(delta) {
   if (state.viewing < 0) return;
   const target = state.viewing + delta;
-  if (target >= state.photos.length - 6) loadMore();
+  if (target >= state.photos.length - 6) await loadMore();
   if (target >= 0 && target < state.photos.length) openViewer(target);
 }
 

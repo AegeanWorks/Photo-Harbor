@@ -152,6 +152,7 @@ photo-harbor/
 ├── REUSE.toml                <- Machine-readable SPDX metadata
 ├── Open Photo Browser.url    <- double-click: the gallery at http://localhost:8642
 ├── README.md
+├── assets/
 ├── COMMERCIAL.md
 ├── photo_harbor/
 │   ├── __init__.py           <- package version

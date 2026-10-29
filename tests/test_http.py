@@ -275,6 +275,18 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(self.call("GET", "/api/status", key=False, headers={"Cookie": second})[0].status, 401)
         self.assertEqual(self.sign_in("ayse", "yeni-sifre")[0], 200)
 
+    def test_last_day_counts_follow_the_signed_in_person(self):
+        self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
+        self.upload(b"main photo", name="mine.jpg")
+        self.call("POST", "/api/upload", body=b"her photo",
+                  headers={"X-Name": "hers.jpg", "X-Profile": "ayse"})
+        _, body = self.call("GET", "/api/status")
+        self.assertEqual(json.loads(body)["last_day"]["stored"], 2)
+        status, cookie = self.sign_in("ayse", "deniz123")
+        self.assertEqual(status, 200)
+        _, body = self.call("GET", "/api/status", key=False, headers={"Cookie": cookie})
+        self.assertEqual(json.loads(body)["last_day"]["stored"], 1)
+
     def test_the_owner_can_reset_a_password_and_a_key_still_signs_in(self):
         ayse = self.add_person()
         response, _ = self.call("POST", "/api/profiles/ayse", body={"password": "12"})
