@@ -12,17 +12,6 @@
   },
   "checkpoints": [
     {
-      "task_id": "profiles-panel",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] Start with Windows (Run key, window + web switch, --startup minimised + immediate server, real registry round-trip verified and removed); GB scale: catalog v3 import skip-list + totals index, NOT INDEXED name search, 4 MB I/O, preview warmer + JPEG draft, 3 parallel browser uploads; measured: re-import 11s->0.0s, people 223->10ms, search 344->14ms, import 66->97MB/s; 82 tests, 4/4 gates; ADR-006; checklists: passed; uncommitted pending user request",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792868625.3470092,
-      "timestamp_str": "2026-10-24 22:03:45",
-      "agent": "claude-code:851e578e"
-    },
-    {
       "task_id": "accounts-folders",
       "phase": "phase 2",
       "phase_num": 2,
@@ -246,6 +235,17 @@
       "status": "suspended",
       "timestamp": 1793295291.6489825,
       "timestamp_str": "2026-10-29 20:34:51",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "reforge stage 8",
+      "phase_num": 3,
+      "description": "Reforge stage 8: run resumed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793295428.4274793,
+      "timestamp_str": "2026-10-29 20:37:08",
       "agent": "opencode"
     }
   ]

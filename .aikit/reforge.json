@@ -8,7 +8,7 @@
       "id": "run-1",
       "start": 3,
       "step": 3,
-      "stop": null,
+      "stop": 22,
       "stage": 8,
       "window": 22,
       "audited_commits": [
@@ -35,9 +35,9 @@
         "df65a88b10c9d52b9c4d1228f644e865deda320c",
         "bb1739dbc0ee31d0b7016eead3a14e339e7c084a"
       ],
-      "status": "stopped",
+      "status": "completed",
       "created": "2026-10-29T19:47:31",
-      "updated": "2026-10-29T20:34:51",
+      "updated": "2026-10-29T20:37:09",
       "last_audit": {
         "run": "run-1",
         "stage": 8,
