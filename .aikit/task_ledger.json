@@ -3,12 +3,13 @@
   "active_task": {
     "task_id": "reforge:run-1",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793293784.2410908,
     "owner": "opencode",
     "started_by": "opencode",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793295469.7040005
   },
   "checkpoints": [
     {
@@ -69,17 +70,6 @@
       "timestamp": 1792880002.686511,
       "timestamp_str": "2026-10-25 01:13:22",
       "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge run",
-      "phase_num": 3,
-      "description": "run started (start=3, step=3, stop=None)",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793292451.2695572,
-      "timestamp_str": "2026-10-29 19:47:31",
-      "agent": "opencode"
     },
     {
       "task_id": "reforge:run-1",
@@ -246,6 +236,16 @@
       "status": "in_progress",
       "timestamp": 1793295428.4274793,
       "timestamp_str": "2026-10-29 20:37:08",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-1",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'reforge:run-1' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793295469.704002,
+      "timestamp_str": "2026-10-29 20:37:49",
       "agent": "opencode"
     }
   ]
