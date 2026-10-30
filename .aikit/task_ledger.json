@@ -13,33 +13,6 @@
   },
   "checkpoints": [
     {
-      "task_id": "android-e2e",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'android-e2e' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793377801.5546799,
-      "timestamp_str": "2026-10-30 19:30:01",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "android-bg-verify",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/1] Verify the scheduled JobService on Android 14: enable the 6-hour background switch, confirm PERSISTED/NOT_METERED/PERIODIC in dumpsys, force-run the job and see the MediaStore images arrive",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793378096.6578617,
-      "timestamp_str": "2026-10-30 19:34:56",
-      "agent": "opencode:android",
-      "impact_assessment": {
-        "why": "The periodic path had only been compiled; only the manual sync and share paths were exercised",
-        "benefits": "Confirms Android actually schedules and executes the background upload without the app in front",
-        "risks": "contract: none; dependency: none; concurrency: forced job overlaps the app UI but hash checks deduplicate; state: none",
-        "mitigation": "Use the persisted job already declared in the manifest, force-run through the system scheduler, and verify the server catalog"
-      }
-    },
-    {
       "task_id": "android-bg-verify",
       "phase": "phase 4",
       "phase_num": 4,
@@ -255,6 +228,33 @@
       "timestamp": 1793380502.0692782,
       "timestamp_str": "2026-10-30 20:15:02",
       "agent": "opencode:backup"
+    },
+    {
+      "task_id": "reforge:run-2",
+      "phase": "reforge stage 3",
+      "phase_num": 3,
+      "description": "Reforge stage 3: window 47, 43 commit(s), 53 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 4 binary not analysed",
+      "files_affected": [
+        "android/res/drawable/icon.png",
+        "photo_harbor/web/android/Harbor.apk",
+        "photo_harbor/web/icon-192.png",
+        "photo_harbor/web/icon-512.png"
+      ],
+      "status": "in_progress",
+      "timestamp": 1793380707.1987846,
+      "timestamp_str": "2026-10-30 20:18:27",
+      "agent": "opencode"
+    },
+    {
+      "task_id": "reforge:run-2",
+      "phase": "reforge stage 4",
+      "phase_num": 3,
+      "description": "Reforge stage 4: window 72, 5 commit(s), 58 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
+      "files_affected": [],
+      "status": "completed",
+      "timestamp": 1793381024.7845588,
+      "timestamp_str": "2026-10-30 20:23:44",
+      "agent": "opencode"
     }
   ]
 }
