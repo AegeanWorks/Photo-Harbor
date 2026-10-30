@@ -9,8 +9,8 @@
 - **Total Python Modules**: `62`
 - **Total Classes**: `111`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `436`
-- **Total Source Lines**: `7206`
+- **Total Class Methods**: `438`
+- **Total Source Lines**: `7227`
 
 ---
 
@@ -131,13 +131,14 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `169` lines (`8257` bytes)
+**Size**: `177` lines (`8657` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
   - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations, android_dir)`
   - Method `.android_page(request)`
   - Method `.android_apk(request)`
+  - Method `.service_worker(request)`
   - Method `.android_apk_info(request)`
   - Method `._register(sync, library, people, albums, downloads, trash, setup)`
   - Method `.close()`
@@ -966,7 +967,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `625` lines (`35471` bytes)
+**Size**: `638` lines (`36250` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -983,6 +984,7 @@
   - Method `.test_a_full_sync_round()`
   - Method `.test_has_answers_yes_only_for_verified_photos()`
   - Method `.test_a_mismatched_hash_is_rejected_and_counted()`
+  - Method `.test_the_gallery_is_installable_as_a_pwa()`
   - Method `.test_android_page_and_apk_are_public()`
   - Method `.test_calls_without_the_key_are_refused_but_the_page_loads()`
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`

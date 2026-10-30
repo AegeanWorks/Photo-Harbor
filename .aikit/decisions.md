@@ -545,3 +545,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   update still goes through Android's browser/installer confirmation; the app does not self-
   install. The constants must be bumped with the manifest in future builds, and the metadata
   sidecar is the single comparison source.
+
+### ADR-028: The gallery is an installable PWA with a shell-only cache
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Android and desktop users could open the gallery in a browser but could not
+  install it as a standalone app, even though a manifest and an SVG icon already existed.
+- **Decision**: Add PNG icons (192/512), manifest entries, and `sw.js` served from `/sw.js` with
+  `Service-Worker-Allowed: /` and no-cache. Registration runs from the external `app.js` because
+  the page's CSP forbids inline scripts. The worker pre-caches the shell on install, then uses
+  network-first for same-origin GETs so online clients always see fresh assets, falling back to
+  the cache only when offline. `/api`, `/media`, `/thumb`, `/android` and `/sw.js` are bypassed;
+  private photos and JSON are never cached. Old caches are deleted on activate.
+- **Consequences**: Chrome/Edge can install the gallery with an offline shell, but photos still
+  require the server; offline opens the UI without data. The cache is per browser profile and
+  not shared between people. Bumping the cache name is only needed if the shell pre-cache list
+  changes; network-first keeps ordinary asset updates fresh.

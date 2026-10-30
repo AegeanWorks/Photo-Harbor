@@ -106,6 +106,19 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/status")
         self.assertEqual(json.loads(body)["last_day"]["rejected"], 1)
 
+    def test_the_gallery_is_installable_as_a_pwa(self):
+        response, body = self.call("GET", "/sw.js", key=False)
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.getheader("Content-Type"), "text/javascript; charset=utf-8")
+        self.assertEqual(response.getheader("Service-Worker-Allowed"), "/")
+        self.assertIn(b"harbor-shell-v1", body)
+        for name in ("icon-192.png", "icon-512.png"):
+            response, body = self.call("GET", f"/static/{name}", key=False)
+            self.assertEqual((response.status, response.getheader("Content-Type")),
+                             (200, "image/png"))
+        response, body = self.call("GET", "/static/manifest.webmanifest", key=False)
+        self.assertIn(b"icon-192.png", body)
+
     def test_android_page_and_apk_are_public(self):
         (self.android_dir / "index.html").write_text("<html>Harbor for Android</html>",
                                                       encoding="utf-8")

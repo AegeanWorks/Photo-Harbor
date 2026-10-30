@@ -79,6 +79,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   re-running adds only new photos.
 - **No iPhone app.** Two Shortcuts built in Apple's Shortcuts app call the server. The gallery's
   **Setup** tab lists every action, with the server address and key ready to copy.
+- **Install the gallery too.** Chrome or Edge can install `http://<pc>:8642/` as a standalone
+  web app using the 192 and 512 pixel icons. A service worker caches only the page shell for an
+  offline start; `/api`, `/media` and `/thumb` are never cached.
 - **Android app too.** A small native Android 8+ client can be installed from
   `http://<pc>:8642/android/`; it sends new photos and videos with the same hash-first protocol,
   keeps the phone's copy, can run every 6 hours on Wi-Fi, and appears in Android's share sheet
@@ -255,7 +258,7 @@ photo-harbor/
 │   ├── thumbs.py             <- optional Pillow previews and the background warmer
 │   ├── trash.py              <- move a copy aside, restore through ingest, delete forever
 │   ├── trash_api.py          <- list, move, restore, delete and empty the trash
-│   └── web/                  <- gallery, assets and web/android/ (install page + Harbor.apk)
+│   └── web/                  <- gallery, icons, PWA sw.js and web/android/ (APK page)
 └── tests/
     ├── __init__.py
     ├── library_fixture.py    <- a throwaway library for tests

@@ -38,6 +38,8 @@ STATIC_TYPES = {
     "app.css": "text/css; charset=utf-8",
     "app.js": "text/javascript; charset=utf-8",
     "icon.svg": "image/svg+xml",
+    "icon-192.png": "image/png",
+    "icon-512.png": "image/png",
     "manifest.webmanifest": "application/manifest+json",
 }
 NO_CACHE = (("Cache-Control", "no-cache"),)
@@ -111,6 +113,11 @@ class HarborApp:
                               ("Cache-Control", "no-cache")),
                      file=path)
 
+    def service_worker(self, request: Request) -> Reply:
+        return Reply(200, content_type="text/javascript; charset=utf-8",
+                     headers=(("Cache-Control", "no-cache"), ("Service-Worker-Allowed", "/")),
+                     file=WEB_DIR / "sw.js")
+
     def android_apk_info(self, request: Request) -> Reply:
         path = self.android_dir / "Harbor.apk.json"
         if not path.is_file():
@@ -125,6 +132,7 @@ class HarborApp:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
+        add("GET", "/sw.js", self.service_worker, public=True)
         add("GET", "/android", self.android_page, public=True)
         self.router.add_exact("GET", "/android/", self.android_page, public=True)
         add("GET", "/android/Harbor.apk", self.android_apk, public=True)
