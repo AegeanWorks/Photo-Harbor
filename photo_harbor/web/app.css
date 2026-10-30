@@ -329,6 +329,9 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
   font-size: 14px; color: var(--ink);
 }
 .rail-item b { font-weight: 500; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rail-label { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.rail-label > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-cover { width: 22px; height: 22px; border-radius: 4px; object-fit: cover; flex: none; }
 .rail-item:hover { background: var(--surface-2); }
 .rail-item[aria-pressed="true"] { background: var(--surface); box-shadow: var(--shadow); font-weight: 600; }
 .rail-item[aria-pressed="true"] b { color: var(--accent); }

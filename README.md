@@ -103,11 +103,12 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Albums and favorites.** Each person can mark photos with a heart and collect them into named
   albums without moving or copying a single file. Favorites and albums are private to the person
   who made them; the main profile sees its own, not everyone's. Open a photo and choose
-  **Add to album…**; albums appear in the sidebar and can be renamed or deleted there. Deleting
-  an album never deletes a photo.
+  **Add to album…**; albums appear in the sidebar with their newest photo as a cover and can be
+  renamed or deleted there. Deleting an album never deletes a photo.
 - **Collect many at once.** Press **Select** in the gallery, tap the photos you want, then
-  **♥ Favorite**, **♡ Unfavorite** or **Add to album…** in the selection bar. **Select all loaded**
-  takes the page in view; **Clear** empties the selection. Up to 500 photos go in one request.
+  **♥ Favorite**, **♡ Unfavorite** or **Add to album…** in the selection bar. **Add to album…**
+  also offers **New album…**, which creates it and adds the selection; **Select all loaded**
+  takes the page in view and **Clear** empties the selection. Up to 500 photos go in one request.
 - **Details on demand.** **Details** in the viewer shows the file type, size, capture and added
   dates, and pixel dimensions. With Pillow installed it also reads the camera make and model,
   lens, exposure time, aperture, ISO and focal length. Videos show file facts only, and a file

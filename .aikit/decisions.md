@@ -319,3 +319,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   a shared photo is counted in each share, which the UI states. A non-owner sees only their own
   files and no people breakdown; a future per-folder or per-year report can reuse the same
   aggregates without a migration.
+
+### ADR-015: Album covers and creation from the selection
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Albums were plain text rows, and creating one while photos were selected forced
+  the user back to the sidebar and lost the selection. Both made a working feature feel
+  unfinished.
+- **Decision**: The album rail row carries a small lazy cover from the newest member (the
+  existing `/thumb` route and `cover` field); a missing or broken thumbnail falls back to the
+  text label. The selection **Add to album…** menu always starts with **New album…**; choosing
+  it prompts for a name, creates the album, and sends the selected hashes through the existing
+  chunked batch endpoint. No server contract changes.
+- **Consequences**: A cover costs one thumbnail request per album row and never blocks the
+  label; the cover follows the newest photo, so it changes as photos are added. Creating from a
+  selection is one continuous flow, but a failed add leaves the empty album in place with an
+  error toast, which is honest and recoverable.

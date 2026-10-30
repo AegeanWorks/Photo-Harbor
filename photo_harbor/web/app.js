@@ -387,7 +387,17 @@ async function loadAlbums() {
     button.type = "button";
     button.dataset.album = String(album.id);
     button.setAttribute("aria-pressed", String(album.id === state.scope.album));
-    button.append(el("span", "", album.name), el("b", "", album.count.toLocaleString()));
+    const label = el("span", "rail-label");
+    if (album.cover) {
+      const cover = el("img", "rail-cover");
+      cover.src = album.cover;
+      cover.alt = "";
+      cover.loading = "lazy";
+      cover.onerror = () => cover.remove();
+      label.append(cover);
+    }
+    label.append(el("span", "", album.name));
+    button.append(label, el("b", "", album.count.toLocaleString()));
     button.addEventListener("click", () => selectAlbum(album.id));
     rail.append(button);
   }
@@ -582,6 +592,17 @@ function downloadAlbum() {
   startDownload({ album: album.id }, $("album-download"));
 }
 
+async function createAlbumForSelection() {
+  const name = prompt("Name for the new album:");
+  if (!name) return;
+  try {
+    const album = await post("/api/albums", { name });
+    await bulkAlbum(album);
+  } catch (error) {
+    handle(error);
+  }
+}
+
 function toggleSelectAlbums() {
   const box = $("select-albums");
   if (!box.hidden) {
@@ -589,10 +610,11 @@ function toggleSelectAlbums() {
     return;
   }
   box.replaceChildren();
-  if (state.albums.length === 0) {
-    toast("Create an album from the sidebar first");
-    return;
-  }
+  const create = el("button", "ghost", "New album…");
+  create.type = "button";
+  create.setAttribute("role", "menuitem");
+  create.addEventListener("click", createAlbumForSelection);
+  box.append(create);
   for (const album of state.albums) {
     const button = el("button", "ghost", album.name);
     button.type = "button";
