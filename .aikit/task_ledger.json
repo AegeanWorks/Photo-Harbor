@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "android-client",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793375744.948355,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793375783.5401206
   },
   "checkpoints": [
-    {
-      "task_id": "album-cover",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Format 7 adds albums.cover_sha; AlbumBook.set_cover validates a visible member, clears on removal, summary falls back to newest; unit tests for choice, removal and v6 migration",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793372191.1685984,
-      "timestamp_str": "2026-10-30 17:56:31",
-      "agent": "opencode:cover"
-    },
     {
       "task_id": "album-cover",
       "phase": "phase 3",
@@ -249,6 +239,16 @@
       "status": "in_progress",
       "timestamp": 1793375744.948355,
       "timestamp_str": "2026-10-30 18:55:44",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-client",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'android-client' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793375783.540122,
+      "timestamp_str": "2026-10-30 18:56:23",
       "agent": "opencode:android"
     }
   ]
