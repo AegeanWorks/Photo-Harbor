@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `54`
-- **Total Classes**: `102`
+- **Total Python Modules**: `55`
+- **Total Classes**: `103`
 - **Total Top-Level Functions**: `91`
-- **Total Class Methods**: `382`
-- **Total Source Lines**: `6370`
+- **Total Class Methods**: `388`
+- **Total Source Lines**: `6435`
 
 ---
 
@@ -229,7 +229,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `215` lines (`10836` bytes)
+**Size**: `221` lines (`11076` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -496,7 +496,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `173` lines (`8326` bytes)
+**Size**: `184` lines (`8973` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -609,7 +609,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `138` lines (`3143` bytes)
+**Size**: `141` lines (`3263` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -618,7 +618,7 @@
 - `class UploadClaim` - *What the phone says about a file before its bytes are checked.*
 - `class IngestResult` - *``status`` is ``stored`` for a new file or ``duplicate`` when the bytes were already held.*
 - `class LibraryStats`
-- `class PhotoFilter` - *Gallery narrowing: ``month`` is ``YYYY-MM``, ``query`` matches the file name, ``kind`` is*
+- `class PhotoFilter` - *Gallery narrowing: ``month`` is ``YYYY-MM``, ``start``/``end`` are inclusive*
 - `class Outline` - *What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the*
 - `class Album` - *One person's named collection; ``cover`` is the newest member's SHA-256, if any.*
 - `class PersonStorage` - *One person's share: shared photos count in each person's share.*
@@ -823,6 +823,19 @@
 
 ---
 
+### [`tests/test_dates.py`](tests/test_dates.py)
+**Size**: `31` lines (`1444` bytes)
+
+**Classes:**
+- `class DateFilterTest`
+  - Method `.setUp()`
+  - Method `.names(narrow)`
+  - Method `.test_an_inclusive_range_selects_days_on_both_ends()`
+  - Method `.test_either_end_can_stand_alone()`
+  - Method `.test_dates_combine_with_the_existing_narrowing()`
+
+---
+
 ### [`tests/test_details.py`](tests/test_details.py)
 **Size**: `62` lines (`2558` bytes)
 
@@ -883,7 +896,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `476` lines (`26377` bytes)
+**Size**: `490` lines (`27293` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -904,6 +917,7 @@
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
   - Method `.test_a_selection_and_an_album_download_as_one_zip()`
+  - Method `.test_a_date_range_narrows_the_gallery()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
   - Method `.test_photos_lists_newest_first_with_paging()`

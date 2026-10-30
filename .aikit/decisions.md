@@ -353,3 +353,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   is large; it is explicit, never automatic. Extra files count as normal history from deleted
   photos, not damage. A backup that was never made fails with a clear message instead of
   reporting zero files as clean.
+
+### ADR-017: Date windows are inclusive and combine with every other filter
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Months were the only date axis. A trip that crosses a month boundary, or a single
+  day, still meant scrolling, and there was no way to combine an exact period with a person,
+  album or search.
+- **Decision**: `PhotoFilter` gains `start`/`end` (`YYYY-MM-DD`, both optional and inclusive).
+  `Catalog._where` compares `substr(sort_time, 1, 10)`, so the existing date order and the
+  current index family stay valid. `/api/photos` accepts `from`/`to`, rejects anything that is
+  not the exact date shape, and rejects a start after the end. The gallery's **Dates** popover
+  fills the scope keys and resets when any other scope is chosen; the title shows the window and
+  the count reflects the filtered page.
+- **Consequences**: A date window costs one extra `substr` predicate per side and works on the
+  same `sort_time` the gallery already sorts by. Choosing a month, person, album or favorites
+  clears the dates; the month outline stays global so the sidebar remains a way out of the
+  window. A future saved-search feature can serialize the same four keys.

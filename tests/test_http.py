@@ -172,6 +172,20 @@ class ServerTest(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(body)) as archive:
             self.assertEqual(archive.namelist(), ["one.jpg"])
 
+    def test_a_date_range_narrows_the_gallery(self):
+        for name, taken in (("may.jpg", "2026-05-01T10:00:00"),
+                            ("june.jpg", "2026-06-01T10:00:00")):
+            self.call("POST", "/api/upload", body=name.encode(),
+                      headers={"X-Name": name, "X-Sha256": sha(name.encode()), "X-Taken": taken})
+        _, body = self.call("GET", "/api/photos?from=2026-05-01&to=2026-05-31")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["may.jpg"])
+        _, body = self.call("GET", "/api/photos?from=2026-06-01")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["june.jpg"])
+        response, _ = self.call("GET", "/api/photos?from=05-01-2026")
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("GET", "/api/photos?from=2026-06-01&to=2026-05-01")
+        self.assertEqual(response.status, 400)
+
     def test_storage_report_follows_the_signed_in_person(self):
         self.upload(b"one", name="one.jpg")
         ayse = self.add_person()

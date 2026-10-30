@@ -1,61 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "backup-verify",
+    "task_id": "date-filter",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793363509.0995252,
-    "owner": "opencode:backup",
-    "started_by": "opencode:backup",
-    "continuations": [],
-    "completed_at": 1793363552.3542116
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793363953.9119406,
+    "owner": "opencode:dates",
+    "started_by": "opencode:dates",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "bulk-download",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/5] selection.py owns bulk hash parsing/validation; downloads.py builds stored ZIPs with duplicate-name handling, 8 GiB and free-space checks, profile-bound one-time tokens and 15-minute expiry; 5 unit tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793358949.079968,
-      "timestamp_str": "2026-10-30 14:15:49",
-      "agent": "opencode:download"
-    },
-    {
-      "task_id": "bulk-download",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/5] POST /api/download {sha256s|album} and GET /api/download/<token>; Reply.delete_after removes the ZIP in a finally; HTTP tests cover selection, album, one-time use, auth and no leftover file",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793358949.959802,
-      "timestamp_str": "2026-10-30 14:15:49",
-      "agent": "opencode:download"
-    },
-    {
-      "task_id": "bulk-download",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[4/5] Selection bar Download and album Download album; 500-photo selection cap with album fallback; browser dogfood downloaded both ZIPs and verified one.png inside, 0 JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793358950.8698916,
-      "timestamp_str": "2026-10-30 14:15:50",
-      "agent": "opencode:download"
-    },
-    {
-      "task_id": "bulk-download",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[5/5] 120 tests; 4/4 project gates; README, limits and API; ADR-013; codebase map regenerated; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793358951.851196,
-      "timestamp_str": "2026-10-30 14:15:51",
-      "agent": "opencode:download"
-    },
     {
       "task_id": "bulk-download",
       "phase": "completed",
@@ -245,6 +200,56 @@
       "timestamp": 1793363552.3542135,
       "timestamp_str": "2026-10-30 15:32:32",
       "agent": "opencode:backup"
+    },
+    {
+      "task_id": "date-filter",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: PhotoFilter gains start/end dates; catalog narrows on substr(sort_time,1,10); /api/photos accepts from/to with strict YYYY-MM-DD and start<=end; scope bar Dates popover with From/To and Apply/Clear; tests, dogfood, ADR-017, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363667.6314468,
+      "timestamp_str": "2026-10-30 15:34:27",
+      "agent": "opencode:dates",
+      "impact_assessment": {
+        "why": "Months are the only date axis; finding a specific trip that crosses a month boundary, or a single day, takes scrolling",
+        "benefits": "Exact date windows combine with person, kind, album, favorites and name search; no schema change and no new dependency",
+        "risks": "contract: two new query parameters and scope keys; dependency: none; concurrency: read-only filter; state: dates are client-only and reset with other scopes",
+        "mitigation": "Validate the date shape and order before querying, keep substr comparisons for correctness with existing sort_time, and reset dates whenever another scope is chosen"
+      }
+    },
+    {
+      "task_id": "date-filter",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] PhotoFilter start/end; catalog comparison on substr(sort_time,1,10); /api/photos from/to validation; 3 unit tests and HTTP range/refusal test",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363953.2560277,
+      "timestamp_str": "2026-10-30 15:39:13",
+      "agent": "opencode:dates"
+    },
+    {
+      "task_id": "date-filter",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] Dates popover with From/To, Apply/Clear; scope title and count; browser dogfood 3 photos, May window 2, cleared 3, 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363953.5795033,
+      "timestamp_str": "2026-10-30 15:39:13",
+      "agent": "opencode:dates"
+    },
+    {
+      "task_id": "date-filter",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] 129 tests; 4/4 project gates; README/API/tree; ADR-017; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363953.9119406,
+      "timestamp_str": "2026-10-30 15:39:13",
+      "agent": "opencode:dates"
     }
   ]
 }

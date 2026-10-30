@@ -91,8 +91,15 @@
             <button class="ghost" id="album-rename" hidden>Rename album</button>
             <button class="ghost" id="album-delete" hidden>Delete album</button>
             <button class="ghost" id="album-download" type="button" hidden>Download album</button>
+            <button class="ghost" id="date-filter" type="button" aria-pressed="false">Dates</button>
             <button class="ghost" id="select-mode" type="button" aria-pressed="false">Select</button>
             <button class="ghost" id="scope-clear" hidden>Show everything</button>
+          </div>
+          <div class="date-panel" id="date-panel" hidden>
+            <label>From <input type="date" id="date-from"></label>
+            <label>To <input type="date" id="date-to"></label>
+            <button class="primary" id="date-apply" type="button">Apply</button>
+            <button class="ghost" id="date-clear" type="button">Clear</button>
           </div>
           <div class="select-bar" id="select-bar" hidden>
             <span id="select-count">0 selected</span>

@@ -18,6 +18,7 @@ from .thumbs import Thumbnailer
 PAGE_MAX = 200
 IMMUTABLE = (("Cache-Control", "private, max-age=31536000, immutable"),)
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
+DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 MAX_QUERY = 100
 LOW_DISK_BYTES = 20 * 1024 ** 3     # warn under 20 GB free...
 LOW_DISK_SHARE = 0.10               # ...or under 10 % of the drive, whichever is larger
@@ -70,9 +71,18 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
     query = request.arg("q").strip()[:MAX_QUERY] or None
     favorite = request.arg("favorite") == "1"
     album = request.arg("album") or None
+    start = request.arg("from").strip() or None
+    end = request.arg("to").strip() or None
     if month is not None and not MONTH.match(month):
         raise HarborError(f"{month!r} is not a month", "months are written YYYY-MM",
                           "use ?month=2026-10")
+    for name, value in (("from", start), ("to", end)):
+        if value is not None and not DATE.match(value):
+            raise HarborError(f"{value!r} is not a date", "dates are written YYYY-MM-DD",
+                              f"use ?{name}=2026-10-01")
+    if start is not None and end is not None and start > end:
+        raise HarborError("the date range is backwards", f"{start} is after {end}",
+                          "choose a From date on or before To")
     if kind not in (None, "photo", "video"):
         raise HarborError(f"{kind!r} is not a kind", "kind is photo or video",
                           "use ?kind=video, or leave it out")
@@ -82,7 +92,8 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
                               "reload the gallery and try again", status=404)
         album = int(album)
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
-                       viewer=request.profile, favorite=favorite, album=album)
+                       viewer=request.profile, favorite=favorite, album=album,
+                       start=start, end=end)
 
 
 class LibraryApi:

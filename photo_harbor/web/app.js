@@ -5,7 +5,8 @@ const BATCH = 500;
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
-  scope: { kind: null, month: null, favorite: false, album: null }, query: "",
+  scope: { kind: null, month: null, favorite: false, album: null, start: null, end: null },
+  query: "",
   generation: 0, total: 0, profile: null, people: [], me: null, owner: false,
   favorites: 0, albums: [], selecting: false, selected: new Set(),
 };
@@ -75,6 +76,7 @@ function dayKey(date) {
 const relativeDay = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 const monthFormat = new Intl.DateTimeFormat(undefined, { month: "long" });
 const monthYearFormat = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" });
+const dateOnlyFormat = new Intl.DateTimeFormat(undefined, { day: "numeric", month: "short", year: "numeric" });
 
 function capitalise(text) {
   return text.charAt(0).toLocaleUpperCase() + text.slice(1);
@@ -197,6 +199,8 @@ function photosUrl() {
   if (state.scope.month) params.set("month", state.scope.month);
   if (state.scope.favorite) params.set("favorite", "1");
   if (state.scope.album) params.set("album", String(state.scope.album));
+  if (state.scope.start) params.set("from", state.scope.start);
+  if (state.scope.end) params.set("to", state.scope.end);
   if (state.query) params.set("q", state.query);
   if (state.profile) params.set("profile", state.profile);
   return `/api/photos?${params}`;
@@ -239,17 +243,31 @@ function currentAlbum() {
   return state.albums.find((album) => album.id === state.scope.album) || null;
 }
 
+function dateTitle() {
+  const start = state.scope.start
+    ? dateOnlyFormat.format(new Date(`${state.scope.start}T00:00:00`)) : null;
+  const end = state.scope.end
+    ? dateOnlyFormat.format(new Date(`${state.scope.end}T00:00:00`)) : null;
+  if (start && end) return `${start} – ${end}`;
+  if (start) return `From ${start}`;
+  if (end) return `Until ${end}`;
+  return "";
+}
+
 function scopeTitle() {
   const album = currentAlbum();
-  if (album) return album.name;
-  if (state.scope.favorite) return "Favorites";
-  if (state.scope.month) return capitalise(monthYearFormat.format(monthDate(state.scope.month)));
-  return state.scope.kind === "video" ? "Videos" : "All photos";
+  let base = "All photos";
+  if (album) base = album.name;
+  else if (state.scope.favorite) base = "Favorites";
+  else if (state.scope.month) base = capitalise(monthYearFormat.format(monthDate(state.scope.month)));
+  else if (state.scope.kind === "video") base = "Videos";
+  const dates = dateTitle();
+  return dates ? `${base} · ${dates}` : base;
 }
 
 function renderScope() {
   const narrowed = Boolean(state.scope.month || state.scope.kind || state.scope.favorite
-    || state.scope.album || state.query);
+    || state.scope.album || state.scope.start || state.scope.end || state.query);
   const shown = state.photos.length;
   const title = state.query ? `“${state.query}”` : scopeTitle();
   $("scope-title").textContent = state.profile ? `${personName(state.profile)} · ${title}` : title;
@@ -287,14 +305,51 @@ function markScope() {
   for (const item of document.querySelectorAll("[data-album]")) {
     item.setAttribute("aria-pressed", String(Number(item.dataset.album) === state.scope.album));
   }
+  $("date-filter").setAttribute("aria-pressed",
+    String(Boolean(state.scope.start || state.scope.end)));
 }
 
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
-  state.scope = { kind, month, favorite: false, album: null, ...extra };
+  state.scope = { kind, month, favorite: false, album: null, start: null, end: null, ...extra };
+  hideDatePanel();
   markScope();
   window.scrollTo({ top: 0 });
   resetPhotos();
+}
+
+function hideDatePanel() {
+  $("date-panel").hidden = true;
+  $("date-filter").setAttribute("aria-expanded", "false");
+}
+
+function toggleDatePanel() {
+  hideSelectAlbums();
+  const panel = $("date-panel");
+  if (!panel.hidden) {
+    hideDatePanel();
+    return;
+  }
+  $("date-from").value = state.scope.start || "";
+  $("date-to").value = state.scope.end || "";
+  panel.hidden = false;
+  $("date-filter").setAttribute("aria-expanded", "true");
+}
+
+function applyDates() {
+  const start = $("date-from").value || null;
+  const end = $("date-to").value || null;
+  if (start && end && start > end) {
+    toast("Choose a From date on or before To");
+    return;
+  }
+  setScope(null, null, { start, end });
+}
+
+function clearDates() {
+  $("date-from").value = "";
+  $("date-to").value = "";
+  setScope(null, null);
 }
 
 function railButton(scope, label, count) {
@@ -340,11 +395,12 @@ function personButton(id, label, count) {
 
 function selectPerson(id) {
   if (state.selecting) setSelecting(false);
+  hideDatePanel();
   state.profile = id;
   for (const item of document.querySelectorAll("[data-person]")) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
-  state.scope = { kind: null, month: null, favorite: false, album: null };
+  state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -754,6 +810,9 @@ function wireBrowser() {
   $("album-rename").addEventListener("click", renameAlbum);
   $("album-delete").addEventListener("click", deleteAlbum);
   $("album-download").addEventListener("click", downloadAlbum);
+  $("date-filter").addEventListener("click", toggleDatePanel);
+  $("date-apply").addEventListener("click", applyDates);
+  $("date-clear").addEventListener("click", clearDates);
   $("select-mode").addEventListener("click", () => setSelecting(!state.selecting));
   $("select-all").addEventListener("click", selectLoaded);
   $("select-clear").addEventListener("click", clearSelected);
@@ -763,6 +822,9 @@ function wireBrowser() {
   $("select-album").addEventListener("click", toggleSelectAlbums);
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".select-album-wrap")) hideSelectAlbums();
+    if (!event.target.closest("#date-panel") && event.target.id !== "date-filter") {
+      hideDatePanel();
+    }
   });
   $("scope-clear").addEventListener("click", () => {
     $("search").value = "";
@@ -779,7 +841,7 @@ function wireBrowser() {
       if (document.querySelector('[data-view="photos"]').getAttribute("aria-selected") !== "true") show("photos");
       // Search covers the whole library, not just the month in view.
       if (query) {
-        state.scope = { kind: null, month: null, favorite: false, album: null };
+        state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null };
         markScope();
       }
       resetPhotos();
@@ -1224,6 +1286,7 @@ function wireStartup() {
 
 function show(view) {
   if (view !== "photos" && state.selecting) setSelecting(false);
+  if (view !== "photos") hideDatePanel();
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }

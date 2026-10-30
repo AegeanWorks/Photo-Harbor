@@ -42,6 +42,12 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
     if narrow.month:
         clauses.append(f"substr({owner}.sort_time, 1, 7) = ?")
         params.append(narrow.month)
+    if narrow.start:
+        clauses.append(f"substr({owner}.sort_time, 1, 10) >= ?")
+        params.append(narrow.start)
+    if narrow.end:
+        clauses.append(f"substr({owner}.sort_time, 1, 10) <= ?")
+        params.append(narrow.end)
     if narrow.query:
         escaped = narrow.query.replace("!", "!!").replace("%", "!%").replace("_", "!_")
         clauses.append(f"{owner}.original_name LIKE ? ESCAPE '!'")
