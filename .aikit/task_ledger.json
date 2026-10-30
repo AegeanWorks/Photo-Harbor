@@ -1,72 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "albums-favorites",
+    "task_id": "batch-selection",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793345087.7834983,
-    "owner": "opencode:albums",
-    "started_by": "opencode:albums",
-    "continuations": [],
-    "completed_at": 1793345146.1696353
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793347900.8166156,
+    "owner": "opencode:batch",
+    "started_by": "opencode:batch",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 6",
-      "phase_num": 3,
-      "description": "Reforge stage 6: window 18, 3 commit(s), 45 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793292663.6855435,
-      "timestamp_str": "2026-10-29 19:51:03",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 7",
-      "phase_num": 3,
-      "description": "Reforge stage 7: window 20, 2 commit(s), 41 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293025.1227112,
-      "timestamp_str": "2026-10-29 19:57:05",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 7",
-      "phase_num": 3,
-      "description": "Reforge stage 7: run stopped at stage 7; resume it with `reforge resume`",
-      "files_affected": [],
-      "status": "suspended",
-      "timestamp": 1793293373.133337,
-      "timestamp_str": "2026-10-29 20:02:53",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "Reforge run complete: 5 findings, 4 fixed, 1 reported; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293715.1875257,
-      "timestamp_str": "2026-10-29 20:08:35",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "Reforge run complete: all 5 findings fixed and tested (99 tests); checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793293784.2410908,
-      "timestamp_str": "2026-10-29 20:09:44",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 7",
@@ -242,6 +186,67 @@
       "timestamp": 1793345895.2273579,
       "timestamp_str": "2026-10-30 10:38:15",
       "agent": "opencode"
+    },
+    {
+      "task_id": "batch-selection",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/5] Plan: gallery Select mode with checkmarked tiles, a selection bar (count, select all loaded, favorite/unfavorite, add to album, clear, done); bulk /api/favorite and /api/album-photos accept sha256s up to 500, validate every hash before writing, and apply in one lock; tests, dogfood, ADR-011, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793347493.907805,
+      "timestamp_str": "2026-10-30 11:04:53",
+      "agent": "opencode:batch",
+      "impact_assessment": {
+        "why": "Albums work, but adding a trip's photos one viewer at a time is tedious; bulk selection is the missing step between browsing and collecting",
+        "benefits": "Collect dozens of photos in two clicks; fewer requests and one database lock per batch; no schema change and no file moves",
+        "risks": "contract: /api/favorite and /api/album-photos gain a sha256s form; dependency: none; concurrency: bulk writes hold the catalog lock; state: selection is client-only and resets on filter changes",
+        "mitigation": "Cap batches at 500, pre-validate existence and ownership before any write, keep single-sha requests working, and test partial-failure refusal plus cross-person refusal"
+      }
+    },
+    {
+      "task_id": "batch-selection",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/5] AlbumBook.add_many/favorite_many under one lock; Catalog.known/copies_of validate in two queries; tests prove each row changes once and repeats return 0",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793347899.9426692,
+      "timestamp_str": "2026-10-30 11:11:39",
+      "agent": "opencode:batch"
+    },
+    {
+      "task_id": "batch-selection",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/5] /api/favorite and /api/album-photos accept sha256 or sha256s (max 500, de-duplicated); every hash is validated before any write; HTTP tests cover batch success, 404 partial refusal, empty and oversized lists",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793347900.2328,
+      "timestamp_str": "2026-10-30 11:11:40",
+      "agent": "opencode:batch"
+    },
+    {
+      "task_id": "batch-selection",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[4/5] Gallery Select mode: checkmarked tiles, count bar, select all loaded, favorite/unfavorite, add to album menu, clear; browser dogfood selected 1 photo, favorited and albumed it, 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793347900.5327091,
+      "timestamp_str": "2026-10-30 11:11:40",
+      "agent": "opencode:batch"
+    },
+    {
+      "task_id": "batch-selection",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[5/5] 110 tests pass; 4/4 project gates; README and ADR-011; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793347900.8166156,
+      "timestamp_str": "2026-10-30 11:11:40",
+      "agent": "opencode:batch"
     }
   ]
 }

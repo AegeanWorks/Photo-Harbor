@@ -318,7 +318,31 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .scope h1 { margin: 0; font: 600 30px/1.15 var(--serif); letter-spacing: -.01em; }
 .scope span { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; }
 .scope .ghost { margin-left: 0; }
+.scope #select-mode[aria-pressed="true"] { background: var(--surface-2); font-weight: 600; }
 .scope #scope-clear { margin-left: auto; }
+.select-bar {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+  margin: 8px 0 4px; padding: 10px 12px; background: var(--surface);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.select-bar[hidden] { display: none; }
+.select-bar .ghost { margin-left: 0; }
+.select-bar #select-count { font-weight: 600; color: var(--ink); margin-right: 4px; }
+.select-album-wrap { position: relative; }
+.select-albums {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 9;
+  display: grid; gap: 2px; padding: 8px; min-width: 180px; max-height: 50vh; overflow: auto;
+  background: var(--surface); border: 1px solid var(--line, #ddd); border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .18);
+}
+.select-albums[hidden] { display: none; }
+.select-albums .ghost { text-align: left; }
+.tile.selected { outline: 3px solid var(--accent); outline-offset: -3px; }
+.tile.selected::after {
+  content: "✓"; position: absolute; right: 6px; top: 6px; width: 24px; height: 24px;
+  border-radius: 50%; background: var(--accent); color: #fff;
+  display: grid; place-items: center; font-size: 14px;
+}
 .day:first-child { margin-top: 4px; }
 
 /* Drag and drop, upload tray */

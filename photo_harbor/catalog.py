@@ -104,13 +104,27 @@ class Catalog:
             ).fetchone()
         return _to_record(row) if row else None
 
-    def has_copy(self, profile: str, sha256: str) -> bool:
-        """Whether ``profile``'s folder holds this photo, so it is theirs to see."""
+    def known(self, sha256s: list) -> set:
+        """The hashes in ``sha256s`` that the catalog holds, in one query."""
+        if not sha256s:
+            return set()
+        marks = ",".join("?" for _ in sha256s)
         with self._db.lock:
-            row = self._db.conn.execute(
-                "SELECT 1 FROM copies WHERE profile = ? AND sha256 = ?", (profile, sha256)
-            ).fetchone()
-        return row is not None
+            rows = self._db.conn.execute(
+                f"SELECT sha256 FROM photos WHERE sha256 IN ({marks})", tuple(sha256s)
+            ).fetchall()
+        return {row[0] for row in rows}
+
+    def copies_of(self, profile: str, sha256s: list) -> set:
+        """The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query."""
+        if not sha256s:
+            return set()
+        marks = ",".join("?" for _ in sha256s)
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                f"SELECT sha256 FROM copies WHERE profile = ? AND sha256 IN ({marks})",
+                (profile, *sha256s)).fetchall()
+        return {row[0] for row in rows}
 
     def page(self, offset: int, limit: int, narrow: PhotoFilter = PhotoFilter()) -> list:
         """Records newest first by taken time, falling back to received time."""

@@ -247,3 +247,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   album leaves its photos in the library. Reads join `photos`, so a membership row left behind
   when a file leaves the catalog is invisible and cannot resurrect a missing photo. Format 5 is
   readable only by this version; an older build refuses it and leaves the `.v4.bak` intact.
+
+### ADR-011: Gallery selection and bounded bulk writes
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Albums and favorites worked one viewer at a time. Collecting a trip's photos meant
+  opening each photo, pressing the heart, and choosing an album, which is slow and easy to leave
+  half done.
+- **Decision**: The gallery gains a **Select** mode: tiles become checkable, a selection bar shows
+  the count and offers **Select all loaded**, **♥ Favorite**, **♡ Unfavorite**, **Add to album…**
+  and **Clear**, and changing scope or leaving the gallery ends the mode. `POST /api/favorite` and
+  `POST /api/album-photos` accept either `sha256` or `sha256s`; a batch is capped at 500,
+  de-duplicated, and every hash is checked for existence and (for non-owners) ownership before
+  the first write. `AlbumBook.add_many` and `favorite_many` apply the rows under one database
+  lock; the browser splits larger selections into 500-hash requests.
+- **Consequences**: A batch request is all or nothing once validation passes, but a multi-request
+  selection stops at the first failed chunk. Selection is client-only and never persisted; a
+  filter, person switch or tab change clears it. Single-hash callers keep the old request shape,
+  and `changed` now reports the number of rows changed rather than a boolean.

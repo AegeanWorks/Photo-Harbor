@@ -105,6 +105,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   who made them; the main profile sees its own, not everyone's. Open a photo and choose
   **Add to album…**; albums appear in the sidebar and can be renamed or deleted there. Deleting
   an album never deletes a photo.
+- **Collect many at once.** Press **Select** in the gallery, tap the photos you want, then
+  **♥ Favorite**, **♡ Unfavorite** or **Add to album…** in the selection bar. **Select all loaded**
+  takes the page in view; **Clear** empties the selection. Up to 500 photos go in one request.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -144,7 +147,7 @@ and exit 1; usage errors exit 2.
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
 | `GET /api/photos?offset=&limit=[&month=YYYY-MM&kind=photo\|video&q=name&profile=id&favorite=1&album=ID]` | gallery page, newest first; non-owners always get their own |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
-| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` adds or removes an album photo; `{sha256, favorite}` marks your favorite |
+| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `GET /media/<sha256>`, `GET /thumb/<sha256>` | original (with byte ranges) and JPEG preview |
 
 ## 📦 What's Inside
@@ -168,7 +171,7 @@ photo-harbor/
 │   ├── atomic_file.py        <- temp + fsync + replace placement
 │   ├── accounts.py           <- password hashes, sessions, wrong-password brake
 │   ├── albums.py             <- personal albums and favorites; no files move
-│   ├── albums_api.py         <- list, create, rename, delete albums; add photos; favorites
+│   ├── albums_api.py         <- albums and favorites; single or up to 500 hashes per call
 │   ├── auth.py               <- home-network check; who is asking (key or session); sign-in
 │   ├── autostart.py          <- start with Windows (per-user Run key)
 │   ├── backup.py             <- mirror to a second drive, daily thread

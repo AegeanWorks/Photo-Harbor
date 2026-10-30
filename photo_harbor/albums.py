@@ -111,32 +111,49 @@ class AlbumBook:
 
     def add(self, profile: str, ident, sha256: str, member: bool) -> bool:
         """Put a photo in an album or take it out; True when the album changed."""
+        return self.add_many(profile, ident, [sha256], member) == 1
+
+    def add_many(self, profile: str, ident, sha256s: list, member: bool) -> int:
+        """Add or remove several photos in one lock; returns how many rows changed."""
         album = _album_id(ident)
+        if not sha256s:
+            return 0
         with self._db.lock:
             self._owned(profile, album)
             if member:
-                cursor = self._db.conn.execute(
+                at = self._now().isoformat(timespec="seconds")
+                cursor = self._db.conn.executemany(
                     "INSERT OR IGNORE INTO album_photos (album_id, sha256, added_at)"
                     " VALUES (?, ?, ?)",
-                    (album, sha256, self._now().isoformat(timespec="seconds")))
+                    [(album, sha256, at) for sha256 in sha256s])
             else:
+                marks = ",".join("?" for _ in sha256s)
                 cursor = self._db.conn.execute(
-                    "DELETE FROM album_photos WHERE album_id = ? AND sha256 = ?",
-                    (album, sha256))
-        return cursor.rowcount == 1
+                    f"DELETE FROM album_photos WHERE album_id = ? AND sha256 IN ({marks})",
+                    (album, *sha256s))
+        return cursor.rowcount
 
     def favorite(self, profile: str, sha256: str, favorite: bool) -> bool:
         """Mark or unmark one photo for one person; True when the mark changed."""
+        return self.favorite_many(profile, [sha256], favorite) == 1
+
+    def favorite_many(self, profile: str, sha256s: list, favorite: bool) -> int:
+        """Mark or unmark several photos in one lock; returns how many rows changed."""
+        if not sha256s:
+            return 0
         with self._db.lock:
             if favorite:
-                cursor = self._db.conn.execute(
+                at = self._now().isoformat(timespec="seconds")
+                cursor = self._db.conn.executemany(
                     "INSERT OR IGNORE INTO favorites (profile, sha256, added_at)"
                     " VALUES (?, ?, ?)",
-                    (profile, sha256, self._now().isoformat(timespec="seconds")))
+                    [(profile, sha256, at) for sha256 in sha256s])
             else:
+                marks = ",".join("?" for _ in sha256s)
                 cursor = self._db.conn.execute(
-                    "DELETE FROM favorites WHERE profile = ? AND sha256 = ?", (profile, sha256))
-        return cursor.rowcount == 1
+                    f"DELETE FROM favorites WHERE profile = ? AND sha256 IN ({marks})",
+                    (profile, *sha256s))
+        return cursor.rowcount
 
     def _owned(self, profile: str, album: int) -> None:
         with self._db.lock:

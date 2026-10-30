@@ -335,6 +335,36 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/photos?favorite=1")
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
 
+    def test_bulk_selection_writes_a_validated_batch(self):
+        for name in ("one.jpg", "two.jpg", "three.jpg"):
+            self.upload(name.encode(), name=name)
+        _, body = self.call("POST", "/api/albums", body={"name": "Batch"})
+        album = json.loads(body)["id"]
+        one, two, three = (sha(name.encode()) for name in ("one.jpg", "two.jpg", "three.jpg"))
+        response, body = self.call("POST", "/api/album-photos",
+                                   body={"album": album, "sha256s": [one, two], "member": True})
+        result = json.loads(body)
+        self.assertEqual((response.status, result["changed"], result["count"]), (200, 2, 2))
+        response, body = self.call("POST", "/api/favorite",
+                                   body={"sha256s": [one, two, three], "favorite": True})
+        self.assertEqual(json.loads(body)["changed"], 3)
+        _, body = self.call("GET", "/api/photos?favorite=1")
+        self.assertEqual(len(json.loads(body)["photos"]), 3)
+        response, body = self.call("POST", "/api/album-photos",
+                                   body={"album": album, "sha256s": [one, "f" * 64],
+                                         "member": True})
+        self.assertEqual(response.status, 404)
+        _, body = self.call("GET", f"/api/photos?album={album}")
+        self.assertEqual(len(json.loads(body)["photos"]), 2)
+        response, _ = self.call("POST", "/api/favorite", body={"sha256s": [], "favorite": True})
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("POST", "/api/favorite",
+                                body={"sha256s": ["f" * 64] * 501, "favorite": True})
+        self.assertEqual(response.status, 400)
+        response, body = self.call("POST", "/api/album-photos",
+                                   body={"album": album, "sha256": three, "member": True})
+        self.assertEqual((response.status, json.loads(body)["count"]), (200, 1))
+
     def test_albums_and_favorites_never_cross_people(self):
         ayse = self.add_person()
         self.upload(b"one", name="one.jpg")

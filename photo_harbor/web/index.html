@@ -90,7 +90,19 @@
             <span id="scope-count"></span>
             <button class="ghost" id="album-rename" hidden>Rename album</button>
             <button class="ghost" id="album-delete" hidden>Delete album</button>
+            <button class="ghost" id="select-mode" type="button" aria-pressed="false">Select</button>
             <button class="ghost" id="scope-clear" hidden>Show everything</button>
+          </div>
+          <div class="select-bar" id="select-bar" hidden>
+            <span id="select-count">0 selected</span>
+            <button class="ghost" id="select-all" type="button">Select all loaded</button>
+            <button class="ghost" id="select-favorite" type="button">♥ Favorite</button>
+            <button class="ghost" id="select-unfavorite" type="button">♡ Unfavorite</button>
+            <div class="select-album-wrap">
+              <button class="ghost" id="select-album" type="button" aria-haspopup="menu" aria-expanded="false">Add to album…</button>
+              <div class="select-albums" id="select-albums" role="menu" hidden></div>
+            </div>
+            <button class="ghost" id="select-clear" type="button">Clear</button>
           </div>
           <div id="days"></div>
           <div id="empty" class="empty" hidden>

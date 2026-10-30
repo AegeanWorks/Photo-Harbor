@@ -1,12 +1,13 @@
 "use strict";
 
 const PAGE = 120;
+const BATCH = 500;
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
   scope: { kind: null, month: null, favorite: false, album: null }, query: "",
   generation: 0, total: 0, profile: null, people: [], me: null, owner: false,
-  favorites: 0, albums: [],
+  favorites: 0, albums: [], selecting: false, selected: new Set(),
 };
 
 function personName(id) {
@@ -128,8 +129,13 @@ function tile(photo, index) {
   const button = el("button", "tile");
   button.type = "button";
   button.dataset.index = String(index);
+  button.dataset.sha = photo.sha256;
+  if (state.selected.has(photo.sha256)) button.classList.add("selected");
   button.setAttribute("aria-label", `${photo.name}${photo.favorite ? ", favorite" : ""}, ${timeFormat.format(parseTime(photo.time) || new Date())}`);
-  button.addEventListener("click", () => openViewer(index));
+  button.addEventListener("click", () => {
+    if (state.selecting) toggleSelected(photo.sha256);
+    else openViewer(index);
+  });
   if (photo.video) {
     button.append(fallback(photo));
   } else {
@@ -214,6 +220,7 @@ async function loadMore() {
 }
 
 function resetPhotos() {
+  if (state.selected.size || document.querySelector(".tile.selected")) clearSelected();
   state.generation += 1;
   state.photos = [];
   state.next = 0;
@@ -278,6 +285,7 @@ function markScope() {
 }
 
 function setScope(kind, month, extra = {}) {
+  if (state.selecting) setSelecting(false);
   state.scope = { kind, month, favorite: false, album: null, ...extra };
   markScope();
   window.scrollTo({ top: 0 });
@@ -326,6 +334,7 @@ function personButton(id, label, count) {
 }
 
 function selectPerson(id) {
+  if (state.selecting) setSelecting(false);
   state.profile = id;
   for (const item of document.querySelectorAll("[data-person]")) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
@@ -431,6 +440,131 @@ function renderPeopleRail() {
   const total = state.people.reduce((sum, p) => sum + p.count, 0);
   rail.append(personButton(null, "Everyone", total));
   for (const person of state.people) rail.append(personButton(person.id, person.name, person.count));
+}
+
+// ---------- selecting many photos ----------
+
+function clearSelected() {
+  state.selected.clear();
+  for (const item of document.querySelectorAll(".tile.selected")) item.classList.remove("selected");
+  renderSelection();
+}
+
+function setSelecting(on) {
+  state.selecting = on;
+  $("select-mode").textContent = on ? "Done" : "Select";
+  $("select-mode").setAttribute("aria-pressed", String(on));
+  $("select-bar").hidden = !on;
+  if (on) renderSelection();
+  else clearSelected();
+}
+
+function toggleSelected(sha256) {
+  if (state.selected.has(sha256)) state.selected.delete(sha256);
+  else state.selected.add(sha256);
+  for (const item of document.querySelectorAll(`.tile[data-sha="${sha256}"]`)) {
+    item.classList.toggle("selected", state.selected.has(sha256));
+  }
+  renderSelection();
+}
+
+function updateTileFavorite(photo) {
+  const button = document.querySelector(`.tile[data-sha="${photo.sha256}"]`);
+  if (!button) return;
+  const heart = button.querySelector(".heart");
+  if (photo.favorite && !heart) button.append(favoriteMark());
+  if (!photo.favorite && heart) heart.remove();
+}
+
+function hideSelectAlbums() {
+  $("select-albums").hidden = true;
+  $("select-album").setAttribute("aria-expanded", "false");
+}
+
+function renderSelection() {
+  const count = state.selected.size;
+  $("select-count").textContent = `${count.toLocaleString()} selected`;
+  for (const id of ["select-favorite", "select-unfavorite", "select-album", "select-clear"]) {
+    $(id).disabled = count === 0;
+  }
+  if (count === 0) hideSelectAlbums();
+}
+
+function selectLoaded() {
+  for (const photo of state.photos) state.selected.add(photo.sha256);
+  for (const item of document.querySelectorAll(".tile")) item.classList.add("selected");
+  renderSelection();
+}
+
+function batches(items) {
+  const out = [];
+  for (let start = 0; start < items.length; start += BATCH) {
+    out.push(items.slice(start, start + BATCH));
+  }
+  return out;
+}
+
+async function bulkFavorite(favorite) {
+  const sha256s = [...state.selected];
+  if (sha256s.length === 0) return;
+  try {
+    let changed = 0;
+    for (const batch of batches(sha256s)) {
+      changed += (await post("/api/favorite", { sha256s: batch, favorite })).changed;
+    }
+    for (const photo of state.photos) {
+      if (!state.selected.has(photo.sha256)) continue;
+      photo.favorite = favorite;
+      updateTileFavorite(photo);
+    }
+    await loadAlbums();
+    toast(`${changed} photo${changed === 1 ? "" : "s"} ${favorite ? "added to" : "removed from"} Favorites`);
+    if (state.scope.favorite && !favorite) {
+      setSelecting(false);
+      resetPhotos();
+    }
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function bulkAlbum(album) {
+  const sha256s = [...state.selected];
+  if (sha256s.length === 0) return;
+  try {
+    let changed = 0;
+    for (const batch of batches(sha256s)) {
+      changed += (await post("/api/album-photos",
+        { album: album.id, sha256s: batch, member: true })).changed;
+    }
+    hideSelectAlbums();
+    toast(`${changed} photo${changed === 1 ? "" : "s"} added to “${album.name}”`);
+    await loadAlbums();
+  } catch (error) {
+    handle(error);
+  }
+}
+
+function toggleSelectAlbums() {
+  const box = $("select-albums");
+  if (!box.hidden) {
+    hideSelectAlbums();
+    return;
+  }
+  box.replaceChildren();
+  if (state.albums.length === 0) {
+    toast("Create an album from the sidebar first");
+    return;
+  }
+  for (const album of state.albums) {
+    const button = el("button", "ghost", album.name);
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    button.addEventListener("click", () => bulkAlbum(album));
+    box.append(button);
+  }
+  box.hidden = false;
+  $("select-album").setAttribute("aria-expanded", "true");
 }
 
 function keyRow(person) {
@@ -560,6 +694,15 @@ function wireBrowser() {
   $("album-new").addEventListener("click", newAlbum);
   $("album-rename").addEventListener("click", renameAlbum);
   $("album-delete").addEventListener("click", deleteAlbum);
+  $("select-mode").addEventListener("click", () => setSelecting(!state.selecting));
+  $("select-all").addEventListener("click", selectLoaded);
+  $("select-clear").addEventListener("click", clearSelected);
+  $("select-favorite").addEventListener("click", () => bulkFavorite(true));
+  $("select-unfavorite").addEventListener("click", () => bulkFavorite(false));
+  $("select-album").addEventListener("click", toggleSelectAlbums);
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest(".select-album-wrap")) hideSelectAlbums();
+  });
   $("scope-clear").addEventListener("click", () => {
     $("search").value = "";
     state.query = "";
@@ -782,12 +925,7 @@ async function toggleFavorite() {
     const result = await post("/api/favorite", { sha256: photo.sha256, favorite: !photo.favorite });
     photo.favorite = result.favorite;
     renderViewerCollections();
-    const button = document.querySelector(`.tile[data-index="${state.viewing}"]`);
-    if (button) {
-      const heart = button.querySelector(".heart");
-      if (photo.favorite && !heart) button.append(favoriteMark());
-      if (!photo.favorite && heart) heart.remove();
-    }
+    updateTileFavorite(photo);
     await loadAlbums();
     if (state.scope.favorite && !photo.favorite) {
       closeViewer();
@@ -936,6 +1074,7 @@ function wireStartup() {
 }
 
 function show(view) {
+  if (view !== "photos" && state.selecting) setSelecting(false);
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }

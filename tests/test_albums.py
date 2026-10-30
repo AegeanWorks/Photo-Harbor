@@ -57,6 +57,17 @@ class AlbumBookTest(unittest.TestCase):
             with self.assertRaises(HarborError):
                 action()
 
+    def test_bulk_membership_and_favorites_change_each_row_once(self):
+        album = self.book.create("main", "Batch")
+        self.assertEqual(self.book.add_many("main", album.id, [self.one, self.two], True), 2)
+        self.assertEqual(self.book.add_many("main", album.id, [self.one, self.two], True), 0)
+        self.assertEqual(self.book.summary("main")[1][0].count, 2)
+        self.assertEqual(self.book.favorite_many("main", [self.one, self.two], True), 2)
+        self.assertEqual(self.book.favorite_many("main", [self.one, self.two], True), 0)
+        self.assertEqual(self.book.summary("main")[0], 2)
+        self.assertEqual(self.book.favorite_many("main", [self.one], False), 1)
+        self.assertEqual(self.book.summary("main")[0], 1)
+
     def test_renaming_and_deleting_an_album_keeps_its_photos(self):
         album = self.book.create("main", "Old name")
         self.book.add("main", album.id, self.one, True)

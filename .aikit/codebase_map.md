@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `46`
 - **Total Classes**: `93`
-- **Total Top-Level Functions**: `75`
-- **Total Class Methods**: `343`
-- **Total Source Lines**: `5466`
+- **Total Top-Level Functions**: `76`
+- **Total Class Methods**: `348`
+- **Total Source Lines**: `5573`
 
 ---
 
@@ -72,7 +72,7 @@
 ### [`photo_harbor/albums.py`](photo_harbor/albums.py)
 > *Personal albums and favorites: named collections that never move or copy a file.*
 
-**Size**: `147` lines (`6684` bytes)
+**Size**: `164` lines (`7497` bytes)
 
 **Classes:**
 - `class AlbumBook` - *Albums belong to one person; favorites are that person's own mark on a photo.*
@@ -83,7 +83,9 @@
   - Method `.delete(profile, ident)`
   - Method `.owned(profile, ident)` - *Whether this person owns the album; a bad id is a 400, a missing one is False.*
   - Method `.add(profile, ident, sha256, member)` - *Put a photo in an album or take it out; True when the album changed.*
+  - Method `.add_many(profile, ident, sha256s, member)` - *Add or remove several photos in one lock; returns how many rows changed.*
   - Method `.favorite(profile, sha256, favorite)` - *Mark or unmark one photo for one person; True when the mark changed.*
+  - Method `.favorite_many(profile, sha256s, favorite)` - *Mark or unmark several photos in one lock; returns how many rows changed.*
   - Method `._owned(profile, album)`
 
 **Functions:**
@@ -95,7 +97,7 @@
 ### [`photo_harbor/albums_api.py`](photo_harbor/albums_api.py)
 > *Endpoints for personal albums and favorites; every write stays inside the caller's profile.*
 
-**Size**: `71` lines (`3063` bytes)
+**Size**: `106` lines (`4768` bytes)
 
 **Classes:**
 - `class AlbumsApi`
@@ -107,7 +109,8 @@
   - Method `.favorite(request)`
 
 **Functions:**
-- `def _photo(request, catalog, value)`
+- `def _named(body)` - *The hashes in ``sha256`` or ``sha256s``, de-duplicated and bounded.*
+- `def _photos(request, catalog, body)` - *Validate every named photo before any write, so a batch is all or nothing.*
 - `def _flag(body, name)`
 
 ---
@@ -221,14 +224,15 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `161` lines (`7685` bytes)
+**Size**: `175` lines (`8256` bytes)
 
 **Classes:**
 - `class Catalog`
   - Method `.__init__(db)`
   - Method `.add(record)` - *Insert ``record``; False when its hash is already catalogued. A path another record*
   - Method `.get(sha256)`
-  - Method `.has_copy(profile, sha256)` - *Whether ``profile``'s folder holds this photo, so it is theirs to see.*
+  - Method `.known(sha256s)` - *The hashes in ``sha256s`` that the catalog holds, in one query.*
+  - Method `.copies_of(profile, sha256s)` - *The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query.*
   - Method `.page(offset, limit, narrow)` - *Records newest first by taken time, falling back to received time.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
@@ -722,7 +726,7 @@
 ---
 
 ### [`tests/test_albums.py`](tests/test_albums.py)
-**Size**: `101` lines (`5253` bytes)
+**Size**: `112` lines (`6004` bytes)
 
 **Classes:**
 - `class AlbumBookTest`
@@ -731,6 +735,7 @@
   - Method `.test_favorites_are_private_to_the_person_who_marked_them()`
   - Method `.test_album_names_are_cleaned_and_unique_per_person()`
   - Method `.test_a_person_cannot_touch_another_persons_album()`
+  - Method `.test_bulk_membership_and_favorites_change_each_row_once()`
   - Method `.test_renaming_and_deleting_an_album_keeps_its_photos()`
 - `class CollectionMigrationTest`
   - Method `.test_a_format_4_catalog_gains_collections_and_keeps_its_photos()`
@@ -768,7 +773,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `371` lines (`20204` bytes)
+**Size**: `401` lines (`22148` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -807,6 +812,7 @@
   - Method `.test_last_day_counts_follow_the_signed_in_person()`
   - Method `.test_the_owner_can_reset_a_password_and_a_key_still_signs_in()`
   - Method `.test_albums_and_favorites_page_the_photos_they_hold()`
+  - Method `.test_bulk_selection_writes_a_validated_batch()`
   - Method `.test_albums_and_favorites_never_cross_people()`
 
 ---
