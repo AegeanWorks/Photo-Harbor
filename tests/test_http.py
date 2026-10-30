@@ -117,7 +117,7 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(response.getheader("Content-Type"),
                          "application/vnd.android.package-archive")
         self.assertEqual(body, b"fake apk")
-        (self.android_dir / "Harbor.apk").unlink()
+        self.app.android_dir = self.android_dir / "removed"
         response, _ = self.call("GET", "/android/Harbor.apk", key=False)
         self.assertEqual(response.status, 404)
 

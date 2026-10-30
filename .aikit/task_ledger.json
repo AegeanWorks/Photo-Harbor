@@ -1,49 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "android-client",
+    "task_id": "android-share",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793375744.948355,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793376345.1698077,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": [],
-    "completed_at": 1793375783.5401206
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "album-cover",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] /api/albums/<id> {cover: sha256|null}; viewer Use as cover; HTTP test for chosen cover, fallback and refusal; browser dogfood rail cover switched to the opened photo, 0 JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793372191.5255451,
-      "timestamp_str": "2026-10-30 17:56:31",
-      "agent": "opencode:cover"
-    },
-    {
-      "task_id": "album-cover",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] 142 tests; 4/4 project gates; README/API/format; ADR-020; codebase map regenerated; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793372191.8631063,
-      "timestamp_str": "2026-10-30 17:56:31",
-      "agent": "opencode:cover"
-    },
-    {
-      "task_id": "album-cover",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'album-cover' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793372231.6816208,
-      "timestamp_str": "2026-10-30 17:57:11",
-      "agent": "opencode:cover"
-    },
     {
       "task_id": "select-matching",
       "phase": "phase 2",
@@ -249,6 +216,45 @@
       "status": "completed",
       "timestamp": 1793375783.540122,
       "timestamp_str": "2026-10-30 18:56:23",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-share",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Plan: Android share target for one or many images/videos; reuse hash-first /api/has + /api/upload; settings screen Test connection against /api/status; build, sign and serve the updated APK; README/ADR-025",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793375919.3879755,
+      "timestamp_str": "2026-10-30 18:58:39",
+      "agent": "opencode:android",
+      "impact_assessment": {
+        "why": "Android users can schedule a sync but cannot send a chosen photo from Gallery without opening Harbor first",
+        "benefits": "One share action uploads selected photos with the same verified protocol; connection test catches a wrong address or key before a sync",
+        "risks": "contract: new exported ShareActivity and intent filters; dependency: none; concurrency: share upload and background job can overlap but each file is hash-checked; state: no new persistence",
+        "mitigation": "Use the same hash-before-upload path, skip already-present files, keep a simple status screen, and rebuild/sign/verify the APK"
+      }
+    },
+    {
+      "task_id": "android-share",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Exported ShareActivity for SEND/SEND_MULTIPLE image/video; metadata fallback, SHA-256 -> /api/has -> /api/upload, skips present files; Test calls /api/status; rebuilt signed APK 57,814 bytes with ShareActivity filters",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793376344.3918943,
+      "timestamp_str": "2026-10-30 19:05:44",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-share",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] README/android README/ADR-025; server APK byte-identical after rebuild; 151 tests stable across 4 runs; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793376345.1698077,
+      "timestamp_str": "2026-10-30 19:05:45",
       "agent": "opencode:android"
     }
   ]

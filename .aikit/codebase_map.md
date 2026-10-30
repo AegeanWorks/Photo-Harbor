@@ -965,7 +965,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `619` lines (`35047` bytes)
+**Size**: `619` lines (`35056` bytes)
 
 **Classes:**
 - `class _NoPreviews`

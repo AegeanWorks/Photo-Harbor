@@ -9,6 +9,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 
 import org.json.JSONObject;
 
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 /** Uploads new MediaStore items with the same hash-first protocol as the iPhone Shortcut. */
 public final class SyncEngine {
@@ -61,6 +63,94 @@ public final class SyncEngine {
                     "{\"started_at\":" + JSONObject.quote(startedAt) + "}");
             return "Done: " + sent + " sent, " + skipped + " already on the PC.";
         }
+    }
+
+    public static String test(String server, String key) throws Exception {
+        JSONObject status = new JSONObject(get(normalise(server) + "/api/status", key));
+        return "Connected: " + status.optInt("count", 0) + " photos on the PC.";
+    }
+
+    public static String share(Context context, List<Uri> uris, String server, String key,
+                               Progress progress) throws Exception {
+        String base = normalise(server);
+        ContentResolver resolver = context.getContentResolver();
+        int sent = 0;
+        int skipped = 0;
+        for (Uri uri : uris) {
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedException("share stopped");
+            }
+            Info info = info(resolver, uri);
+            if (info.size <= 0) {
+                skipped++;
+                continue;
+            }
+            progress.say("Checking " + info.name + "…");
+            String digest = hash(resolver, uri);
+            if (has(base, key, digest)) {
+                skipped++;
+                continue;
+            }
+            progress.say("Sending " + info.name + "…");
+            upload(resolver, uri, info.size, info.name, digest, info.taken, base, key);
+            sent++;
+        }
+        return "Sent " + sent + ", " + skipped + " already on the PC.";
+    }
+
+    private static final class Info {
+        final String name;
+        final long size;
+        final long taken;
+
+        Info(String name, long size, long taken) {
+            this.name = name;
+            this.size = size;
+            this.taken = taken;
+        }
+    }
+
+    private static Info info(ContentResolver resolver, Uri uri) {
+        String name = uri.getLastPathSegment() == null ? "photo" : uri.getLastPathSegment();
+        long size = -1;
+        long taken = 0;
+        long added = 0;
+        String[] projection = {OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE,
+                "datetaken", "date_added"};
+        try (Cursor cursor = resolver.query(uri, projection, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int nameColumn = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                int sizeColumn = cursor.getColumnIndex(OpenableColumns.SIZE);
+                int takenColumn = cursor.getColumnIndex("datetaken");
+                int addedColumn = cursor.getColumnIndex("date_added");
+                if (nameColumn >= 0 && cursor.getString(nameColumn) != null) {
+                    name = cursor.getString(nameColumn);
+                }
+                if (sizeColumn >= 0) {
+                    size = cursor.getLong(sizeColumn);
+                }
+                if (takenColumn >= 0) {
+                    taken = cursor.getLong(takenColumn);
+                }
+                if (addedColumn >= 0) {
+                    added = cursor.getLong(addedColumn);
+                }
+            }
+        } catch (Exception ignored) {
+            // A share provider may not expose metadata; fall back to the URI and length.
+        }
+        if (size <= 0) {
+            try (android.content.res.AssetFileDescriptor descriptor =
+                         resolver.openAssetFileDescriptor(uri, "r")) {
+                if (descriptor != null) {
+                    size = descriptor.getLength();
+                }
+            } catch (Exception ignored) {
+                // Leave the size unknown; the caller skips it.
+            }
+        }
+        long stamp = taken > 0 ? taken : (added > 0 ? added * 1000L : System.currentTimeMillis());
+        return new Info(name, size, stamp);
     }
 
     private static int[] syncCollection(Context context, Uri collection, String base, String key,

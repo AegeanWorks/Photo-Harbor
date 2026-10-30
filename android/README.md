@@ -32,8 +32,15 @@ key. The keystore is deliberately outside the repository.
 2. Download `Harbor.apk` and allow installation from this browser when Android asks.
 3. In Harbor, copy the person's key from the window or Setup → Server and keys.
 4. In the app, enter the server address (e.g. `http://192.168.1.10:8642`) and the key.
-5. Press **Sync now**. The first sync sends photos and videos newer than the last finished
-   sync. A background schedule (Wi-Fi only, every 6 hours) is optional.
+5. Press **Test** to check the address and key, then **Sync now**. The first sync sends photos
+   and videos newer than the last finished sync. A background schedule (Wi-Fi only, every
+   6 hours) is optional.
+
+## Share from another app
+
+Harbor appears in Android's share sheet for images and videos. Select one or more items in
+Gallery (or any app with a share action), choose **Harbor**, and the app uploads them with the
+same hash-first protocol. The first share requires the server and key to be saved in Harbor.
 
 The app uses the same endpoints as the iPhone: `/api/sync/start`, `/api/has`, `/api/upload`,
 `/api/sync/done`. Every upload carries the phone's SHA-256; the PC keeps it only on a match.

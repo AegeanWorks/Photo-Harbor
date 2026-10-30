@@ -101,6 +101,16 @@ public class MainActivity extends Activity {
             }
         });
         buttons.addView(syncButton);
+
+        final Button test = new Button(this);
+        test.setText("Test");
+        test.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                testConnection(test);
+            }
+        });
+        buttons.addView(test);
         form.addView(buttons);
 
         status = new TextView(this);
@@ -161,6 +171,34 @@ public class MainActivity extends Activity {
         if (syncNow) {
             startSync();
         }
+    }
+
+    private void testConnection(final Button button) {
+        final String address = server.getText().toString().trim();
+        final String accessKey = key.getText().toString().trim();
+        if (address.isEmpty() || accessKey.isEmpty()) {
+            status.setText("Enter the server address and your key first.");
+            return;
+        }
+        button.setEnabled(false);
+        status.setText("Testing…");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    show(SyncEngine.test(address, accessKey));
+                } catch (final Exception error) {
+                    show("Connection failed: " + error.getMessage());
+                } finally {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            button.setEnabled(true);
+                        }
+                    });
+                }
+            }
+        }, "harbor-test").start();
     }
 
     private void startSync() {

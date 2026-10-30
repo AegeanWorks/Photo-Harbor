@@ -498,3 +498,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   AndroidX, so its UI is intentionally plain and its sync is a single foreground/background
   pass rather than a system media observer. The APK is built only when the SDK is present; the
   served binary is committed so a normal server install needs no Android toolchain.
+
+### ADR-025: Android share sheet uploads chosen items directly
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Scheduled sync handles new media, but sending one photo from Gallery meant opening
+  Harbor first; a wrong address or key was only discovered after a long sync started.
+- **Decision**: Add an exported `ShareActivity` with `ACTION_SEND` and `ACTION_SEND_MULTIPLE`
+  filters for `image/*` and `video/*`. It reads the granted content URIs, queries display name,
+  size and capture/added time, then runs the same SHA-256 → `/api/has` → `/api/upload` path
+  without starting or finishing a sync journal entry. A shared item is skipped when the PC
+  already has it. The settings screen gains **Test**, which calls `/api/status` with the saved
+  key and reports the library count. No new permission or persistence is added.
+- **Consequences**: A share upload does not advance the journal's last-sync time, so the next
+  scheduled sync still checks recent media (hash checks make this cheap). Share metadata can be
+  missing on unusual providers; the app falls back to the URI name, asset length and the current
+  time, and skips a file whose size cannot be determined. Both the share activity and the
+  background job rely on the same hash check, so concurrent uploads cannot store a file twice.

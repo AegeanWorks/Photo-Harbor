@@ -81,8 +81,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   **Setup** tab lists every action, with the server address and key ready to copy.
 - **Android app too.** A small native Android 8+ client can be installed from
   `http://<pc>:8642/android/`; it sends new photos and videos with the same hash-first protocol,
-  keeps the phone's copy, and can run every 6 hours on Wi-Fi. The **APK** is served by Harbor
-  itself; **Setup → Android phone** links to the install page. Build it with
+  keeps the phone's copy, can run every 6 hours on Wi-Fi, and appears in Android's share sheet
+  for chosen photos. **Test** checks the address and key before a sync. The **APK** is served by
+  Harbor itself; **Setup → Android phone** links to the install page. Build it with
   `python android/build.py` (JDK 17 and Android SDK 34 at build time only).
 - **Automatic on home Wi-Fi.** Automations run *Harbor Sync* when the phone joins the home
   network and when it is plugged in. The Shortcut stops at once on any other network.
