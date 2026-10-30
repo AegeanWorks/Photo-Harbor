@@ -7,6 +7,7 @@ from typing import Callable
 
 from .albums import AlbumBook
 from .catalog import Catalog
+from .details import read_details
 from .errors import HarborError
 from .journal import SyncJournal
 from .messages import Reply, Request, json_reply
@@ -128,6 +129,14 @@ class LibraryApi:
         usage = shutil.disk_usage(self._store.root)
         return {"free": usage.free, "total": usage.total,
                 "low": usage.free < max(LOW_DISK_BYTES, usage.total * LOW_DISK_SHARE)}
+
+    def details(self, request: Request, sha256: str) -> Reply:
+        found = self._store.locate(normalise_sha(sha256) or "",
+                                   None if request.owner else request.profile)
+        if found is None:
+            raise _not_found(sha256)
+        path, record = found
+        return json_reply(read_details(record, path))
 
     def media(self, request: Request, sha256: str) -> Reply:
         found = self._store.locate(normalise_sha(sha256) or "",

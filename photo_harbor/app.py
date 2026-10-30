@@ -109,6 +109,7 @@ class HarborApp:
         add("POST", "/api/albums/", albums.update)
         add("POST", "/api/album-photos", albums.membership)
         add("POST", "/api/favorite", albums.favorite)
+        add("GET", "/api/details/", library.details)
         add("GET", "/media/", library.media)
         add("GET", "/thumb/", library.thumb)
 

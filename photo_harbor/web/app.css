@@ -196,6 +196,7 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 }
 .viewer-meta #viewer-detail { color: #a9a59d; }
 .viewer-meta .ghost { color: #f2efe9; border-color: #444; }
+.viewer-meta .ghost:hover, .viewer-albums .ghost:hover { background: rgba(255, 255, 255, .12); }
 .viewer-close, .viewer-nav {
   position: absolute; border: 0; background: rgba(255, 255, 255, .08); color: #f2efe9;
   border-radius: 50%; width: 42px; height: 42px; font-size: 22px; line-height: 1;
@@ -214,6 +215,18 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 }
 .viewer-albums[hidden] { display: none; }
 .viewer-albums .ghost { color: #f2efe9; border-color: #444; text-align: left; }
+.viewer-details {
+  position: fixed; right: 16px; bottom: calc(env(safe-area-inset-bottom) + 64px);
+  width: min(320px, calc(100vw - 32px)); max-height: 60vh; overflow: auto; padding: 14px 16px;
+  background: #1b1c1f; border: 1px solid #333; border-radius: 10px; color: #f2efe9;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .4); z-index: 2;
+}
+.viewer-details[hidden] { display: none; }
+.viewer-details dl {
+  display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 13px;
+}
+.viewer-details dt { color: #a9a59d; }
+.viewer-details dd { margin: 0; overflow-wrap: anywhere; }
 #viewer:not([hidden]) ~ #toast { bottom: calc(env(safe-area-inset-bottom) + 78px); }
 
 .toast {

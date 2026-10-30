@@ -1,6 +1,5 @@
 """Small JPEG previews, made only when the optional Pillow (and pillow-heif for HEIC) is installed."""
 
-import importlib.util
 import io
 import queue
 import threading
@@ -8,27 +7,15 @@ from pathlib import Path
 from typing import Optional
 
 from .atomic_file import write_atomic
+from .pillow_support import load_pillow
 from .records import PhotoRecord
 
 EDGE = 480
 QUALITY = 82
 
 
-def _load_pillow():
-    """Pillow's Image and ImageOps modules, or None without Pillow. HEIC opens only when
-    pillow-heif is installed too; without it HEIC previews fail and the gallery falls back."""
-    try:
-        from PIL import Image, ImageOps
-    except ImportError:
-        return None
-    if importlib.util.find_spec("pillow_heif") is not None:
-        from pillow_heif import register_heif_opener
-        register_heif_opener()
-    return Image, ImageOps
-
-
 class Thumbnailer:
-    def __init__(self, cache_dir: Path, pillow=_load_pillow) -> None:
+    def __init__(self, cache_dir: Path, pillow=load_pillow) -> None:
         self._cache = cache_dir
         self._pillow = pillow()
         self._lock = threading.Lock()

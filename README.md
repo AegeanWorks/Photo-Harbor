@@ -10,7 +10,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
-- **Runtime Prerequisites**: Python 3.10 or newer (standard library only). Optional: `pip install pillow pillow-heif` for HEIC thumbnails in every browser.
+- **Runtime Prerequisites**: Python 3.10 or newer (standard library only). Optional: `pip install pillow pillow-heif` for HEIC thumbnails and camera details.
 - **Canonical Regression Shield Gate**:
   ```bash
   python -m unittest discover -s tests -t .
@@ -108,6 +108,10 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Collect many at once.** Press **Select** in the gallery, tap the photos you want, then
   **♥ Favorite**, **♡ Unfavorite** or **Add to album…** in the selection bar. **Select all loaded**
   takes the page in view; **Clear** empties the selection. Up to 500 photos go in one request.
+- **Details on demand.** **Details** in the viewer shows the file type, size, capture and added
+  dates, and pixel dimensions. With Pillow installed it also reads the camera make and model,
+  lens, exposure time, aperture, ISO and focal length. Videos show file facts only, and a file
+  with unreadable EXIF still opens with the facts Harbor knows.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -148,6 +152,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/photos?offset=&limit=[&month=YYYY-MM&kind=photo\|video&q=name&profile=id&favorite=1&album=ID]` | gallery page, newest first; non-owners always get their own |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
+| `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
 | `GET /media/<sha256>`, `GET /thumb/<sha256>` | original (with byte ranges) and JPEG preview |
 
 ## 📦 What's Inside
@@ -181,6 +186,7 @@ photo-harbor/
 │   ├── config.py             <- settings file with the library key
 │   ├── control_panel.py      <- the Harbor window (tkinter)
 │   ├── database.py           <- SQLite file and its format version
+│   ├── details.py            <- file facts and optional EXIF for the Details panel
 │   ├── errors.py             <- the Error/Why/Fix triad
 │   ├── exif_dates.py         <- capture date from EXIF, when Pillow is installed
 │   ├── http_server.py        <- HTTP handling, byte ranges, security headers
@@ -190,6 +196,7 @@ photo-harbor/
 │   ├── library_api.py        <- status, month outline, filtered photo list, originals, previews
 │   ├── messages.py           <- Request and Reply values, Range parsing
 │   ├── naming.py             <- safe file names, month folders, media types
+│   ├── pillow_support.py     <- optional Pillow and HEIC loading in one place
 │   ├── profiles.py           <- people, folder ids and keys
 │   ├── profiles_api.py       <- list, add, rename and re-key people
 │   ├── records.py            <- frozen value objects
@@ -205,6 +212,7 @@ photo-harbor/
     ├── __init__.py
     ├── library_fixture.py    <- a throwaway library for tests
     ├── test_albums.py        <- personal albums, favorites and format 5 migration
+    ├── test_details.py       <- file facts and optional EXIF details
     ├── test_http.py          <- the server over a real socket
     ├── test_naming.py
     ├── test_folders.py

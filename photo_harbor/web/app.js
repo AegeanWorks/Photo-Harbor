@@ -903,6 +903,7 @@ function openViewer(index) {
   $("viewer-prev").disabled = index === 0;
   $("viewer-next").disabled = index === state.photos.length - 1 && state.next === null;
   renderViewerCollections();
+  hideDetails();
   $("viewer").hidden = false;
   document.body.style.overflow = "hidden";
 }
@@ -916,6 +917,58 @@ function renderViewerCollections() {
   $("viewer-album-remove").hidden = !photo || !state.scope.album;
   $("viewer-albums").hidden = true;
   $("viewer-albums").replaceChildren();
+}
+
+function hideDetails() {
+  $("viewer-details").hidden = true;
+  $("viewer-details").replaceChildren();
+  $("viewer-info").textContent = "Details";
+  $("viewer-info").setAttribute("aria-expanded", "false");
+}
+
+function renderDetails(details) {
+  const rows = [
+    ["File", details.name],
+    ["Type", details.type],
+    ["Size", bytes(details.size)],
+    ["Taken", details.taken ? timeFormat.format(parseTime(details.taken)) : "Not recorded"],
+    ["Added", details.received ? timeFormat.format(parseTime(details.received)) : null],
+    ["Dimensions", details.width && details.height ? `${details.width} × ${details.height}` : null],
+    ["Camera", details.camera],
+    ["Lens", details.lens],
+    ["Exposure", details.exposure],
+    ["Aperture", details.aperture],
+    ["ISO", details.iso],
+    ["Focal length", details.focal_length],
+  ];
+  const list = el("dl");
+  for (const [label, value] of rows) {
+    if (value === null || value === undefined || value === "") continue;
+    list.append(el("dt", "", label), el("dd", "", String(value)));
+  }
+  $("viewer-details").replaceChildren(list);
+}
+
+async function toggleDetails() {
+  const box = $("viewer-details");
+  if (!box.hidden) {
+    hideDetails();
+    return;
+  }
+  const photo = state.photos[state.viewing];
+  if (!photo) return;
+  try {
+    const details = await api(`/api/details/${photo.sha256}`);
+    renderDetails(details);
+    $("viewer-albums").hidden = true;
+    $("viewer-albums").replaceChildren();
+    $("viewer-album-add").setAttribute("aria-expanded", "false");
+    box.hidden = false;
+    $("viewer-info").textContent = "Hide details";
+    $("viewer-info").setAttribute("aria-expanded", "true");
+  } catch (error) {
+    handle(error);
+  }
 }
 
 async function toggleFavorite() {
@@ -943,6 +996,7 @@ function toggleAlbumMenu() {
     box.hidden = true;
     return;
   }
+  hideDetails();
   const photo = state.photos[state.viewing];
   if (!photo) return;
   box.replaceChildren();
@@ -982,6 +1036,7 @@ async function removeFromAlbum() {
 }
 
 function closeViewer() {
+  hideDetails();
   $("viewer").hidden = true;
   $("viewer-stage").replaceChildren();
   document.body.style.overflow = "";
@@ -1002,6 +1057,7 @@ function wireViewer() {
   $("viewer-favorite").addEventListener("click", toggleFavorite);
   $("viewer-album-add").addEventListener("click", toggleAlbumMenu);
   $("viewer-album-remove").addEventListener("click", removeFromAlbum);
+  $("viewer-info").addEventListener("click", toggleDetails);
   document.addEventListener("keydown", (event) => {
     if (state.viewing < 0) return;
     if (event.key === "Escape") closeViewer();
@@ -1009,6 +1065,8 @@ function wireViewer() {
     if (event.key === "ArrowRight") step(1);
     if (event.key.toLowerCase() === "f" && !event.ctrlKey && !event.metaKey && !event.altKey
       && event.target.tagName !== "BUTTON") toggleFavorite();
+    if (event.key.toLowerCase() === "i" && !event.ctrlKey && !event.metaKey && !event.altKey
+      && event.target.tagName !== "BUTTON") toggleDetails();
   });
   let startX = null;
   const stage = $("viewer-stage");

@@ -1,8 +1,9 @@
 """The capture time stored inside a photo, for uploads that arrive without one (browser uploads)."""
 
-import importlib.util
 from pathlib import Path
 from typing import Optional
+
+from .pillow_support import load_image
 
 DATETIME_ORIGINAL = 0x9003
 EXIF_IFD = 0x8769
@@ -11,12 +12,9 @@ DATETIME = 0x0132
 
 def read_taken(path: Path) -> Optional[str]:
     """``YYYY-MM-DDTHH:MM:SS`` from EXIF DateTimeOriginal, or None without Pillow or a date."""
-    if importlib.util.find_spec("PIL") is None:
+    Image = load_image()
+    if Image is None:
         return None
-    from PIL import Image
-    if importlib.util.find_spec("pillow_heif") is not None:
-        from pillow_heif import register_heif_opener
-        register_heif_opener()
     try:
         # hygiene: allow Pillow's Image.open reads binary image data, not text
         with Image.open(path) as image:

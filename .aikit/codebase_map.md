@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `46`
-- **Total Classes**: `93`
-- **Total Top-Level Functions**: `76`
-- **Total Class Methods**: `348`
-- **Total Source Lines**: `5573`
+- **Total Python Modules**: `49`
+- **Total Classes**: `94`
+- **Total Top-Level Functions**: `85`
+- **Total Class Methods**: `354`
+- **Total Source Lines**: `5785`
 
 ---
 
@@ -118,7 +118,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `119` lines (`5411` bytes)
+**Size**: `120` lines (`5464` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -335,6 +335,22 @@
 
 ---
 
+### [`photo_harbor/details.py`](photo_harbor/details.py)
+> *File and camera facts for one original, read on demand without touching the catalog.*
+
+**Size**: `110` lines (`3177` bytes)
+
+**Functions:**
+- `def _text(value)`
+- `def _exposure(value)`
+- `def _aperture(value)`
+- `def _focal(value)`
+- `def _iso(value)`
+- `def _camera(make, model)`
+- `def read_details(record, path)` - *File facts always; width, height and EXIF fields when Pillow can read them.*
+
+---
+
 ### [`photo_harbor/errors.py`](photo_harbor/errors.py)
 > *The one error type photo-harbor raises for problems a person can fix.*
 
@@ -351,7 +367,7 @@
 ### [`photo_harbor/exif_dates.py`](photo_harbor/exif_dates.py)
 > *The capture time stored inside a photo, for uploads that arrive without one (browser uploads).*
 
-**Size**: `29` lines (`1127` bytes)
+**Size**: `27` lines (`974` bytes)
 
 **Functions:**
 - `def read_taken(path)` - *``YYYY-MM-DDTHH:MM:SS`` from EXIF DateTimeOriginal, or None without Pillow or a date.*
@@ -441,7 +457,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `151` lines (`7214` bytes)
+**Size**: `160` lines (`7601` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -450,6 +466,7 @@
   - Method `.photos(request)`
   - Method `.outline(request)` - *Months with photos, newest first, for the browser sidebar.*
   - Method `._disk()`
+  - Method `.details(request, sha256)`
   - Method `.media(request, sha256)`
   - Method `.thumb(request, sha256)`
 
@@ -495,6 +512,17 @@
 - `def month_folder(moment)` - *``2026/2026-10``: the year to browse by, then a month folder that sorts and reads alone.*
 - `def folder_name(name)` - *A person's folder as they would name it, made safe for Windows: ``Ayşe`` stays ``Ayşe``.*
 - `def media_type(name)`
+
+---
+
+### [`photo_harbor/pillow_support.py`](photo_harbor/pillow_support.py)
+> *Optional Pillow loading, with HEIC support when pillow-heif is installed.*
+
+**Size**: `24` lines (`715` bytes)
+
+**Functions:**
+- `def load_image()` - *Pillow's ``Image`` module, or None when Pillow is not installed.*
+- `def load_pillow()` - *``(Image, ImageOps)``, or None when Pillow is not installed.*
 
 ---
 
@@ -685,7 +713,7 @@
 ### [`photo_harbor/thumbs.py`](photo_harbor/thumbs.py)
 > *Small JPEG previews, made only when the optional Pillow (and pillow-heif for HEIC) is installed.*
 
-**Size**: `114` lines (`4154` bytes)
+**Size**: `101` lines (`3701` bytes)
 
 **Classes:**
 - `class Thumbnailer`
@@ -699,9 +727,6 @@
   - Method `.stop()`
   - Method `._warm(record)`
   - Method `._run()`
-
-**Functions:**
-- `def _load_pillow()` - *Pillow's Image and ImageOps modules, or None without Pillow. HEIC opens only when*
 
 ---
 
@@ -743,6 +768,21 @@
 
 ---
 
+### [`tests/test_details.py`](tests/test_details.py)
+**Size**: `62` lines (`2558` bytes)
+
+**Classes:**
+- `class DetailsTest`
+  - Method `.setUp()`
+  - Method `.test_file_facts_survive_an_unreadable_image()`
+  - Method `.test_a_video_has_no_image_facts()`
+  - Method `.test_pillow_reads_dimensions_and_camera_tags()`
+
+**Functions:**
+- `def record_for(path, name, media_type)`
+
+---
+
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
@@ -773,7 +813,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `401` lines (`22148` bytes)
+**Size**: `422` lines (`23438` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -792,6 +832,7 @@
   - Method `.test_a_mismatched_hash_is_rejected_and_counted()`
   - Method `.test_calls_without_the_key_are_refused_but_the_page_loads()`
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
+  - Method `.test_photo_details_are_visible_only_with_the_photo()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
   - Method `.test_photos_lists_newest_first_with_paging()`
   - Method `.test_a_chunked_upload_is_accepted()`

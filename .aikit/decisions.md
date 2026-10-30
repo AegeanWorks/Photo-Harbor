@@ -265,3 +265,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   selection stops at the first failed chunk. Selection is client-only and never persisted; a
   filter, person switch or tab change clears it. Single-hash callers keep the old request shape,
   and `changed` now reports the number of rows changed rather than a boolean.
+
+### ADR-012: Details are read on demand, never indexed
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The viewer showed only the file name, date and size, although originals carry
+  dimensions and camera settings. Copying every EXIF tag into SQLite would add a migration and a
+  second source of truth for data that changes only when the file does.
+- **Decision**: `details.py` reads the requested original when the viewer asks. File facts (name,
+  type, size, capture and added dates) are always returned; with Pillow, `Image.open` supplies
+  pixel dimensions and curated EXIF fields (make, model, lens, exposure, aperture, ISO, focal
+  length). GPS and free-form tags are deliberately not exposed. `GET /api/details/<sha256>` uses
+  the same visibility rule as `/media`, so a non-owner sees only their own copy. Pillow and
+  pillow-heif loading moves into `pillow_support.py`, shared with previews and date extraction.
+- **Consequences**: Each Details open reads one file and holds no cache, so a very large image
+  costs one decode to read its header while the catalog stays untouched. A malformed or
+  unsupported file still returns the facts Harbor already knows, and videos return file facts
+  only. A future GPS or histogram feature would need a deliberate new decision rather than an
+  accidental field.

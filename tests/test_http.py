@@ -114,6 +114,27 @@ class ServerTest(unittest.TestCase):
         response, _ = self.call("GET", "/api/status", headers={"Cookie": cookie}, key=False)
         self.assertEqual(response.status, 200)
 
+    def test_photo_details_are_visible_only_with_the_photo(self):
+        self.upload(b"one", name="one.jpg")
+        response, body = self.call("GET", f"/api/details/{sha(b'one')}")
+        details = json.loads(body)
+        self.assertEqual((response.status, details["name"], details["type"]),
+                         (200, "one.jpg", "image/jpeg"))
+        self.assertIsNone(details["width"])
+        response, _ = self.call("GET", f"/api/details/{sha(b'missing')}")
+        self.assertEqual(response.status, 404)
+        ayse = self.add_person()
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
+        as_her = {"Cookie": response.getheader("Set-Cookie").split(";", 1)[0]}
+        response, _ = self.call("GET", f"/api/details/{sha(b'one')}", key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, body = self.call("GET", f"/api/details/{sha(b'hers')}", key=False,
+                                   headers=as_her)
+        self.assertEqual((response.status, json.loads(body)["name"]), (200, "hers.jpg"))
+
     def test_media_serves_ranges_for_video_scrubbing(self):
         self.upload(b"0123456789", name="clip.MOV")
         response, body = self.call("GET", f"/media/{sha(b'0123456789')}", headers={"Range": "bytes=2-4"})
