@@ -34,6 +34,8 @@ def _parser() -> argparse.ArgumentParser:
     importer.add_argument("--profile", default="main", help="whose photos they are (default: main)")
     backup = commands.add_parser("backup", help="copy originals to another drive once")
     backup.add_argument("--to", type=Path, required=True, help="backup folder")
+    backup.add_argument("--check", action="store_true",
+                        help="re-hash every copied file instead of copying")
     return parser
 
 
@@ -110,8 +112,17 @@ def main(argv=None) -> int:
             print(settings.key)
             return 0
         if args.command == "backup":
-            from .backup import mirror
-            report = mirror(library, args.to.expanduser().resolve())
+            from .backup import mirror, verify
+            target = args.to.expanduser().resolve()
+            if args.check:
+                report = verify(library, target)
+                print(f"Checked {report.checked} files ({report.bytes_checked} bytes); "
+                      f"{report.missing} missing, {report.different} different, "
+                      f"{report.extra} extra in the backup.")
+                for rel, kind in report.problems:
+                    print(f"  {kind}: {rel}")
+                return 0 if report.ok else 1
+            report = mirror(library, target)
             print(f"Copied {report.copied} ({report.bytes_copied} bytes); "
                   f"{report.unchanged} already backed up.")
             return 0

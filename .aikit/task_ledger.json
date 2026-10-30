@@ -1,60 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "album-polish",
+    "task_id": "backup-verify",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793363147.1285903,
-    "owner": "opencode:polish",
-    "started_by": "opencode:polish",
-    "continuations": [],
-    "completed_at": 1793363178.2936444
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793363509.0995252,
+    "owner": "opencode:backup",
+    "started_by": "opencode:backup",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "photo-details",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] details.py returns file facts always and dimensions/EXIF with Pillow; pillow_support.py now centralizes optional Pillow+HEIC loading for previews, dates and details; 3 unit tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793356987.4092302,
-      "timestamp_str": "2026-10-30 13:43:07",
-      "agent": "opencode:details"
-    },
-    {
-      "task_id": "photo-details",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] GET /api/details/<sha> follows media visibility; viewer Details panel shows file facts, dates, dimensions, camera, lens, exposure, aperture, ISO and focal length; browser dogfood verified a 20x10 JPEG with Acme EXIF, 0 JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793356987.7561002,
-      "timestamp_str": "2026-10-30 13:43:07",
-      "agent": "opencode:details"
-    },
-    {
-      "task_id": "photo-details",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] 114 tests; 4/4 project gates; README prerequisites, how-it-works and API; ADR-012; codebase map regenerated; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793356988.2323177,
-      "timestamp_str": "2026-10-30 13:43:08",
-      "agent": "opencode:details"
-    },
-    {
-      "task_id": "photo-details",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'photo-details' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793357027.1453865,
-      "timestamp_str": "2026-10-30 13:43:47",
-      "agent": "opencode:details"
-    },
     {
       "task_id": "bulk-download",
       "phase": "phase 2",
@@ -245,6 +201,56 @@
       "timestamp": 1793363178.2936459,
       "timestamp_str": "2026-10-30 15:26:18",
       "agent": "opencode:polish"
+    },
+    {
+      "task_id": "backup-verify",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: backup.verify hashes every source file against its copy and reports missing/different/extra; python -m photo_harbor backup --to DIR --check exits 1 on problems; Harbor window Check backup runs it in a thread; tests, README, ADR-016",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363311.0662975,
+      "timestamp_str": "2026-10-30 15:28:31",
+      "agent": "opencode:backup",
+      "impact_assessment": {
+        "why": "Mirroring only compares sizes; a silent bit-rot or truncation on the backup drive is invisible, and the user has no way to know the second copy is good",
+        "benefits": "A real integrity check with a clear report; no server dependency, no schema change, and no writes to either drive",
+        "risks": "contract: new --check flag and window button; dependency: hashlib only; concurrency: read-only walk while backup may run; state: none persisted",
+        "mitigation": "Skip dot folders like mirror does, stream hashes in 1 MB blocks, cap the printed problem list while counting every file, and run the window check on a background thread"
+      }
+    },
+    {
+      "task_id": "backup-verify",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] backup.verify streams SHA-256 over every visible source and backup file, reports missing/different/extra and caps the problem list; 2 new unit tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363506.6419315,
+      "timestamp_str": "2026-10-30 15:31:46",
+      "agent": "opencode:backup"
+    },
+    {
+      "task_id": "backup-verify",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] CLI backup --check prints the report and exits 1 on damage; Harbor window Check backup runs it on a background thread and re-enables itself; manual temp run verified clean 0 and damaged 1",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363507.9251952,
+      "timestamp_str": "2026-10-30 15:31:47",
+      "agent": "opencode:backup"
+    },
+    {
+      "task_id": "backup-verify",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] 125 tests; 4/4 project gates; README second-copy and command; ADR-016; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793363509.0995252,
+      "timestamp_str": "2026-10-30 15:31:49",
+      "agent": "opencode:backup"
     }
   ]
 }

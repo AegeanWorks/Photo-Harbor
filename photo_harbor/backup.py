@@ -1,5 +1,6 @@
 """A second copy of the library's originals on another drive, so one disk failure loses nothing."""
 
+import hashlib
 import os
 import shutil
 import threading
@@ -10,6 +11,7 @@ from .atomic_file import replace_with_retry
 from .errors import HarborError
 
 DAY_SECONDS = 24 * 3600
+HASH_BLOCK = 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -19,12 +21,82 @@ class BackupReport:
     bytes_copied: int
 
 
-def mirror(source: Path, target: Path) -> BackupReport:
-    """Copy each original missing from ``target`` or differing in size; never deletes there."""
+@dataclass(frozen=True)
+class VerifyReport:
+    checked: int
+    missing: int
+    different: int
+    extra: int
+    bytes_checked: int
+    problems: tuple
+
+    @property
+    def ok(self) -> bool:
+        return self.missing == 0 and self.different == 0
+
+
+def _refuse_inside(source: Path, target: Path) -> None:
     if target.resolve() == source.resolve() or source.resolve() in target.resolve().parents:
         raise HarborError(f"{target} is inside the library",
                           "a backup in the same folder dies with the same disk",
                           "choose a folder on another drive, e.g. E:\\HarborBackup")
+
+
+def _files(root: Path):
+    """Every visible file below ``root``, skipping Harbor's dot folders."""
+    for path in sorted(root.rglob("*")):
+        if path.is_file() and not any(part.startswith(".")
+                                      for part in path.relative_to(root).parts):
+            yield path
+
+
+def _digest(path: Path) -> str:
+    digest = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for block in iter(lambda: handle.read(HASH_BLOCK), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def verify(source: Path, target: Path) -> VerifyReport:
+    """Re-hash every source original against its backup copy; extras there are reported only."""
+    _refuse_inside(source, target)
+    if not target.is_dir():
+        raise HarborError(f"{target} is not a folder",
+                          "no backup exists there yet",
+                          "run `python -m photo_harbor backup --to <folder>` first")
+    checked = missing = different = extra = total = 0
+    problems = []
+    source_files = {}
+    for path in _files(source):
+        rel = path.relative_to(source)
+        source_files[rel] = path
+        checked += 1
+        total += path.stat().st_size
+        dest = target / rel
+        if not dest.is_file():
+            missing += 1
+            kind = "missing"
+        elif dest.stat().st_size != path.stat().st_size:
+            different += 1
+            kind = "different"
+        elif _digest(path) != _digest(dest):
+            different += 1
+            kind = "different"
+        else:
+            continue
+        if len(problems) < 50:
+            problems.append((str(rel), kind))
+    for path in _files(target):
+        if path.relative_to(target) not in source_files:
+            extra += 1
+    return VerifyReport(checked=checked, missing=missing, different=different, extra=extra,
+                        bytes_checked=total, problems=tuple(problems))
+
+
+def mirror(source: Path, target: Path) -> BackupReport:
+    """Copy each original missing from ``target`` or differing in size; never deletes there."""
+    _refuse_inside(source, target)
     copied = unchanged = total = 0
     for path in sorted(source.rglob("*")):
         if not path.is_file() or any(part.startswith(".") for part in path.relative_to(source).parts):

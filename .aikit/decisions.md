@@ -335,3 +335,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   label; the cover follows the newest photo, so it changes as photos are added. Creating from a
   selection is one continuous flow, but a failed add leaves the empty album in place with an
   error toast, which is honest and recoverable.
+
+### ADR-016: Backup verification compares hashes, not just sizes
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The daily mirror skips a file when the destination size matches, which is fast
+  but cannot detect bit rot or same-size corruption on the backup drive. The window could say a
+  backup ran, but not whether the copy is good.
+- **Decision**: `backup.verify(source, target)` walks the visible library and the backup,
+  compares sizes, then streams SHA-256 for every matching pair in 1 MB blocks. It reports
+  missing, different and extra counts plus the first 50 problem paths. `backup --to DIR --check`
+  prints the report and exits 1 when anything is missing or different; extra files are
+  informational because the mirror never deletes. The Harbor window's **Check backup** button
+  runs the same function on a background thread and logs the result. Both refuse a target inside
+  the library.
+- **Consequences**: A check reads every byte of both drives, so it takes as long as the library
+  is large; it is explicit, never automatic. Extra files count as normal history from deleted
+  photos, not damage. A backup that was never made fails with a clear message instead of
+  reporting zero files as clean.

@@ -172,6 +172,9 @@ class ControlPanel:
         self.check_button = ttk.Button(buttons, text="Check all files", state="disabled",
                                        command=self.check_files)
         self.check_button.pack(side="left", padx=(8, 0))
+        self.verify_button = ttk.Button(buttons, text="Check backup",
+                                        command=self.check_backup)
+        self.verify_button.pack(side="left", padx=(8, 0))
         self.address = ttk.Label(server, text="Start the server to see the iPhone address.",
                                  style="Muted.TLabel")
         self.address.grid(row=6, column=0, columnspan=3, sticky="w", pady=(6, 0))
@@ -313,6 +316,32 @@ class ControlPanel:
         if self._runner is not None:
             self._runner.app.schedule.run_now(full=True)
             self.log("Checking every file in the background; results appear here.")
+
+    def check_backup(self) -> None:
+        folder = self.backup_var.get().strip()
+        if not folder:
+            self.log("Choose a backup folder first.", error=True)
+            return
+        self.verify_button.configure(state="disabled", text="Checking…")
+        threading.Thread(target=self._verify_worker,
+                         args=(Path(self.library_var.get()).expanduser(),
+                               Path(folder).expanduser()),
+                         name="harbor-verify", daemon=True).start()
+
+    def _verify_worker(self, source: Path, target: Path) -> None:
+        from .backup import verify
+        try:
+            report = verify(source, target)
+            self._inbox.put(("log", f"Backup check: {report.checked} checked, "
+                                    f"{report.missing} missing, {report.different} different, "
+                                    f"{report.extra} extra."))
+            for rel, kind in report.problems[:10]:
+                self._inbox.put(("log", f"  {kind}: {rel}"))
+        except (HarborError, OSError) as error:
+            text = error.as_text() if isinstance(error, HarborError) else str(error)
+            self._inbox.put(("log", f"Backup check failed: {text}"))
+        finally:
+            self._inbox.put(("backup_checked",))
 
     def set_password(self, ident: str, name: str) -> None:
         from tkinter import simpledialog
@@ -519,6 +548,8 @@ class ControlPanel:
                 for line in message[2][:5]:
                     self.log(line, error=True)
                 self._refresh_people()
+            elif kind == "backup_checked":
+                self.verify_button.configure(state="normal", text="Check backup")
         self.root.after(POLL_MS, self._drain)
 
 

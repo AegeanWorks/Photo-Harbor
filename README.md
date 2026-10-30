@@ -128,7 +128,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   file's modified time.
 - **Second copy.** `--backup-to E:\HarborBackup` mirrors the person folders at start-up and every
   24 hours. It never deletes anything in the backup. A photo shared by two people is copied
-  twice there, because the backup drive gets plain copies.
+  twice there, because the backup drive gets plain copies. **Check backup** in the window, or
+  `python -m photo_harbor backup --to DIR --check`, re-hashes every source file against its
+  copy and reports missing, different and extra files.
 
 ### Commands
 
@@ -139,7 +141,7 @@ pythonw Harbor.pyw --startup                            # what Windows runs at s
 python -m photo_harbor [--library DIR] key [--new]      # print, or replace, the main key
 python -m photo_harbor [--library DIR] profiles [--add NAME]   # list people and keys, or add one
 python -m photo_harbor [--library DIR] import FOLDER [--profile ID]  # copy photos in from disk
-python -m photo_harbor [--library DIR] backup --to DIR  # one-off mirror to another drive
+python -m photo_harbor [--library DIR] backup --to DIR [--check]  # mirror, or verify by hash
 ```
 
 The default library is `%USERPROFILE%\Pictures\Harbor`. Errors print `Error:`, `Why:` and `Fix:`

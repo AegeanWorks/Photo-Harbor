@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `54`
-- **Total Classes**: `101`
-- **Total Top-Level Functions**: `87`
-- **Total Class Methods**: `377`
-- **Total Source Lines**: `6232`
+- **Total Classes**: `102`
+- **Total Top-Level Functions**: `91`
+- **Total Class Methods**: `382`
+- **Total Source Lines**: `6370`
 
 ---
 
@@ -26,7 +26,7 @@
 ### [`photo_harbor/__main__.py`](photo_harbor/__main__.py)
 > *Command line: ``python -m photo_harbor serve | panel | key | profiles | import | backup``.*
 
-**Size**: `132` lines (`5532` bytes)
+**Size**: `143` lines (`6151` bytes)
 
 **Functions:**
 - `def _parser()`
@@ -186,10 +186,12 @@
 ### [`photo_harbor/backup.py`](photo_harbor/backup.py)
 > *A second copy of the library's originals on another drive, so one disk failure loses nothing.*
 
-**Size**: `73` lines (`2635` bytes)
+**Size**: `145` lines (`4946` bytes)
 
 **Classes:**
 - `class BackupReport`
+- `class VerifyReport`
+  - Property `.ok`
 - `class DailyBackup` - *Mirrors at start-up and every 24 hours on a background thread while the server runs.*
   - Method `.__init__(source, target, log)`
   - Method `.start()`
@@ -197,6 +199,10 @@
   - Method `._run()`
 
 **Functions:**
+- `def _refuse_inside(source, target)`
+- `def _files(root)` - *Every visible file below ``root``, skipping Harbor's dot folders.*
+- `def _digest(path)`
+- `def verify(source, target)` - *Re-hash every source original against its backup copy; extras there are reported only.*
 - `def mirror(source, target)` - *Copy each original missing from ``target`` or differing in size; never deletes there.*
 
 ---
@@ -265,7 +271,7 @@
 ### [`photo_harbor/control_panel.py`](photo_harbor/control_panel.py)
 > *The Harbor window: Start/Stop the server, open the photo browser, manage people, import folders.*
 
-**Size**: `537` lines (`25598` bytes)
+**Size**: `568` lines (`27217` bytes)
 
 **Classes:**
 - `class ControlPanel` - *Builds the window; background work reports back through ``_inbox`` on the Tk thread.*
@@ -281,6 +287,8 @@
   - Method `.add_person()`
   - Method `.open_folder(folder)` - *Open the library, or one person's folder, in File Explorer.*
   - Method `.check_files()`
+  - Method `.check_backup()`
+  - Method `._verify_worker(source, target)`
   - Method `.set_password(ident, name)`
   - Method `.rename(ident, name)`
   - Method `._person_menu(profile)`
@@ -942,7 +950,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `135` lines (`5435` bytes)
+**Size**: `159` lines (`6641` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -964,6 +972,8 @@
 - `class BackupTest`
   - Method `.test_copies_new_files_and_skips_ones_already_there()`
   - Method `.test_refuses_a_target_inside_the_library()`
+  - Method `.test_verify_hashes_every_copy_and_reports_damage()`
+  - Method `.test_verify_refuses_a_target_that_is_not_there()`
 - `class ThumbnailerTest`
   - Method `.test_without_pillow_previews_are_off()`
 - `class DamagedConfigTest`

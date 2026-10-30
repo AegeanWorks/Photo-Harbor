@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from photo_harbor.auth import is_home_network
-from photo_harbor.backup import mirror
+from photo_harbor.backup import mirror, verify
 from photo_harbor.body_readers import ChunkedReader, LengthReader
 from photo_harbor.config import load_or_create, rotate_key
 from photo_harbor.errors import HarborError
@@ -114,6 +114,30 @@ class BackupTest(unittest.TestCase):
         root = temp_dir(self)
         with self.assertRaises(HarborError):
             mirror(root, root / "inside")
+
+    def test_verify_hashes_every_copy_and_reports_damage(self):
+        root = temp_dir(self)
+        source, target = root / "photos", root / "backup"
+        (source / "2026" / "10").mkdir(parents=True)
+        (source / "2026" / "10" / "a.heic").write_bytes(b"aaa")
+        (source / "2026" / "10" / "b.heic").write_bytes(b"bbb")
+        mirror(source, target)
+        clean = verify(source, target)
+        self.assertTrue(clean.ok)
+        self.assertEqual((clean.checked, clean.bytes_checked, clean.extra), (2, 6, 0))
+        (target / "2026" / "10" / "a.heic").write_bytes(b"zzz")
+        (target / "2026" / "10" / "b.heic").unlink()
+        (target / "2026" / "10" / "old.heic").write_bytes(b"old")
+        damaged = verify(source, target)
+        self.assertFalse(damaged.ok)
+        self.assertEqual((damaged.checked, damaged.missing, damaged.different, damaged.extra),
+                         (2, 1, 1, 1))
+        self.assertEqual(sorted(kind for _, kind in damaged.problems), ["different", "missing"])
+
+    def test_verify_refuses_a_target_that_is_not_there(self):
+        root = temp_dir(self)
+        with self.assertRaises(HarborError):
+            verify(root, root / "missing")
 
 
 class ThumbnailerTest(unittest.TestCase):
