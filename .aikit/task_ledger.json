@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "apk-metadata",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793378595.6882706,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793378652.4133794
   },
   "checkpoints": [
-    {
-      "task_id": "viewer-a11y",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] Setup Keyboard panel; browser dogfood open focus close, Tab to next, Shift+Tab wraps to download, Escape returns to the tile, 0 JS errors; 149 tests, 4/4 gates; README/ADR-023; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793373370.3298268,
-      "timestamp_str": "2026-10-30 18:16:10",
-      "agent": "opencode:a11y"
-    },
     {
       "task_id": "viewer-a11y",
       "phase": "completed",
@@ -254,6 +244,16 @@
       "status": "in_progress",
       "timestamp": 1793378595.6882706,
       "timestamp_str": "2026-10-30 19:43:15",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "apk-metadata",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'apk-metadata' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793378652.4133818,
+      "timestamp_str": "2026-10-30 19:44:12",
       "agent": "opencode:android"
     }
   ]
