@@ -111,7 +111,7 @@
             <button class="ghost" id="date-clear" type="button">Clear</button>
           </div>
           <div class="select-bar" id="select-bar" hidden>
-            <span id="select-count">0 selected</span>
+            <span id="select-count" aria-live="polite">0 selected</span>
             <button class="ghost" id="select-all" type="button">Select loaded</button>
             <button class="ghost" id="select-matching" type="button">Select matching</button>
             <button class="ghost" id="select-favorite" type="button">♥ Favorite</button>
@@ -193,6 +193,17 @@
           <p class="hint">Harbor opens minimised and starts the server right away, so phones can sync without anyone opening it. The same setting is in the Harbor window.</p>
         </article>
 
+        <article class="panel" id="shortcuts">
+          <h2>Keyboard</h2>
+          <ul class="shortcuts">
+            <li><kbd>←</kbd> <kbd>→</kbd> previous and next photo</li>
+            <li><kbd>F</kbd> favorite, <kbd>I</kbd> details</li>
+            <li><kbd>Esc</kbd> close the viewer or an open menu</li>
+            <li><kbd>Tab</kbd> stays inside the photo viewer</li>
+          </ul>
+          <p class="hint">Photos and controls are buttons, so Tab and Enter work throughout.</p>
+        </article>
+
         <article class="panel steps">
           <h2>2 · Shortcut “Harbor Sync”</h2>
           <p class="hint">In the Shortcuts app tap +, name it Harbor Sync and add these actions in order.</p>
@@ -241,7 +252,7 @@
       <section id="view-trash" class="view narrow" hidden>
         <div class="scope">
           <h1>Trash</h1>
-          <span id="trash-count">0</span>
+          <span id="trash-count" aria-live="polite">0</span>
           <button class="ghost" id="trash-empty" type="button">Empty trash</button>
         </div>
         <p class="hint">Removed photos stay here until you put them back. Empty trash deletes them permanently.</p>
@@ -251,18 +262,18 @@
   </div>
 
   <div id="viewer" class="viewer" hidden role="dialog" aria-modal="true" aria-label="Photo viewer">
-    <button class="viewer-close" id="viewer-close" aria-label="Close">✕</button>
+    <button class="viewer-close" id="viewer-close" aria-label="Close" aria-keyshortcuts="Escape">✕</button>
     <button class="viewer-nav prev" id="viewer-prev" aria-label="Previous">‹</button>
     <figure class="viewer-stage" id="viewer-stage"></figure>
     <button class="viewer-nav next" id="viewer-next" aria-label="Next">›</button>
     <footer class="viewer-meta">
       <span id="viewer-title"></span>
       <span id="viewer-detail"></span>
-      <button class="ghost" id="viewer-favorite" type="button" aria-pressed="false">♡ Favorite</button>
+      <button class="ghost" id="viewer-favorite" type="button" aria-pressed="false" aria-keyshortcuts="F">♡ Favorite</button>
       <button class="ghost" id="viewer-album-add" type="button">Add to album…</button>
       <button class="ghost" id="viewer-album-remove" type="button" hidden>Remove from album</button>
       <button class="ghost" id="viewer-cover" type="button" hidden>Use as cover</button>
-      <button class="ghost" id="viewer-info" type="button" aria-expanded="false">Details</button>
+      <button class="ghost" id="viewer-info" type="button" aria-expanded="false" aria-keyshortcuts="I">Details</button>
       <button class="ghost" id="viewer-trash" type="button">Move to trash</button>
       <a id="viewer-download" class="ghost" download>Download original</a>
     </footer>

@@ -1,55 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "search-scope",
-    "last_phase": "phase 3",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793372938.6972466,
-    "owner": "opencode:search",
-    "started_by": "opencode:search",
-    "continuations": [],
-    "completed_at": 1793372973.7828782
+    "task_id": "viewer-a11y",
+    "last_phase": "phase 4",
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793373370.3298268,
+    "owner": "opencode:a11y",
+    "started_by": "opencode:a11y",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "sort-order",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] 132 tests; 4/4 project gates; README/API/tree; ADR-018; codebase map regenerated; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793370071.3703406,
-      "timestamp_str": "2026-10-30 17:21:11",
-      "agent": "opencode:sort"
-    },
-    {
-      "task_id": "sort-order",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'sort-order' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793370168.99608,
-      "timestamp_str": "2026-10-30 17:22:48",
-      "agent": "opencode:sort"
-    },
-    {
-      "task_id": "trash-restore",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: catalog format 6 adds a trash table; TrashBook moves one person's copy into .harbor/trash with a row, forgets the copy, restores through store.ingest, and deletes permanently; API list/move/restore/delete/empty; Trash tab and move actions; tests, dogfood, ADR-019, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793371077.3621788,
-      "timestamp_str": "2026-10-30 17:37:57",
-      "agent": "opencode:trash",
-      "impact_assessment": {
-        "why": "There is no way to remove a bad or unwanted photo from Harbor without using Explorer; direct deletion would be irreversible and would desynchronise the catalog",
-        "benefits": "A safe, per-person remove with restore; shared photos stay for others; no permanent loss on the first action; trash is hidden from the library and backup",
-        "risks": "contract: catalog format 6 and new endpoints; dependency: none; concurrency: moves and catalog writes share the store lock; state: trash rows and files, with a crash window between move and forget",
-        "mitigation": "Insert the trash row before moving, move inside the store lock, roll back the file if forgetting fails, restore by re-ingesting the bytes through the normal hash-verified path, and test shared/last-copy cases plus migration"
-      }
-    },
     {
       "task_id": "trash-restore",
       "phase": "phase 3",
@@ -250,6 +211,45 @@
       "timestamp": 1793372973.7828987,
       "timestamp_str": "2026-10-30 18:09:33",
       "agent": "opencode:search"
+    },
+    {
+      "task_id": "viewer-a11y",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Plan: viewer records the tile that opened it, focuses Close, traps Tab/Shift+Tab inside visible controls, restores focus on close; Escape closes date/album menus outside; aria-live selection/trash counts, aria-keyshortcuts, Setup shortcut list; dogfood, README, ADR-023",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793373139.7356412,
+      "timestamp_str": "2026-10-30 18:12:19",
+      "agent": "opencode:a11y",
+      "impact_assessment": {
+        "why": "The viewer looks modal but keyboard focus stays on the page behind it, Tab can leave, and closing drops focus instead of returning to the photo",
+        "benefits": "Keyboard and screen-reader users get a predictable dialog; shortcuts become discoverable; no data or schema change",
+        "risks": "contract: focus behavior and a help panel; dependency: none; concurrency: none; state: one focus reference in memory",
+        "mitigation": "Capture focus only when the viewer first opens, filter hidden/disabled controls for the Tab trap, check the element is still connected before restoring, and test the cycle with Playwright"
+      }
+    },
+    {
+      "task_id": "viewer-a11y",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Viewer records the opening tile, focuses Close, traps Tab/Shift+Tab among visible enabled controls, restores focus on close; Escape closes date/album menus outside; live counts and aria-keyshortcuts",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793373370.024966,
+      "timestamp_str": "2026-10-30 18:16:10",
+      "agent": "opencode:a11y"
+    },
+    {
+      "task_id": "viewer-a11y",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] Setup Keyboard panel; browser dogfood open focus close, Tab to next, Shift+Tab wraps to download, Escape returns to the tile, 0 JS errors; 149 tests, 4/4 gates; README/ADR-023; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793373370.3298268,
+      "timestamp_str": "2026-10-30 18:16:10",
+      "agent": "opencode:a11y"
     }
   ]
 }

@@ -99,7 +99,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **A library browser.** The gallery has a sidebar of years and months with counts, a Videos
   filter and search by file name; on a phone the sidebar becomes a scrolling row of chips. Days
   are labelled in the browser's language. Click any photo for a full-screen viewer (arrow keys,
-  swipe, download the original).
+  swipe, download the original). <kbd>F</kbd> favorites, <kbd>I</kbd> shows details and
+  <kbd>Esc</kbd> closes; keyboard focus stays inside the viewer and returns to the photo.
 - **Search stays in view.** Typing filters the current album, favorites, person, month or date
   window instead of jumping back to the whole library. Every word must appear in the file name,
   so `trip beach` finds `trip-beach.jpg`; **Show everything** is the explicit reset.

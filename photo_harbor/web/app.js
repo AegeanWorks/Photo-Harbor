@@ -9,7 +9,7 @@ const state = {
     order: "newest" },
   query: "",
   generation: 0, total: 0, profile: null, people: [], me: null, owner: false,
-  favorites: 0, albums: [], selecting: false, selected: new Set(),
+  favorites: 0, albums: [], selecting: false, selected: new Set(), viewerReturnFocus: null,
 };
 
 function personName(id) {
@@ -1112,6 +1112,7 @@ function wireUploads() {
 function openViewer(index) {
   const photo = state.photos[index];
   if (!photo) return;
+  if (state.viewing < 0) state.viewerReturnFocus = document.activeElement;
   state.viewing = index;
   const stage = $("viewer-stage");
   stage.replaceChildren();
@@ -1145,6 +1146,7 @@ function openViewer(index) {
   hideDetails();
   $("viewer").hidden = false;
   document.body.style.overflow = "hidden";
+  $("viewer-close").focus();
 }
 
 function renderViewerCollections() {
@@ -1289,11 +1291,14 @@ async function removeFromAlbum() {
 }
 
 function closeViewer() {
+  const target = state.viewerReturnFocus;
+  state.viewerReturnFocus = null;
   hideDetails();
   $("viewer").hidden = true;
   $("viewer-stage").replaceChildren();
   document.body.style.overflow = "";
   state.viewing = -1;
+  if (target && target.isConnected) target.focus();
 }
 
 async function step(delta) {
@@ -1318,6 +1323,21 @@ function wireViewer() {
     if (event.key === "Escape") closeViewer();
     if (event.key === "ArrowLeft") step(-1);
     if (event.key === "ArrowRight") step(1);
+    if (event.key === "Tab") {
+      const focusable = [...$("viewer").querySelectorAll(
+        "button, a[href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
+        .filter((item) => !item.disabled && !item.hidden && item.offsetParent !== null);
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
     if (event.key.toLowerCase() === "f" && !event.ctrlKey && !event.metaKey && !event.altKey
       && event.target.tagName !== "BUTTON") toggleFavorite();
     if (event.key.toLowerCase() === "i" && !event.ctrlKey && !event.metaKey && !event.altKey
@@ -1462,6 +1482,12 @@ function wireShell() {
     if (document.visibilityState !== "visible" || $("shell").hidden) return;
     refreshStatus().catch(handle);
     if (!$("view-sync").hidden) loadStorage().catch(handle);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" || state.viewing >= 0) return;
+    hideDatePanel();
+    hideSelectAlbums();
+    hideDetails();
   });
 }
 

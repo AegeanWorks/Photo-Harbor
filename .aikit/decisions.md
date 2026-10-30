@@ -459,3 +459,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   finding a photo outside the current view means clearing the scope first. Multi-word search
   adds one indexed-or-scan predicate per term and keeps the same wildcard escaping. No schema
   or API shape changed; existing `q=` callers gain the all-words semantics.
+
+### ADR-023: The viewer is a modal for keyboard and screen-reader users
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The viewer had `role="dialog"` and `aria-modal`, but focus stayed on the page
+  behind it, Tab could leave the dialog, and closing dropped focus. The shortcuts added over
+  time were also undiscoverable.
+- **Decision**: Opening the viewer records the focused tile (only when it was closed), focuses
+  **Close**, and traps Tab/Shift+Tab among visible, enabled controls. Closing restores focus to
+  the recording when that element is still connected. Escape closes date/album/detail menus
+  when no viewer is open. Selection and trash counts are `aria-live="polite"`, the viewer's
+  favorite/details/close buttons declare `aria-keyshortcuts`, and Setup has a Keyboard panel.
+- **Consequences**: Keyboard users cannot tab into the hidden page, and a closed viewer returns
+  them to the photo they opened. Focus is not restored after an action that removes the tile
+  (for example Move to trash), because the target is gone; the browser falls back to the page.
+  The help panel is static and costs no script.
