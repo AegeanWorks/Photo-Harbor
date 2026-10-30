@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `60`
-- **Total Classes**: `110`
+- **Total Python Modules**: `61`
+- **Total Classes**: `111`
 - **Total Top-Level Functions**: `92`
-- **Total Class Methods**: `424`
-- **Total Source Lines**: `6971`
+- **Total Class Methods**: `430`
+- **Total Source Lines**: `7011`
 
 ---
 
@@ -230,7 +230,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `238` lines (`11997` bytes)
+**Size**: `238` lines (`12034` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -612,7 +612,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `156` lines (`3611` bytes)
+**Size**: `157` lines (`3657` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -949,7 +949,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `593` lines (`33530` bytes)
+**Size**: `602` lines (`34039` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -980,6 +980,7 @@
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
   - Method `.test_photos_lists_newest_first_with_paging()`
   - Method `.test_a_chunked_upload_is_accepted()`
+  - Method `.test_search_matches_every_word_and_stays_in_scope()`
   - Method `.test_browsing_by_month_kind_and_name()`
   - Method `.test_a_browser_upload_needs_no_hash_and_keeps_a_non_ascii_name()`
   - Method `.test_a_non_media_upload_downloads_instead_of_rendering()`
@@ -1128,6 +1129,19 @@
   - Method `.test_a_failing_pass_is_logged_and_the_thread_keeps_going()`
 - `class SessionCleanupTest`
   - Method `.test_expired_sessions_are_removed()`
+
+---
+
+### [`tests/test_search.py`](tests/test_search.py)
+**Size**: `30` lines (`1327` bytes)
+
+**Classes:**
+- `class SearchTest`
+  - Method `.setUp()`
+  - Method `.names(query, **kwargs)`
+  - Method `.test_every_word_must_appear_in_the_file_name()`
+  - Method `.test_search_combines_with_other_narrowing()`
+  - Method `.test_like_wildcards_are_literal()`
 
 ---
 

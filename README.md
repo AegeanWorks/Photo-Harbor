@@ -100,6 +100,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   filter and search by file name; on a phone the sidebar becomes a scrolling row of chips. Days
   are labelled in the browser's language. Click any photo for a full-screen viewer (arrow keys,
   swipe, download the original).
+- **Search stays in view.** Typing filters the current album, favorites, person, month or date
+  window instead of jumping back to the whole library. Every word must appear in the file name,
+  so `trip beach` finds `trip-beach.jpg`; **Show everything** is the explicit reset.
 - **Albums and favorites.** Each person can mark photos with a heart and collect them into named
   albums without moving or copying a single file. Favorites and albums are private to the person
   who made them; the main profile sees its own, not everyone's. Open a photo and choose
@@ -257,6 +260,7 @@ photo-harbor/
     ├── test_profiles.py
     ├── test_runner.py
     ├── test_scale.py
+    ├── test_search.py       <- multi-word search inside the active filters
     ├── test_sort.py         <- newest, oldest, largest and smallest order
     ├── test_storage.py      <- whole-library and per-person storage totals
     ├── test_store.py

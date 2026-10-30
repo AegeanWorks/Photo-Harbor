@@ -441,3 +441,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   must narrow the filters. Selection remains client-only and resets with the scope, and no new
   state or schema is added. The endpoint is read-only and uses the same validation as the page,
   so a malformed filter fails before any hash is returned.
+
+### ADR-022: Search is a narrowing axis, not a scope reset
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: Typing in the search box silently cleared the album, favorites, month and date
+  scope and searched the whole library. That contradicted the visible scope and made it
+  impossible to search inside a trip or a date window. A single `LIKE` also treated
+  `trip beach` as one literal substring.
+- **Decision**: The search handler no longer rewrites `state.scope`; `q` combines with every
+  existing filter, and the title shows `scope · “query”`. `Catalog._where` splits the query on
+  whitespace (up to 8 terms) and adds one escaped `LIKE ... ESCAPE '!'` per term, so all words
+  must appear in the file name. The count uses the filtered page whenever a query, month, kind
+  or date is active; album/favorite totals are only shown for the unfiltered collection.
+  **Show everything** remains the single explicit reset.
+- **Consequences**: Searching is now contextual, which is what the scope header promises;
+  finding a photo outside the current view means clearing the scope first. Multi-word search
+  adds one indexed-or-scan predicate per term and keeps the same wildcard escaping. No schema
+  or API shape changed; existing `q=` callers gain the all-words semantics.

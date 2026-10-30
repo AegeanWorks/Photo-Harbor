@@ -326,6 +326,15 @@ class ServerTest(unittest.TestCase):
         response, body = self.call("POST", "/api/upload", body=framed, headers=headers)
         self.assertEqual((response.status, json.loads(body)["status"]), (200, "stored"))
 
+    def test_search_matches_every_word_and_stays_in_scope(self):
+        self.upload(b"beach", name="trip-beach.jpg")
+        self.upload(b"city", name="trip-city.jpg")
+        self.upload(b"other", name="other.jpg")
+        _, body = self.call("GET", "/api/photos?q=trip%20beach")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["trip-beach.jpg"])
+        _, body = self.call("GET", "/api/photos?month=2026-05&q=trip")
+        self.assertEqual(len(json.loads(body)["photos"]), 2)
+
     def test_browsing_by_month_kind_and_name(self):
         self.upload(b"may photo", name="IMG_0001.HEIC")
         self.call("POST", "/api/upload", body=b"clip", headers={

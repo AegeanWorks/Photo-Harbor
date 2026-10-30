@@ -275,12 +275,14 @@ function scopeTitle() {
 }
 
 function renderScope() {
-  const narrowed = Boolean(state.scope.month || state.scope.kind || state.scope.favorite
-    || state.scope.album || state.scope.start || state.scope.end || state.query);
+  const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
+    || state.scope.end || state.query);
+  const narrowed = Boolean(extra || state.scope.favorite || state.scope.album);
   const shown = state.photos.length;
-  const title = state.query ? `“${state.query}”` : scopeTitle();
+  const title = state.query ? `${scopeTitle()} · “${state.query}”` : scopeTitle();
   $("scope-title").textContent = state.profile ? `${personName(state.profile)} · ${title}` : title;
-  if (state.scope.album) $("scope-count").textContent = (currentAlbum()?.count ?? shown).toLocaleString();
+  if (extra) $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
+  else if (state.scope.album) $("scope-count").textContent = (currentAlbum()?.count ?? shown).toLocaleString();
   else if (state.scope.favorite) $("scope-count").textContent = state.favorites.toLocaleString();
   else if (!narrowed && !state.profile) $("scope-count").textContent = state.total.toLocaleString();
   else if (!narrowed) $("scope-count").textContent = (state.people.find((p) => p.id === state.profile)?.count ?? shown).toLocaleString();
@@ -958,12 +960,6 @@ function wireBrowser() {
       if (query === state.query) return;
       state.query = query;
       if (document.querySelector('[data-view="photos"]').getAttribute("aria-selected") !== "true") show("photos");
-      // Search covers the whole library, not just the month in view.
-      if (query) {
-        state.scope = { kind: null, month: null, favorite: false, album: null, start: null,
-          end: null, order: state.scope.order || "newest" };
-        markScope();
-      }
       resetPhotos();
     }, 250);
   });

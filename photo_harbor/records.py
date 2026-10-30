@@ -56,7 +56,8 @@ class LibraryStats:
 @dataclass(frozen=True)
 class PhotoFilter:
     """Gallery narrowing: ``month`` is ``YYYY-MM``, ``start``/``end`` are inclusive
-    ``YYYY-MM-DD`` dates, ``query`` matches the file name, ``kind`` is ``photo`` or ``video``.
+    ``YYYY-MM-DD`` dates, ``query`` is whitespace-separated words that must all match the file
+    name, ``kind`` is ``photo`` or ``video``.
     ``viewer`` is whose favorites and albums are read; ``favorite`` and ``album`` narrow to that
     viewer's marks. ``order`` is newest, oldest, largest or smallest. None means no narrowing on
     that axis."""
