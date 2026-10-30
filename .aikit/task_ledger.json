@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "android-bg-verify",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793378096.9522977,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793378128.621139
   },
   "checkpoints": [
-    {
-      "task_id": "search-scope",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/3] Search keeps the current album/favorites/person/month/date scope; title and count reflect the filtered set; browser dogfood Trip 2 -> beach 1 -> cleared 2, 0 JS errors; 149 tests, 4/4 gates; README/ADR-022; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793372938.6972466,
-      "timestamp_str": "2026-10-30 18:08:58",
-      "agent": "opencode:search"
-    },
     {
       "task_id": "search-scope",
       "phase": "completed",
@@ -254,6 +244,16 @@
       "status": "in_progress",
       "timestamp": 1793378096.9522977,
       "timestamp_str": "2026-10-30 19:34:56",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-bg-verify",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'android-bg-verify' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793378128.6211445,
+      "timestamp_str": "2026-10-30 19:35:28",
       "agent": "opencode:android"
     }
   ]
