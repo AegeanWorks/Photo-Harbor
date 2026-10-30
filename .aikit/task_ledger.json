@@ -3,31 +3,15 @@
   "active_task": {
     "task_id": "photo-details",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793356988.2323177,
     "owner": "opencode:details",
     "started_by": "opencode:details",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793357027.1453824
   },
   "checkpoints": [
-    {
-      "task_id": "albums-favorites",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/6] Plan: catalog format 5 adds favorites, albums and album_photos (additive); AlbumBook domain; /api/albums, /api/albums/<id>, /api/album-photos, /api/favorite; photos gain ?favorite=1 and ?album=ID plus a favorite flag; gallery rail, viewer heart and add-to-album; tests, README, ADR-010, codebase map",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793344193.2746875,
-      "timestamp_str": "2026-10-30 10:09:53",
-      "agent": "opencode:albums",
-      "impact_assessment": {
-        "why": "The user asked to continue photo-harbor; after accounts and folders, the library has no way to collect a subset of photos or mark keepers across months",
-        "benefits": "Personal albums and favorites with no file moves; plain-folder layout untouched; favorites and albums stay private per person; additive migration keeps existing libraries",
-        "risks": "contract: catalog format 5 and new API fields; dependency: none (sqlite3 only); concurrency: album writes share the database lock with scans and uploads; state: v4->v5 migration and album rows",
-        "mitigation": "Additive CREATE TABLE IF NOT EXISTS only, no row rewrites; the existing .v4.bak backs the upgrade; every album and favorite query is scoped to the signed-in profile; tests cover migration, privacy, add/remove and paging"
-      }
-    },
     {
       "task_id": "albums-favorites",
       "phase": "phase 3",
@@ -252,6 +236,16 @@
       "status": "in_progress",
       "timestamp": 1793356988.2323177,
       "timestamp_str": "2026-10-30 13:43:08",
+      "agent": "opencode:details"
+    },
+    {
+      "task_id": "photo-details",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'photo-details' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793357027.1453865,
+      "timestamp_str": "2026-10-30 13:43:47",
       "agent": "opencode:details"
     }
   ]
