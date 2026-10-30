@@ -3,24 +3,15 @@
   "active_task": {
     "task_id": "date-filter",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793363953.9119406,
     "owner": "opencode:dates",
     "started_by": "opencode:dates",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793363985.5041986
   },
   "checkpoints": [
-    {
-      "task_id": "bulk-download",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'bulk-download' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793358998.2377293,
-      "timestamp_str": "2026-10-30 14:16:38",
-      "agent": "opencode:download"
-    },
     {
       "task_id": "storage-report",
       "phase": "phase 2",
@@ -249,6 +240,16 @@
       "status": "in_progress",
       "timestamp": 1793363953.9119406,
       "timestamp_str": "2026-10-30 15:39:13",
+      "agent": "opencode:dates"
+    },
+    {
+      "task_id": "date-filter",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'date-filter' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793363985.5042002,
+      "timestamp_str": "2026-10-30 15:39:45",
       "agent": "opencode:dates"
     }
   ]
