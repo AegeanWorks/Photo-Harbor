@@ -5,8 +5,10 @@ import android.app.Activity;
 import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.InputType;
@@ -21,6 +23,8 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
     private static final int ASK_MEDIA = 41;
     private static final int JOB_ID = 1;
+    private static final int VERSION_CODE = 1;
+    private static final String VERSION_NAME = "1.0";
 
     private EditText server;
     private EditText key;
@@ -28,6 +32,7 @@ public class MainActivity extends Activity {
     private CheckBox background;
     private TextView status;
     private Button syncButton;
+    private Button updateButton;
     private SharedPreferences prefs;
     private boolean running;
 
@@ -120,9 +125,25 @@ public class MainActivity extends Activity {
         status.setPadding(0, dp(8), 0, dp(8));
         form.addView(status);
 
+        updateButton = new Button(this);
+        updateButton.setText("Update Harbor");
+        updateButton.setVisibility(View.GONE);
+        updateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String address = server.getText().toString().trim();
+                if (address.isEmpty()) {
+                    return;
+                }
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse(SyncEngine.webUrl(address) + "/android/")));
+            }
+        });
+        form.addView(updateButton);
+
         TextView note = new TextView(this);
-        note.setText("The first sync may take a while. Nothing is deleted from the phone. "
-                + "Allow photos and videos when Android asks.");
+        note.setText("Version " + VERSION_NAME + ". The first sync may take a while. "
+                + "Nothing is deleted from the phone. Allow photos and videos when Android asks.");
         note.setTextSize(12);
         form.addView(note);
 
@@ -140,6 +161,34 @@ public class MainActivity extends Activity {
         if (background.isChecked()) {
             schedule(true);
         }
+        checkForUpdate();
+    }
+
+    private void checkForUpdate() {
+        final String address = server.getText().toString().trim();
+        if (address.isEmpty()) {
+            return;
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    final int latest = SyncEngine.latestVersion(address);
+                    if (latest > VERSION_CODE) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateButton.setVisibility(View.VISIBLE);
+                                status.setText("Harbor " + latest
+                                        + " is available on the server. Tap Update Harbor.");
+                            }
+                        });
+                    }
+                } catch (Exception ignored) {
+                    // No metadata or no network is normal; leave the screen untouched.
+                }
+            }
+        }, "harbor-update").start();
     }
 
     private TextView label(String text) {

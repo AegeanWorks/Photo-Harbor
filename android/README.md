@@ -40,6 +40,13 @@ key. The keystore is deliberately outside the repository.
    and videos newer than the last finished sync. A background schedule (Wi-Fi only, every
    6 hours) is optional.
 
+## Updates
+
+The app shows its own version under the buttons. On launch it reads
+`/android/Harbor.apk.json` from the saved server; when the served `versionCode` is newer it shows
+**Update Harbor** and opens the install page in the browser. Android still asks before installing
+the downloaded APK.
+
 ## Share from another app
 
 Harbor appears in Android's share sheet for images and videos. Select one or more items in

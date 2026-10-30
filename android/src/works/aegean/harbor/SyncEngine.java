@@ -70,6 +70,16 @@ public final class SyncEngine {
         return "Connected: " + status.optInt("count", 0) + " photos on the PC.";
     }
 
+    public static int latestVersion(String server) throws Exception {
+        JSONObject info = new JSONObject(
+                get(normalise(server) + "/android/Harbor.apk.json", ""));
+        return info.optInt("versionCode", 0);
+    }
+
+    public static String webUrl(String server) {
+        return normalise(server);
+    }
+
     public static String share(Context context, List<Uri> uris, String server, String key,
                                Progress progress) throws Exception {
         String base = normalise(server);

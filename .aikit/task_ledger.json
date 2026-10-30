@@ -1,44 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "apk-metadata",
-    "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793378595.6882706,
+    "task_id": "android-update",
+    "last_phase": "phase 3",
+    "active_phase": 3,
+    "status": "in_progress",
+    "updated_at": 1793379009.2655556,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": [],
-    "completed_at": 1793378652.4133794
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "viewer-a11y",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'viewer-a11y' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793373406.6209173,
-      "timestamp_str": "2026-10-30 18:16:46",
-      "agent": "opencode:a11y"
-    },
-    {
-      "task_id": "android-client",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: native Android 8+ app (programmatic UI, MediaStore hash-verified sync over the existing API, Wi-Fi-only periodic JobService); pure-SDK build script using aapt2/d8/apksigner; signed debug APK in web/android; server page /android/ and APK download; tests, docs, ADR-024",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793375168.1025848,
-      "timestamp_str": "2026-10-30 18:46:08",
-      "agent": "opencode:android",
-      "impact_assessment": {
-        "why": "The project is iPhone-only; Android users have no client and no way to install one from the home server",
-        "benefits": "One APK install from the same home server; verified uploads reuse the existing API and journal; no server schema change",
-        "risks": "contract: new Android endpoints/static page and an APK binary; dependency: Android SDK only at build time, no runtime libraries; concurrency: background job and manual sync can overlap; state: SharedPreferences last settings, server journal last sync",
-        "mitigation": "A single sync lock per process, all uploads hash-verified, periodic job limited to unmetered networks, cleartext allowed only for the home LAN, and the APK built and signature-checked before serving"
-      }
-    },
     {
       "task_id": "android-client",
       "phase": "phase 3",
@@ -254,6 +226,34 @@
       "status": "completed",
       "timestamp": 1793378652.4133818,
       "timestamp_str": "2026-10-30 19:44:12",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-update",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Plan: app reads /android/Harbor.apk.json on launch, compares versionCode with the installed build, shows Update Harbor and opens the install page when newer; keep the existing Test/sync/share paths; rebuild, emulator-check, README/ADR-027",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793378744.4987419,
+      "timestamp_str": "2026-10-30 19:45:44",
+      "agent": "opencode:android",
+      "impact_assessment": {
+        "why": "The APK page now carries a version, but the installed app has no way to notice that the server has a newer build",
+        "benefits": "Users can see an update is available without manually comparing versions; reuses the public metadata route",
+        "risks": "contract: one public metadata read from the app; dependency: none; concurrency: launch-time background check only; state: none",
+        "mitigation": "Treat a missing or malformed sidecar as no update, compare integer versionCode, and only show the button when the served code is newer"
+      }
+    },
+    {
+      "task_id": "android-update",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/2] App reads Harbor.apk.json on launch, compares versionCode and shows Update Harbor; emulator with a temporary versionCode 2 showed 'Harbor 2 is available' and the button; metadata restored to 1.0; 151 tests, 4/4 gates; README/ADR-027; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793379009.2655556,
+      "timestamp_str": "2026-10-30 19:50:09",
       "agent": "opencode:android"
     }
   ]

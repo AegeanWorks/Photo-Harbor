@@ -530,3 +530,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   another dependency. If the sidecar is missing the page falls back to its static note and the
   JSON route returns 404; the APK itself is still served. A future updater can compare
   `versionCode` from the same file without parsing the APK.
+
+### ADR-027: Android checks the served versionCode on launch
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The install page shows the version and checksum, but an already-installed app
+  could not notice that the server had a newer build; users had to compare manually.
+- **Decision**: The app carries `VERSION_CODE`/`VERSION_NAME` constants matching the manifest.
+  On launch, if a server is saved, a background thread reads the public
+  `/android/Harbor.apk.json` and compares `versionCode`. A newer value shows **Update Harbor**
+  and a message; the button opens the server's `/android/` page in the browser. A missing,
+  malformed or unreachable sidecar is treated as "no update" and never blocks the screen.
+- **Consequences**: The check is one public read on launch and adds no permission. Installing an
+  update still goes through Android's browser/installer confirmation; the app does not self-
+  install. The constants must be bumped with the manifest in future builds, and the metadata
+  sidecar is the single comparison source.
