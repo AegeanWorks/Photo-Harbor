@@ -1412,6 +1412,29 @@ async function loadStorage() {
   }
 }
 
+async function loadBackup() {
+  try {
+    const report = await api("/api/backup");
+    $("backup-panel").hidden = false;
+    if (!report.configured) {
+      $("backup-status").textContent =
+        "No backup folder is configured. Start Harbor with --backup-to <folder> or use the Harbor window.";
+      return;
+    }
+    if (report.error) {
+      $("backup-status").textContent =
+        `Backup to ${report.target} failed ${report.last_at ? ago(report.last_at) : "at the last attempt"}: ${report.error}`;
+      return;
+    }
+    $("backup-status").textContent =
+      `Backup to ${report.target} · ${report.last_at ? ago(report.last_at) : "starting"} · `
+      + `${report.copied.toLocaleString()} copied last time · ${bytes(report.bytes)}`;
+  } catch (error) {
+    if (error instanceof Unauthorised) handle(error);
+    else $("backup-panel").hidden = true;
+  }
+}
+
 async function loadSetup() {
   const setup = await api("/api/setup");
   $("setup-server").textContent = setup.server;
@@ -1448,6 +1471,7 @@ function show(view) {
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);
+    loadBackup().catch(handle);
   }
   if (view === "setup") loadSetup().catch(handle);
   if (view === "trash") loadTrash().catch(handle);
@@ -1481,7 +1505,10 @@ function wireShell() {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState !== "visible" || $("shell").hidden) return;
     refreshStatus().catch(handle);
-    if (!$("view-sync").hidden) loadStorage().catch(handle);
+    if (!$("view-sync").hidden) {
+      loadStorage().catch(handle);
+      loadBackup().catch(handle);
+    }
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || state.viewing >= 0) return;

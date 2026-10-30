@@ -154,7 +154,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   file's modified time.
 - **Second copy.** `--backup-to E:\HarborBackup` mirrors the person folders at start-up and every
   24 hours. It never deletes anything in the backup. A photo shared by two people is copied
-  twice there, because the backup drive gets plain copies. **Check backup** in the window, or
+  twice there, because the backup drive gets plain copies. **Sync → Backup** shows the target
+  and the last attempt for the main profile; **Check backup** in the window, or
   `python -m photo_harbor backup --to DIR --check`, re-hashes every source file against its
   copy and reports missing, different and extra files.
 
@@ -184,6 +185,7 @@ and exit 1; usage errors exit 2.
 | `POST /api/sync/done` | JSON `{started_at}`: records a finished sync |
 | `GET /api/status`, `GET /api/outline` `[?profile=]` | counts, sync state, months with photos |
 | `GET /api/storage` `[?profile=]` | file/byte totals, photo/video split, shared count, per-person shares and the ten largest files |
+| `GET /api/backup` | owner: configured target, last attempt, copied/unchanged bytes and any error |
 | `GET /api/people`, `POST /api/login`, `POST /api/logout` | public sign-in: names; `{profile, password}` or `{key}` → session cookie |
 | `POST /api/password` | your own password: `{current, new}` (`current` only once one is set) |
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
@@ -226,6 +228,7 @@ photo-harbor/
 │   ├── auth.py               <- home-network check; who is asking (key or session); sign-in
 │   ├── autostart.py          <- start with Windows (per-user Run key)
 │   ├── backup.py             <- mirror to a second drive, daily thread
+│   ├── backup_api.py         <- owner-only backup status for the Sync tab
 │   ├── body_readers.py       <- Content-Length and chunked request bodies
 │   ├── catalog.py            <- index of stored originals by SHA-256; per-person views
 │   ├── copies.py             <- whose folder holds which photo, and where

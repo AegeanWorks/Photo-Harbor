@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `62`
-- **Total Classes**: `111`
+- **Total Python Modules**: `63`
+- **Total Classes**: `113`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `438`
-- **Total Source Lines**: `7227`
+- **Total Class Methods**: `444`
+- **Total Source Lines**: `7327`
 
 ---
 
@@ -131,7 +131,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `177` lines (`8657` bytes)
+**Size**: `181` lines (`8841` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -140,7 +140,7 @@
   - Method `.android_apk(request)`
   - Method `.service_worker(request)`
   - Method `.android_apk_info(request)`
-  - Method `._register(sync, library, people, albums, downloads, trash, setup)`
+  - Method `._register(sync, library, people, albums, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -204,16 +204,19 @@
 ### [`photo_harbor/backup.py`](photo_harbor/backup.py)
 > *A second copy of the library's originals on another drive, so one disk failure loses nothing.*
 
-**Size**: `145` lines (`4946` bytes)
+**Size**: `174` lines (`5838` bytes)
 
 **Classes:**
 - `class BackupReport`
 - `class VerifyReport`
   - Property `.ok`
+- `class BackupStatus`
 - `class DailyBackup` - *Mirrors at start-up and every 24 hours on a background thread while the server runs.*
   - Method `.__init__(source, target, log)`
   - Method `.start()`
   - Method `.stop()`
+  - Method `.status()`
+  - Method `.run_once()`
   - Method `._run()`
 
 **Functions:**
@@ -222,6 +225,18 @@
 - `def _digest(path)`
 - `def verify(source, target)` - *Re-hash every source original against its backup copy; extras there are reported only.*
 - `def mirror(source, target)` - *Copy each original missing from ``target`` or differing in size; never deletes there.*
+
+---
+
+### [`photo_harbor/backup_api.py`](photo_harbor/backup_api.py)
+> *Owner-only view of the daily mirror: target, last attempt and result.*
+
+**Size**: `31` lines (`1111` bytes)
+
+**Classes:**
+- `class BackupApi`
+  - Method `.__init__(backup)`
+  - Method `.status(request)`
 
 ---
 
@@ -668,7 +683,7 @@
 ### [`photo_harbor/runner.py`](photo_harbor/runner.py)
 > *Starts and stops one server in the background, for the command line and the Harbor window.*
 
-**Size**: `92` lines (`3711` bytes)
+**Size**: `93` lines (`3753` bytes)
 
 **Classes:**
 - `class RunningServer`
@@ -967,7 +982,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `638` lines (`36250` bytes)
+**Size**: `657` lines (`37234` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -996,6 +1011,7 @@
   - Method `.test_hashes_match_the_filters_for_select_matching()`
   - Method `.test_sort_order_changes_the_page()`
   - Method `.test_a_date_range_narrows_the_gallery()`
+  - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
   - Method `.test_photos_lists_newest_first_with_paging()`
@@ -1043,7 +1059,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `165` lines (`6927` bytes)
+**Size**: `181` lines (`7666` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1068,6 +1084,7 @@
   - Method `.test_refuses_a_target_inside_the_library()`
   - Method `.test_verify_hashes_every_copy_and_reports_damage()`
   - Method `.test_verify_refuses_a_target_that_is_not_there()`
+  - Method `.test_a_backup_run_records_its_last_status()`
 - `class ThumbnailerTest`
   - Method `.test_without_pillow_previews_are_off()`
 - `class DamagedConfigTest`

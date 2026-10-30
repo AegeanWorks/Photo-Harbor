@@ -9,6 +9,7 @@ from .albums import AlbumBook
 from .albums_api import AlbumsApi
 from .auth import KeyGuard
 from .autostart import Autostart
+from .backup_api import BackupApi
 from .catalog import Catalog
 from .copies import CopyIndex
 from .config import Settings
@@ -60,6 +61,7 @@ class HarborApp:
                  password_iterations: int = ITERATIONS,
                  android_dir: Optional[Path] = None) -> None:
         self.android_dir = android_dir or WEB_DIR / "android"
+        self.backup = None
         self.db = Database(settings.state_dir / "catalog.sqlite3")
         catalog = Catalog(self.db)
         journal = SyncJournal(self.db)
@@ -93,6 +95,7 @@ class HarborApp:
                        AlbumsApi(self.albums, catalog),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),
+                       BackupApi(lambda: self.backup),
                        SetupApi(port, autostart or Autostart()))
 
     def android_page(self, request: Request) -> Reply:
@@ -128,7 +131,7 @@ class HarborApp:
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
                   albums: AlbumsApi, downloads: DownloadsApi, trash: TrashApi,
-                  setup: SetupApi) -> None:
+                  backup: BackupApi, setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -146,6 +149,7 @@ class HarborApp:
         add("POST", "/api/sync/done", sync.done)
         add("GET", "/api/has", sync.has)
         add("GET", "/api/status", library.status)
+        add("GET", "/api/backup", backup.status)
         add("GET", "/api/storage", library.storage)
         add("GET", "/api/photos/hashes", library.hashes)
         add("GET", "/api/photos", library.photos)

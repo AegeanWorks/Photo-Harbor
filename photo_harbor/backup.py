@@ -5,7 +5,9 @@ import os
 import shutil
 import threading
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Optional
 
 from .atomic_file import replace_with_retry
 from .errors import HarborError
@@ -33,6 +35,16 @@ class VerifyReport:
     @property
     def ok(self) -> bool:
         return self.missing == 0 and self.different == 0
+
+
+@dataclass(frozen=True)
+class BackupStatus:
+    target: Path
+    last_at: Optional[str] = None
+    copied: int = 0
+    unchanged: int = 0
+    bytes_copied: int = 0
+    error: Optional[str] = None
 
 
 def _refuse_inside(source: Path, target: Path) -> None:
@@ -125,6 +137,8 @@ class DailyBackup:
         self._target = target
         self._log = log
         self._stop = threading.Event()
+        self._status_lock = threading.Lock()
+        self._status = BackupStatus(target)
         self._thread = threading.Thread(target=self._run, name="harbor-backup", daemon=True)
 
     def start(self) -> None:
@@ -132,14 +146,29 @@ class DailyBackup:
 
     def stop(self) -> None:
         self._stop.set()
-        self._thread.join(timeout=5)
+        if self._thread.is_alive():
+            self._thread.join(timeout=5)
+
+    def status(self) -> BackupStatus:
+        with self._status_lock:
+            return self._status
+
+    def run_once(self) -> BackupStatus:
+        now = datetime.now().isoformat(timespec="seconds")
+        try:
+            report = mirror(self._source, self._target)
+            status = BackupStatus(self._target, now, report.copied, report.unchanged,
+                                  report.bytes_copied)
+            self._log(f"Backup: {report.copied} copied, {report.unchanged} already there "
+                      f"-> {self._target}")
+        except (OSError, HarborError) as error:
+            status = BackupStatus(self._target, now, error=str(error))
+            self._log(f"Backup failed: {error}. It retries in 24 hours.")
+        with self._status_lock:
+            self._status = status
+        return status
 
     def _run(self) -> None:
         while not self._stop.is_set():
-            try:
-                report = mirror(self._source, self._target)
-                self._log(f"Backup: {report.copied} copied, {report.unchanged} already there "
-                          f"-> {self._target}")
-            except (OSError, HarborError) as error:
-                self._log(f"Backup failed: {error}. It retries in 24 hours.")
+            self.run_once()
             self._stop.wait(DAY_SECONDS)

@@ -69,6 +69,7 @@ class ServerRunner:
             app.schedule.start()
             if self._backup_to is not None:
                 self._backup = DailyBackup(self._library, self._backup_to, self._log)
+                app.backup = self._backup
                 self._backup.start()
             port = server.server_address[1]
             return RunningServer(port, f"http://localhost:{port}", f"http://{lan_address()}:{port}",

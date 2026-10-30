@@ -1,66 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "web-pwa",
+    "task_id": "backup-status",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793379838.3613513,
-    "owner": "opencode:pwa",
-    "started_by": "opencode:pwa",
-    "continuations": [],
-    "completed_at": 1793379888.4736717
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793380459.7244904,
+    "owner": "opencode:backup",
+    "started_by": "opencode:backup",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "android-share",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Exported ShareActivity for SEND/SEND_MULTIPLE image/video; metadata fallback, SHA-256 -> /api/has -> /api/upload, skips present files; Test calls /api/status; rebuilt signed APK 57,814 bytes with ShareActivity filters",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793376344.3918943,
-      "timestamp_str": "2026-10-30 19:05:44",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "android-share",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] README/android README/ADR-025; server APK byte-identical after rebuild; 151 tests stable across 4 runs; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793376345.1698077,
-      "timestamp_str": "2026-10-30 19:05:45",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "android-share",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'android-share' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793376393.0425258,
-      "timestamp_str": "2026-10-30 19:06:33",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "android-e2e",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Plan: accept Intent.getData() when a share arrives without EXTRA_STREAM/ClipData; rerun the APK on an Android 14 emulator against a real Harbor for Test, first sync, duplicate sync and share; document the evidence",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793377730.5682998,
-      "timestamp_str": "2026-10-30 19:28:50",
-      "agent": "opencode:android",
-      "impact_assessment": {
-        "why": "The emulator proved the main sync, but an explicit data-URI share was not handled; the app also had no hardware-level verification record",
-        "benefits": "Share intents from more providers work; the APK has a reproducible end-to-end check; no server or schema change",
-        "risks": "contract: one more share fallback; dependency: none; concurrency: hash checks already deduplicate; state: none",
-        "mitigation": "Use the existing hash-first upload path, keep data URIs last after EXTRA_STREAM and ClipData, and record the exact emulator results in the Android README"
-      }
-    },
     {
       "task_id": "android-e2e",
       "phase": "phase 4",
@@ -255,6 +205,56 @@
       "timestamp": 1793379888.473673,
       "timestamp_str": "2026-10-30 20:04:48",
       "agent": "opencode:pwa"
+    },
+    {
+      "task_id": "backup-status",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: DailyBackup records last run/copied/unchanged/bytes/error; ServerRunner attaches it to HarborApp; owner-only GET /api/backup; Sync tab Backup panel; tests, dogfood, ADR-029",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793380080.3671806,
+      "timestamp_str": "2026-10-30 20:08:00",
+      "agent": "opencode:backup",
+      "impact_assessment": {
+        "why": "The daily mirror only reports into the Harbor window log; web users cannot see whether a backup is configured or when it last succeeded",
+        "benefits": "Backup state is visible wherever the gallery is open; no new storage or background thread; owner-only path",
+        "risks": "contract: one owner-only read endpoint and runner wiring; dependency: none; concurrency: status snapshot under a lock; state: status is in memory",
+        "mitigation": "Keep a small immutable status, update it after every mirror attempt, expose only to the owner, and show 'not configured' when no --backup-to was supplied"
+      }
+    },
+    {
+      "task_id": "backup-status",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] DailyBackup.run_once/status immutable snapshot; Runner attaches it; owner-only GET /api/backup; 2 unit tests and HTTP configured/unconfigured/privacy test; stop() safe before start",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793380458.2393112,
+      "timestamp_str": "2026-10-30 20:14:18",
+      "agent": "opencode:backup"
+    },
+    {
+      "task_id": "backup-status",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] Sync Backup panel shows target, last attempt, copied bytes or error; non-owners hide; browser dogfood saw the target and '1 copied last time', 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793380459.0134273,
+      "timestamp_str": "2026-10-30 20:14:19",
+      "agent": "opencode:backup"
+    },
+    {
+      "task_id": "backup-status",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] README second-copy/API/tree; ADR-029; 154 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793380459.7244904,
+      "timestamp_str": "2026-10-30 20:14:19",
+      "agent": "opencode:backup"
     }
   ]
 }

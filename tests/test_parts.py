@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 from photo_harbor.auth import is_home_network
-from photo_harbor.backup import mirror, verify
+from photo_harbor.backup import DailyBackup, mirror, verify
 from photo_harbor.body_readers import ChunkedReader, LengthReader
 from photo_harbor.config import load_or_create, rotate_key
 from photo_harbor.errors import HarborError
@@ -144,6 +144,22 @@ class BackupTest(unittest.TestCase):
         root = temp_dir(self)
         with self.assertRaises(HarborError):
             verify(root, root / "missing")
+
+    def test_a_backup_run_records_its_last_status(self):
+        root = temp_dir(self)
+        source, target = root / "photos", root / "backup"
+        source.mkdir()
+        (source / "a.jpg").write_bytes(b"aaa")
+        backup = DailyBackup(source, target, log=lambda text: None)
+        status = backup.run_once()
+        self.assertIsNotNone(status.last_at)
+        self.assertEqual((status.copied, status.unchanged, status.bytes_copied),
+                         (1, 0, 3))
+        self.assertIsNone(status.error)
+        self.assertEqual(backup.status(), status)
+        backup.stop()
+        broken = DailyBackup(source, source / "inside", log=lambda text: None)
+        self.assertIsNotNone(broken.run_once().error)
 
 
 class ThumbnailerTest(unittest.TestCase):

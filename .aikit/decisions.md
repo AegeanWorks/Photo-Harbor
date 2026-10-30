@@ -561,3 +561,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   require the server; offline opens the UI without data. The cache is per browser profile and
   not shared between people. Bumping the cache name is only needed if the shell pre-cache list
   changes; network-first keeps ordinary asset updates fresh.
+
+### ADR-029: Backup status is an owner-only snapshot
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: `DailyBackup` reported into the Harbor window log only; the web Sync tab could
+  show photos and storage but not whether the second copy was configured or had last succeeded.
+- **Decision**: `DailyBackup` keeps an immutable `BackupStatus` (target, last attempt, copied,
+  unchanged, bytes, error) under a lock and exposes `run_once()` plus `status()`. `ServerRunner`
+  attaches the running backup to `HarborApp`; `GET /api/backup` returns the snapshot only to the
+  owner and `{"configured": false}` when no `--backup-to` was supplied. The Sync tab shows the
+  target and last result, or hides itself for non-owners. No status is persisted; it describes
+  this server process.
+- **Consequences**: A web user can see the last mirror result without opening the Harbor window,
+  and a failed target is visible as text. A restart shows a fresh “starting” state until the
+  first run completes. The check remains a separate explicit action; this endpoint never starts
+  a long verification from a page request.

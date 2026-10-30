@@ -14,6 +14,7 @@ from pathlib import Path
 
 from photo_harbor.app import HarborApp
 from photo_harbor.autostart import Autostart
+from photo_harbor.backup import DailyBackup
 from photo_harbor.config import load_or_create
 from photo_harbor.http_server import HarborServer
 from tests.library_fixture import FIXED_NOW, sha
@@ -324,6 +325,24 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(response.status, 400)
         response, _ = self.call("GET", "/api/photos?from=2026-06-01&to=2026-05-01")
         self.assertEqual(response.status, 400)
+
+    def test_backup_status_is_visible_only_to_the_owner(self):
+        _, body = self.call("GET", "/api/backup")
+        self.assertEqual(json.loads(body), {"configured": False})
+        backup = DailyBackup(self.settings.library, self.settings.library.parent / "backup",
+                             log=lambda text: None)
+        backup.run_once()
+        self.app.backup = backup
+        _, body = self.call("GET", "/api/backup")
+        report = json.loads(body)
+        self.assertTrue(report["configured"])
+        self.assertIsNotNone(report["last_at"])
+        self.assertIsNone(report["error"])
+        ayse = self.add_person()
+        response, body = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
+        as_her = {"Cookie": response.getheader("Set-Cookie").split(";", 1)[0]}
+        response, _ = self.call("GET", "/api/backup", key=False, headers=as_her)
+        self.assertEqual(response.status, 403)
 
     def test_storage_report_follows_the_signed_in_person(self):
         self.upload(b"one", name="one.jpg")
