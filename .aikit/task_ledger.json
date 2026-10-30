@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "select-matching",
     "last_phase": "phase 3",
-    "active_phase": 3,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793372578.6938083,
     "owner": "opencode:select",
     "started_by": "opencode:select",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793372613.8925095
   },
   "checkpoints": [
-    {
-      "task_id": "date-filter",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Dates popover with From/To, Apply/Clear; scope title and count; browser dogfood 3 photos, May window 2, cleared 3, 0 JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793363953.5795033,
-      "timestamp_str": "2026-10-30 15:39:13",
-      "agent": "opencode:dates"
-    },
     {
       "task_id": "date-filter",
       "phase": "phase 4",
@@ -249,6 +239,16 @@
       "status": "in_progress",
       "timestamp": 1793372578.6938083,
       "timestamp_str": "2026-10-30 18:02:58",
+      "agent": "opencode:select"
+    },
+    {
+      "task_id": "select-matching",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'select-matching' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793372613.892511,
+      "timestamp_str": "2026-10-30 18:03:33",
       "agent": "opencode:select"
     }
   ]
