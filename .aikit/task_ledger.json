@@ -3,31 +3,15 @@
   "active_task": {
     "task_id": "album-polish",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793363147.1285903,
     "owner": "opencode:polish",
     "started_by": "opencode:polish",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793363178.2936444
   },
   "checkpoints": [
-    {
-      "task_id": "photo-details",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: add details.py (file facts always; dimensions, camera, lens, exposure, aperture, ISO and focal length with optional Pillow); GET /api/details/<sha> with the same visibility as media; viewer Details panel; tests, dogfood, ADR-012, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793356669.4343662,
-      "timestamp_str": "2026-10-30 13:37:49",
-      "agent": "opencode:details",
-      "impact_assessment": {
-        "why": "The viewer shows only name, date and size; users cannot see dimensions or camera settings, and the data is already in the file",
-        "benefits": "One click shows capture facts; no schema change, no index, no extra dependency beyond the optional Pillow already used for previews and dates",
-        "risks": "contract: new read-only endpoint and viewer control; dependency: Pillow optional, HEIC via pillow-heif; concurrency: on-demand file read, no shared mutable state; state: none persisted",
-        "mitigation": "Read only the requested original through the store's visibility check, cache nothing, catch unreadable EXIF, and return file facts even when Pillow is absent or the image is a video"
-      }
-    },
     {
       "task_id": "photo-details",
       "phase": "phase 3",
@@ -250,6 +234,16 @@
       "status": "in_progress",
       "timestamp": 1793363147.1285903,
       "timestamp_str": "2026-10-30 15:25:47",
+      "agent": "opencode:polish"
+    },
+    {
+      "task_id": "album-polish",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'album-polish' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793363178.2936459,
+      "timestamp_str": "2026-10-30 15:26:18",
       "agent": "opencode:polish"
     }
   ]
