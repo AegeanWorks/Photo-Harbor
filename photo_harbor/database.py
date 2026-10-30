@@ -6,13 +6,37 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 OWNER_PROFILE = "main"
 
-# Format 4, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 5, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
-_SCHEMA = """
+_COLLECTIONS = """
+CREATE TABLE IF NOT EXISTS favorites (
+    profile TEXT NOT NULL,
+    sha256 TEXT NOT NULL,
+    added_at TEXT NOT NULL,
+    PRIMARY KEY (profile, sha256)
+);
+CREATE INDEX IF NOT EXISTS favorites_by_sha ON favorites (sha256);
+CREATE TABLE IF NOT EXISTS albums (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile TEXT NOT NULL,
+    name TEXT NOT NULL COLLATE NOCASE,
+    created_at TEXT NOT NULL,
+    UNIQUE (profile, name)
+);
+CREATE TABLE IF NOT EXISTS album_photos (
+    album_id INTEGER NOT NULL,
+    sha256 TEXT NOT NULL,
+    added_at TEXT NOT NULL,
+    PRIMARY KEY (album_id, sha256)
+);
+CREATE INDEX IF NOT EXISTS album_photos_by_sha ON album_photos (sha256);
+"""
+
+_SCHEMA = _COLLECTIONS + """
 CREATE TABLE IF NOT EXISTS photos (
     sha256 TEXT PRIMARY KEY,
     rel_path TEXT NOT NULL UNIQUE,
@@ -130,7 +154,12 @@ CREATE TABLE IF NOT EXISTS sessions (
 );
 """
 
-_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3, 2: _FROM_2 + _FROM_3, 3: _FROM_3}
+# Format 5 adds personal favorites and albums. Existing photos, copies and folders are untouched;
+# the tables are additive, so a failed upgrade leaves the format 4 catalog readable in its backup.
+_FROM_4 = _COLLECTIONS
+
+_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4, 2: _FROM_2 + _FROM_3 + _FROM_4,
+             3: _FROM_3 + _FROM_4, 4: _FROM_4}
 
 
 class Database:

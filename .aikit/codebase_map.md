@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `43`
-- **Total Classes**: `88`
-- **Total Top-Level Functions**: `71`
-- **Total Class Methods**: `317`
-- **Total Source Lines**: `4980`
+- **Total Python Modules**: `46`
+- **Total Classes**: `93`
+- **Total Top-Level Functions**: `75`
+- **Total Class Methods**: `343`
+- **Total Source Lines**: `5466`
 
 ---
 
@@ -69,15 +69,58 @@
 
 ---
 
+### [`photo_harbor/albums.py`](photo_harbor/albums.py)
+> *Personal albums and favorites: named collections that never move or copy a file.*
+
+**Size**: `147` lines (`6684` bytes)
+
+**Classes:**
+- `class AlbumBook` - *Albums belong to one person; favorites are that person's own mark on a photo.*
+  - Method `.__init__(db, now)`
+  - Method `.summary(profile)` - *``(favorite count, [Album, ...])`` for the signed-in person, names in A-Z order.*
+  - Method `.create(profile, name)`
+  - Method `.rename(profile, ident, name)`
+  - Method `.delete(profile, ident)`
+  - Method `.owned(profile, ident)` - *Whether this person owns the album; a bad id is a 400, a missing one is False.*
+  - Method `.add(profile, ident, sha256, member)` - *Put a photo in an album or take it out; True when the album changed.*
+  - Method `.favorite(profile, sha256, favorite)` - *Mark or unmark one photo for one person; True when the mark changed.*
+  - Method `._owned(profile, album)`
+
+**Functions:**
+- `def _clean_name(value)`
+- `def _album_id(value)`
+
+---
+
+### [`photo_harbor/albums_api.py`](photo_harbor/albums_api.py)
+> *Endpoints for personal albums and favorites; every write stays inside the caller's profile.*
+
+**Size**: `71` lines (`3063` bytes)
+
+**Classes:**
+- `class AlbumsApi`
+  - Method `.__init__(albums, catalog)`
+  - Method `.listing(request)`
+  - Method `.create(request)`
+  - Method `.update(request, ident)`
+  - Method `.membership(request)`
+  - Method `.favorite(request)`
+
+**Functions:**
+- `def _photo(request, catalog, value)`
+- `def _flag(body, name)`
+
+---
+
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `110` lines (`4948` bytes)
+**Size**: `119` lines (`5411` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
   - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations)`
-  - Method `._register(sync, library, people, setup)`
+  - Method `._register(sync, library, people, albums, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -178,15 +221,16 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `135` lines (`6285` bytes)
+**Size**: `161` lines (`7685` bytes)
 
 **Classes:**
 - `class Catalog`
   - Method `.__init__(db)`
   - Method `.add(record)` - *Insert ``record``; False when its hash is already catalogued. A path another record*
   - Method `.get(sha256)`
+  - Method `.has_copy(profile, sha256)` - *Whether ``profile``'s folder holds this photo, so it is theirs to see.*
   - Method `.page(offset, limit, narrow)` - *Records newest first by taken time, falling back to received time.*
-  - Method `.outline(profile)` - *Months and video count, for one profile or (None) everyone.*
+  - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
 
 **Functions:**
@@ -275,7 +319,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `191` lines (`7024` bytes)
+**Size**: `220` lines (`8005` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -393,11 +437,11 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `139` lines (`6542` bytes)
+**Size**: `151` lines (`7214` bytes)
 
 **Classes:**
 - `class LibraryApi`
-  - Method `.__init__(store, catalog, journal, thumbs, now)`
+  - Method `.__init__(store, catalog, journal, thumbs, albums, now)`
   - Method `.status(request)`
   - Method `.photos(request)`
   - Method `.outline(request)` - *Months with photos, newest first, for the browser sidebar.*
@@ -411,7 +455,7 @@
 - `def photo_json(record)`
 - `def _profile_arg(request)`
 - `def _visible_profile(request)` - *The owner may look at anyone (or, with no ?profile=, everyone); others see only*
-- `def _narrowing(request)`
+- `def _narrowing(request, albums)`
 
 ---
 
@@ -493,7 +537,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `89` lines (`2078` bytes)
+**Size**: `106` lines (`2560` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -503,7 +547,8 @@
 - `class IngestResult` - *``status`` is ``stored`` for a new file or ``duplicate`` when the bytes were already held.*
 - `class LibraryStats`
 - `class PhotoFilter` - *Gallery narrowing: ``month`` is ``YYYY-MM``, ``query`` matches the file name, ``kind`` is*
-- `class Outline` - *What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, and the video count.*
+- `class Outline` - *What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the*
+- `class Album` - *One person's named collection; ``cover`` is the newest member's SHA-256, if any.*
 - `class Profile` - *A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends.*
 - `class Identity` - *Who a request comes from; the owner (library key) may manage every profile.*
 
@@ -676,6 +721,23 @@
 
 ---
 
+### [`tests/test_albums.py`](tests/test_albums.py)
+**Size**: `101` lines (`5253` bytes)
+
+**Classes:**
+- `class AlbumBookTest`
+  - Method `.setUp()`
+  - Method `.test_an_album_holds_photos_without_moving_any_file()`
+  - Method `.test_favorites_are_private_to_the_person_who_marked_them()`
+  - Method `.test_album_names_are_cleaned_and_unique_per_person()`
+  - Method `.test_a_person_cannot_touch_another_persons_album()`
+  - Method `.test_renaming_and_deleting_an_album_keeps_its_photos()`
+- `class CollectionMigrationTest`
+  - Method `.test_a_format_4_catalog_gains_collections_and_keeps_its_photos()`
+  - Method `.test_a_bad_collection_id_is_a_clear_error()`
+
+---
+
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
@@ -706,7 +768,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `297` lines (`15551` bytes)
+**Size**: `371` lines (`20204` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -744,6 +806,8 @@
   - Method `.test_changing_a_password_needs_the_current_one_and_signs_out_other_browsers()`
   - Method `.test_last_day_counts_follow_the_signed_in_person()`
   - Method `.test_the_owner_can_reset_a_password_and_a_key_still_signs_in()`
+  - Method `.test_albums_and_favorites_page_the_photos_they_hold()`
+  - Method `.test_albums_and_favorites_never_cross_people()`
 
 ---
 

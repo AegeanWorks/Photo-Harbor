@@ -4,8 +4,9 @@ const PAGE = 120;
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
-  scope: { kind: null, month: null }, query: "", generation: 0, total: 0,
-  profile: null, people: [], me: null, owner: false,
+  scope: { kind: null, month: null, favorite: false, album: null }, query: "",
+  generation: 0, total: 0, profile: null, people: [], me: null, owner: false,
+  favorites: 0, albums: [],
 };
 
 function personName(id) {
@@ -126,7 +127,8 @@ function showImage(img, tile, sources, photo) {
 function tile(photo, index) {
   const button = el("button", "tile");
   button.type = "button";
-  button.setAttribute("aria-label", `${photo.name}, ${timeFormat.format(parseTime(photo.time) || new Date())}`);
+  button.dataset.index = String(index);
+  button.setAttribute("aria-label", `${photo.name}${photo.favorite ? ", favorite" : ""}, ${timeFormat.format(parseTime(photo.time) || new Date())}`);
   button.addEventListener("click", () => openViewer(index));
   if (photo.video) {
     button.append(fallback(photo));
@@ -144,7 +146,14 @@ function tile(photo, index) {
     badge.innerHTML = PLAY;
     button.append(badge);
   }
+  if (photo.favorite) button.append(favoriteMark());
   return button;
+}
+
+function favoriteMark() {
+  const heart = el("span", "heart", "♥");
+  heart.title = "Favorite";
+  return heart;
 }
 
 function dayGroup(date) {
@@ -176,6 +185,8 @@ function photosUrl() {
   const params = new URLSearchParams({ offset: String(state.next), limit: String(PAGE) });
   if (state.scope.kind) params.set("kind", state.scope.kind);
   if (state.scope.month) params.set("month", state.scope.month);
+  if (state.scope.favorite) params.set("favorite", "1");
+  if (state.scope.album) params.set("album", String(state.scope.album));
   if (state.query) params.set("q", state.query);
   if (state.profile) params.set("profile", state.profile);
   return `/api/photos?${params}`;
@@ -213,40 +224,61 @@ function resetPhotos() {
 
 // ---------- browsing: months, videos, search ----------
 
+function currentAlbum() {
+  return state.albums.find((album) => album.id === state.scope.album) || null;
+}
+
 function scopeTitle() {
+  const album = currentAlbum();
+  if (album) return album.name;
+  if (state.scope.favorite) return "Favorites";
   if (state.scope.month) return capitalise(monthYearFormat.format(monthDate(state.scope.month)));
   return state.scope.kind === "video" ? "Videos" : "All photos";
 }
 
 function renderScope() {
-  const narrowed = Boolean(state.scope.month || state.scope.kind || state.query);
+  const narrowed = Boolean(state.scope.month || state.scope.kind || state.scope.favorite
+    || state.scope.album || state.query);
   const shown = state.photos.length;
   const title = state.query ? `“${state.query}”` : scopeTitle();
   $("scope-title").textContent = state.profile ? `${personName(state.profile)} · ${title}` : title;
-  if (!narrowed && !state.profile) $("scope-count").textContent = state.total.toLocaleString();
+  if (state.scope.album) $("scope-count").textContent = (currentAlbum()?.count ?? shown).toLocaleString();
+  else if (state.scope.favorite) $("scope-count").textContent = state.favorites.toLocaleString();
+  else if (!narrowed && !state.profile) $("scope-count").textContent = state.total.toLocaleString();
   else if (!narrowed) $("scope-count").textContent = (state.people.find((p) => p.id === state.profile)?.count ?? shown).toLocaleString();
   else $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
   $("scope-clear").hidden = !narrowed;
+  $("album-rename").hidden = !currentAlbum();
+  $("album-delete").hidden = !currentAlbum();
   const empty = shown === 0 && state.next === null;
   $("empty").hidden = !empty;
   if (empty) {
     $("empty-title").textContent = narrowed ? "Nothing here" : "No photos yet";
-    $("empty-text").textContent = narrowed
-      ? "No photo matches. Try another month or search."
-      : "Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.";
+    $("empty-text").textContent = state.scope.album
+      ? "This album is empty. Open a photo and choose Add to album."
+      : state.scope.favorite
+        ? "No favorites yet. Open a photo and press ♡ Favorite."
+        : narrowed
+          ? "No photo matches. Try another month or search."
+          : "Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.";
     $("empty-action").hidden = narrowed;
   }
 }
 
 function markScope() {
-  const active = state.scope.month || state.scope.kind || "all";
+  const active = state.scope.album ? null
+    : state.scope.favorite ? "favorite"
+      : state.scope.month || state.scope.kind || "all";
   for (const item of document.querySelectorAll(".rail-item[data-scope]")) {
     item.setAttribute("aria-pressed", String(item.dataset.scope === active));
   }
+  for (const item of document.querySelectorAll("[data-album]")) {
+    item.setAttribute("aria-pressed", String(Number(item.dataset.album) === state.scope.album));
+  }
 }
 
-function setScope(kind, month) {
-  state.scope = { kind, month };
+function setScope(kind, month, extra = {}) {
+  state.scope = { kind, month, favorite: false, album: null, ...extra };
   markScope();
   window.scrollTo({ top: 0 });
   resetPhotos();
@@ -275,6 +307,8 @@ async function loadOutline() {
     years.append(railButton(month, capitalise(monthFormat.format(monthDate(month))), count));
   }
   $("rail-videos").textContent = outline.videos.toLocaleString();
+  state.favorites = outline.favorites || 0;
+  $("rail-favorites").textContent = state.favorites.toLocaleString();
   document.querySelector('[data-scope="video"]').hidden = outline.videos === 0;
   markScope();
 }
@@ -296,11 +330,97 @@ function selectPerson(id) {
   for (const item of document.querySelectorAll("[data-person]")) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
-  state.scope = { kind: null, month: null };
+  state.scope = { kind: null, month: null, favorite: false, album: null };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
   resetPhotos();
+}
+
+// ---------- albums and favorites ----------
+
+function clearPersonScope() {
+  if (!state.owner) return;
+  state.profile = null;
+  for (const item of document.querySelectorAll("[data-person]")) {
+    item.setAttribute("aria-pressed", String(item.dataset.person === ""));
+  }
+}
+
+function selectFavorites() {
+  clearPersonScope();
+  setScope(null, null, { favorite: true });
+  loadOutline().catch(handle);
+}
+
+function selectAlbum(id) {
+  if (!state.albums.some((album) => album.id === id)) return;
+  clearPersonScope();
+  setScope(null, null, { album: id });
+  loadOutline().catch(handle);
+  renderScope();
+}
+
+async function loadAlbums() {
+  const listing = await api("/api/albums");
+  state.favorites = listing.favorites;
+  state.albums = listing.albums;
+  $("rail-favorites").textContent = state.favorites.toLocaleString();
+  const rail = $("rail-albums");
+  rail.replaceChildren();
+  for (const album of state.albums) {
+    const button = el("button", "rail-item");
+    button.type = "button";
+    button.dataset.album = String(album.id);
+    button.setAttribute("aria-pressed", String(album.id === state.scope.album));
+    button.append(el("span", "", album.name), el("b", "", album.count.toLocaleString()));
+    button.addEventListener("click", () => selectAlbum(album.id));
+    rail.append(button);
+  }
+  renderScope();
+  renderViewerCollections();
+}
+
+async function newAlbum() {
+  const name = prompt("Name for the new album:");
+  if (!name) return;
+  try {
+    const album = await post("/api/albums", { name });
+    await loadAlbums();
+    toast(`Album “${album.name}” created; open a photo to add it`);
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function renameAlbum() {
+  const album = currentAlbum();
+  if (!album) return;
+  const name = prompt("Rename this album:", album.name);
+  if (!name || name.trim() === album.name) return;
+  try {
+    await post(`/api/albums/${album.id}`, { name });
+    await loadAlbums();
+    toast("Album renamed");
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function deleteAlbum() {
+  const album = currentAlbum();
+  if (!album) return;
+  if (!confirm(`Delete the album “${album.name}”? The photos stay in the library.`)) return;
+  try {
+    await post(`/api/albums/${album.id}`, { delete: true });
+    state.scope = { kind: null, month: null, favorite: false, album: null };
+    markScope();
+    await loadAlbums();
+    resetPhotos();
+    toast("Album deleted; its photos are still in the library");
+  } catch (error) {
+    handle(error);
+  }
 }
 
 function renderPeopleRail() {
@@ -436,6 +556,10 @@ async function copyText(text) {
 function wireBrowser() {
   document.querySelector('[data-scope="all"]').addEventListener("click", () => setScope(null, null));
   document.querySelector('[data-scope="video"]').addEventListener("click", () => setScope("video", null));
+  document.querySelector('[data-scope="favorite"]').addEventListener("click", selectFavorites);
+  $("album-new").addEventListener("click", newAlbum);
+  $("album-rename").addEventListener("click", renameAlbum);
+  $("album-delete").addEventListener("click", deleteAlbum);
   $("scope-clear").addEventListener("click", () => {
     $("search").value = "";
     state.query = "";
@@ -451,7 +575,7 @@ function wireBrowser() {
       if (document.querySelector('[data-view="photos"]').getAttribute("aria-selected") !== "true") show("photos");
       // Search covers the whole library, not just the month in view.
       if (query) {
-        state.scope = { kind: null, month: null };
+        state.scope = { kind: null, month: null, favorite: false, album: null };
         markScope();
       }
       resetPhotos();
@@ -635,8 +759,88 @@ function openViewer(index) {
   $("viewer-download").setAttribute("download", photo.name);
   $("viewer-prev").disabled = index === 0;
   $("viewer-next").disabled = index === state.photos.length - 1 && state.next === null;
+  renderViewerCollections();
   $("viewer").hidden = false;
   document.body.style.overflow = "hidden";
+}
+
+function renderViewerCollections() {
+  const photo = state.photos[state.viewing];
+  const favorite = $("viewer-favorite");
+  favorite.textContent = photo?.favorite ? "♥ Favorited" : "♡ Favorite";
+  favorite.setAttribute("aria-pressed", String(Boolean(photo?.favorite)));
+  $("viewer-album-add").hidden = !photo || state.albums.length === 0;
+  $("viewer-album-remove").hidden = !photo || !state.scope.album;
+  $("viewer-albums").hidden = true;
+  $("viewer-albums").replaceChildren();
+}
+
+async function toggleFavorite() {
+  const photo = state.photos[state.viewing];
+  if (!photo) return;
+  try {
+    const result = await post("/api/favorite", { sha256: photo.sha256, favorite: !photo.favorite });
+    photo.favorite = result.favorite;
+    renderViewerCollections();
+    const button = document.querySelector(`.tile[data-index="${state.viewing}"]`);
+    if (button) {
+      const heart = button.querySelector(".heart");
+      if (photo.favorite && !heart) button.append(favoriteMark());
+      if (!photo.favorite && heart) heart.remove();
+    }
+    await loadAlbums();
+    if (state.scope.favorite && !photo.favorite) {
+      closeViewer();
+      resetPhotos();
+    }
+    toast(photo.favorite ? "Added to Favorites" : "Removed from Favorites");
+  } catch (error) {
+    handle(error);
+  }
+}
+
+function toggleAlbumMenu() {
+  const box = $("viewer-albums");
+  if (!box.hidden) {
+    box.hidden = true;
+    return;
+  }
+  const photo = state.photos[state.viewing];
+  if (!photo) return;
+  box.replaceChildren();
+  for (const album of state.albums) {
+    const button = el("button", "ghost", album.name);
+    button.type = "button";
+    button.addEventListener("click", async () => {
+      try {
+        const result = await post("/api/album-photos",
+          { album: album.id, sha256: photo.sha256, member: true });
+        box.hidden = true;
+        toast(result.changed ? `Added to “${album.name}”` : `Already in “${album.name}”`);
+        await loadAlbums();
+      } catch (error) {
+        handle(error);
+      }
+    });
+    box.append(button);
+  }
+  box.hidden = false;
+}
+
+async function removeFromAlbum() {
+  const photo = state.photos[state.viewing];
+  const album = currentAlbum();
+  if (!photo || !album) return;
+  try {
+    const result = await post("/api/album-photos",
+      { album: album.id, sha256: photo.sha256, member: false });
+    await loadAlbums();
+    closeViewer();
+    resetPhotos();
+    toast(result.changed ? `Removed from “${album.name}”` : "It was not in this album");
+  } catch (error) {
+    handle(error);
+  }
 }
 
 function closeViewer() {
@@ -657,11 +861,16 @@ function wireViewer() {
   $("viewer-close").addEventListener("click", closeViewer);
   $("viewer-prev").addEventListener("click", () => step(-1));
   $("viewer-next").addEventListener("click", () => step(1));
+  $("viewer-favorite").addEventListener("click", toggleFavorite);
+  $("viewer-album-add").addEventListener("click", toggleAlbumMenu);
+  $("viewer-album-remove").addEventListener("click", removeFromAlbum);
   document.addEventListener("keydown", (event) => {
     if (state.viewing < 0) return;
     if (event.key === "Escape") closeViewer();
     if (event.key === "ArrowLeft") step(-1);
     if (event.key === "ArrowRight") step(1);
+    if (event.key.toLowerCase() === "f" && !event.ctrlKey && !event.metaKey && !event.altKey
+      && event.target.tagName !== "BUTTON") toggleFavorite();
   });
   let startX = null;
   const stage = $("viewer-stage");
@@ -828,6 +1037,7 @@ async function start() {
   show(view);
   loadPeople().catch(handle);
   loadOutline().catch(handle);
+  loadAlbums().catch(handle);
   resetPhotos();
 }
 

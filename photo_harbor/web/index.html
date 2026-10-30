@@ -78,6 +78,9 @@
           <h4 class="rail-year">Library</h4>
           <button class="rail-item" data-scope="all" aria-pressed="true"><span>All photos</span><b id="rail-all"></b></button>
           <button class="rail-item" data-scope="video" aria-pressed="false"><span>Videos</span><b id="rail-videos"></b></button>
+          <button class="rail-item" data-scope="favorite" aria-pressed="false"><span>Favorites</span><b id="rail-favorites">0</b></button>
+          <div id="rail-albums" class="rail-years"></div>
+          <button class="rail-add" id="album-new" type="button">+ New album</button>
           <div id="rail-years" class="rail-years"></div>
         </aside>
         <div class="gallery">
@@ -85,6 +88,8 @@
           <div class="scope" id="scope">
             <h1 id="scope-title">All photos</h1>
             <span id="scope-count"></span>
+            <button class="ghost" id="album-rename" hidden>Rename album</button>
+            <button class="ghost" id="album-delete" hidden>Delete album</button>
             <button class="ghost" id="scope-clear" hidden>Show everything</button>
           </div>
           <div id="days"></div>
@@ -204,8 +209,12 @@
     <footer class="viewer-meta">
       <span id="viewer-title"></span>
       <span id="viewer-detail"></span>
+      <button class="ghost" id="viewer-favorite" type="button" aria-pressed="false">♡ Favorite</button>
+      <button class="ghost" id="viewer-album-add" type="button">Add to album…</button>
+      <button class="ghost" id="viewer-album-remove" type="button" hidden>Remove from album</button>
       <a id="viewer-download" class="ghost" download>Download original</a>
     </footer>
+    <div class="viewer-albums" id="viewer-albums" hidden></div>
   </div>
 
   <div id="drop" class="drop" hidden aria-hidden="true">

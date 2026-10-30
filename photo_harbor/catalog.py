@@ -10,7 +10,10 @@ _COLUMNS = "sha256, rel_path, size, original_name, media_type, taken_at, receive
 
 
 def _to_record(row: sqlite3.Row) -> PhotoRecord:
-    return PhotoRecord(**dict(row))
+    values = dict(row)
+    if "favorite" in values:
+        values["favorite"] = bool(values["favorite"])
+    return PhotoRecord(**values)
 
 
 def _source(narrow: PhotoFilter) -> tuple:
@@ -46,6 +49,14 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
         wanted = "=" if narrow.kind == "video" else "!="
         clauses.append(f"c.is_video {wanted} 1" if owner == "c" else
                        f"p.media_type {'' if wanted == '=' else 'NOT '}LIKE 'video/%'")
+    if narrow.favorite:
+        clauses.append("EXISTS (SELECT 1 FROM favorites f"
+                       " WHERE f.profile = ? AND f.sha256 = p.sha256)")
+        params.append(narrow.viewer)
+    if narrow.album is not None:
+        clauses.append("EXISTS (SELECT 1 FROM album_photos a JOIN albums al ON al.id = a.album_id"
+                       " WHERE a.album_id = ? AND al.profile = ? AND a.sha256 = p.sha256)")
+        params.extend((narrow.album, narrow.viewer))
     return (" WHERE " + " AND ".join(clauses) if clauses else ""), params
 
 
@@ -93,21 +104,32 @@ class Catalog:
             ).fetchone()
         return _to_record(row) if row else None
 
+    def has_copy(self, profile: str, sha256: str) -> bool:
+        """Whether ``profile``'s folder holds this photo, so it is theirs to see."""
+        with self._db.lock:
+            row = self._db.conn.execute(
+                "SELECT 1 FROM copies WHERE profile = ? AND sha256 = ?", (profile, sha256)
+            ).fetchone()
+        return row is not None
+
     def page(self, offset: int, limit: int, narrow: PhotoFilter = PhotoFilter()) -> list:
         """Records newest first by taken time, falling back to received time."""
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
+        favorite = ("EXISTS (SELECT 1 FROM favorites f"
+                    " WHERE f.profile = ? AND f.sha256 = p.sha256) AS favorite")
         with self._db.lock:
             rows = self._db.conn.execute(
-                f"SELECT {columns} FROM {table}{where}"
+                f"SELECT {columns}, {favorite} FROM {table}{where}"
                 f" ORDER BY {owner}.sort_time DESC, {owner}.sha256 DESC"
                 " LIMIT ? OFFSET ?",
-                (*params, limit, offset),
+                (narrow.viewer, *params, limit, offset),
             ).fetchall()
         return [_to_record(row) for row in rows]
 
-    def outline(self, profile: Optional[str] = None) -> Outline:
-        """Months and video count, for one profile or (None) everyone."""
+    def outline(self, profile: Optional[str] = None, viewer: str = "main") -> Outline:
+        """Months and video count, for one profile or (None) everyone, plus the viewer's
+        favorites."""
         # One person's totals come from their copies alone; no join needed.
         table, where, params = _totals_source(profile)
         alias = "c" if profile else "p"
@@ -121,7 +143,11 @@ class Catalog:
             videos = self._db.conn.execute(
                 f"SELECT COUNT(*) FROM {table}{video_where} {video}", params
             ).fetchone()[0]
-        return Outline(months=tuple((row[0], row[1]) for row in months), videos=videos)
+            favorites = self._db.conn.execute(
+                "SELECT COUNT(*) FROM favorites f JOIN photos p ON p.sha256 = f.sha256"
+                " WHERE f.profile = ?", (viewer,)).fetchone()[0]
+        return Outline(months=tuple((row[0], row[1]) for row in months), videos=videos,
+                       favorites=favorites)
 
     def stats(self, profile: Optional[str] = None) -> LibraryStats:
         table, where, params = _totals_source(profile)

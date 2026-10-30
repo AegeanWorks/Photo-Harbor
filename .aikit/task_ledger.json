@@ -1,87 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "reforge:run-1",
+    "task_id": "albums-favorites",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793293784.2410908,
-    "owner": "opencode",
-    "started_by": "opencode",
-    "continuations": [],
-    "completed_at": 1793295469.7040005
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793345087.7834983,
+    "owner": "opencode:albums",
+    "started_by": "opencode:albums",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "accounts-folders",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/6] Plan: M1 catalog v4 (copies per person, profile folder, password hash, sessions) + store writes readable paths <Person>/<YYYY>/<YYYY-MM>/ with hard-linked shared photos; M2 resumable reorganiser moving existing files + library README.txt + hidden .harbor + folder rename; M3 accounts: PBKDF2 passwords, sessions, name+password login (key fallback), change/reset password, login rate limit, per-person privacy on every endpoint; M4 UI: login picker, My account, owner resets, window Open folder + set password, disk-space warning; M5 weekly integrity check; M6 tests, docs, ADR-007/008, review, screenshots",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792868757.4617782,
-      "timestamp_str": "2026-10-24 22:05:57",
-      "agent": "claude-code:851e578e",
-      "impact_assessment": {
-        "why": "User asked that each person reach their own photos, change their passwords, and find photos in plain, understandable Windows folders usable without Harbor; plus proposals 1 and 3",
-        "benefits": "Private per-person galleries, password sign-in, photos browsable in File Explorer, early warning before the disk fills or a file rots",
-        "risks": "contract: login moves from keys to name+password, non-owners lose the everyone view, on-disk layout changes; dependency: none new (hashlib.pbkdf2_hmac, os.link); concurrency: reorganiser moving files while uploads arrive; state: catalog v3->v4 migration and moving every original",
-        "mitigation": "Key sign-in kept as fallback; migration additive with backup copy; file moves are per-file, resumable, verified by size, done under the store's placement lock; hard link falls back to copy"
-      }
-    },
-    {
-      "task_id": "profiles-panel",
-      "phase": "superseded",
-      "phase_num": 4,
-      "description": "Superseded by 'accounts-folders' without --complete or --reset",
-      "status": "superseded",
-      "timestamp": 1792868757.4617782,
-      "timestamp_str": "2026-10-24 22:05:57",
-      "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "accounts-folders",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] Done: catalog v4 (copies, folders, passwords, sessions); readable <Person>/<YYYY>/<YYYY-MM> layout with hard links, bilingual guide, hidden .harbor, legacy move verified on 60 real files; Explorer reconcile with unplugged-drive guard; weekly file check; PBKDF2 sign-in, sessions, brake, change/reset password, per-person privacy; window: More menu (password, rename, open folder), library folder, check files, free space; gallery: name picker login, account menu, My account, owner tools, disk banner; 95 tests, 4/4 gates, Edge+Tk screenshots; ADR-007/008; checklists: passed; uncommitted pending user request",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792879529.3375595,
-      "timestamp_str": "2026-10-25 01:05:29",
-      "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "accounts-folders",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "Review since 425c1b6: fixed per-person import skip, silent scan-thread death and missing window log, savepoint leak on sqlite errors, hashing under placement lock, expired sessions; per-person views denormalised (copies sort_time/size/is_video + indexes): page 200->13-33ms, outline 462->26, status 214->10, people 206->9, search 163->23; 97 tests, 4/4 gates, Edge+Tk walkthrough; ADR-009; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1792880002.4750876,
-      "timestamp_str": "2026-10-25 01:13:22",
-      "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "accounts-folders",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'accounts-folders' completed successfully.",
-      "status": "completed",
-      "timestamp": 1792880002.686511,
-      "timestamp_str": "2026-10-25 01:13:22",
-      "agent": "claude-code:851e578e"
-    },
-    {
-      "task_id": "reforge:run-1",
-      "phase": "reforge stage 1",
-      "phase_num": 3,
-      "description": "Reforge stage 1: window 3, 3 commit(s), 2 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793292457.0422652,
-      "timestamp_str": "2026-10-29 19:47:37",
-      "agent": "opencode"
-    },
     {
       "task_id": "reforge:run-1",
       "phase": "reforge stage 2",
@@ -247,6 +176,78 @@
       "timestamp": 1793295469.704002,
       "timestamp_str": "2026-10-29 20:37:49",
       "agent": "opencode"
+    },
+    {
+      "task_id": "albums-favorites",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/6] Plan: catalog format 5 adds favorites, albums and album_photos (additive); AlbumBook domain; /api/albums, /api/albums/<id>, /api/album-photos, /api/favorite; photos gain ?favorite=1 and ?album=ID plus a favorite flag; gallery rail, viewer heart and add-to-album; tests, README, ADR-010, codebase map",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793344193.2746875,
+      "timestamp_str": "2026-10-30 10:09:53",
+      "agent": "opencode:albums",
+      "impact_assessment": {
+        "why": "The user asked to continue photo-harbor; after accounts and folders, the library has no way to collect a subset of photos or mark keepers across months",
+        "benefits": "Personal albums and favorites with no file moves; plain-folder layout untouched; favorites and albums stay private per person; additive migration keeps existing libraries",
+        "risks": "contract: catalog format 5 and new API fields; dependency: none (sqlite3 only); concurrency: album writes share the database lock with scans and uploads; state: v4->v5 migration and album rows",
+        "mitigation": "Additive CREATE TABLE IF NOT EXISTS only, no row rewrites; the existing .v4.bak backs the upgrade; every album and favorite query is scoped to the signed-in profile; tests cover migration, privacy, add/remove and paging"
+      }
+    },
+    {
+      "task_id": "albums-favorites",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/6] Catalog format 5 with favorites, albums and album_photos; additive migration from 4; AlbumBook domain; 7 tests cover membership, privacy, names and migration",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793345086.7147503,
+      "timestamp_str": "2026-10-30 10:24:46",
+      "agent": "opencode:albums"
+    },
+    {
+      "task_id": "albums-favorites",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/6] API: GET/POST /api/albums, POST /api/albums/<id>, /api/album-photos, /api/favorite; ?favorite=1 and ?album=ID; per-viewer favorite flag; HTTP tests for lifecycle and cross-person refusal",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793345086.9894333,
+      "timestamp_str": "2026-10-30 10:24:46",
+      "agent": "opencode:albums"
+    },
+    {
+      "task_id": "albums-favorites",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[4/6] Gallery: Favorites and album rail, heart in the viewer and on tiles, Add to album menu, Remove from album, rename/delete; browser dogfood created an album and favorited a photo with zero JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793345087.2609653,
+      "timestamp_str": "2026-10-30 10:24:47",
+      "agent": "opencode:albums"
+    },
+    {
+      "task_id": "albums-favorites",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[5/6] README how-it-works and API rows, format 5 note, file tree; ADR-010; codebase map regenerated",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793345087.5180306,
+      "timestamp_str": "2026-10-30 10:24:47",
+      "agent": "opencode:albums"
+    },
+    {
+      "task_id": "albums-favorites",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[6/6] 108 tests pass; 4/4 project gates; Edge dogfood 1 favorite + 1 album, no console errors; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793345087.7834983,
+      "timestamp_str": "2026-10-30 10:24:47",
+      "agent": "opencode:albums"
     }
   ]
 }

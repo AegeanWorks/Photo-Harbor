@@ -16,6 +16,7 @@ class PhotoRecord:
     taken_at: Optional[str]
     received_at: str
     profile: str = "main"
+    favorite: bool = False
 
     @property
     def sort_time(self) -> str:
@@ -55,20 +56,36 @@ class LibraryStats:
 @dataclass(frozen=True)
 class PhotoFilter:
     """Gallery narrowing: ``month`` is ``YYYY-MM``, ``query`` matches the file name, ``kind`` is
-    ``photo`` or ``video``; None means no narrowing on that axis."""
+    ``photo`` or ``video``. ``viewer`` is whose favorites and albums are read; ``favorite`` and
+    ``album`` narrow to that viewer's marks. None means no narrowing on that axis."""
 
     month: Optional[str] = None
     query: Optional[str] = None
     kind: Optional[str] = None
     profile: Optional[str] = None
+    viewer: str = "main"
+    favorite: bool = False
+    album: Optional[int] = None
 
 
 @dataclass(frozen=True)
 class Outline:
-    """What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, and the video count."""
+    """What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the
+    viewer's favorites."""
 
     months: tuple
     videos: int
+    favorites: int = 0
+
+
+@dataclass(frozen=True)
+class Album:
+    """One person's named collection; ``cover`` is the newest member's SHA-256, if any."""
+
+    id: int
+    name: str
+    count: int = 0
+    cover: Optional[str] = None
 
 
 @dataclass(frozen=True)

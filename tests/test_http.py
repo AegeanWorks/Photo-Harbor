@@ -295,3 +295,77 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(self.sign_in("ayse", "baslangic")[0], 200)
         response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
         self.assertEqual(response.status, 200)
+
+    def test_albums_and_favorites_page_the_photos_they_hold(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        response, body = self.call("POST", "/api/albums", body={"name": "Keepers"})
+        self.assertEqual(response.status, 201)
+        album = json.loads(body)["id"]
+        response, body = self.call("POST", "/api/album-photos",
+                                   body={"album": album, "sha256": sha(b"one"), "member": True})
+        self.assertEqual((response.status, json.loads(body)["changed"]), (200, True))
+        _, body = self.call("GET", f"/api/photos?album={album}")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+        _, body = self.call("GET", "/api/albums")
+        listing = json.loads(body)
+        self.assertEqual(listing["favorites"], 0)
+        self.assertEqual((listing["albums"][0]["name"], listing["albums"][0]["count"]),
+                         ("Keepers", 1))
+        self.assertTrue(listing["albums"][0]["cover"].startswith("/thumb/"))
+        response, body = self.call("POST", "/api/favorite",
+                                   body={"sha256": sha(b"one"), "favorite": True})
+        self.assertEqual((response.status, json.loads(body)["changed"]), (200, True))
+        _, body = self.call("GET", "/api/photos?favorite=1")
+        self.assertEqual([(p["name"], p["favorite"]) for p in json.loads(body)["photos"]],
+                         [("one.jpg", True)])
+        _, body = self.call("GET", "/api/outline")
+        self.assertEqual(json.loads(body)["favorites"], 1)
+        response, _ = self.call("POST", "/api/favorite",
+                                body={"sha256": sha(b"one"), "favorite": "yes"})
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("POST", f"/api/albums/{album}", body={"name": "Best"})
+        self.assertEqual(response.status, 200)
+        _, body = self.call("GET", "/api/albums")
+        self.assertEqual(json.loads(body)["albums"][0]["name"], "Best")
+        response, _ = self.call("POST", f"/api/albums/{album}", body={"delete": True})
+        self.assertEqual(response.status, 200)
+        response, _ = self.call("GET", f"/api/photos?album={album}")
+        self.assertEqual(response.status, 404)
+        _, body = self.call("GET", "/api/photos?favorite=1")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+
+    def test_albums_and_favorites_never_cross_people(self):
+        ayse = self.add_person()
+        self.upload(b"one", name="one.jpg")
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        _, body = self.call("POST", "/api/albums", body={"name": "Main album"})
+        main_album = json.loads(body)["id"]
+        self.call("POST", "/api/album-photos",
+                  body={"album": main_album, "sha256": sha(b"one"), "member": True})
+        response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
+        as_her = {"Cookie": response.getheader("Set-Cookie").split(";", 1)[0]}
+        _, body = self.call("GET", "/api/albums", key=False, headers=as_her)
+        self.assertEqual(json.loads(body), {"favorites": 0, "albums": []})
+        response, _ = self.call("POST", f"/api/albums/{main_album}", body={"name": "Stolen"},
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("GET", f"/api/photos?album={main_album}", key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("POST", "/api/album-photos",
+                                body={"album": main_album, "sha256": sha(b"hers"), "member": True},
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("POST", "/api/favorite",
+                                body={"sha256": sha(b"one"), "favorite": True},
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        _, body = self.call("POST", "/api/albums", body={"name": "Hers"}, key=False,
+                            headers=as_her)
+        her_album = json.loads(body)["id"]
+        response, _ = self.call("POST", "/api/album-photos",
+                                body={"album": her_album, "sha256": sha(b"hers"), "member": True},
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 200)

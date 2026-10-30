@@ -5,6 +5,7 @@ import shutil
 from datetime import datetime, timedelta
 from typing import Callable
 
+from .albums import AlbumBook
 from .catalog import Catalog
 from .errors import HarborError
 from .journal import SyncJournal
@@ -37,6 +38,7 @@ def photo_json(record: PhotoRecord) -> dict:
     return {"sha256": record.sha256, "name": record.original_name, "type": record.media_type,
             "video": record.is_video, "size": record.size, "taken": record.taken_at,
             "received": record.received_at, "time": record.sort_time,
+            "favorite": record.favorite,
             "media": f"/media/{record.sha256}", "thumb": f"/thumb/{record.sha256}"}
 
 
@@ -61,26 +63,36 @@ def _visible_profile(request: Request):
     return request.profile
 
 
-def _narrowing(request: Request) -> PhotoFilter:
+def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
     month = request.arg("month") or None
     kind = request.arg("kind") or None
     query = request.arg("q").strip()[:MAX_QUERY] or None
+    favorite = request.arg("favorite") == "1"
+    album = request.arg("album") or None
     if month is not None and not MONTH.match(month):
         raise HarborError(f"{month!r} is not a month", "months are written YYYY-MM",
                           "use ?month=2026-10")
     if kind not in (None, "photo", "video"):
         raise HarborError(f"{kind!r} is not a kind", "kind is photo or video",
                           "use ?kind=video, or leave it out")
-    return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request))
+    if album is not None:
+        if not albums.owned(request.profile, album):
+            raise HarborError(f"no album {album}", "it was deleted or belongs to someone else",
+                              "reload the gallery and try again", status=404)
+        album = int(album)
+    return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
+                       viewer=request.profile, favorite=favorite, album=album)
 
 
 class LibraryApi:
     def __init__(self, store: PhotoStore, catalog: Catalog, journal: SyncJournal,
-                 thumbs: Thumbnailer, now: Callable[[], datetime] = local_now) -> None:
+                 thumbs: Thumbnailer, albums: AlbumBook,
+                 now: Callable[[], datetime] = local_now) -> None:
         self._store = store
         self._catalog = catalog
         self._journal = journal
         self._thumbs = thumbs
+        self._albums = albums
         self._now = now
 
     def status(self, request: Request) -> Reply:
@@ -102,15 +114,15 @@ class LibraryApi:
         except ValueError as exc:
             raise HarborError("offset and limit must be whole numbers", str(exc),
                               "use ?offset=0&limit=120") from exc
-        records = self._catalog.page(offset, limit, _narrowing(request))
+        records = self._catalog.page(offset, limit, _narrowing(request, self._albums))
         return json_reply({"photos": [photo_json(r) for r in records],
                            "next": offset + len(records) if len(records) == limit else None})
 
     def outline(self, request: Request) -> Reply:
         """Months with photos, newest first, for the browser sidebar."""
-        outline = self._catalog.outline(_visible_profile(request))
+        outline = self._catalog.outline(_visible_profile(request), viewer=request.profile)
         return json_reply({"months": [{"month": m, "count": n} for m, n in outline.months],
-                           "videos": outline.videos})
+                           "videos": outline.videos, "favorites": outline.favorites})
 
     def _disk(self) -> dict:
         usage = shutil.disk_usage(self._store.root)

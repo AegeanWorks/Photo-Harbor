@@ -225,3 +225,25 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 ## License notice cleanup (2026-10-26)
 
 - The license-history notes were removed from README.md and COMMERCIAL.md: the project is offered only under the Aegean License 1.1 (AL-1.1), with commercial use under ACL-1.0.
+
+### ADR-010: Personal albums and favorites without moving files
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: After per-person folders landed, the library could only be narrowed by month,
+  kind and file name. There was no way to keep a set of photos for a trip or mark the keepers,
+  and copying them into album folders would break the plain-folder layout, duplicate storage and
+  desynchronise the catalog.
+- **Decision**: Catalog format 5 adds `favorites (profile, sha256, added_at)` and
+  `albums (id, profile, name COLLATE NOCASE, created_at)` plus
+  `album_photos (album_id, sha256, added_at)`. The migration is additive from format 4 and keeps
+  every existing row; the old catalog is backed up as `catalog.sqlite3.v4.bak`. Albums and
+  favorites belong to the signed-in person, so the owner's marks are the owner's own. Album names
+  are trimmed, limited to 60 characters and unique case-insensitively per person. The gallery
+  gains a Favorites entry and an album list in the rail, a heart and **Add to album…** in the
+  viewer, and rename/delete controls on an album. `/api/photos` accepts `favorite=1` and
+  `album=ID`, every photo carries its viewer's `favorite` flag, and `/api/albums` returns counts
+  and the newest member as a cover. Albums never move, copy or delete a file.
+- **Consequences**: A photo can be in any number of albums at no extra disk cost, and deleting an
+  album leaves its photos in the library. Reads join `photos`, so a membership row left behind
+  when a file leaves the catalog is invisible and cannot resurrect a missing photo. Format 5 is
+  readable only by this version; an older build refuses it and leaves the `.v4.bak` intact.

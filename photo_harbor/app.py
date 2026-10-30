@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from .accounts import ITERATIONS, Passwords, Sessions
+from .albums import AlbumBook
+from .albums_api import AlbumsApi
 from .auth import KeyGuard
 from .autostart import Autostart
 from .catalog import Catalog
@@ -53,6 +55,7 @@ class HarborApp:
         self.db = Database(settings.state_dir / "catalog.sqlite3")
         catalog = Catalog(self.db)
         journal = SyncJournal(self.db)
+        self.albums = AlbumBook(self.db, now)
         self.profiles = ProfileBook(self.db, settings.key)
         self.copies = CopyIndex(self.db)
         self.store = PhotoStore(settings.library, catalog, self.copies,
@@ -74,13 +77,14 @@ class HarborApp:
         self.guard = KeyGuard(self.profiles, self.passwords, self.sessions)
         self.router = Router()
         self._register(SyncApi(self.store, journal, self.profiles, now),
-                       LibraryApi(self.store, catalog, journal, thumbs, now),
+                       LibraryApi(self.store, catalog, journal, thumbs, self.albums, now),
                        ProfilesApi(self.profiles, catalog, journal, self.passwords,
                                    self.sessions, self.layout),
+                       AlbumsApi(self.albums, catalog),
                        SetupApi(port, autostart or Autostart()))
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
-                  setup: SetupApi) -> None:
+                  albums: AlbumsApi, setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -100,6 +104,11 @@ class HarborApp:
         add("GET", "/api/profiles", people.listing)
         add("POST", "/api/profiles", people.create)
         add("POST", "/api/profiles/", people.update)
+        add("GET", "/api/albums", albums.listing)
+        add("POST", "/api/albums", albums.create)
+        add("POST", "/api/albums/", albums.update)
+        add("POST", "/api/album-photos", albums.membership)
+        add("POST", "/api/favorite", albums.favorite)
         add("GET", "/media/", library.media)
         add("GET", "/thumb/", library.thumb)
 

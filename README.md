@@ -100,6 +100,11 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   filter and search by file name; on a phone the sidebar becomes a scrolling row of chips. Days
   are labelled in the browser's language. Click any photo for a full-screen viewer (arrow keys,
   swipe, download the original).
+- **Albums and favorites.** Each person can mark photos with a heart and collect them into named
+  albums without moving or copying a single file. Favorites and albums are private to the person
+  who made them; the main profile sees its own, not everyone's. Open a photo and choose
+  **Add to album…**; albums appear in the sidebar and can be renamed or deleted there. Deleting
+  an album never deletes a photo.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -137,7 +142,9 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&kind=photo\|video&q=name&profile=id]` | gallery page, newest first; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&kind=photo\|video&q=name&profile=id&favorite=1&album=ID]` | gallery page, newest first; non-owners always get their own |
+| `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
+| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` adds or removes an album photo; `{sha256, favorite}` marks your favorite |
 | `GET /media/<sha256>`, `GET /thumb/<sha256>` | original (with byte ranges) and JPEG preview |
 
 ## 📦 What's Inside
@@ -160,6 +167,8 @@ photo-harbor/
 │   ├── app.py                <- wires storage, APIs and the web page into routes
 │   ├── atomic_file.py        <- temp + fsync + replace placement
 │   ├── accounts.py           <- password hashes, sessions, wrong-password brake
+│   ├── albums.py             <- personal albums and favorites; no files move
+│   ├── albums_api.py         <- list, create, rename, delete albums; add photos; favorites
 │   ├── auth.py               <- home-network check; who is asking (key or session); sign-in
 │   ├── autostart.py          <- start with Windows (per-user Run key)
 │   ├── backup.py             <- mirror to a second drive, daily thread
@@ -192,6 +201,7 @@ photo-harbor/
 └── tests/
     ├── __init__.py
     ├── library_fixture.py    <- a throwaway library for tests
+    ├── test_albums.py        <- personal albums, favorites and format 5 migration
     ├── test_http.py          <- the server over a real socket
     ├── test_naming.py
     ├── test_folders.py
@@ -205,7 +215,7 @@ photo-harbor/
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 4; an older catalog is upgraded in place after a copy
+`config.json`, `catalog.sqlite3` (format 5; an older catalog is upgraded in place after a copy
 to `catalog.sqlite3.v<N>.bak`), `incoming\` and `thumbs\`.
 
 ## 🚀 Performance
