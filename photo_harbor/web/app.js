@@ -194,8 +194,8 @@ function addPhotos(photos) {
   }
 }
 
-function photosUrl() {
-  const params = new URLSearchParams({ offset: String(state.next), limit: String(PAGE) });
+function filterParams() {
+  const params = new URLSearchParams();
   if (state.scope.kind) params.set("kind", state.scope.kind);
   if (state.scope.month) params.set("month", state.scope.month);
   if (state.scope.favorite) params.set("favorite", "1");
@@ -205,6 +205,13 @@ function photosUrl() {
   if (state.scope.order) params.set("order", state.scope.order);
   if (state.query) params.set("q", state.query);
   if (state.profile) params.set("profile", state.profile);
+  return params;
+}
+
+function photosUrl() {
+  const params = filterParams();
+  params.set("offset", String(state.next));
+  params.set("limit", String(PAGE));
   return `/api/photos?${params}`;
 }
 
@@ -573,6 +580,20 @@ function selectLoaded() {
   renderSelection();
 }
 
+async function selectMatching() {
+  try {
+    const found = await api(`/api/photos/hashes?${filterParams()}`);
+    for (const sha256 of found.hashes) state.selected.add(sha256);
+    for (const item of document.querySelectorAll(".tile")) item.classList.add("selected");
+    renderSelection();
+    toast(found.truncated
+      ? "Selected the first 10,000 matching photos; narrow the filters for the rest"
+      : `Selected ${found.hashes.length.toLocaleString()} matching photos`);
+  } catch (error) {
+    handle(error);
+  }
+}
+
 function batches(items) {
   const out = [];
   for (let start = 0; start < items.length; start += BATCH) {
@@ -911,6 +932,7 @@ function wireBrowser() {
   });
   $("select-mode").addEventListener("click", () => setSelecting(!state.selecting));
   $("select-all").addEventListener("click", selectLoaded);
+  $("select-matching").addEventListener("click", selectMatching);
   $("select-clear").addEventListener("click", clearSelected);
   $("select-favorite").addEventListener("click", () => bulkFavorite(true));
   $("select-unfavorite").addEventListener("click", () => bulkFavorite(false));

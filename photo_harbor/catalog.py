@@ -154,6 +154,17 @@ class Catalog:
             ).fetchall()
         return [_to_record(row) for row in rows]
 
+    def hashes(self, narrow: PhotoFilter = PhotoFilter(), limit: int = 10_000) -> list:
+        """Every matching hash in the same order as the gallery, capped by ``limit``."""
+        table, _, owner = _source(narrow)
+        where, params = _where(narrow, owner)
+        order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                f"SELECT p.sha256 FROM {table}{where} ORDER BY {order} LIMIT ?",
+                (*params, limit)).fetchall()
+        return [row[0] for row in rows]
+
     def outline(self, profile: Optional[str] = None, viewer: str = "main") -> Outline:
         """Months and video count, for one profile or (None) everyone, plus the viewer's
         favorites."""

@@ -424,3 +424,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   chosen photo until it leaves the album; a fallback is computed live rather than stored. Format
   6 upgrades add the column; formats 1-4 get it from the recreated albums table, so no duplicate
   ALTER runs.
+
+### ADR-021: Select matching asks the server for the filtered hashes
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: **Select all loaded** only covered the pages the browser had already scrolled in.
+  A 300-photo album or a wide date window still required scrolling before a bulk action, and the
+  album selector cannot know which pages are still unloaded.
+- **Decision**: `Catalog.hashes` runs the same `_source`/`_where`/`_ORDER` path as `page` but
+  selects only `p.sha256`, capped at 10,001 rows so the API can report a 10,000 cap without a
+  second count query. `GET /api/photos/hashes` accepts exactly the `/api/photos` filters,
+  including profile privacy, album ownership and order. The selection bar adds **Select
+  matching**; it adds every returned hash to the client Set, marks loaded tiles, and tells the
+  user when the 10,000 cap was hit. Existing bulk writes still chunk at 500.
+- **Consequences**: One request can return up to 10,000 hashes (about 670 KB); a wider library
+  must narrow the filters. Selection remains client-only and resets with the scope, and no new
+  state or schema is added. The endpoint is read-only and uses the same validation as the page,
+  so a malformed filter fails before any hash is returned.

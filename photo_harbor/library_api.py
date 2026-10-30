@@ -16,6 +16,7 @@ from .store import PhotoStore, local_now, normalise_sha
 from .thumbs import Thumbnailer
 
 PAGE_MAX = 200
+HASH_LIMIT = 10_000
 IMMUTABLE = (("Cache-Control", "private, max-age=31536000, immutable"),)
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -123,6 +124,11 @@ class LibraryApi:
                            "missing": self._journal.missing(profile=profile),
                            "disk": self._disk(),
                            "previews": self._thumbs.enabled})
+
+    def hashes(self, request: Request) -> Reply:
+        """Every matching hash for Select matching, in the gallery's order."""
+        found = self._catalog.hashes(_narrowing(request, self._albums), HASH_LIMIT + 1)
+        return json_reply({"hashes": found[:HASH_LIMIT], "truncated": len(found) > HASH_LIMIT})
 
     def storage(self, request: Request) -> Reply:
         """Counts, bytes, per-person shares and the largest files the caller may see."""

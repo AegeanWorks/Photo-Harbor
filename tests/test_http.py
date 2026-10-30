@@ -245,6 +245,21 @@ class ServerTest(unittest.TestCase):
         response, _ = self.call("POST", "/api/trash", body={"sha256s": [sha(b"hers")]})
         self.assertEqual(response.status, 400)
 
+    def test_hashes_match_the_filters_for_select_matching(self):
+        for name, taken in (("a.jpg", "2026-05-01T10:00:00"),
+                            ("b.jpg", "2026-05-02T10:00:00"),
+                            ("c.jpg", "2026-06-01T10:00:00")):
+            self.call("POST", "/api/upload", body=name.encode(),
+                      headers={"X-Name": name, "X-Sha256": sha(name.encode()), "X-Taken": taken})
+        _, body = self.call("GET", "/api/photos/hashes?order=oldest")
+        self.assertEqual(json.loads(body)["hashes"],
+                         [sha(b"a.jpg"), sha(b"b.jpg"), sha(b"c.jpg")])
+        self.assertFalse(json.loads(body)["truncated"])
+        _, body = self.call("GET", "/api/photos/hashes?from=2026-05-01&to=2026-05-31")
+        self.assertEqual(json.loads(body)["hashes"], [sha(b"b.jpg"), sha(b"a.jpg")])
+        response, _ = self.call("GET", "/api/photos/hashes?order=sideways")
+        self.assertEqual(response.status, 400)
+
     def test_sort_order_changes_the_page(self):
         for name, body, taken in (("a.jpg", b"a", "2026-05-01T10:00:00"),
                                   ("b.jpg", b"bbb", "2026-05-02T10:00:00"),

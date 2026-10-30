@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `59`
-- **Total Classes**: `109`
+- **Total Python Modules**: `60`
+- **Total Classes**: `110`
 - **Total Top-Level Functions**: `92`
-- **Total Class Methods**: `418`
-- **Total Source Lines**: `6911`
+- **Total Class Methods**: `424`
+- **Total Source Lines**: `6971`
 
 ---
 
@@ -118,7 +118,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `136` lines (`6304` bytes)
+**Size**: `137` lines (`6361` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -230,7 +230,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `227` lines (`11414` bytes)
+**Size**: `238` lines (`11997` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -240,6 +240,7 @@
   - Method `.known(sha256s)` - *The hashes in ``sha256s`` that the catalog holds, in one query.*
   - Method `.copies_of(profile, sha256s)` - *The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query.*
   - Method `.page(offset, limit, narrow)` - *Records in the requested order, newest first by default (taken time, then received).*
+  - Method `.hashes(narrow, limit)` - *Every matching hash in the same order as the gallery, capped by ``limit``.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
@@ -497,12 +498,13 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `189` lines (`9294` bytes)
+**Size**: `195` lines (`9627` bytes)
 
 **Classes:**
 - `class LibraryApi`
   - Method `.__init__(store, catalog, journal, thumbs, albums, now)`
   - Method `.status(request)`
+  - Method `.hashes(request)` - *Every matching hash for Select matching, in the gallery's order.*
   - Method `.storage(request)` - *Counts, bytes, per-person shares and the largest files the caller may see.*
   - Method `.photos(request)`
   - Method `.outline(request)` - *Months with photos, newest first, for the browser sidebar.*
@@ -933,10 +935,21 @@
 
 ---
 
+### [`tests/test_hashes.py`](tests/test_hashes.py)
+**Size**: `27` lines (`1328` bytes)
+
+**Classes:**
+- `class HashSelectionTest`
+  - Method `.setUp()`
+  - Method `.test_hashes_follow_the_same_filter_and_order_as_the_page()`
+  - Method `.test_a_limit_caps_the_result()`
+
+---
+
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `578` lines (`32568` bytes)
+**Size**: `593` lines (`33530` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -960,6 +973,7 @@
   - Method `.test_a_selection_and_an_album_download_as_one_zip()`
   - Method `.test_trash_moves_restores_and_deletes()`
   - Method `.test_trash_never_crosses_people()`
+  - Method `.test_hashes_match_the_filters_for_select_matching()`
   - Method `.test_sort_order_changes_the_page()`
   - Method `.test_a_date_range_narrows_the_gallery()`
   - Method `.test_storage_report_follows_the_signed_in_person()`

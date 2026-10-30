@@ -1,55 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "album-cover",
-    "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793372191.8631063,
-    "owner": "opencode:cover",
-    "started_by": "opencode:cover",
-    "continuations": [],
-    "completed_at": 1793372231.6816187
+    "task_id": "select-matching",
+    "last_phase": "phase 3",
+    "active_phase": 3,
+    "status": "in_progress",
+    "updated_at": 1793372578.6938083,
+    "owner": "opencode:select",
+    "started_by": "opencode:select",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "backup-verify",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'backup-verify' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793363552.3542135,
-      "timestamp_str": "2026-10-30 15:32:32",
-      "agent": "opencode:backup"
-    },
-    {
-      "task_id": "date-filter",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: PhotoFilter gains start/end dates; catalog narrows on substr(sort_time,1,10); /api/photos accepts from/to with strict YYYY-MM-DD and start<=end; scope bar Dates popover with From/To and Apply/Clear; tests, dogfood, ADR-017, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793363667.6314468,
-      "timestamp_str": "2026-10-30 15:34:27",
-      "agent": "opencode:dates",
-      "impact_assessment": {
-        "why": "Months are the only date axis; finding a specific trip that crosses a month boundary, or a single day, takes scrolling",
-        "benefits": "Exact date windows combine with person, kind, album, favorites and name search; no schema change and no new dependency",
-        "risks": "contract: two new query parameters and scope keys; dependency: none; concurrency: read-only filter; state: dates are client-only and reset with other scopes",
-        "mitigation": "Validate the date shape and order before querying, keep substr comparisons for correctness with existing sort_time, and reset dates whenever another scope is chosen"
-      }
-    },
-    {
-      "task_id": "date-filter",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] PhotoFilter start/end; catalog comparison on substr(sort_time,1,10); /api/photos from/to validation; 3 unit tests and HTTP range/refusal test",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793363953.2560277,
-      "timestamp_str": "2026-10-30 15:39:13",
-      "agent": "opencode:dates"
-    },
     {
       "task_id": "date-filter",
       "phase": "phase 3",
@@ -250,6 +211,45 @@
       "timestamp": 1793372231.6816208,
       "timestamp_str": "2026-10-30 17:57:11",
       "agent": "opencode:cover"
+    },
+    {
+      "task_id": "select-matching",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Plan: Catalog.hashes runs the same filter/order as the page with a 10,000 cap; GET /api/photos/hashes returns hashes and truncated; selection bar gets Select matching; UI selects across pages and says when the cap was hit; tests, dogfood, ADR-021, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793372338.9779942,
+      "timestamp_str": "2026-10-30 17:58:58",
+      "agent": "opencode:select",
+      "impact_assessment": {
+        "why": "Select all loaded only covers the pages already scrolled in; a 300-photo album or a wide date window still means scrolling before a bulk action",
+        "benefits": "One action selects the whole filtered set; reuses the existing filters, order and chunked bulk endpoints; no schema change",
+        "risks": "contract: new read-only endpoint and a larger client-side Set; dependency: none; concurrency: read-only; state: selection stays client-only and resets with scope",
+        "mitigation": "Cap at 10,000 hashes, return a truncated flag, keep the same narrowing validation as /api/photos, and chunk every write as before"
+      }
+    },
+    {
+      "task_id": "select-matching",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Catalog.hashes reuses the page filter/order with a 10,001 cap; GET /api/photos/hashes returns hashes and truncated; 2 unit tests and HTTP filter/order test",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793372578.39992,
+      "timestamp_str": "2026-10-30 18:02:58",
+      "agent": "opencode:select"
+    },
+    {
+      "task_id": "select-matching",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/3] Select matching in the selection bar across all filtered pages; browser dogfood 3 all, 2 in May, 0 JS errors; 145 tests, 4/4 gates; README/ADR-021; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793372578.6938083,
+      "timestamp_str": "2026-10-30 18:02:58",
+      "agent": "opencode:select"
     }
   ]
 }

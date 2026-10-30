@@ -108,8 +108,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   deletes a photo.
 - **Collect many at once.** Press **Select** in the gallery, tap the photos you want, then
   **♥ Favorite**, **♡ Unfavorite** or **Add to album…** in the selection bar. **Add to album…**
-  also offers **New album…**, which creates it and adds the selection; **Select all loaded**
-  takes the page in view and **Clear** empties the selection. Up to 500 photos go in one request.
+  also offers **New album…**, which creates it and adds the selection; **Select loaded** takes
+  the pages in view, **Select matching** takes every photo in the current filters (up to
+  10,000) and **Clear** empties the selection. Up to 500 photos go in one request.
 - **Details on demand.** **Details** in the viewer shows the file type, size, capture and added
   dates, and pixel dimensions. With Pillow installed it also reads the camera make and model,
   lens, exposure time, aperture, ISO and focal length. Videos show file facts only, and a file
@@ -173,6 +174,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
 | `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
+| `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
@@ -250,6 +252,7 @@ photo-harbor/
     ├── test_http.py          <- the server over a real socket
     ├── test_naming.py
     ├── test_folders.py
+    ├── test_hashes.py        <- Select matching across the same filters
     ├── test_parts.py
     ├── test_profiles.py
     ├── test_runner.py
