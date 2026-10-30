@@ -103,8 +103,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Albums and favorites.** Each person can mark photos with a heart and collect them into named
   albums without moving or copying a single file. Favorites and albums are private to the person
   who made them; the main profile sees its own, not everyone's. Open a photo and choose
-  **Add to album…**; albums appear in the sidebar with their newest photo as a cover and can be
-  renamed or deleted there. Deleting an album never deletes a photo.
+  **Add to album…**; albums appear in the sidebar with a cover (the newest photo until you pick
+  one with **Use as cover**) and can be renamed or deleted there. Deleting an album never
+  deletes a photo.
 - **Collect many at once.** Press **Select** in the gallery, tap the photos you want, then
   **♥ Favorite**, **♡ Unfavorite** or **Add to album…** in the selection bar. **Add to album…**
   also offers **New album…**, which creates it and adds the selection; **Select all loaded**
@@ -172,7 +173,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
 | `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
-| `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
+| `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
@@ -262,7 +263,7 @@ photo-harbor/
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 6; an older catalog is upgraded in place after a copy
+`config.json`, `catalog.sqlite3` (format 7; an older catalog is upgraded in place after a copy
 to `catalog.sqlite3.v<N>.bak`), `incoming\`, `thumbs\` and `trash\`.
 
 ## 🚀 Performance

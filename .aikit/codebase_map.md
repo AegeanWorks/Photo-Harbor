@@ -9,8 +9,8 @@
 - **Total Python Modules**: `59`
 - **Total Classes**: `109`
 - **Total Top-Level Functions**: `92`
-- **Total Class Methods**: `414`
-- **Total Source Lines**: `6826`
+- **Total Class Methods**: `418`
+- **Total Source Lines**: `6911`
 
 ---
 
@@ -72,7 +72,7 @@
 ### [`photo_harbor/albums.py`](photo_harbor/albums.py)
 > *Personal albums and favorites: named collections that never move or copy a file.*
 
-**Size**: `175` lines (`8008` bytes)
+**Size**: `199` lines (`9422` bytes)
 
 **Classes:**
 - `class AlbumBook` - *Albums belong to one person; favorites are that person's own mark on a photo.*
@@ -80,6 +80,7 @@
   - Method `.summary(profile)` - *``(favorite count, [Album, ...])`` for the signed-in person, names in A-Z order.*
   - Method `.create(profile, name)`
   - Method `.rename(profile, ident, name)`
+  - Method `.set_cover(profile, ident, sha256)` - *Pick a visible member as the album cover; an empty value returns to newest.*
   - Method `.delete(profile, ident)`
   - Method `.owned(profile, ident)` - *Whether this person owns the album; a bad id is a 400, a missing one is False.*
   - Method `.members(profile, ident)` - *The hashes in one owned album, newest photo first.*
@@ -98,7 +99,7 @@
 ### [`photo_harbor/albums_api.py`](photo_harbor/albums_api.py)
 > *Endpoints for personal albums and favorites; every write stays inside the caller's profile.*
 
-**Size**: `61` lines (`2675` bytes)
+**Size**: `66` lines (`2932` bytes)
 
 **Classes:**
 - `class AlbumsApi`
@@ -331,7 +332,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `240` lines (`8608` bytes)
+**Size**: `245` lines (`8806` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -843,7 +844,7 @@
 ---
 
 ### [`tests/test_albums.py`](tests/test_albums.py)
-**Size**: `112` lines (`6004` bytes)
+**Size**: `137` lines (`7266` bytes)
 
 **Classes:**
 - `class AlbumBookTest`
@@ -852,10 +853,12 @@
   - Method `.test_favorites_are_private_to_the_person_who_marked_them()`
   - Method `.test_album_names_are_cleaned_and_unique_per_person()`
   - Method `.test_a_person_cannot_touch_another_persons_album()`
+  - Method `.test_a_chosen_cover_is_used_until_it_leaves_the_album()`
   - Method `.test_bulk_membership_and_favorites_change_each_row_once()`
   - Method `.test_renaming_and_deleting_an_album_keeps_its_photos()`
 - `class CollectionMigrationTest`
   - Method `.test_a_format_4_catalog_gains_collections_and_keeps_its_photos()`
+  - Method `.test_a_format_6_catalog_gains_the_album_cover_column()`
   - Method `.test_a_bad_collection_id_is_a_clear_error()`
 
 ---
@@ -933,7 +936,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `556` lines (`31232` bytes)
+**Size**: `578` lines (`32568` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -953,6 +956,7 @@
   - Method `.test_calls_without_the_key_are_refused_but_the_page_loads()`
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
+  - Method `.test_an_album_can_choose_its_cover()`
   - Method `.test_a_selection_and_an_album_download_as_one_zip()`
   - Method `.test_trash_moves_restores_and_deletes()`
   - Method `.test_trash_never_crosses_people()`
@@ -1174,7 +1178,7 @@
 ---
 
 ### [`tests/test_trash.py`](tests/test_trash.py)
-**Size**: `73` lines (`3538` bytes)
+**Size**: `77` lines (`3773` bytes)
 
 **Classes:**
 - `class TrashBookTest`

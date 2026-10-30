@@ -6,10 +6,10 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 6
+SCHEMA_VERSION = 7
 OWNER_PROFILE = "main"
 
-# Format 6, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 7, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
 _COLLECTIONS = """
@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS albums (
     profile TEXT NOT NULL,
     name TEXT NOT NULL COLLATE NOCASE,
     created_at TEXT NOT NULL,
+    cover_sha TEXT,
     UNIQUE (profile, name)
 );
 CREATE TABLE IF NOT EXISTS album_photos (
@@ -177,9 +178,13 @@ _FROM_4 = _COLLECTIONS
 # Format 6 adds the trash table; files themselves live under .harbor/trash.
 _FROM_5 = _TRASH
 
+# Format 7 lets an album keep a chosen cover; NULL falls back to its newest member.
+_FROM_6 = "ALTER TABLE albums ADD COLUMN cover_sha TEXT;"
+
 _UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5,
              2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5,
-             3: _FROM_3 + _FROM_4 + _FROM_5, 4: _FROM_4 + _FROM_5, 5: _FROM_5}
+             3: _FROM_3 + _FROM_4 + _FROM_5, 4: _FROM_4 + _FROM_5,
+             5: _FROM_5 + _FROM_6, 6: _FROM_6}
 
 
 class Database:

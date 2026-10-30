@@ -5,6 +5,7 @@ from .catalog import Catalog
 from .errors import HarborError
 from .messages import Reply, Request, json_reply
 from .selection import visible
+from .store import normalise_sha
 
 
 def _flag(body: dict, name: str) -> bool:
@@ -39,6 +40,10 @@ class AlbumsApi:
         if body.get("delete") is True:
             self._albums.delete(request.profile, ident)
             return json_reply({"deleted": True})
+        if "cover" in body:
+            cover = normalise_sha(str(body.get("cover") or ""))
+            self._albums.set_cover(request.profile, ident, cover)
+            return json_reply({"id": int(ident), "cover": cover})
         album = self._albums.rename(request.profile, ident, body.get("name"))
         return json_reply({"id": album.id, "name": album.name})
 

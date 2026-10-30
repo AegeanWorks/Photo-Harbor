@@ -138,6 +138,28 @@ class ServerTest(unittest.TestCase):
                                    headers=as_her)
         self.assertEqual((response.status, json.loads(body)["name"]), (200, "hers.jpg"))
 
+    def test_an_album_can_choose_its_cover(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        _, body = self.call("POST", "/api/albums", body={"name": "Cover"})
+        album = json.loads(body)["id"]
+        self.call("POST", "/api/album-photos",
+                  body={"album": album, "sha256s": [sha(b"one"), sha(b"two")], "member": True})
+        response, _ = self.call("POST", f"/api/albums/{album}", body={"cover": sha(b"one")})
+        self.assertEqual(response.status, 200)
+        _, body = self.call("GET", "/api/albums")
+        self.assertEqual(json.loads(body)["albums"][0]["cover"], f"/thumb/{sha(b'one')}")
+        self.call("POST", "/api/album-photos",
+                  body={"album": album, "sha256": sha(b"one"), "member": False})
+        _, body = self.call("GET", "/api/albums")
+        self.assertEqual(json.loads(body)["albums"][0]["cover"], f"/thumb/{sha(b'two')}")
+        response, _ = self.call("POST", f"/api/albums/{album}", body={"cover": "f" * 64})
+        self.assertEqual(response.status, 400)
+        ayse = self.add_person()
+        response, _ = self.call("POST", f"/api/albums/{album}", body={"cover": sha(b"two")},
+                                key=False, headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual(response.status, 404)
+
     def test_a_selection_and_an_album_download_as_one_zip(self):
         self.upload(b"one", name="one.jpg")
         self.upload(b"two", name="two.jpg")

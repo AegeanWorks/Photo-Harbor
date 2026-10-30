@@ -49,9 +49,13 @@ class AlbumBook:
                 " WHERE f.profile = ?", (profile,)).fetchone()[0]
             rows = self._db.conn.execute(
                 "SELECT al.id, al.name, COUNT(p.sha256) AS n,"
-                " (SELECT a2.sha256 FROM album_photos a2 JOIN photos p2 ON p2.sha256 = a2.sha256"
+                " CASE WHEN al.cover_sha IS NOT NULL AND EXISTS ("
+                "  SELECT 1 FROM album_photos a3 JOIN photos p3 ON p3.sha256 = a3.sha256"
+                "  WHERE a3.album_id = al.id AND a3.sha256 = al.cover_sha)"
+                " THEN al.cover_sha ELSE ("
+                "  SELECT a2.sha256 FROM album_photos a2 JOIN photos p2 ON p2.sha256 = a2.sha256"
                 "  WHERE a2.album_id = al.id"
-                "  ORDER BY p2.sort_time DESC, p2.sha256 DESC LIMIT 1) AS cover"
+                "  ORDER BY p2.sort_time DESC, p2.sha256 DESC LIMIT 1) END AS cover"
                 " FROM albums al"
                 " LEFT JOIN album_photos a ON a.album_id = al.id"
                 " LEFT JOIN photos p ON p.sha256 = a.sha256"
@@ -86,6 +90,23 @@ class AlbumBook:
                                   "album names are unique for each person",
                                   "choose another name", status=409) from exc
         return Album(id=album, name=clean)
+
+    def set_cover(self, profile: str, ident, sha256) -> None:
+        """Pick a visible member as the album cover; an empty value returns to newest."""
+        album = _album_id(ident)
+        chosen = sha256 or None
+        with self._db.lock:
+            self._owned(profile, album)
+            if chosen is not None:
+                row = self._db.conn.execute(
+                    "SELECT 1 FROM album_photos a JOIN photos p ON p.sha256 = a.sha256"
+                    " WHERE a.album_id = ? AND a.sha256 = ?", (album, chosen)).fetchone()
+                if row is None:
+                    raise HarborError("that photo is not in this album",
+                                      "the cover must be one of its photos",
+                                      "open a photo in the album and try again", status=400)
+            self._db.conn.execute("UPDATE albums SET cover_sha = ? WHERE id = ?",
+                                  (chosen, album))
 
     def delete(self, profile: str, ident) -> None:
         album = _album_id(ident)
@@ -142,6 +163,9 @@ class AlbumBook:
                 cursor = self._db.conn.execute(
                     f"DELETE FROM album_photos WHERE album_id = ? AND sha256 IN ({marks})",
                     (album, *sha256s))
+                self._db.conn.execute(
+                    f"UPDATE albums SET cover_sha = NULL WHERE id = ?"
+                    f" AND cover_sha IN ({marks})", (album, *sha256s))
         return cursor.rowcount
 
     def favorite(self, profile: str, sha256: str, favorite: bool) -> bool:

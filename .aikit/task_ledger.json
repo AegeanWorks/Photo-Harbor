@@ -1,66 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "trash-restore",
+    "task_id": "album-cover",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793371684.87285,
-    "owner": "opencode:trash",
-    "started_by": "opencode:trash",
-    "continuations": [],
-    "completed_at": 1793371721.504514
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793372191.8631063,
+    "owner": "opencode:cover",
+    "started_by": "opencode:cover",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "album-polish",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'album-polish' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793363178.2936459,
-      "timestamp_str": "2026-10-30 15:26:18",
-      "agent": "opencode:polish"
-    },
-    {
-      "task_id": "backup-verify",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: backup.verify hashes every source file against its copy and reports missing/different/extra; python -m photo_harbor backup --to DIR --check exits 1 on problems; Harbor window Check backup runs it in a thread; tests, README, ADR-016",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793363311.0662975,
-      "timestamp_str": "2026-10-30 15:28:31",
-      "agent": "opencode:backup",
-      "impact_assessment": {
-        "why": "Mirroring only compares sizes; a silent bit-rot or truncation on the backup drive is invisible, and the user has no way to know the second copy is good",
-        "benefits": "A real integrity check with a clear report; no server dependency, no schema change, and no writes to either drive",
-        "risks": "contract: new --check flag and window button; dependency: hashlib only; concurrency: read-only walk while backup may run; state: none persisted",
-        "mitigation": "Skip dot folders like mirror does, stream hashes in 1 MB blocks, cap the printed problem list while counting every file, and run the window check on a background thread"
-      }
-    },
-    {
-      "task_id": "backup-verify",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] backup.verify streams SHA-256 over every visible source and backup file, reports missing/different/extra and caps the problem list; 2 new unit tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793363506.6419315,
-      "timestamp_str": "2026-10-30 15:31:46",
-      "agent": "opencode:backup"
-    },
-    {
-      "task_id": "backup-verify",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] CLI backup --check prints the report and exits 1 on damage; Harbor window Check backup runs it on a background thread and re-enables itself; manual temp run verified clean 0 and damaged 1",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793363507.9251952,
-      "timestamp_str": "2026-10-30 15:31:47",
-      "agent": "opencode:backup"
-    },
     {
       "task_id": "backup-verify",
       "phase": "phase 4",
@@ -250,6 +200,56 @@
       "timestamp": 1793371721.504516,
       "timestamp_str": "2026-10-30 17:48:41",
       "agent": "opencode:trash"
+    },
+    {
+      "task_id": "album-cover",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: catalog format 7 adds albums.cover_sha; summary falls back to the newest member when the chosen hash is gone; set cover validates membership; viewer Use as cover; tests, dogfood, ADR-020, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793371932.024562,
+      "timestamp_str": "2026-10-30 17:52:12",
+      "agent": "opencode:cover",
+      "impact_assessment": {
+        "why": "An album's sidebar cover is always its newest photo, which is often not the image that represents the trip",
+        "benefits": "One chosen image per album; no file copies; the fallback keeps old albums working and a removed cover degrades gracefully",
+        "risks": "contract: catalog format 7 and an albums update field; dependency: none; concurrency: cover writes share the database lock; state: one nullable column",
+        "mitigation": "Add the column in an additive migration, validate that the chosen hash is still a visible album member, reset it when that photo leaves the album, and test v5/v6 upgrades"
+      }
+    },
+    {
+      "task_id": "album-cover",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] Format 7 adds albums.cover_sha; AlbumBook.set_cover validates a visible member, clears on removal, summary falls back to newest; unit tests for choice, removal and v6 migration",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793372191.1685984,
+      "timestamp_str": "2026-10-30 17:56:31",
+      "agent": "opencode:cover"
+    },
+    {
+      "task_id": "album-cover",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] /api/albums/<id> {cover: sha256|null}; viewer Use as cover; HTTP test for chosen cover, fallback and refusal; browser dogfood rail cover switched to the opened photo, 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793372191.5255451,
+      "timestamp_str": "2026-10-30 17:56:31",
+      "agent": "opencode:cover"
+    },
+    {
+      "task_id": "album-cover",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] 142 tests; 4/4 project gates; README/API/format; ADR-020; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793372191.8631063,
+      "timestamp_str": "2026-10-30 17:56:31",
+      "agent": "opencode:cover"
     }
   ]
 }

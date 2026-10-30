@@ -62,7 +62,9 @@ class TrashMigrationTest(unittest.TestCase):
         lib = Library(self)
         path = lib.root / "v5.sqlite3"
         old = Database(path)
-        old.conn.executescript("DROP TABLE trash; PRAGMA user_version=5;")
+        old.conn.executescript("DROP TABLE trash;"
+                               "ALTER TABLE albums DROP COLUMN cover_sha;"
+                               "PRAGMA user_version=5;")
         old.close()
         db = Database(path)
         self.addCleanup(db.close)
@@ -70,4 +72,6 @@ class TrashMigrationTest(unittest.TestCase):
         self.assertEqual(db.conn.execute(
             "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='trash'"
         ).fetchone()[0], 1)
+        columns = [row[1] for row in db.conn.execute("PRAGMA table_info(albums)")]
+        self.assertIn("cover_sha", columns)
         self.assertTrue((lib.root / "v5.sqlite3.v5.bak").exists())

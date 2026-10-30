@@ -57,6 +57,18 @@ class AlbumBookTest(unittest.TestCase):
             with self.assertRaises(HarborError):
                 action()
 
+    def test_a_chosen_cover_is_used_until_it_leaves_the_album(self):
+        album = self.book.create("main", "Cover")
+        self.book.add_many("main", album.id, [self.one, self.two], True)
+        self.book.set_cover("main", album.id, self.one)
+        self.assertEqual(self.book.summary("main")[1][0].cover, self.one)
+        self.book.add("main", album.id, self.one, False)
+        self.assertEqual(self.book.summary("main")[1][0].cover, self.two)
+        self.book.set_cover("main", album.id, self.two)
+        self.assertEqual(self.book.summary("main")[1][0].cover, self.two)
+        with self.assertRaises(HarborError):
+            self.book.set_cover("main", album.id, "f" * 64)
+
     def test_bulk_membership_and_favorites_change_each_row_once(self):
         album = self.book.create("main", "Batch")
         self.assertEqual(self.book.add_many("main", album.id, [self.one, self.two], True), 2)
@@ -102,6 +114,19 @@ class CollectionMigrationTest(unittest.TestCase):
                 db.conn.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?",
                                 (table,)).fetchone()[0], 1)
         self.assertTrue((lib.root / "v4.sqlite3.v4.bak").exists())
+
+    def test_a_format_6_catalog_gains_the_album_cover_column(self):
+        lib = Library(self)
+        path = lib.root / "v6.sqlite3"
+        old = Database(path)
+        old.conn.executescript("ALTER TABLE albums DROP COLUMN cover_sha;"
+                               "PRAGMA user_version=6;")
+        old.close()
+        db = Database(path)
+        self.addCleanup(db.close)
+        columns = [row[1] for row in db.conn.execute("PRAGMA table_info(albums)")]
+        self.assertIn("cover_sha", columns)
+        self.assertTrue((lib.root / "v6.sqlite3.v6.bak").exists())
 
     def test_a_bad_collection_id_is_a_clear_error(self):
         lib = Library(self)

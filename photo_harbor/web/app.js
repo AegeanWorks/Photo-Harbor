@@ -1136,6 +1136,7 @@ function renderViewerCollections() {
   favorite.setAttribute("aria-pressed", String(Boolean(photo?.favorite)));
   $("viewer-album-add").hidden = !photo || state.albums.length === 0;
   $("viewer-album-remove").hidden = !photo || !state.scope.album;
+  $("viewer-cover").hidden = !photo || !state.scope.album;
   $("viewer-albums").hidden = true;
   $("viewer-albums").replaceChildren();
 }
@@ -1240,6 +1241,19 @@ function toggleAlbumMenu() {
   box.hidden = false;
 }
 
+async function setAlbumCover() {
+  const photo = state.photos[state.viewing];
+  const album = currentAlbum();
+  if (!photo || !album) return;
+  try {
+    await post(`/api/albums/${album.id}`, { cover: photo.sha256 });
+    await loadAlbums();
+    toast(`“${album.name}” now uses this photo as its cover`);
+  } catch (error) {
+    handle(error);
+  }
+}
+
 async function removeFromAlbum() {
   const photo = state.photos[state.viewing];
   const album = currentAlbum();
@@ -1278,6 +1292,7 @@ function wireViewer() {
   $("viewer-favorite").addEventListener("click", toggleFavorite);
   $("viewer-album-add").addEventListener("click", toggleAlbumMenu);
   $("viewer-album-remove").addEventListener("click", removeFromAlbum);
+  $("viewer-cover").addEventListener("click", setAlbumCover);
   $("viewer-info").addEventListener("click", toggleDetails);
   $("viewer-trash").addEventListener("click", trashCurrent);
   document.addEventListener("keydown", (event) => {

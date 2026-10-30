@@ -408,3 +408,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   that path. The owner cannot trash another person's copy from the everyone view; the error
   tells them to select that person. Empty trash is the only irreversible action, and the UI
   confirms it.
+
+### ADR-020: An album can keep a chosen cover
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The rail cover was always the album's newest photo, which is rarely the image
+  that represents a trip. Choosing one should not copy a file or require a second thumbnail.
+- **Decision**: Catalog format 7 adds nullable `albums.cover_sha`. `AlbumBook.set_cover` accepts
+  a hash only when it is a current member whose photo still exists; an empty value resets it.
+  Removing that photo from the album clears the column. `summary` uses the chosen hash when it
+  is still a member and otherwise falls back to the newest member, so old albums and a removed
+  or trashed cover degrade without a broken image. The viewer shows **Use as cover** only while
+  an album is the current scope. `/api/albums/<id>` accepts `{cover: sha256}` or `{cover: null}`.
+- **Consequences**: A cover costs one nullable column and reuses `/thumb`. The cover follows the
+  chosen photo until it leaves the album; a fallback is computed live rather than stored. Format
+  6 upgrades add the column; formats 1-4 get it from the recreated albums table, so no duplicate
+  ALTER runs.
