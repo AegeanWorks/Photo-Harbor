@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "viewer-a11y",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793373370.3298268,
     "owner": "opencode:a11y",
     "started_by": "opencode:a11y",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793373406.6209161
   },
   "checkpoints": [
-    {
-      "task_id": "trash-restore",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Format 6 trash table; TrashBook inserts the row, moves the copy, forgets it, rolls back on failure, restores through store.ingest, and can delete or empty; 5 unit tests including shared and migration",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793371684.198568,
-      "timestamp_str": "2026-10-30 17:48:04",
-      "agent": "opencode:trash"
-    },
     {
       "task_id": "trash-restore",
       "phase": "phase 3",
@@ -249,6 +239,16 @@
       "status": "in_progress",
       "timestamp": 1793373370.3298268,
       "timestamp_str": "2026-10-30 18:16:10",
+      "agent": "opencode:a11y"
+    },
+    {
+      "task_id": "viewer-a11y",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'viewer-a11y' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793373406.6209173,
+      "timestamp_str": "2026-10-30 18:16:46",
       "agent": "opencode:a11y"
     }
   ]
