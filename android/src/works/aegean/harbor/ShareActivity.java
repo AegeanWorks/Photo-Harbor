@@ -112,6 +112,9 @@ public class ShareActivity extends Activity {
                 }
             }
         }
+        if (uris.isEmpty() && intent.getData() != null) {
+            uris.add(intent.getData());
+        }
         return uris;
     }
 

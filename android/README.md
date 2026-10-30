@@ -48,3 +48,17 @@ Nothing is deleted from the phone.
 
 The home server is plain HTTP on the local network, so `usesCleartextTraffic` is enabled. Do not
 expose the server to the public internet.
+
+## Verified
+
+Android 14 (API 34) emulator, APK installed with `adb install`, Harbor running on the host through
+`adb reverse tcp:8642 tcp:8642`:
+
+- **Test** showed `Connected: 0 photos on the PC.`
+- First **Sync now** sent one PNG and the server catalog listed `android-test.png`.
+- A second sync reported `Done: 0 sent, 1 already on the PC.`
+- A share intent for a second PNG reported `Sent 1, 0 already on the PC.` and the server listed
+  `android-share.png`.
+
+The emulator test is not part of the Python gate; rerun it after changing the sync engine or
+manifest.

@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "android-share",
+    "task_id": "android-e2e",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793376345.1698077,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793377758.7092755,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": [],
-    "completed_at": 1793376393.0425236
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "select-matching",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Catalog.hashes reuses the page filter/order with a 10,001 cap; GET /api/photos/hashes returns hashes and truncated; 2 unit tests and HTTP filter/order test",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793372578.39992,
-      "timestamp_str": "2026-10-30 18:02:58",
-      "agent": "opencode:select"
-    },
-    {
-      "task_id": "select-matching",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/3] Select matching in the selection bar across all filtered pages; browser dogfood 3 all, 2 in May, 0 JS errors; 145 tests, 4/4 gates; README/ADR-021; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793372578.6938083,
-      "timestamp_str": "2026-10-30 18:02:58",
-      "agent": "opencode:select"
-    },
     {
       "task_id": "select-matching",
       "phase": "completed",
@@ -249,6 +226,34 @@
       "status": "completed",
       "timestamp": 1793376393.0425258,
       "timestamp_str": "2026-10-30 19:06:33",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-e2e",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Plan: accept Intent.getData() when a share arrives without EXTRA_STREAM/ClipData; rerun the APK on an Android 14 emulator against a real Harbor for Test, first sync, duplicate sync and share; document the evidence",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793377730.5682998,
+      "timestamp_str": "2026-10-30 19:28:50",
+      "agent": "opencode:android",
+      "impact_assessment": {
+        "why": "The emulator proved the main sync, but an explicit data-URI share was not handled; the app also had no hardware-level verification record",
+        "benefits": "Share intents from more providers work; the APK has a reproducible end-to-end check; no server or schema change",
+        "risks": "contract: one more share fallback; dependency: none; concurrency: hash checks already deduplicate; state: none",
+        "mitigation": "Use the existing hash-first upload path, keep data URIs last after EXTRA_STREAM and ClipData, and record the exact emulator results in the Android README"
+      }
+    },
+    {
+      "task_id": "android-e2e",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Emulator Android 14: Test Connected, first sync 1 sent, second 0 sent/1 already, share 1 sent; server catalog saw both PNGs; data-URI fallback documented; 151 tests, 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793377758.7092755,
+      "timestamp_str": "2026-10-30 19:29:18",
       "agent": "opencode:android"
     }
   ]
