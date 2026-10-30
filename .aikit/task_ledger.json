@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "storage-report",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793362488.3361993,
     "owner": "opencode:storage",
     "started_by": "opencode:storage",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793362519.394276
   },
   "checkpoints": [
-    {
-      "task_id": "batch-selection",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/5] /api/favorite and /api/album-photos accept sha256 or sha256s (max 500, de-duplicated); every hash is validated before any write; HTTP tests cover batch success, 404 partial refusal, empty and oversized lists",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793347900.2328,
-      "timestamp_str": "2026-10-30 11:11:40",
-      "agent": "opencode:batch"
-    },
     {
       "task_id": "batch-selection",
       "phase": "phase 3",
@@ -244,6 +234,16 @@
       "status": "in_progress",
       "timestamp": 1793362488.3361993,
       "timestamp_str": "2026-10-30 15:14:48",
+      "agent": "opencode:storage"
+    },
+    {
+      "task_id": "storage-report",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'storage-report' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793362519.394277,
+      "timestamp_str": "2026-10-30 15:15:19",
       "agent": "opencode:storage"
     }
   ]
