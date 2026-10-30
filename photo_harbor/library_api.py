@@ -108,6 +108,19 @@ class LibraryApi:
                            "disk": self._disk(),
                            "previews": self._thumbs.enabled})
 
+    def storage(self, request: Request) -> Reply:
+        """Counts, bytes, per-person shares and the largest files the caller may see."""
+        report = self._catalog.storage(_visible_profile(request))
+        return json_reply({
+            "count": report.count, "bytes": report.bytes,
+            "photos": report.photos, "videos": report.videos, "shared": report.shared,
+            "largest": [{"sha256": item.sha256, "name": item.name, "size": item.size,
+                         "time": item.time} for item in report.largest],
+            "people": [{"profile": item.profile, "count": item.count, "bytes": item.bytes}
+                       for item in report.people],
+            "disk": self._disk(),
+        })
+
     def photos(self, request: Request) -> Reply:
         try:
             offset = max(int(request.arg("offset", "0")), 0)

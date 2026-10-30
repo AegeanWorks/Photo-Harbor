@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `53`
-- **Total Classes**: `97`
+- **Total Python Modules**: `54`
+- **Total Classes**: `101`
 - **Total Top-Level Functions**: `87`
-- **Total Class Methods**: `371`
-- **Total Source Lines**: `6098`
+- **Total Class Methods**: `377`
+- **Total Source Lines**: `6232`
 
 ---
 
@@ -117,7 +117,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `126` lines (`5814` bytes)
+**Size**: `127` lines (`5866` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -223,7 +223,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `175` lines (`8256` bytes)
+**Size**: `215` lines (`10836` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -235,6 +235,7 @@
   - Method `.page(offset, limit, narrow)` - *Records newest first by taken time, falling back to received time.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
+  - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
 
 **Functions:**
 - `def _to_record(row)`
@@ -487,12 +488,13 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `160` lines (`7601` bytes)
+**Size**: `173` lines (`8326` bytes)
 
 **Classes:**
 - `class LibraryApi`
   - Method `.__init__(store, catalog, journal, thumbs, albums, now)`
   - Method `.status(request)`
+  - Method `.storage(request)` - *Counts, bytes, per-person shares and the largest files the caller may see.*
   - Method `.photos(request)`
   - Method `.outline(request)` - *Months with photos, newest first, for the browser sidebar.*
   - Method `._disk()`
@@ -599,7 +601,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `106` lines (`2560` bytes)
+**Size**: `138` lines (`3143` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -611,6 +613,9 @@
 - `class PhotoFilter` - *Gallery narrowing: ``month`` is ``YYYY-MM``, ``query`` matches the file name, ``kind`` is*
 - `class Outline` - *What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the*
 - `class Album` - *One person's named collection; ``cover`` is the newest member's SHA-256, if any.*
+- `class PersonStorage` - *One person's share: shared photos count in each person's share.*
+- `class StorageFile` - *One row of the largest-files list.*
+- `class StorageReport` - *Disk use for one profile, or for the whole library when ``profile`` is None.*
 - `class Profile` - *A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends.*
 - `class Identity` - *Who a request comes from; the owner (library key) may manage every profile.*
 
@@ -870,7 +875,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `459` lines (`25360` bytes)
+**Size**: `476` lines (`26377` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -891,6 +896,7 @@
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
   - Method `.test_a_selection_and_an_album_download_as_one_zip()`
+  - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
   - Method `.test_photos_lists_newest_first_with_paging()`
   - Method `.test_a_chunked_upload_is_accepted()`
@@ -1040,6 +1046,17 @@
   - Method `.test_a_failing_pass_is_logged_and_the_thread_keeps_going()`
 - `class SessionCleanupTest`
   - Method `.test_expired_sessions_are_removed()`
+
+---
+
+### [`tests/test_storage.py`](tests/test_storage.py)
+**Size**: `31` lines (`1537` bytes)
+
+**Classes:**
+- `class StorageReportTest`
+  - Method `.setUp()`
+  - Method `.test_the_whole_library_counts_each_photo_once_and_flags_sharing()`
+  - Method `.test_one_persons_share_uses_their_own_name_and_bytes()`
 
 ---
 

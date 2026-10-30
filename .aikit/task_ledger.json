@@ -1,85 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "bulk-download",
+    "task_id": "storage-report",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793358951.851196,
-    "owner": "opencode:download",
-    "started_by": "opencode:download",
-    "continuations": [],
-    "completed_at": 1793358998.2377257
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793362488.3361993,
+    "owner": "opencode:storage",
+    "started_by": "opencode:storage",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "reforge:run-2",
-      "phase": "reforge run",
-      "phase_num": 3,
-      "description": "run started (start=23, step=1, stop=26)",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345719.7995224,
-      "timestamp_str": "2026-10-30 10:35:19",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-2",
-      "phase": "reforge stage 1",
-      "phase_num": 3,
-      "description": "Reforge stage 1: window 23, 23 commit(s), 29 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired, 6 binary not analysed",
-      "files_affected": [
-        "assets/artwork.jpg",
-        "assets/logo.jpg",
-        "assets/logo.png",
-        "assets/screenshots/2026-10-28-index.png",
-        "assets/social-preview.jpg",
-        "assets/social-preview.png"
-      ],
-      "status": "in_progress",
-      "timestamp": 1793345759.4218438,
-      "timestamp_str": "2026-10-30 10:35:59",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "reforge:run-2",
-      "phase": "reforge stage 2",
-      "phase_num": 3,
-      "description": "Reforge stage 2: window 24, 1 commit(s), 6 file(s) reviewed (unreviewed), 0 finding(s), 0 repaired",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345895.2273579,
-      "timestamp_str": "2026-10-30 10:38:15",
-      "agent": "opencode"
-    },
-    {
-      "task_id": "batch-selection",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/5] Plan: gallery Select mode with checkmarked tiles, a selection bar (count, select all loaded, favorite/unfavorite, add to album, clear, done); bulk /api/favorite and /api/album-photos accept sha256s up to 500, validate every hash before writing, and apply in one lock; tests, dogfood, ADR-011, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793347493.907805,
-      "timestamp_str": "2026-10-30 11:04:53",
-      "agent": "opencode:batch",
-      "impact_assessment": {
-        "why": "Albums work, but adding a trip's photos one viewer at a time is tedious; bulk selection is the missing step between browsing and collecting",
-        "benefits": "Collect dozens of photos in two clicks; fewer requests and one database lock per batch; no schema change and no file moves",
-        "risks": "contract: /api/favorite and /api/album-photos gain a sha256s form; dependency: none; concurrency: bulk writes hold the catalog lock; state: selection is client-only and resets on filter changes",
-        "mitigation": "Cap batches at 500, pre-validate existence and ownership before any write, keep single-sha requests working, and test partial-failure refusal plus cross-person refusal"
-      }
-    },
-    {
-      "task_id": "batch-selection",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/5] AlbumBook.add_many/favorite_many under one lock; Catalog.known/copies_of validate in two queries; tests prove each row changes once and repeats return 0",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793347899.9426692,
-      "timestamp_str": "2026-10-30 11:11:39",
-      "agent": "opencode:batch"
-    },
     {
       "task_id": "batch-selection",
       "phase": "phase 3",
@@ -253,6 +184,67 @@
       "timestamp": 1793358998.2377293,
       "timestamp_str": "2026-10-30 14:16:38",
       "agent": "opencode:download"
+    },
+    {
+      "task_id": "storage-report",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: Catalog.storage returns file counts, bytes, photo/video split, shared-photo count, per-person shares and the ten largest files; GET /api/storage keeps the same profile visibility; Sync tab panel with summary, people and largest files; tests, dogfood, ADR-014, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793362162.624061,
+      "timestamp_str": "2026-10-30 15:09:22",
+      "agent": "opencode:storage",
+      "impact_assessment": {
+        "why": "The Sync tab shows only a total count and bytes; users cannot see which person takes the space or what the largest files are, and hard-link savings are invisible",
+        "benefits": "One read-only report for disk planning; owner sees everyone, each person sees only their own share; no schema change and no file reads",
+        "risks": "contract: new read-only endpoint; dependency: none; concurrency: three aggregate queries per request; state: none persisted",
+        "mitigation": "Keep it to indexed aggregates and ten rows, scope every query to the visible profile, and show only names and sizes the caller may already see"
+      }
+    },
+    {
+      "task_id": "storage-report",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] Catalog.storage reports whole-library or per-person counts, bytes, photo/video split, shared photos, per-person shares and ten largest files; 2 unit tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793362487.5487297,
+      "timestamp_str": "2026-10-30 15:14:47",
+      "agent": "opencode:storage"
+    },
+    {
+      "task_id": "storage-report",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] GET /api/storage with the same visibility as status; HTTP test proves the owner sees 2 people and a person sees only their one file, with ?profile=main refused",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793362487.8124964,
+      "timestamp_str": "2026-10-30 15:14:47",
+      "agent": "opencode:storage"
+    },
+    {
+      "task_id": "storage-report",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[4/4] Sync Storage panel shows summary, shared count, per-person shares and largest files with links; browser dogfood 2 files, 2 people, 2 largest, 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793362488.069897,
+      "timestamp_str": "2026-10-30 15:14:48",
+      "agent": "opencode:storage"
+    },
+    {
+      "task_id": "storage-report",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] 123 tests; 4/4 project gates; README/API/tree; ADR-014; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793362488.3361993,
+      "timestamp_str": "2026-10-30 15:14:48",
+      "agent": "opencode:storage"
     }
   ]
 }

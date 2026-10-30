@@ -301,3 +301,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   leave a served token behind. Preparing a large ZIP costs one temporary file and a synchronous
   read of every selected original, so a slow disk delays the request; the 8 GB cap bounds that
   cost. A token is a short-lived capability bound to the profile, not a share link.
+
+### ADR-014: Storage is an aggregate view, not a second index
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The Sync tab showed only a total file count and bytes. A shared photo is stored
+  once on disk but appears in two people's folders, so neither `photos` nor `copies` alone tells
+  the whole story, and there was no list of the files most likely to matter when space runs low.
+- **Decision**: `Catalog.storage(profile)` runs indexed aggregates: whole-library totals come
+  from `photos` (each file once), one person's share from `copies`, the shared count from a
+  grouped `copies` query, per-person shares from a grouped `copies` query, and the ten largest
+  files from the visible side. `GET /api/storage` applies the same profile visibility as
+  `/api/status`; the Sync tab renders the summary, people and largest files, with links to the
+  originals. No schema or state is added.
+- **Consequences**: A report is three or four cheap queries and never reads a photo. The
+  whole-library byte total is the disk cost; the sum of per-person shares can be larger because
+  a shared photo is counted in each share, which the UI states. A non-owner sees only their own
+  files and no people breakdown; a future per-folder or per-year report can reuse the same
+  aggregates without a migration.

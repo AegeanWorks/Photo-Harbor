@@ -170,6 +170,18 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .missing li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
 .missing li:first-child { border-top: 0; }
 .missing .none { color: var(--accent); }
+.panel h3 { margin: 18px 0 4px; font: 600 16px/1.3 var(--serif); }
+.storage-people { margin-top: 6px; }
+.storage-people:empty { display: none; }
+.storage-person {
+  display: flex; justify-content: space-between; gap: 12px; padding: 8px 0;
+  border-top: 1px solid var(--line); font-size: 14px;
+}
+.storage-person:first-child { border-top: 0; }
+.storage-person b { font-weight: 600; }
+.storage-person .hint { margin: 0; }
+#storage-largest a { color: var(--ink); text-decoration: none; }
+#storage-largest a:hover { text-decoration: underline; }
 .field { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
 .field:first-of-type { border-top: 0; }
 .field span { width: 64px; color: var(--muted); font-size: 14px; }

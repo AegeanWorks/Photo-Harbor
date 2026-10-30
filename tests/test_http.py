@@ -172,6 +172,23 @@ class ServerTest(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(body)) as archive:
             self.assertEqual(archive.namelist(), ["one.jpg"])
 
+    def test_storage_report_follows_the_signed_in_person(self):
+        self.upload(b"one", name="one.jpg")
+        ayse = self.add_person()
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        _, body = self.call("GET", "/api/storage")
+        report = json.loads(body)
+        self.assertEqual((report["count"], report["photos"], len(report["people"])), (2, 2, 2))
+        response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
+        as_her = {"Cookie": response.getheader("Set-Cookie").split(";", 1)[0]}
+        _, body = self.call("GET", "/api/storage", key=False, headers=as_her)
+        report = json.loads(body)
+        self.assertEqual((report["count"], report["people"]), (1, []))
+        response, _ = self.call("GET", "/api/storage?profile=main", key=False, headers=as_her)
+        self.assertEqual(response.status, 403)
+
     def test_media_serves_ranges_for_video_scrubbing(self):
         self.upload(b"0123456789", name="clip.MOV")
         response, body = self.call("GET", f"/media/{sha(b'0123456789')}", headers={"Range": "bytes=2-4"})

@@ -48,6 +48,10 @@ function bytes(n) {
   return `${n.toFixed(n < 10 && i > 0 ? 1 : 0)} ${units[i]}`;
 }
 
+function items(n) {
+  return `${n.toLocaleString()} item${n === 1 ? "" : "s"}`;
+}
+
 function parseTime(text) {
   const date = text ? new Date(text) : null;
   return date && !Number.isNaN(date.getTime()) ? date : null;
@@ -677,7 +681,7 @@ function renderPeopleSetup() {
   sync.replaceChildren();
   for (const person of state.people) {
     const row = el("li");
-    row.append(el("span", "", `${person.name} · ${person.count.toLocaleString()} items`),
+    row.append(el("span", "", `${person.name} · ${items(person.count)}`),
       el("span", "hint", `synced ${ago(person.last_sync)}`));
     sync.append(row);
   }
@@ -1142,6 +1146,36 @@ async function refreshStatus() {
     "Previews are off: install Pillow and pillow-heif on the PC for HEIC thumbnails in every browser.";
 }
 
+async function loadStorage() {
+  const report = await api("/api/storage");
+  const shared = report.shared ? ` · ${report.shared.toLocaleString()} shared` : "";
+  $("storage-summary").textContent = `${report.count.toLocaleString()} files · ${bytes(report.bytes)} · ${report.photos.toLocaleString()} photos · ${report.videos.toLocaleString()} videos${shared}`;
+  const people = $("storage-people");
+  people.replaceChildren();
+  for (const person of report.people) {
+    const row = el("div", "storage-person");
+    row.append(el("b", "", personName(person.profile)),
+      el("span", "", items(person.count)),
+      el("span", "hint", bytes(person.bytes)));
+    people.append(row);
+  }
+  const largest = $("storage-largest");
+  largest.replaceChildren();
+  if (report.largest.length === 0) {
+    largest.append(el("li", "none", "No files yet."));
+    return;
+  }
+  for (const item of report.largest) {
+    const row = el("li");
+    const link = el("a", "", item.name);
+    link.href = `/media/${item.sha256}`;
+    link.target = "_blank";
+    link.rel = "noopener";
+    row.append(link, el("span", "hint", `${bytes(item.size)} · ${ago(item.time)}`));
+    largest.append(row);
+  }
+}
+
 async function loadSetup() {
   const setup = await api("/api/setup");
   $("setup-server").textContent = setup.server;
@@ -1172,7 +1206,10 @@ function show(view) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
   for (const name of ["photos", "sync", "setup"]) $(`view-${name}`).hidden = name !== view;
-  if (view === "sync") refreshStatus().catch(handle);
+  if (view === "sync") {
+    refreshStatus().catch(handle);
+    loadStorage().catch(handle);
+  }
   if (view === "setup") loadSetup().catch(handle);
   try { localStorage.setItem("harbor-view", view); } catch (_) { /* private mode */ }
 }
@@ -1202,7 +1239,9 @@ function wireShell() {
     document.documentElement.style.setProperty("--topbar-h", `${bar.offsetHeight}px`);
   }).observe(bar);
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible" && !$("shell").hidden) refreshStatus().catch(handle);
+    if (document.visibilityState !== "visible" || $("shell").hidden) return;
+    refreshStatus().catch(handle);
+    if (!$("view-sync").hidden) loadStorage().catch(handle);
   });
 }
 

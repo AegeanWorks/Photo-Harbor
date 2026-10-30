@@ -4,7 +4,8 @@ import sqlite3
 from typing import Optional
 
 from .database import Database
-from .records import LibraryStats, Outline, PhotoFilter, PhotoRecord
+from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRecord,
+                      StorageFile, StorageReport)
 
 _COLUMNS = "sha256, rel_path, size, original_name, media_type, taken_at, received_at, profile"
 
@@ -173,3 +174,42 @@ class Catalog:
                 params,
             ).fetchone()
         return LibraryStats(count=row[0], total_bytes=row[1], last_received=row[2])
+
+    def storage(self, profile: Optional[str] = None) -> StorageReport:
+        """Disk use and the ten largest files; one person's share or the whole library."""
+        with self._db.lock:
+            if profile:
+                row = self._db.conn.execute(
+                    "SELECT COUNT(*), COALESCE(SUM(size), 0),"
+                    " COALESCE(SUM(CASE WHEN is_video = 0 THEN 1 ELSE 0 END), 0),"
+                    " COALESCE(SUM(CASE WHEN is_video = 1 THEN 1 ELSE 0 END), 0)"
+                    " FROM copies WHERE profile = ?", (profile,)).fetchone()
+                shared = self._db.conn.execute(
+                    "SELECT COUNT(*) FROM copies c WHERE c.profile = ? AND EXISTS"
+                    " (SELECT 1 FROM copies o WHERE o.sha256 = c.sha256 AND o.profile <> c.profile)",
+                    (profile,)).fetchone()[0]
+                largest = self._db.conn.execute(
+                    "SELECT sha256, original_name, size, sort_time FROM copies"
+                    " WHERE profile = ? ORDER BY size DESC, sha256 LIMIT 10", (profile,)).fetchall()
+                people = ()
+            else:
+                row = self._db.conn.execute(
+                    "SELECT COUNT(*), COALESCE(SUM(size), 0),"
+                    " COALESCE(SUM(CASE WHEN media_type NOT LIKE 'video/%' THEN 1 ELSE 0 END), 0),"
+                    " COALESCE(SUM(CASE WHEN media_type LIKE 'video/%' THEN 1 ELSE 0 END), 0)"
+                    " FROM photos").fetchone()
+                shared = self._db.conn.execute(
+                    "SELECT COUNT(*) FROM (SELECT sha256 FROM copies GROUP BY sha256"
+                    " HAVING COUNT(*) > 1)").fetchone()[0]
+                largest = self._db.conn.execute(
+                    "SELECT sha256, original_name, size, sort_time FROM photos"
+                    " ORDER BY size DESC, sha256 LIMIT 10").fetchall()
+                people = tuple(PersonStorage(row[0], row[1], row[2]) for row in
+                               self._db.conn.execute(
+                                   "SELECT profile, COUNT(*), COALESCE(SUM(size), 0) FROM copies"
+                                   " GROUP BY profile ORDER BY SUM(size) DESC").fetchall())
+        return StorageReport(count=row[0], bytes=row[1], photos=row[2], videos=row[3],
+                             shared=shared,
+                             largest=tuple(StorageFile(row[0], row[1], row[2], row[3])
+                                           for row in largest),
+                             people=people)

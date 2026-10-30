@@ -89,6 +89,38 @@ class Album:
 
 
 @dataclass(frozen=True)
+class PersonStorage:
+    """One person's share: shared photos count in each person's share."""
+
+    profile: str
+    count: int
+    bytes: int
+
+
+@dataclass(frozen=True)
+class StorageFile:
+    """One row of the largest-files list."""
+
+    sha256: str
+    name: str
+    size: int
+    time: Optional[str]
+
+
+@dataclass(frozen=True)
+class StorageReport:
+    """Disk use for one profile, or for the whole library when ``profile`` is None."""
+
+    count: int
+    bytes: int
+    photos: int
+    videos: int
+    shared: int
+    largest: tuple
+    people: tuple = ()
+
+
+@dataclass(frozen=True)
 class Profile:
     """A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends."""
 

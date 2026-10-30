@@ -101,6 +101,7 @@ class HarborApp:
         add("POST", "/api/sync/done", sync.done)
         add("GET", "/api/has", sync.has)
         add("GET", "/api/status", library.status)
+        add("GET", "/api/storage", library.storage)
         add("GET", "/api/photos", library.photos)
         add("GET", "/api/outline", library.outline)
         add("GET", "/api/setup", setup.details)

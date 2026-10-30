@@ -117,6 +117,10 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   link works once, for 15 minutes, and only for the person who prepared it. A selection download
   takes up to 500 photos; an album can be larger. Downloads are capped at 8 GB and need that
   much free space plus a 1 GB reserve.
+- **Know where the space went.** **Sync → Storage** shows the file and byte total, the
+  photo/video split, how many photos are shared (stored once but counted in each person's
+  share), each person's share, and the ten largest files. A person sees only their own share;
+  the main profile sees everyone.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -149,6 +153,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/has?sha256=…[&name=…&report=1]` | `{present, answer: yes\|no}` after re-hashing the PC's copy |
 | `POST /api/sync/done` | JSON `{started_at}`: records a finished sync |
 | `GET /api/status`, `GET /api/outline` `[?profile=]` | counts, sync state, months with photos |
+| `GET /api/storage` `[?profile=]` | file/byte totals, photo/video split, shared count, per-person shares and the ten largest files |
 | `GET /api/people`, `POST /api/login`, `POST /api/logout` | public sign-in: names; `{profile, password}` or `{key}` → session cookie |
 | `POST /api/password` | your own password: `{current, new}` (`current` only once one is set) |
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
@@ -231,6 +236,7 @@ photo-harbor/
     ├── test_profiles.py
     ├── test_runner.py
     ├── test_scale.py
+    ├── test_storage.py      <- whole-library and per-person storage totals
     └── test_store.py
 ```
 
