@@ -59,6 +59,9 @@ Android 14 (API 34) emulator, APK installed with `adb install`, Harbor running o
 - A second sync reported `Done: 0 sent, 1 already on the PC.`
 - A share intent for a second PNG reported `Sent 1, 0 already on the PC.` and the server listed
   `android-share.png`.
+- Ticking **Sync every 6 hours in the background** scheduled a `PERSISTED`, `NOT_METERED`,
+  `PERIODIC interval=+6h` job for `.SyncJobService` (confirmed with `dumpsys jobscheduler`); a
+  forced run uploaded the MediaStore images without the app in front.
 
 The emulator test is not part of the Python gate; rerun it after changing the sync engine or
 manifest.
