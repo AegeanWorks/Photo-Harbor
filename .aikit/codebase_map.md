@@ -6,15 +6,28 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `61`
+- **Total Python Modules**: `62`
 - **Total Classes**: `111`
-- **Total Top-Level Functions**: `92`
-- **Total Class Methods**: `430`
-- **Total Source Lines**: `7011`
+- **Total Top-Level Functions**: `96`
+- **Total Class Methods**: `435`
+- **Total Source Lines**: `7176`
 
 ---
 
 ## 📦 Modules & Exported Symbols
+
+### [`android/build.py`](android/build.py)
+> *Build a signed debug APK with the Android SDK tools; no Gradle or runtime libraries.*
+
+**Size**: `114` lines (`4541` bytes)
+
+**Functions:**
+- `def find_sdk()`
+- `def find_java()`
+- `def run(command, env, cwd)`
+- `def main()`
+
+---
 
 ### [`photo_harbor/__init__.py`](photo_harbor/__init__.py)
 > *photo-harbor: a self-hosted photo server that an iPhone feeds through Apple Shortcuts.*
@@ -118,11 +131,13 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `137` lines (`6361` bytes)
+**Size**: `160` lines (`7729` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
-  - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations)`
+  - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations, android_dir)`
+  - Method `.android_page(request)`
+  - Method `.android_apk(request)`
   - Method `._register(sync, library, people, albums, downloads, trash, setup)`
   - Method `.close()`
 
@@ -636,13 +651,14 @@
 ### [`photo_harbor/router.py`](photo_harbor/router.py)
 > *Maps a method and path to an endpoint; a path ending in ``/`` passes the rest as a parameter.*
 
-**Size**: `31` lines (`1112` bytes)
+**Size**: `36` lines (`1381` bytes)
 
 **Classes:**
 - `class Route`
 - `class Router`
   - Method `.__init__()`
   - Method `.add(method, path, handler, public)`
+  - Method `.add_exact(method, path, handler, public)` - *A path that ends in ``/`` but must still match exactly (a page, not a parameter).*
   - Method `.match(method, path)`
 
 ---
@@ -949,7 +965,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `602` lines (`34039` bytes)
+**Size**: `619` lines (`35047` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -966,6 +982,7 @@
   - Method `.test_a_full_sync_round()`
   - Method `.test_has_answers_yes_only_for_verified_photos()`
   - Method `.test_a_mismatched_hash_is_rejected_and_counted()`
+  - Method `.test_android_page_and_apk_are_public()`
   - Method `.test_calls_without_the_key_are_refused_but_the_page_loads()`
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
@@ -1023,7 +1040,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `159` lines (`6641` bytes)
+**Size**: `165` lines (`6927` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1035,6 +1052,7 @@
   - Method `.test_json_body_must_be_an_object()`
 - `class RouterTest`
   - Method `.test_exact_and_prefix_routes()`
+  - Method `.test_an_exact_trailing_slash_route_is_not_a_prefix()`
 - `class HomeNetworkTest`
   - Method `.test_private_addresses_are_home()`
   - Method `.test_public_addresses_are_not()`

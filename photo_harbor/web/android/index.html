@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Harbor for Android</title>
+  <style>
+    :root { color-scheme: light; --bg:#f6f4f0; --surface:#fff; --ink:#1d1f22; --muted:#6f6b64;
+      --accent:#0f766e; --line:#ddd8cf; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink);
+      font:16px/1.55 "Segoe UI", system-ui, sans-serif; }
+    main { max-width:560px; margin:0 auto; padding:48px 20px 64px; }
+    .mark { width:52px; height:52px; }
+    h1 { font:600 34px/1.15 Georgia, serif; margin:18px 0 6px; }
+    p { color:var(--muted); }
+    .card { background:var(--surface); border-radius:14px; padding:22px 24px; margin:20px 0;
+      box-shadow:0 8px 24px rgba(29,31,34,.07); }
+    .button { display:inline-block; background:var(--accent); color:#fff; text-decoration:none;
+      font-weight:600; padding:12px 20px; border-radius:999px; margin:8px 0 4px; }
+    .button:hover { filter:brightness(1.07); }
+    ol { padding-left:22px; }
+    li { margin:8px 0; }
+    code, kbd { background:#ece8e1; border-radius:5px; padding:1px 6px; font-size:.9em; }
+    .meta { font-size:13px; color:var(--muted); }
+    a { color:var(--accent); }
+  </style>
+</head>
+<body>
+<main>
+  <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M4 21c3 0 3 2 6 2s3-2 6-2 3 2 6 2 3-2 6-2" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round"/>
+    <path d="M16 4v13M10 10h12M11 17a5 5 0 0 0 10 0" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <h1>Harbor for Android</h1>
+  <p>Send new photos and videos from this phone to your Harbor PC over home Wi-Fi. Nothing is deleted from the phone.</p>
+
+  <div class="card">
+    <a class="button" href="/android/Harbor.apk" download>Download Harbor.apk</a>
+    <p class="meta">Android 8 or newer. The APK is signed for sideloading, not a Play Store release.</p>
+  </div>
+
+  <div class="card">
+    <h2>Install</h2>
+    <ol>
+      <li>Open this page on the Android phone, tap <b>Download Harbor.apk</b>, and allow installation from this browser when Android asks.</li>
+      <!-- hygiene: allow example LAN address in instructions -->
+      <li>Open Harbor and enter the server address shown in the Harbor window, for example <code>http://192.168.1.10:8642</code>.</li>
+      <li>Enter the key for your profile. The main profile manages people under Setup → Server and keys.</li>
+      <li>Press <b>Sync now</b> and allow photos and videos. The first sync may take a while.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Background sync</h2>
+    <p>Tick <b>Sync every 6 hours in the background</b> to let Android send new items on Wi-Fi. The app uses the same hash-first protocol as the iPhone Shortcut: each file is checked with <code>/api/has</code> and only uploaded when it is new.</p>
+  </div>
+
+  <p class="meta">Use this only on your home network. Harbor is plain HTTP and must not be exposed to the public internet. <a href="/">Back to the gallery</a></p>
+</main>
+</body>
+</html>

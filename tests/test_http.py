@@ -46,9 +46,11 @@ class ServerTest(unittest.TestCase):
         self.addCleanup(shutil.rmtree, root, True)
         self.settings = load_or_create(root)
         self.registry = _FakeRunKey()
+        self.android_dir = root / "android"
+        self.android_dir.mkdir()
         self.app = HarborApp(self.settings, port=0, thumbs=_NoPreviews(), now=lambda: FIXED_NOW,
                              autostart=Autostart(self.registry, 'pythonw Harbor.pyw', supported=True),
-                             password_iterations=1000)
+                             password_iterations=1000, android_dir=self.android_dir)
         self.addCleanup(self.app.close)
         self.server = HarborServer(("127.0.0.1", 0), self.app.router, self.app.guard,
                                    verbose=False)
@@ -103,6 +105,21 @@ class ServerTest(unittest.TestCase):
         self.assertIn("why", json.loads(body))
         _, body = self.call("GET", "/api/status")
         self.assertEqual(json.loads(body)["last_day"]["rejected"], 1)
+
+    def test_android_page_and_apk_are_public(self):
+        (self.android_dir / "index.html").write_text("<html>Harbor for Android</html>",
+                                                      encoding="utf-8")
+        (self.android_dir / "Harbor.apk").write_bytes(b"fake apk")
+        response, body = self.call("GET", "/android/", key=False)
+        self.assertEqual((response.status, b"Harbor for Android" in body), (200, True))
+        response, body = self.call("GET", "/android/Harbor.apk", key=False)
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.getheader("Content-Type"),
+                         "application/vnd.android.package-archive")
+        self.assertEqual(body, b"fake apk")
+        (self.android_dir / "Harbor.apk").unlink()
+        response, _ = self.call("GET", "/android/Harbor.apk", key=False)
+        self.assertEqual(response.status, 404)
 
     def test_calls_without_the_key_are_refused_but_the_page_loads(self):
         response, _ = self.call("GET", "/api/status", key=False)

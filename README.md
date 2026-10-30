@@ -6,7 +6,7 @@
 <!-- aegean:media:end -->
 
 
-Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi through Apple Shortcuts, no app needed, with a verified-hash cleanup and a gallery.
+Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi through Apple Shortcuts, no app needed, and an optional native Android app does the same, with a verified-hash cleanup and a gallery.
 
 ## ⚡ 30-Second Cold-Start Quick Reference
 
@@ -79,6 +79,11 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   re-running adds only new photos.
 - **No iPhone app.** Two Shortcuts built in Apple's Shortcuts app call the server. The gallery's
   **Setup** tab lists every action, with the server address and key ready to copy.
+- **Android app too.** A small native Android 8+ client can be installed from
+  `http://<pc>:8642/android/`; it sends new photos and videos with the same hash-first protocol,
+  keeps the phone's copy, and can run every 6 hours on Wi-Fi. The **APK** is served by Harbor
+  itself; **Setup → Android phone** links to the install page. Build it with
+  `python android/build.py` (JDK 17 and Android SDK 34 at build time only).
 - **Automatic on home Wi-Fi.** Automations run *Harbor Sync* when the phone joins the home
   network and when it is plugged in. The Shortcut stops at once on any other network.
 - **Only what is new is sent.** `POST /api/sync/start` returns the time of the last finished
@@ -157,6 +162,7 @@ python -m photo_harbor [--library DIR] key [--new]      # print, or replace, the
 python -m photo_harbor [--library DIR] profiles [--add NAME]   # list people and keys, or add one
 python -m photo_harbor [--library DIR] import FOLDER [--profile ID]  # copy photos in from disk
 python -m photo_harbor [--library DIR] backup --to DIR [--check]  # mirror, or verify by hash
+python android/build.py                                              # build Harbor.apk for /android/
 ```
 
 The default library is `%USERPROFILE%\Pictures\Harbor`. Errors print `Error:`, `Why:` and `Fix:`
@@ -201,6 +207,7 @@ photo-harbor/
 ├── Open Photo Browser.url    <- double-click: the gallery at http://localhost:8642
 ├── README.md
 ├── assets/
+├── android/                  <- native Android client, build.py and install page source
 ├── COMMERCIAL.md
 ├── photo_harbor/
 │   ├── __init__.py           <- package version
@@ -245,7 +252,7 @@ photo-harbor/
 │   ├── thumbs.py             <- optional Pillow previews and the background warmer
 │   ├── trash.py              <- move a copy aside, restore through ingest, delete forever
 │   ├── trash_api.py          <- list, move, restore, delete and empty the trash
-│   └── web/                  <- gallery and browser: index.html, app.css, app.js, icon, manifest
+│   └── web/                  <- gallery, assets and web/android/ (install page + Harbor.apk)
 └── tests/
     ├── __init__.py
     ├── library_fixture.py    <- a throwaway library for tests

@@ -475,3 +475,26 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   them to the photo they opened. Focus is not restored after an action that removes the tile
   (for example Move to trash), because the target is gone; the browser falls back to the page.
   The help panel is static and costs no script.
+
+### ADR-024: A native Android client, built without AndroidX and served by Harbor
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The phone side was Apple Shortcuts only. Android users had no client and no way
+  to install one from the same home server; adding AndroidX and Gradle would add a second
+  toolchain and a large dependency surface to a deliberately small project.
+- **Decision**: Add `android/` with a plain Java client for Android 8+ (minSdk 26, target 34):
+  programmatic UI, MediaStore query over `date_added`, SHA-256 hash before upload, `/api/has`
+  first, `/api/upload` with `X-Harbor-Key`, `X-Name`, `X-Sha256`, `X-Taken`, then
+  `/api/sync/done`. An optional persisted `JobScheduler` job runs every 6 hours on an unmetered
+  network; a manual **Sync now** button shares the same engine. `android/build.py` compiles with
+  `javac`, links with `aapt2`, dexes with `d8`, aligns with `zipalign`, signs with a debug key in
+  `~/.harbor-android/debug.keystore`, and verifies with `apksigner`; no Gradle or runtime
+  libraries. Harbor serves `/android/` and `/android/Harbor.apk` publicly on the home network,
+  and Setup links to it. Cleartext is enabled because the server is plain HTTP on the LAN.
+  `Router.add_exact` serves a trailing-slash page without turning it into a parameter prefix.
+- **Consequences**: One APK is installed by sideloading and updated only when signed with the
+  same private debug key; the key stays outside the repository. The app keeps the phone's files
+  and deletes nothing, so cleanup remains an iOS Shortcut feature for now. The client has no
+  AndroidX, so its UI is intentionally plain and its sync is a single foreground/background
+  pass rather than a system media observer. The APK is built only when the SDK is present; the
+  served binary is committed so a normal server install needs no Android toolchain.

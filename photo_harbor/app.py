@@ -55,7 +55,9 @@ class HarborApp:
     def __init__(self, settings: Settings, port: int, thumbs: Optional[Thumbnailer] = None,
                  now: Callable[[], datetime] = local_now,
                  autostart: Optional[Autostart] = None,
-                 password_iterations: int = ITERATIONS) -> None:
+                 password_iterations: int = ITERATIONS,
+                 android_dir: Optional[Path] = None) -> None:
+        self.android_dir = android_dir or WEB_DIR / "android"
         self.db = Database(settings.state_dir / "catalog.sqlite3")
         catalog = Catalog(self.db)
         journal = SyncJournal(self.db)
@@ -91,12 +93,33 @@ class HarborApp:
                        TrashApi(self.trash, catalog),
                        SetupApi(port, autostart or Autostart()))
 
+    def android_page(self, request: Request) -> Reply:
+        path = self.android_dir / "index.html"
+        if not path.is_file():
+            raise HarborError("the Android page is missing", str(path),
+                              "restore photo_harbor/web/android/index.html", status=404)
+        return Reply(200, content_type="text/html; charset=utf-8", headers=NO_CACHE, file=path)
+
+    def android_apk(self, request: Request) -> Reply:
+        path = self.android_dir / "Harbor.apk"
+        if not path.is_file():
+            raise HarborError("the Android app is not built yet",
+                              "no Harbor.apk is in the server's android folder",
+                              "run python android/build.py, then reload this page", status=404)
+        return Reply(200, content_type="application/vnd.android.package-archive",
+                     headers=(("Content-Disposition", 'attachment; filename="Harbor.apk"'),
+                              ("Cache-Control", "no-cache")),
+                     file=path)
+
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
                   albums: AlbumsApi, downloads: DownloadsApi, trash: TrashApi,
                   setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
+        add("GET", "/android", self.android_page, public=True)
+        self.router.add_exact("GET", "/android/", self.android_page, public=True)
+        add("GET", "/android/Harbor.apk", self.android_apk, public=True)
         add("POST", "/api/login", self.guard.login, public=True)
         add("GET", "/api/people", self.guard.people, public=True)
         add("POST", "/api/logout", self.guard.logout, public=True)

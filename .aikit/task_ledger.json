@@ -1,66 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "viewer-a11y",
+    "task_id": "android-client",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793373370.3298268,
-    "owner": "opencode:a11y",
-    "started_by": "opencode:a11y",
-    "continuations": [],
-    "completed_at": 1793373406.6209161
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793375744.948355,
+    "owner": "opencode:android",
+    "started_by": "opencode:android",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "trash-restore",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] GET/POST /api/trash, restore/delete by id, empty; owner cannot trash another person's copy; HTTP lifecycle and privacy tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793371684.5357609,
-      "timestamp_str": "2026-10-30 17:48:04",
-      "agent": "opencode:trash"
-    },
-    {
-      "task_id": "trash-restore",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] Trash tab, viewer and selection move actions, restore/delete/empty; browser dogfood move 1 -> restore -> 2 -> bulk 2 -> empty, 0 JS errors; 139 tests, 4/4 gates; README/ADR-019; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793371684.87285,
-      "timestamp_str": "2026-10-30 17:48:04",
-      "agent": "opencode:trash"
-    },
-    {
-      "task_id": "trash-restore",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'trash-restore' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793371721.504516,
-      "timestamp_str": "2026-10-30 17:48:41",
-      "agent": "opencode:trash"
-    },
-    {
-      "task_id": "album-cover",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: catalog format 7 adds albums.cover_sha; summary falls back to the newest member when the chosen hash is gone; set cover validates membership; viewer Use as cover; tests, dogfood, ADR-020, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793371932.024562,
-      "timestamp_str": "2026-10-30 17:52:12",
-      "agent": "opencode:cover",
-      "impact_assessment": {
-        "why": "An album's sidebar cover is always its newest photo, which is often not the image that represents the trip",
-        "benefits": "One chosen image per album; no file copies; the fallback keeps old albums working and a removed cover degrades gracefully",
-        "risks": "contract: catalog format 7 and an albums update field; dependency: none; concurrency: cover writes share the database lock; state: one nullable column",
-        "mitigation": "Add the column in an additive migration, validate that the chosen hash is still a visible album member, reset it when that photo leaves the album, and test v5/v6 upgrades"
-      }
-    },
     {
       "task_id": "album-cover",
       "phase": "phase 3",
@@ -250,6 +200,56 @@
       "timestamp": 1793373406.6209173,
       "timestamp_str": "2026-10-30 18:16:46",
       "agent": "opencode:a11y"
+    },
+    {
+      "task_id": "android-client",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/4] Plan: native Android 8+ app (programmatic UI, MediaStore hash-verified sync over the existing API, Wi-Fi-only periodic JobService); pure-SDK build script using aapt2/d8/apksigner; signed debug APK in web/android; server page /android/ and APK download; tests, docs, ADR-024",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793375168.1025848,
+      "timestamp_str": "2026-10-30 18:46:08",
+      "agent": "opencode:android",
+      "impact_assessment": {
+        "why": "The project is iPhone-only; Android users have no client and no way to install one from the home server",
+        "benefits": "One APK install from the same home server; verified uploads reuse the existing API and journal; no server schema change",
+        "risks": "contract: new Android endpoints/static page and an APK binary; dependency: Android SDK only at build time, no runtime libraries; concurrency: background job and manual sync can overlap; state: SharedPreferences last settings, server journal last sync",
+        "mitigation": "A single sync lock per process, all uploads hash-verified, periodic job limited to unmetered networks, cleartext allowed only for the home LAN, and the APK built and signature-checked before serving"
+      }
+    },
+    {
+      "task_id": "android-client",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/4] Native Android 8+ source: programmatic settings UI, MediaStore hash-first sync, /api/has before /api/upload, sync journal start/done, optional 6-hour unmetered JobService; pure-SDK build.py using aapt2/javac/d8/zipalign/apksigner",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793375744.3871953,
+      "timestamp_str": "2026-10-30 18:55:44",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-client",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/4] Built a 53,718-byte signed debug APK (package works.aegean.harbor 1.0, min 26, target 34), apksigner verified; /android/ page and /android/Harbor.apk served publicly; Router.add_exact; HTTP page/APK/404 tests and byte-identical server dogfood",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793375744.6729393,
+      "timestamp_str": "2026-10-30 18:55:44",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-client",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[4/4] README Android app/build/tree, Setup link, ADR-024, .gitignore build/idsig; 151 tests; 4/4 project gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793375744.948355,
+      "timestamp_str": "2026-10-30 18:55:44",
+      "agent": "opencode:android"
     }
   ]
 }

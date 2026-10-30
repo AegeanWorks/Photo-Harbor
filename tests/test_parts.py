@@ -61,6 +61,12 @@ class RouterTest(unittest.TestCase):
         self.assertIsNone(router.match("GET", "/media/a/b"))
         self.assertIsNone(router.match("POST", "/media/abc"))
 
+    def test_an_exact_trailing_slash_route_is_not_a_prefix(self):
+        router = Router()
+        router.add_exact("GET", "/android/", "page")
+        self.assertEqual(router.match("GET", "/android/").handler, "page")
+        self.assertIsNone(router.match("GET", "/android/other"))
+
 
 class HomeNetworkTest(unittest.TestCase):
     def test_private_addresses_are_home(self):

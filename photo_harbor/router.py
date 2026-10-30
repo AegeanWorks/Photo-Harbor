@@ -20,6 +20,11 @@ class Router:
         else:
             self._exact[(method, path)] = (handler, public)
 
+    def add_exact(self, method: str, path: str, handler: Callable,
+                  public: bool = False) -> None:
+        """A path that ends in ``/`` but must still match exactly (a page, not a parameter)."""
+        self._exact[(method, path)] = (handler, public)
+
     def match(self, method: str, path: str) -> Optional[Route]:
         if (method, path) in self._exact:
             handler, public = self._exact[(method, path)]
