@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "search-scope",
     "last_phase": "phase 3",
-    "active_phase": 3,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793372938.6972466,
     "owner": "opencode:search",
     "started_by": "opencode:search",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793372973.7828782
   },
   "checkpoints": [
-    {
-      "task_id": "sort-order",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] PhotoFilter.order and catalog ORDER BY with sha tiebreaker; /api/photos order validation; 2 unit tests and HTTP order test; Sort select preserves dates/albums/favorites; browser dogfood newest c, oldest a, largest c, 0 JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793370070.9560206,
-      "timestamp_str": "2026-10-30 17:21:10",
-      "agent": "opencode:sort"
-    },
     {
       "task_id": "sort-order",
       "phase": "phase 4",
@@ -249,6 +239,16 @@
       "status": "in_progress",
       "timestamp": 1793372938.6972466,
       "timestamp_str": "2026-10-30 18:08:58",
+      "agent": "opencode:search"
+    },
+    {
+      "task_id": "search-scope",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'search-scope' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793372973.7828987,
+      "timestamp_str": "2026-10-30 18:09:33",
       "agent": "opencode:search"
     }
   ]
