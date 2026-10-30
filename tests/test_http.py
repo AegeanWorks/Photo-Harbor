@@ -110,6 +110,10 @@ class ServerTest(unittest.TestCase):
         (self.android_dir / "index.html").write_text("<html>Harbor for Android</html>",
                                                       encoding="utf-8")
         (self.android_dir / "Harbor.apk").write_bytes(b"fake apk")
+        (self.android_dir / "Harbor.apk.json").write_text(
+            json.dumps({"version": "1.0", "versionCode": 1, "size": 8,
+                        "sha256": "a" * 64, "built_at": "2026-10-30T00:00:00+00:00"}),
+            encoding="utf-8")
         response, body = self.call("GET", "/android/", key=False)
         self.assertEqual((response.status, b"Harbor for Android" in body), (200, True))
         response, body = self.call("GET", "/android/Harbor.apk", key=False)
@@ -117,6 +121,8 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(response.getheader("Content-Type"),
                          "application/vnd.android.package-archive")
         self.assertEqual(body, b"fake apk")
+        response, body = self.call("GET", "/android/Harbor.apk.json", key=False)
+        self.assertEqual((response.status, json.loads(body)["version"]), (200, "1.0"))
         self.app.android_dir = self.android_dir / "removed"
         response, _ = self.call("GET", "/android/Harbor.apk", key=False)
         self.assertEqual(response.status, 404)

@@ -1,6 +1,9 @@
 """Build a signed debug APK with the Android SDK tools; no Gradle or runtime libraries."""
 
+import datetime
 import glob
+import hashlib
+import json
 import os
 import shutil
 import subprocess
@@ -14,6 +17,8 @@ BUILD = ROOT / "build"
 OUTPUT = PROJECT / "photo_harbor" / "web" / "android" / "Harbor.apk"
 KEYSTORE = Path.home() / ".harbor-android" / "debug.keystore"
 STOREPASS = "android"
+VERSION = "1.0"
+VERSION_CODE = 1
 
 
 def find_sdk() -> Path:
@@ -102,7 +107,17 @@ def main() -> int:
          "--key-pass", f"pass:{STOREPASS}", "--out", OUTPUT, aligned], env)
     run([apksigner, "verify", "--verbose", OUTPUT], env)
     run([aapt2, "dump", "badging", OUTPUT], env)
-    print(f"\nBuilt {OUTPUT} ({OUTPUT.stat().st_size} bytes)")
+    data = OUTPUT.read_bytes()
+    metadata = {
+        "version": VERSION,
+        "versionCode": VERSION_CODE,
+        "size": len(data),
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "built_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+    }
+    info_path = OUTPUT.with_name("Harbor.apk.json")
+    info_path.write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    print(f"\nBuilt {OUTPUT} ({metadata['size']} bytes, sha256 {metadata['sha256']})")
     return 0
 
 

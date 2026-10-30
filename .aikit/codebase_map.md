@@ -9,8 +9,8 @@
 - **Total Python Modules**: `62`
 - **Total Classes**: `111`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `435`
-- **Total Source Lines**: `7176`
+- **Total Class Methods**: `436`
+- **Total Source Lines**: `7206`
 
 ---
 
@@ -19,7 +19,7 @@
 ### [`android/build.py`](android/build.py)
 > *Build a signed debug APK with the Android SDK tools; no Gradle or runtime libraries.*
 
-**Size**: `114` lines (`4541` bytes)
+**Size**: `129` lines (`5069` bytes)
 
 **Functions:**
 - `def find_sdk()`
@@ -131,13 +131,14 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `160` lines (`7729` bytes)
+**Size**: `169` lines (`8257` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
   - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations, android_dir)`
   - Method `.android_page(request)`
   - Method `.android_apk(request)`
+  - Method `.android_apk_info(request)`
   - Method `._register(sync, library, people, albums, downloads, trash, setup)`
   - Method `.close()`
 
@@ -965,7 +966,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `619` lines (`35056` bytes)
+**Size**: `625` lines (`35471` bytes)
 
 **Classes:**
 - `class _NoPreviews`

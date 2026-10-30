@@ -515,3 +515,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   missing on unusual providers; the app falls back to the URI name, asset length and the current
   time, and skips a file whose size cannot be determined. Both the share activity and the
   background job rely on the same hash check, so concurrent uploads cannot store a file twice.
+
+### ADR-026: APK downloads carry a verifiable metadata sidecar
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: A sideloaded APK is an opaque binary; the install page showed no version, size or
+  checksum, so a user could not tell whether the served file was the build they expected.
+- **Decision**: `android/build.py` writes `Harbor.apk.json` after `apksigner verify`, containing
+  version, versionCode, size, SHA-256 and build time. Harbor serves it publicly at
+  `/android/Harbor.apk.json` with `Cache-Control: no-cache`; the install page fetches it and
+  replaces the static note with the exact version, size and full SHA-256. Metadata is generated
+  only from the signed bytes, never hand-written.
+- **Consequences**: The checksum identifies the exact APK without adding a signing service or
+  another dependency. If the sidecar is missing the page falls back to its static note and the
+  JSON route returns 404; the APK itself is still served. A future updater can compare
+  `versionCode` from the same file without parsing the APK.

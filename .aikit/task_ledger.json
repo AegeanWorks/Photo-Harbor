@@ -1,55 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "android-bg-verify",
+    "task_id": "apk-metadata",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793378096.9522977,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793378595.6882706,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": [],
-    "completed_at": 1793378128.621139
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "search-scope",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'search-scope' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793372973.7828987,
-      "timestamp_str": "2026-10-30 18:09:33",
-      "agent": "opencode:search"
-    },
-    {
-      "task_id": "viewer-a11y",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/3] Plan: viewer records the tile that opened it, focuses Close, traps Tab/Shift+Tab inside visible controls, restores focus on close; Escape closes date/album menus outside; aria-live selection/trash counts, aria-keyshortcuts, Setup shortcut list; dogfood, README, ADR-023",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793373139.7356412,
-      "timestamp_str": "2026-10-30 18:12:19",
-      "agent": "opencode:a11y",
-      "impact_assessment": {
-        "why": "The viewer looks modal but keyboard focus stays on the page behind it, Tab can leave, and closing drops focus instead of returning to the photo",
-        "benefits": "Keyboard and screen-reader users get a predictable dialog; shortcuts become discoverable; no data or schema change",
-        "risks": "contract: focus behavior and a help panel; dependency: none; concurrency: none; state: one focus reference in memory",
-        "mitigation": "Capture focus only when the viewer first opens, filter hidden/disabled controls for the Tab trap, check the element is still connected before restoring, and test the cycle with Playwright"
-      }
-    },
-    {
-      "task_id": "viewer-a11y",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Viewer records the opening tile, focuses Close, traps Tab/Shift+Tab among visible enabled controls, restores focus on close; Escape closes date/album menus outside; live counts and aria-keyshortcuts",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793373370.024966,
-      "timestamp_str": "2026-10-30 18:16:10",
-      "agent": "opencode:a11y"
-    },
     {
       "task_id": "viewer-a11y",
       "phase": "phase 4",
@@ -254,6 +215,45 @@
       "status": "completed",
       "timestamp": 1793378128.6211445,
       "timestamp_str": "2026-10-30 19:35:28",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "apk-metadata",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Plan: build.py writes Harbor.apk.json next to the signed APK with version, versionCode, size, SHA-256 and build time; /android/Harbor.apk.json serves it; install page displays it; tests, README, ADR-026",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793378421.8119376,
+      "timestamp_str": "2026-10-30 19:40:21",
+      "agent": "opencode:android",
+      "impact_assessment": {
+        "why": "The APK download is a binary with no visible version or checksum, so a user cannot tell what they are installing or whether the bytes changed",
+        "benefits": "Verifiable sideload downloads; the page identifies the exact build; no server schema or runtime dependency",
+        "risks": "contract: one generated sidecar and a public JSON route; dependency: hashlib/json only; concurrency: metadata written after signing; state: one small file beside the APK",
+        "mitigation": "Generate metadata only after the signed APK is verified, serve it no-cache, show the full SHA-256, and test both present and missing sidecar cases"
+      }
+    },
+    {
+      "task_id": "apk-metadata",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] build.py writes Harbor.apk.json after apksigner verify (version/code/size/sha256/built_at); /android/Harbor.apk.json served no-cache; install page displays it; HTTP test and byte/checksum dogfood",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793378595.2071857,
+      "timestamp_str": "2026-10-30 19:43:15",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "apk-metadata",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] README/android README/ADR-026; 151 tests; 4/4 gates; served page/APK/metadata all 200 with matching SHA-256; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793378595.6882706,
+      "timestamp_str": "2026-10-30 19:43:15",
       "agent": "opencode:android"
     }
   ]

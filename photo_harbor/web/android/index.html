@@ -37,7 +37,7 @@
 
   <div class="card">
     <a class="button" href="/android/Harbor.apk" download>Download Harbor.apk</a>
-    <p class="meta">Android 8 or newer. The APK is signed for sideloading, not a Play Store release.</p>
+    <p class="meta" id="apk-meta">Android 8 or newer. The APK is signed for sideloading, not a Play Store release.</p>
   </div>
 
   <div class="card">
@@ -58,5 +58,17 @@
 
   <p class="meta">Use this only on your home network. Harbor is plain HTTP and must not be exposed to the public internet. <a href="/">Back to the gallery</a></p>
 </main>
+<script>
+  fetch("/android/Harbor.apk.json", { cache: "no-store" })
+    .then((response) => response.ok ? response.json() : null)
+    .then((data) => {
+      if (!data) return;
+      const kb = (data.size / 1024).toFixed(1);
+      document.getElementById("apk-meta").textContent =
+        `Version ${data.version} \u00b7 ${kb} KB \u00b7 SHA-256 ${data.sha256} ` +
+        `\u00b7 Android 8 or newer, signed for sideloading`;
+    })
+    .catch(() => {});
+</script>
 </body>
 </html>

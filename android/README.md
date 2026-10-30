@@ -21,7 +21,11 @@ build), verifies the signature, and writes:
 
 ```text
 photo_harbor/web/android/Harbor.apk
+photo_harbor/web/android/Harbor.apk.json
 ```
+
+The JSON sidecar records the version, version code, size, SHA-256 and build time. The install
+page reads it and shows the exact build and checksum beside the download button.
 
 Keep `~/.harbor-android/debug.keystore`: Android only installs an update signed with the same
 key. The keystore is deliberately outside the repository.
