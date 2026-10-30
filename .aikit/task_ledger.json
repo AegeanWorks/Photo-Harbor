@@ -1,56 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "date-filter",
+    "task_id": "sort-order",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793363953.9119406,
-    "owner": "opencode:dates",
-    "started_by": "opencode:dates",
-    "continuations": [],
-    "completed_at": 1793363985.5041986
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793370071.3703406,
+    "owner": "opencode:sort",
+    "started_by": "opencode:sort",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "storage-report",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: Catalog.storage returns file counts, bytes, photo/video split, shared-photo count, per-person shares and the ten largest files; GET /api/storage keeps the same profile visibility; Sync tab panel with summary, people and largest files; tests, dogfood, ADR-014, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793362162.624061,
-      "timestamp_str": "2026-10-30 15:09:22",
-      "agent": "opencode:storage",
-      "impact_assessment": {
-        "why": "The Sync tab shows only a total count and bytes; users cannot see which person takes the space or what the largest files are, and hard-link savings are invisible",
-        "benefits": "One read-only report for disk planning; owner sees everyone, each person sees only their own share; no schema change and no file reads",
-        "risks": "contract: new read-only endpoint; dependency: none; concurrency: three aggregate queries per request; state: none persisted",
-        "mitigation": "Keep it to indexed aggregates and ten rows, scope every query to the visible profile, and show only names and sizes the caller may already see"
-      }
-    },
-    {
-      "task_id": "storage-report",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Catalog.storage reports whole-library or per-person counts, bytes, photo/video split, shared photos, per-person shares and ten largest files; 2 unit tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793362487.5487297,
-      "timestamp_str": "2026-10-30 15:14:47",
-      "agent": "opencode:storage"
-    },
-    {
-      "task_id": "storage-report",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] GET /api/storage with the same visibility as status; HTTP test proves the owner sees 2 people and a person sees only their one file, with ?profile=main refused",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793362487.8124964,
-      "timestamp_str": "2026-10-30 15:14:47",
-      "agent": "opencode:storage"
-    },
     {
       "task_id": "storage-report",
       "phase": "phase 3",
@@ -251,6 +211,45 @@
       "timestamp": 1793363985.5042002,
       "timestamp_str": "2026-10-30 15:39:45",
       "agent": "opencode:dates"
+    },
+    {
+      "task_id": "sort-order",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/3] Plan: PhotoFilter.order (newest default, oldest, largest, smallest); catalog ORDER BY per side; /api/photos?order= validation; scope-bar sort select preserves dates/albums/favorites; tests, dogfood, ADR-018, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793369739.9231682,
+      "timestamp_str": "2026-10-30 17:15:39",
+      "agent": "opencode:sort",
+      "impact_assessment": {
+        "why": "The gallery is always newest-first; finding the oldest photo or the files taking the most space means a different tool or scrolling",
+        "benefits": "One control over the existing page query; no schema change, no extra read, and it combines with every filter",
+        "risks": "contract: one new query parameter and scope key; dependency: none; concurrency: read-only; state: sort is client-only and resets on person/month/favorites changes",
+        "mitigation": "Validate against a fixed set, keep a stable sha tiebreaker on every order, and preserve the chosen order when a date window is applied"
+      }
+    },
+    {
+      "task_id": "sort-order",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] PhotoFilter.order and catalog ORDER BY with sha tiebreaker; /api/photos order validation; 2 unit tests and HTTP order test; Sort select preserves dates/albums/favorites; browser dogfood newest c, oldest a, largest c, 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793370070.9560206,
+      "timestamp_str": "2026-10-30 17:21:10",
+      "agent": "opencode:sort"
+    },
+    {
+      "task_id": "sort-order",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] 132 tests; 4/4 project gates; README/API/tree; ADR-018; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793370071.3703406,
+      "timestamp_str": "2026-10-30 17:21:11",
+      "agent": "opencode:sort"
     }
   ]
 }

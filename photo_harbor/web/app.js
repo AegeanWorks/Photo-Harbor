@@ -5,7 +5,8 @@ const BATCH = 500;
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
-  scope: { kind: null, month: null, favorite: false, album: null, start: null, end: null },
+  scope: { kind: null, month: null, favorite: false, album: null, start: null, end: null,
+    order: "newest" },
   query: "",
   generation: 0, total: 0, profile: null, people: [], me: null, owner: false,
   favorites: 0, albums: [], selecting: false, selected: new Set(),
@@ -201,6 +202,7 @@ function photosUrl() {
   if (state.scope.album) params.set("album", String(state.scope.album));
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
+  if (state.scope.order) params.set("order", state.scope.order);
   if (state.query) params.set("q", state.query);
   if (state.profile) params.set("profile", state.profile);
   return `/api/photos?${params}`;
@@ -277,6 +279,7 @@ function renderScope() {
   else if (!narrowed) $("scope-count").textContent = (state.people.find((p) => p.id === state.profile)?.count ?? shown).toLocaleString();
   else $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
   $("scope-clear").hidden = !narrowed;
+  $("sort-order").value = state.scope.order || "newest";
   $("album-rename").hidden = !currentAlbum();
   $("album-delete").hidden = !currentAlbum();
   $("album-download").hidden = !currentAlbum();
@@ -311,7 +314,8 @@ function markScope() {
 
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
-  state.scope = { kind, month, favorite: false, album: null, start: null, end: null, ...extra };
+  state.scope = { kind, month, favorite: false, album: null, start: null, end: null,
+    order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
   window.scrollTo({ top: 0 });
@@ -400,7 +404,8 @@ function selectPerson(id) {
   for (const item of document.querySelectorAll("[data-person]")) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
-  state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null };
+  state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null,
+    order: state.scope.order || "newest" };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -813,6 +818,11 @@ function wireBrowser() {
   $("date-filter").addEventListener("click", toggleDatePanel);
   $("date-apply").addEventListener("click", applyDates);
   $("date-clear").addEventListener("click", clearDates);
+  $("sort-order").addEventListener("change", (event) => {
+    state.scope = { ...state.scope, order: event.target.value };
+    window.scrollTo({ top: 0 });
+    resetPhotos();
+  });
   $("select-mode").addEventListener("click", () => setSelecting(!state.selecting));
   $("select-all").addEventListener("click", selectLoaded);
   $("select-clear").addEventListener("click", clearSelected);
@@ -841,7 +851,8 @@ function wireBrowser() {
       if (document.querySelector('[data-view="photos"]').getAttribute("aria-selected") !== "true") show("photos");
       // Search covers the whole library, not just the month in view.
       if (query) {
-        state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null };
+        state.scope = { kind: null, month: null, favorite: false, album: null, start: null,
+          end: null, order: state.scope.order || "newest" };
         markScope();
       }
       resetPhotos();

@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `55`
-- **Total Classes**: `103`
+- **Total Python Modules**: `56`
+- **Total Classes**: `104`
 - **Total Top-Level Functions**: `91`
-- **Total Class Methods**: `388`
-- **Total Source Lines**: `6435`
+- **Total Class Methods**: `393`
+- **Total Source Lines**: `6489`
 
 ---
 
@@ -229,7 +229,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `221` lines (`11076` bytes)
+**Size**: `227` lines (`11414` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -238,7 +238,7 @@
   - Method `.get(sha256)`
   - Method `.known(sha256s)` - *The hashes in ``sha256s`` that the catalog holds, in one query.*
   - Method `.copies_of(profile, sha256s)` - *The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query.*
-  - Method `.page(offset, limit, narrow)` - *Records newest first by taken time, falling back to received time.*
+  - Method `.page(offset, limit, narrow)` - *Records in the requested order, newest first by default (taken time, then received).*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
@@ -496,7 +496,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `184` lines (`8973` bytes)
+**Size**: `189` lines (`9294` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -609,7 +609,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `141` lines (`3263` bytes)
+**Size**: `143` lines (`3343` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -896,7 +896,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `490` lines (`27293` bytes)
+**Size**: `505` lines (`28215` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -917,6 +917,7 @@
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
   - Method `.test_a_selection_and_an_album_download_as_one_zip()`
+  - Method `.test_sort_order_changes_the_page()`
   - Method `.test_a_date_range_narrows_the_gallery()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1070,6 +1071,18 @@
   - Method `.test_a_failing_pass_is_logged_and_the_thread_keeps_going()`
 - `class SessionCleanupTest`
   - Method `.test_expired_sessions_are_removed()`
+
+---
+
+### [`tests/test_sort.py`](tests/test_sort.py)
+**Size**: `26` lines (`1135` bytes)
+
+**Classes:**
+- `class SortOrderTest`
+  - Method `.setUp()`
+  - Method `.names(order)`
+  - Method `.test_each_order_is_stable_and_complete()`
+  - Method `.test_an_unknown_order_falls_back_to_newest()`
 
 ---
 

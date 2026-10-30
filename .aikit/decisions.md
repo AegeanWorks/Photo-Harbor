@@ -370,3 +370,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   same `sort_time` the gallery already sorts by. Choosing a month, person, album or favorites
   clears the dates; the month outline stays global so the sidebar remains a way out of the
   window. A future saved-search feature can serialize the same four keys.
+
+### ADR-018: Sort order is part of the gallery filter, with a stable tiebreaker
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: The gallery was always newest-first. Finding the oldest photo, or the largest
+  files, meant opening another tool; a sort control is a natural companion to the date window
+  and storage report.
+- **Decision**: `PhotoFilter.order` accepts `newest` (default), `oldest`, `largest` and
+  `smallest`; `/api/photos` validates the same set. `Catalog.page` maps each order to an
+  `ORDER BY` on the owner side (`photos` for the library, `copies` for one person) and always
+  ends with `sha256` as a stable tiebreaker. The scope-bar **Sort** select updates the scope
+  without clearing dates, album, favorites or search; person, month and favorites changes keep
+  the chosen order.
+- **Consequences**: Sorting costs no extra query and no schema, and pagination remains stable
+  because every order has a unique tiebreaker. Largest/smallest sort by stored bytes, not pixel
+  dimensions, which is the number the storage report uses. A future custom order (for example
+  a drag-and-drop album sequence) would need a stored position rather than another SQL order.

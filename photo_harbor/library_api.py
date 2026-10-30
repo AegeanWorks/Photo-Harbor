@@ -73,6 +73,11 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
     album = request.arg("album") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
+    order = request.arg("order") or "newest"
+    if order not in ("newest", "oldest", "largest", "smallest"):
+        raise HarborError(f"{order!r} is not a sort order",
+                          "order is newest, oldest, largest or smallest",
+                          "use ?order=oldest, or leave it out")
     if month is not None and not MONTH.match(month):
         raise HarborError(f"{month!r} is not a month", "months are written YYYY-MM",
                           "use ?month=2026-10")
@@ -93,7 +98,7 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
         album = int(album)
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album,
-                       start=start, end=end)
+                       start=start, end=end, order=order)
 
 
 class LibraryApi:

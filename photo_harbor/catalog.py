@@ -8,6 +8,12 @@ from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRe
                       StorageFile, StorageReport)
 
 _COLUMNS = "sha256, rel_path, size, original_name, media_type, taken_at, received_at, profile"
+_ORDERS = {
+    "newest": "{owner}.sort_time DESC, {owner}.sha256 DESC",
+    "oldest": "{owner}.sort_time ASC, {owner}.sha256 ASC",
+    "largest": "{owner}.size DESC, {owner}.sort_time DESC, {owner}.sha256 DESC",
+    "smallest": "{owner}.size ASC, {owner}.sort_time ASC, {owner}.sha256 ASC",
+}
 
 
 def _to_record(row: sqlite3.Row) -> PhotoRecord:
@@ -134,16 +140,16 @@ class Catalog:
         return {row[0] for row in rows}
 
     def page(self, offset: int, limit: int, narrow: PhotoFilter = PhotoFilter()) -> list:
-        """Records newest first by taken time, falling back to received time."""
+        """Records in the requested order, newest first by default (taken time, then received)."""
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
+        order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
         favorite = ("EXISTS (SELECT 1 FROM favorites f"
                     " WHERE f.profile = ? AND f.sha256 = p.sha256) AS favorite")
         with self._db.lock:
             rows = self._db.conn.execute(
                 f"SELECT {columns}, {favorite} FROM {table}{where}"
-                f" ORDER BY {owner}.sort_time DESC, {owner}.sha256 DESC"
-                " LIMIT ? OFFSET ?",
+                f" ORDER BY {order} LIMIT ? OFFSET ?",
                 (narrow.viewer, *params, limit, offset),
             ).fetchall()
         return [_to_record(row) for row in rows]

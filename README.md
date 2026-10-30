@@ -125,6 +125,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Exact date windows.** **Dates** in the gallery takes a From and To day; both ends are
   included, either can be left empty, and the range combines with person, album, favorites,
   kind and name search. **Show everything** removes it.
+- **Order the gallery.** **Sort** offers Newest (the default), Oldest, Largest and Smallest.
+  The choice stays when a date window is applied and stacks with the other filters.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -165,7 +167,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID]` | gallery page, newest first; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
@@ -243,6 +245,7 @@ photo-harbor/
     ├── test_profiles.py
     ├── test_runner.py
     ├── test_scale.py
+    ├── test_sort.py         <- newest, oldest, largest and smallest order
     ├── test_storage.py      <- whole-library and per-person storage totals
     └── test_store.py
 ```

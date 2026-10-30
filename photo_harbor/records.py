@@ -58,7 +58,8 @@ class PhotoFilter:
     """Gallery narrowing: ``month`` is ``YYYY-MM``, ``start``/``end`` are inclusive
     ``YYYY-MM-DD`` dates, ``query`` matches the file name, ``kind`` is ``photo`` or ``video``.
     ``viewer`` is whose favorites and albums are read; ``favorite`` and ``album`` narrow to that
-    viewer's marks. None means no narrowing on that axis."""
+    viewer's marks. ``order`` is newest, oldest, largest or smallest. None means no narrowing on
+    that axis."""
 
     month: Optional[str] = None
     query: Optional[str] = None
@@ -69,6 +70,7 @@ class PhotoFilter:
     album: Optional[int] = None
     start: Optional[str] = None
     end: Optional[str] = None
+    order: str = "newest"
 
 
 @dataclass(frozen=True)

@@ -172,6 +172,21 @@ class ServerTest(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(body)) as archive:
             self.assertEqual(archive.namelist(), ["one.jpg"])
 
+    def test_sort_order_changes_the_page(self):
+        for name, body, taken in (("a.jpg", b"a", "2026-05-01T10:00:00"),
+                                  ("b.jpg", b"bbb", "2026-05-02T10:00:00"),
+                                  ("c.jpg", b"ccccc", "2026-05-03T10:00:00")):
+            self.call("POST", "/api/upload", body=body,
+                      headers={"X-Name": name, "X-Sha256": sha(body), "X-Taken": taken})
+        _, body = self.call("GET", "/api/photos?order=oldest")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]],
+                         ["a.jpg", "b.jpg", "c.jpg"])
+        _, body = self.call("GET", "/api/photos?order=largest")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]],
+                         ["c.jpg", "b.jpg", "a.jpg"])
+        response, _ = self.call("GET", "/api/photos?order=sideways")
+        self.assertEqual(response.status, 400)
+
     def test_a_date_range_narrows_the_gallery(self):
         for name, taken in (("may.jpg", "2026-05-01T10:00:00"),
                             ("june.jpg", "2026-06-01T10:00:00")):
