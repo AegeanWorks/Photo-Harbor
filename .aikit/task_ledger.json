@@ -3,31 +3,15 @@
   "active_task": {
     "task_id": "backup-verify",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793363509.0995252,
     "owner": "opencode:backup",
     "started_by": "opencode:backup",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793363552.3542116
   },
   "checkpoints": [
-    {
-      "task_id": "bulk-download",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/5] Plan: selection.py centralizes bulk hash validation; downloads.py builds a stored zip in .harbor/downloads with size/free-space caps and one-time expiring tokens; POST /api/download {sha256s|album} returns a URL; GET /api/download/<token> serves and deletes; Reply delete_after; UI Download in the selection bar and album scope; tests, dogfood, ADR-013, README",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793357929.2613866,
-      "timestamp_str": "2026-10-30 13:58:49",
-      "agent": "opencode:download",
-      "impact_assessment": {
-        "why": "Albums and selection can collect photos, but taking them out still means opening and downloading originals one at a time",
-        "benefits": "One zip for a trip, album or selection; no recompression, no second copy of the library, and no schema change",
-        "risks": "contract: new endpoint, token store and Reply cleanup; dependency: stdlib zipfile only; concurrency: token map and temp file creation under a lock; state: temporary zips and expiry",
-        "mitigation": "Cap batches at 500 hashes and 8 GiB, require free space, use random one-time tokens with a 15-minute expiry, delete after send or on startup, and sanitize zip entry names"
-      }
-    },
     {
       "task_id": "bulk-download",
       "phase": "phase 3",
@@ -250,6 +234,16 @@
       "status": "in_progress",
       "timestamp": 1793363509.0995252,
       "timestamp_str": "2026-10-30 15:31:49",
+      "agent": "opencode:backup"
+    },
+    {
+      "task_id": "backup-verify",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'backup-verify' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793363552.3542135,
+      "timestamp_str": "2026-10-30 15:32:32",
       "agent": "opencode:backup"
     }
   ]
