@@ -29,6 +29,8 @@ from .setup_api import SetupApi
 from .store import PhotoStore, local_now
 from .sync_api import SyncApi
 from .thumbs import PreviewWarmer, Thumbnailer
+from .trash import TrashBook
+from .trash_api import TrashApi
 
 WEB_DIR = Path(__file__).parent / "web"
 STATIC_TYPES = {
@@ -63,6 +65,7 @@ class HarborApp:
         self.copies = CopyIndex(self.db)
         self.store = PhotoStore(settings.library, catalog, self.copies,
                                 folder_of=lambda profile: self.profiles.get(profile).folder, now=now)
+        self.trash = TrashBook(self.db, settings.library, self.store, self.copies, now=now)
         thumbs = thumbs or Thumbnailer(settings.state_dir / "thumbs")
         self.previews = thumbs.enabled
         self.warmer = PreviewWarmer(thumbs, catalog, self.store) if thumbs.enabled else None
@@ -85,10 +88,12 @@ class HarborApp:
                                    self.sessions, self.layout),
                        AlbumsApi(self.albums, catalog),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
+                       TrashApi(self.trash, catalog),
                        SetupApi(port, autostart or Autostart()))
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
-                  albums: AlbumsApi, downloads: DownloadsApi, setup: SetupApi) -> None:
+                  albums: AlbumsApi, downloads: DownloadsApi, trash: TrashApi,
+                  setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -116,6 +121,10 @@ class HarborApp:
         add("POST", "/api/favorite", albums.favorite)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
+        add("GET", "/api/trash", trash.listing)
+        add("POST", "/api/trash", trash.move)
+        add("POST", "/api/trash/empty", trash.empty)
+        add("POST", "/api/trash/", trash.update)
         add("GET", "/api/details/", library.details)
         add("GET", "/media/", library.media)
         add("GET", "/thumb/", library.thumb)

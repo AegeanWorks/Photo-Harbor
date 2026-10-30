@@ -387,3 +387,24 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   because every order has a unique tiebreaker. Largest/smallest sort by stored bytes, not pixel
   dimensions, which is the number the storage report uses. A future custom order (for example
   a drag-and-drop album sequence) would need a stored position rather than another SQL order.
+
+### ADR-019: Trash moves only the caller's copy and restores through ingest
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: There was no way to remove an unwanted photo in Harbor; doing it in Explorer
+  bypassed the catalog, and a direct delete would be irreversible. A photo can be shared by
+  hard link between people, so removing one person's copy must not remove another's.
+- **Decision**: Catalog format 6 adds a `trash` table. `TrashBook.move(profile, sha)` inserts a
+  row, moves that profile's file into `.harbor/trash/<token>/<safe name>`, then calls
+  `CopyIndex.forget(profile, sha)`; if forgetting fails the file is moved back and the row is
+  removed. A shared photo keeps its other copy and stays in the catalog; the last copy removes
+  the photo row. Restore re-ingests the trashed bytes with the original hash, name, profile and
+  capture time through `PhotoStore.ingest`, so placement, hard links and thumbnails use the
+  normal path; only then is the trash row and file removed. Permanent delete and empty remove
+  the files. The Trash tab is per person, and move/restore/delete all check ownership.
+- **Consequences**: Trash is a safety net, not a second gallery: files are hidden from the
+  library, storage report and backup mirror until restored. A crash between the move and the
+  catalog forget leaves a row and a file for the scanner to reconcile; no bytes are deleted in
+  that path. The owner cannot trash another person's copy from the everyone view; the error
+  tells them to select that person. Empty trash is the only irreversible action, and the UI
+  confirms it.

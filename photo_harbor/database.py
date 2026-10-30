@@ -6,10 +6,10 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 OWNER_PROFILE = "main"
 
-# Format 5, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 6, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
 _COLLECTIONS = """
@@ -36,7 +36,23 @@ CREATE TABLE IF NOT EXISTS album_photos (
 CREATE INDEX IF NOT EXISTS album_photos_by_sha ON album_photos (sha256);
 """
 
-_SCHEMA = _COLLECTIONS + """
+_TRASH = """
+CREATE TABLE IF NOT EXISTS trash (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile TEXT NOT NULL,
+    sha256 TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    rel_path TEXT NOT NULL,
+    trash_path TEXT NOT NULL UNIQUE,
+    size INTEGER NOT NULL,
+    media_type TEXT NOT NULL,
+    taken_at TEXT,
+    trashed_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS trash_by_profile ON trash (profile, trashed_at DESC);
+"""
+
+_SCHEMA = _COLLECTIONS + _TRASH + """
 CREATE TABLE IF NOT EXISTS photos (
     sha256 TEXT PRIMARY KEY,
     rel_path TEXT NOT NULL UNIQUE,
@@ -158,8 +174,12 @@ CREATE TABLE IF NOT EXISTS sessions (
 # the tables are additive, so a failed upgrade leaves the format 4 catalog readable in its backup.
 _FROM_4 = _COLLECTIONS
 
-_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4, 2: _FROM_2 + _FROM_3 + _FROM_4,
-             3: _FROM_3 + _FROM_4, 4: _FROM_4}
+# Format 6 adds the trash table; files themselves live under .harbor/trash.
+_FROM_5 = _TRASH
+
+_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5,
+             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5,
+             3: _FROM_3 + _FROM_4 + _FROM_5, 4: _FROM_4 + _FROM_5, 5: _FROM_5}
 
 
 class Database:

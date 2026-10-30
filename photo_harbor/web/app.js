@@ -560,8 +560,8 @@ function hideSelectAlbums() {
 function renderSelection() {
   const count = state.selected.size;
   $("select-count").textContent = `${count.toLocaleString()} selected`;
-  for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-album",
-    "select-clear"]) {
+  for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-trash",
+    "select-album", "select-clear"]) {
     $(id).disabled = count === 0;
   }
   if (count === 0) hideSelectAlbums();
@@ -651,6 +651,91 @@ function downloadAlbum() {
   const album = currentAlbum();
   if (!album) return;
   startDownload({ album: album.id }, $("album-download"));
+}
+
+// ---------- trash ----------
+
+async function loadTrash() {
+  const data = await api("/api/trash");
+  $("trash-count").textContent = items(data.items.length);
+  const list = $("trash-list");
+  list.replaceChildren();
+  if (data.items.length === 0) {
+    list.append(el("li", "none", "Trash is empty."));
+    return;
+  }
+  for (const item of data.items) {
+    const row = el("li");
+    row.append(el("span", "trash-name", item.name),
+      el("span", "hint", `${bytes(item.size)} · ${ago(item.trashed)}`));
+    const actions = el("div", "trash-actions");
+    const restore = el("button", "ghost", "Restore");
+    restore.type = "button";
+    restore.addEventListener("click", () => restoreTrash(item.id));
+    const remove = el("button", "ghost", "Delete forever");
+    remove.type = "button";
+    remove.addEventListener("click", () => deleteTrash(item));
+    actions.append(restore, remove);
+    row.append(actions);
+    list.append(row);
+  }
+}
+
+async function trashPhotos(sha256s) {
+  if (sha256s.length === 0) return;
+  if (!confirm(`Move ${items(sha256s.length)} to Trash? You can restore them from the Trash tab.`)) return;
+  try {
+    let moved = 0;
+    for (const batch of batches(sha256s)) {
+      moved += (await post("/api/trash", { sha256s: batch })).moved;
+    }
+    setSelecting(false);
+    closeViewer();
+    resetPhotos();
+    await Promise.all([loadAlbums(), loadOutline(), refreshStatus()]);
+    toast(`${items(moved)} moved to Trash`);
+    if (!$("view-trash").hidden) loadTrash().catch(handle);
+  } catch (error) {
+    handle(error);
+  }
+}
+
+function trashCurrent() {
+  const photo = state.photos[state.viewing];
+  if (photo) trashPhotos([photo.sha256]);
+}
+
+async function restoreTrash(id) {
+  try {
+    await post(`/api/trash/${id}`, { restore: true });
+    await Promise.all([loadTrash(), loadOutline(), loadAlbums(), refreshStatus()]);
+    resetPhotos();
+    toast("Photo restored");
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function deleteTrash(item) {
+  if (!confirm(`Delete “${item.name}” forever? This cannot be undone.`)) return;
+  try {
+    await post(`/api/trash/${item.id}`, { delete: true });
+    await loadTrash();
+    toast("Deleted forever");
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function emptyTrash() {
+  if (!confirm("Delete everything in Trash forever? This cannot be undone.")) return;
+  try {
+    const result = await post("/api/trash/empty", {});
+    await loadTrash();
+    toast(`${items(result.deleted)} deleted forever`);
+  } catch (error) {
+    handle(error);
+  }
 }
 
 async function createAlbumForSelection() {
@@ -815,6 +900,7 @@ function wireBrowser() {
   $("album-rename").addEventListener("click", renameAlbum);
   $("album-delete").addEventListener("click", deleteAlbum);
   $("album-download").addEventListener("click", downloadAlbum);
+  $("trash-empty").addEventListener("click", emptyTrash);
   $("date-filter").addEventListener("click", toggleDatePanel);
   $("date-apply").addEventListener("click", applyDates);
   $("date-clear").addEventListener("click", clearDates);
@@ -829,6 +915,7 @@ function wireBrowser() {
   $("select-favorite").addEventListener("click", () => bulkFavorite(true));
   $("select-unfavorite").addEventListener("click", () => bulkFavorite(false));
   $("select-download").addEventListener("click", downloadSelection);
+  $("select-trash").addEventListener("click", () => trashPhotos([...state.selected]));
   $("select-album").addEventListener("click", toggleSelectAlbums);
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".select-album-wrap")) hideSelectAlbums();
@@ -1192,6 +1279,7 @@ function wireViewer() {
   $("viewer-album-add").addEventListener("click", toggleAlbumMenu);
   $("viewer-album-remove").addEventListener("click", removeFromAlbum);
   $("viewer-info").addEventListener("click", toggleDetails);
+  $("viewer-trash").addEventListener("click", trashCurrent);
   document.addEventListener("keydown", (event) => {
     if (state.viewing < 0) return;
     if (event.key === "Escape") closeViewer();
@@ -1301,12 +1389,15 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "sync", "setup"]) $(`view-${name}`).hidden = name !== view;
+  for (const name of ["photos", "sync", "setup", "trash"]) {
+    $(`view-${name}`).hidden = name !== view;
+  }
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);
   }
   if (view === "setup") loadSetup().catch(handle);
+  if (view === "trash") loadTrash().catch(handle);
   try { localStorage.setItem("harbor-view", view); } catch (_) { /* private mode */ }
 }
 

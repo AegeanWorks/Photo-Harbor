@@ -182,6 +182,9 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .storage-person .hint { margin: 0; }
 #storage-largest a { color: var(--ink); text-decoration: none; }
 #storage-largest a:hover { text-decoration: underline; }
+#trash-empty { margin-left: auto; }
+#trash-list .trash-actions { display: flex; gap: 6px; flex: none; }
+#trash-list .trash-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .field { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
 .field:first-of-type { border-top: 0; }
 .field span { width: 64px; color: var(--muted); font-size: 14px; }

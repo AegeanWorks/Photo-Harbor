@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `56`
-- **Total Classes**: `104`
-- **Total Top-Level Functions**: `91`
-- **Total Class Methods**: `393`
-- **Total Source Lines**: `6489`
+- **Total Python Modules**: `59`
+- **Total Classes**: `109`
+- **Total Top-Level Functions**: `92`
+- **Total Class Methods**: `414`
+- **Total Source Lines**: `6826`
 
 ---
 
@@ -117,12 +117,12 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `127` lines (`5866` bytes)
+**Size**: `136` lines (`6304` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
   - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations)`
-  - Method `._register(sync, library, people, albums, downloads, setup)`
+  - Method `._register(sync, library, people, albums, downloads, trash, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -331,7 +331,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `220` lines (`8005` bytes)
+**Size**: `240` lines (`8608` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -609,7 +609,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `143` lines (`3343` bytes)
+**Size**: `156` lines (`3611` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -624,6 +624,7 @@
 - `class PersonStorage` - *One person's share: shared photos count in each person's share.*
 - `class StorageFile` - *One row of the largest-files list.*
 - `class StorageReport` - *Disk use for one profile, or for the whole library when ``profile`` is None.*
+- `class TrashItem` - *One recoverable removal; the bytes sit under ``.harbor/trash`` until restored or deleted.*
 - `class Profile` - *A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends.*
 - `class Identity` - *Who a request comes from; the owner (library key) may manage every profile.*
 
@@ -785,6 +786,42 @@
 
 ---
 
+### [`photo_harbor/trash.py`](photo_harbor/trash.py)
+> *A per-person trash: move a copy aside, restore it through the normal ingest, or delete it.*
+
+**Size**: `124` lines (`5568` bytes)
+
+**Classes:**
+- `class TrashBook`
+  - Method `.__init__(db, library, store, copies, now)`
+  - Method `.move(profile, sha256)` - *Move one person's copy to trash and forget it in the catalog; returns the trash id.*
+  - Method `.listing(profile)`
+  - Method `.restore(profile, ident)` - *Re-ingest the trashed bytes; the normal hash-verified path places them again.*
+  - Method `.delete(profile, ident)`
+  - Method `.empty(profile)`
+  - Method `._owned(profile, ident)`
+  - Method `._forget_file(item, path)`
+
+---
+
+### [`photo_harbor/trash_api.py`](photo_harbor/trash_api.py)
+> *Endpoints for the per-person trash: list, move, restore, delete and empty.*
+
+**Size**: `47` lines (`2170` bytes)
+
+**Classes:**
+- `class TrashApi`
+  - Method `.__init__(trash, catalog)`
+  - Method `.listing(request)`
+  - Method `.move(request)`
+  - Method `.update(request, ident)`
+  - Method `.empty(request)`
+
+**Functions:**
+- `def _item_json(item)`
+
+---
+
 ### [`tests/__init__.py`](tests/__init__.py)
 **Size**: `0` lines (`0` bytes)
 
@@ -896,7 +933,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `505` lines (`28215` bytes)
+**Size**: `556` lines (`31232` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -917,6 +954,8 @@
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
   - Method `.test_a_selection_and_an_album_download_as_one_zip()`
+  - Method `.test_trash_moves_restores_and_deletes()`
+  - Method `.test_trash_never_crosses_people()`
   - Method `.test_sort_order_changes_the_page()`
   - Method `.test_a_date_range_narrows_the_gallery()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
@@ -1131,5 +1170,20 @@
   - Method `.test_resending_over_a_damaged_copy_restores_it()`
   - Method `.test_a_name_held_by_a_catalogued_but_missing_file_is_not_reused()`
   - Method `.test_a_connection_error_mid_upload_is_a_clear_failure()`
+
+---
+
+### [`tests/test_trash.py`](tests/test_trash.py)
+**Size**: `73` lines (`3538` bytes)
+
+**Classes:**
+- `class TrashBookTest`
+  - Method `.setUp()`
+  - Method `.test_a_copy_moves_to_trash_and_restores_its_bytes()`
+  - Method `.test_a_shared_photo_stays_for_the_other_person()`
+  - Method `.test_permanent_delete_and_empty_remove_the_files()`
+  - Method `.test_another_person_cannot_restore_or_delete_the_entry()`
+- `class TrashMigrationTest`
+  - Method `.test_a_format_5_catalog_gains_the_trash_table()`
 
 ---

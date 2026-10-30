@@ -127,6 +127,10 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   kind and name search. **Show everything** removes it.
 - **Order the gallery.** **Sort** offers Newest (the default), Oldest, Largest and Smallest.
   The choice stays when a date window is applied and stacks with the other filters.
+- **A safe Trash.** **Move to trash** from the viewer or a selection. It removes only your
+  copy: a shared photo stays for the other person. The **Trash** tab restores it through the
+  normal hash-verified path, or deletes it forever; **Empty trash** clears the whole tab. Trashed
+  files sit under `.harbor/trash` and are not counted in the library or copied to the backup.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -170,6 +174,8 @@ and exit 1; usage errors exit 2.
 | `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
+| `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
+| `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
 | `POST /api/download` | `{sha256 \| sha256s}` or `{album}` prepares one stored ZIP; returns `{url, name, count, bytes}` |
 | `GET /api/download/<token>` | serves the prepared ZIP once to the same person, then deletes it (15 minutes) |
@@ -230,6 +236,8 @@ photo-harbor/
 │   ├── store.py              <- hash-verified ingest and re-verification
 │   ├── sync_api.py           <- the endpoints the Shortcuts call
 │   ├── thumbs.py             <- optional Pillow previews and the background warmer
+│   ├── trash.py              <- move a copy aside, restore through ingest, delete forever
+│   ├── trash_api.py          <- list, move, restore, delete and empty the trash
 │   └── web/                  <- gallery and browser: index.html, app.css, app.js, icon, manifest
 └── tests/
     ├── __init__.py
@@ -247,14 +255,15 @@ photo-harbor/
     ├── test_scale.py
     ├── test_sort.py         <- newest, oldest, largest and smallest order
     ├── test_storage.py      <- whole-library and per-person storage totals
-    └── test_store.py
+    ├── test_store.py
+    └── test_trash.py        <- move, restore, delete and format 6 migration
 ```
 
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 5; an older catalog is upgraded in place after a copy
-to `catalog.sqlite3.v<N>.bak`), `incoming\` and `thumbs\`.
+`config.json`, `catalog.sqlite3` (format 6; an older catalog is upgraded in place after a copy
+to `catalog.sqlite3.v<N>.bak`), `incoming\`, `thumbs\` and `trash\`.
 
 ## 🚀 Performance
 

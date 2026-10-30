@@ -172,6 +172,57 @@ class ServerTest(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(body)) as archive:
             self.assertEqual(archive.namelist(), ["one.jpg"])
 
+    def test_trash_moves_restores_and_deletes(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        response, body = self.call("POST", "/api/trash",
+                                   body={"sha256s": [sha(b"one")]})
+        moved = json.loads(body)
+        self.assertEqual((response.status, moved["moved"]), (200, 1))
+        _, body = self.call("GET", "/api/photos")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["two.jpg"])
+        _, body = self.call("GET", "/api/trash")
+        items = json.loads(body)["items"]
+        self.assertEqual([item["name"] for item in items], ["one.jpg"])
+        response, body = self.call("POST", f"/api/trash/{moved['ids'][0]}",
+                                   body={"restore": True})
+        self.assertEqual((response.status, json.loads(body)["restored"]), (200, True))
+        _, body = self.call("GET", "/api/photos")
+        self.assertEqual(len(json.loads(body)["photos"]), 2)
+        _, body = self.call("POST", "/api/trash", body={"sha256s": [sha(b"one")]})
+        moved = json.loads(body)
+        response, _ = self.call("POST", f"/api/trash/{moved['ids'][0]}",
+                                body={"delete": True})
+        self.assertEqual(response.status, 200)
+        _, body = self.call("GET", "/api/trash")
+        self.assertEqual(json.loads(body)["items"], [])
+        _, body = self.call("POST", "/api/trash", body={"sha256s": [sha(b"two")]})
+        response, body = self.call("POST", "/api/trash/empty", body={})
+        self.assertEqual((response.status, json.loads(body)["deleted"]), (200, 1))
+        _, body = self.call("GET", "/api/photos")
+        self.assertEqual(json.loads(body)["photos"], [])
+
+    def test_trash_never_crosses_people(self):
+        self.upload(b"one", name="one.jpg")
+        ayse = self.add_person()
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        _, body = self.call("POST", "/api/trash", body={"sha256s": [sha(b"one")]})
+        moved = json.loads(body)
+        response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
+        as_her = {"Cookie": response.getheader("Set-Cookie").split(";", 1)[0]}
+        _, body = self.call("GET", "/api/trash", key=False, headers=as_her)
+        self.assertEqual(json.loads(body)["items"], [])
+        response, _ = self.call("POST", f"/api/trash/{moved['ids'][0]}",
+                                body={"restore": True}, key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("POST", "/api/trash", body={"sha256s": [sha(b"one")]},
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("POST", "/api/trash", body={"sha256s": [sha(b"hers")]})
+        self.assertEqual(response.status, 400)
+
     def test_sort_order_changes_the_page(self):
         for name, body, taken in (("a.jpg", b"a", "2026-05-01T10:00:00"),
                                   ("b.jpg", b"bbb", "2026-05-02T10:00:00"),

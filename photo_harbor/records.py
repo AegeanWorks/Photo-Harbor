@@ -126,6 +126,19 @@ class StorageReport:
 
 
 @dataclass(frozen=True)
+class TrashItem:
+    """One recoverable removal; the bytes sit under ``.harbor/trash`` until restored or deleted."""
+
+    id: int
+    sha256: str
+    name: str
+    size: int
+    media_type: str
+    taken_at: Optional[str]
+    trashed_at: str
+
+
+@dataclass(frozen=True)
 class Profile:
     """A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends."""
 

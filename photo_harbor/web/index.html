@@ -42,6 +42,7 @@
         <button role="tab" data-view="photos" aria-selected="true">Photos</button>
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
+        <button role="tab" data-view="trash" aria-selected="false">Trash</button>
       </nav>
       <label class="search">
         <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4.5 4.5"/></svg>
@@ -115,6 +116,7 @@
             <button class="ghost" id="select-favorite" type="button">♥ Favorite</button>
             <button class="ghost" id="select-unfavorite" type="button">♡ Unfavorite</button>
             <button class="ghost" id="select-download" type="button">Download</button>
+            <button class="ghost" id="select-trash" type="button">Move to trash</button>
             <div class="select-album-wrap">
               <button class="ghost" id="select-album" type="button" aria-haspopup="menu" aria-expanded="false">Add to album…</button>
               <div class="select-albums" id="select-albums" role="menu" hidden></div>
@@ -234,6 +236,16 @@
           <p class="hint">Only photos the PC has just re-hashed and found intact are deleted. They stay in Recently Deleted for 30 days. With iCloud Photos on, deleting also removes them from iCloud.</p>
         </article>
       </section>
+
+      <section id="view-trash" class="view narrow" hidden>
+        <div class="scope">
+          <h1>Trash</h1>
+          <span id="trash-count">0</span>
+          <button class="ghost" id="trash-empty" type="button">Empty trash</button>
+        </div>
+        <p class="hint">Removed photos stay here until you put them back. Empty trash deletes them permanently.</p>
+        <ul id="trash-list" class="missing"></ul>
+      </section>
     </main>
   </div>
 
@@ -249,6 +261,7 @@
       <button class="ghost" id="viewer-album-add" type="button">Add to album…</button>
       <button class="ghost" id="viewer-album-remove" type="button" hidden>Remove from album</button>
       <button class="ghost" id="viewer-info" type="button" aria-expanded="false">Details</button>
+      <button class="ghost" id="viewer-trash" type="button">Move to trash</button>
       <a id="viewer-download" class="ghost" download>Download original</a>
     </footer>
     <div class="viewer-albums" id="viewer-albums" hidden></div>
