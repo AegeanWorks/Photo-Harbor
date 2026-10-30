@@ -283,3 +283,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   unsupported file still returns the facts Harbor already knows, and videos return file facts
   only. A future GPS or histogram feature would need a deliberate new decision rather than an
   accidental field.
+
+### ADR-013: Downloads are one-time ZIP tokens, not library copies
+- **Date**: 2026-10-30
+- **Status**: Accepted
+- **Context**: A selection or album can now hold dozens of photos, but taking them out meant
+  opening each original and downloading it separately. A long-lived archive directory would
+  silently double disk use and become stale.
+- **Decision**: `POST /api/download` accepts `sha256`/`sha256s` or `album`, validates visibility,
+  and writes one stored (uncompressed) ZIP to `.harbor/downloads`. The response carries a random
+  token URL; `GET /api/download/<token>` serves it once to the same profile, then deletes the
+  file. Tokens expire after 15 minutes, archives are capped at 8 GB with a 1 GB free-space
+  reserve, and startup removes any archive left by a restart. `Reply.delete_after` lets the
+  HTTP sender unlink the file in a `finally`, even when the client disconnects. `selection.py`
+  now owns bulk hash parsing and all-or-nothing validation for both album writes and downloads.
+- **Consequences**: The library is never copied permanently, and an interrupted download cannot
+  leave a served token behind. Preparing a large ZIP costs one temporary file and a synchronous
+  read of every selected original, so a slow disk delays the request; the 8 GB cap bounds that
+  cost. A token is a short-lived capability bound to the profile, not a share link.

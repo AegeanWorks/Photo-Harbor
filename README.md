@@ -112,6 +112,11 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   dates, and pixel dimensions. With Pillow installed it also reads the camera make and model,
   lens, exposure time, aperture, ISO and focal length. Videos show file facts only, and a file
   with unreadable EXIF still opens with the facts Harbor knows.
+- **Download a set.** Select photos and press **Download**, or open an album and press
+  **Download album**. Harbor packs the originals into one ZIP without recompressing them; the
+  link works once, for 15 minutes, and only for the person who prepared it. A selection download
+  takes up to 500 photos; an album can be larger. Downloads are capped at 8 GB and need that
+  much free space plus a 1 GB reserve.
 - **Upload from any browser.** Drop files on the page or press **Upload**, from the PC or from
   the iPhone's photo picker when the Shortcut is not set up. Browser uploads need no hash: the
   PC computes it. Their date is the phone's, else the EXIF capture date (with Pillow), else the
@@ -153,6 +158,8 @@ and exit 1; usage errors exit 2.
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}` or delete `{delete: true}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
+| `POST /api/download` | `{sha256 \| sha256s}` or `{album}` prepares one stored ZIP; returns `{url, name, count, bytes}` |
+| `GET /api/download/<token>` | serves the prepared ZIP once to the same person, then deletes it (15 minutes) |
 | `GET /media/<sha256>`, `GET /thumb/<sha256>` | original (with byte ranges) and JPEG preview |
 
 ## 📦 What's Inside
@@ -187,6 +194,8 @@ photo-harbor/
 │   ├── control_panel.py      <- the Harbor window (tkinter)
 │   ├── database.py           <- SQLite file and its format version
 │   ├── details.py            <- file facts and optional EXIF for the Details panel
+│   ├── downloads.py          <- one-off stored ZIPs, size limits and expiring tokens
+│   ├── downloads_api.py      <- prepare and serve a selection or album download
 │   ├── errors.py             <- the Error/Why/Fix triad
 │   ├── exif_dates.py         <- capture date from EXIF, when Pillow is installed
 │   ├── http_server.py        <- HTTP handling, byte ranges, security headers
@@ -203,6 +212,7 @@ photo-harbor/
 │   ├── router.py             <- method + path routing
 │   ├── runner.py             <- start and stop a server in the background
 │   ├── scan.py               <- keeping up with File Explorer; weekly file check
+│   ├── selection.py          <- bulk hash parsing and all-or-nothing validation
 │   ├── setup_api.py          <- address and key for the Setup tab
 │   ├── store.py              <- hash-verified ingest and re-verification
 │   ├── sync_api.py           <- the endpoints the Shortcuts call
@@ -213,6 +223,7 @@ photo-harbor/
     ├── library_fixture.py    <- a throwaway library for tests
     ├── test_albums.py        <- personal albums, favorites and format 5 migration
     ├── test_details.py       <- file facts and optional EXIF details
+    ├── test_downloads.py     <- ZIP names, tokens and expiry
     ├── test_http.py          <- the server over a real socket
     ├── test_naming.py
     ├── test_folders.py
@@ -258,6 +269,8 @@ these, so on a phone the network sets the pace):
 - Very large videos may need more than one run because Shortcuts limits how long one run takes.
 - Thumbnails need Pillow. Without them, Safari still shows HEIC originals; other browsers show a
   placeholder.
+- A download is a temporary ZIP: at most 8 GB, and the drive must hold that plus 1 GB free. The
+  link works once for 15 minutes; prepare it again if it expires.
 
 <!-- aegean:brand-assets:start -->
 ## 🎨 Brand Assets

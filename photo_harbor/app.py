@@ -13,6 +13,8 @@ from .catalog import Catalog
 from .copies import CopyIndex
 from .config import Settings
 from .database import Database
+from .downloads import Downloads
+from .downloads_api import DownloadsApi
 from .errors import HarborError
 from .importer import ImportLedger
 from .layout import LibraryLayout
@@ -56,6 +58,7 @@ class HarborApp:
         catalog = Catalog(self.db)
         journal = SyncJournal(self.db)
         self.albums = AlbumBook(self.db, now)
+        self.downloads = Downloads(settings.state_dir)
         self.profiles = ProfileBook(self.db, settings.key)
         self.copies = CopyIndex(self.db)
         self.store = PhotoStore(settings.library, catalog, self.copies,
@@ -81,10 +84,11 @@ class HarborApp:
                        ProfilesApi(self.profiles, catalog, journal, self.passwords,
                                    self.sessions, self.layout),
                        AlbumsApi(self.albums, catalog),
+                       DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        SetupApi(port, autostart or Autostart()))
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
-                  albums: AlbumsApi, setup: SetupApi) -> None:
+                  albums: AlbumsApi, downloads: DownloadsApi, setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -109,6 +113,8 @@ class HarborApp:
         add("POST", "/api/albums/", albums.update)
         add("POST", "/api/album-photos", albums.membership)
         add("POST", "/api/favorite", albums.favorite)
+        add("POST", "/api/download", downloads.prepare)
+        add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/details/", library.details)
         add("GET", "/media/", library.media)
         add("GET", "/thumb/", library.thumb)

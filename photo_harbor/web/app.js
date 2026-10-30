@@ -257,6 +257,7 @@ function renderScope() {
   $("scope-clear").hidden = !narrowed;
   $("album-rename").hidden = !currentAlbum();
   $("album-delete").hidden = !currentAlbum();
+  $("album-download").hidden = !currentAlbum();
   const empty = shown === 0 && state.next === null;
   $("empty").hidden = !empty;
   if (empty) {
@@ -484,7 +485,8 @@ function hideSelectAlbums() {
 function renderSelection() {
   const count = state.selected.size;
   $("select-count").textContent = `${count.toLocaleString()} selected`;
-  for (const id of ["select-favorite", "select-unfavorite", "select-album", "select-clear"]) {
+  for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-album",
+    "select-clear"]) {
     $(id).disabled = count === 0;
   }
   if (count === 0) hideSelectAlbums();
@@ -543,6 +545,37 @@ async function bulkAlbum(album) {
   } catch (error) {
     handle(error);
   }
+}
+
+async function startDownload(payload, button) {
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = "Preparing…";
+  try {
+    const result = await post("/api/download", payload);
+    toast(`Preparing ${result.count.toLocaleString()} photo${result.count === 1 ? "" : "s"}…`);
+    window.location.href = result.url;
+  } catch (error) {
+    handle(error);
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
+  }
+}
+
+function downloadSelection() {
+  if (state.selected.size === 0) return;
+  if (state.selected.size > BATCH) {
+    toast(`Download at most ${BATCH} photos at once; add them to an album for a larger set`);
+    return;
+  }
+  startDownload({ sha256s: [...state.selected] }, $("select-download"));
+}
+
+function downloadAlbum() {
+  const album = currentAlbum();
+  if (!album) return;
+  startDownload({ album: album.id }, $("album-download"));
 }
 
 function toggleSelectAlbums() {
@@ -694,11 +727,13 @@ function wireBrowser() {
   $("album-new").addEventListener("click", newAlbum);
   $("album-rename").addEventListener("click", renameAlbum);
   $("album-delete").addEventListener("click", deleteAlbum);
+  $("album-download").addEventListener("click", downloadAlbum);
   $("select-mode").addEventListener("click", () => setSelecting(!state.selecting));
   $("select-all").addEventListener("click", selectLoaded);
   $("select-clear").addEventListener("click", clearSelected);
   $("select-favorite").addEventListener("click", () => bulkFavorite(true));
   $("select-unfavorite").addEventListener("click", () => bulkFavorite(false));
+  $("select-download").addEventListener("click", downloadSelection);
   $("select-album").addEventListener("click", toggleSelectAlbums);
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".select-album-wrap")) hideSelectAlbums();

@@ -109,6 +109,17 @@ class AlbumBook:
                 "SELECT 1 FROM albums WHERE id = ? AND profile = ?", (album, profile)).fetchone()
         return row is not None
 
+    def members(self, profile: str, ident) -> list:
+        """The hashes in one owned album, newest photo first."""
+        album = _album_id(ident)
+        with self._db.lock:
+            self._owned(profile, album)
+            rows = self._db.conn.execute(
+                "SELECT a.sha256 FROM album_photos a JOIN photos p ON p.sha256 = a.sha256"
+                " WHERE a.album_id = ? ORDER BY p.sort_time DESC, p.sha256 DESC",
+                (album,)).fetchall()
+        return [row[0] for row in rows]
+
     def add(self, profile: str, ident, sha256: str, member: bool) -> bool:
         """Put a photo in an album or take it out; True when the album changed."""
         return self.add_many(profile, ident, [sha256], member) == 1

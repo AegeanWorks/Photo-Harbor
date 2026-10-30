@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `49`
-- **Total Classes**: `94`
-- **Total Top-Level Functions**: `85`
-- **Total Class Methods**: `354`
-- **Total Source Lines**: `5785`
+- **Total Python Modules**: `53`
+- **Total Classes**: `97`
+- **Total Top-Level Functions**: `87`
+- **Total Class Methods**: `371`
+- **Total Source Lines**: `6098`
 
 ---
 
@@ -72,7 +72,7 @@
 ### [`photo_harbor/albums.py`](photo_harbor/albums.py)
 > *Personal albums and favorites: named collections that never move or copy a file.*
 
-**Size**: `164` lines (`7497` bytes)
+**Size**: `175` lines (`8008` bytes)
 
 **Classes:**
 - `class AlbumBook` - *Albums belong to one person; favorites are that person's own mark on a photo.*
@@ -82,6 +82,7 @@
   - Method `.rename(profile, ident, name)`
   - Method `.delete(profile, ident)`
   - Method `.owned(profile, ident)` - *Whether this person owns the album; a bad id is a 400, a missing one is False.*
+  - Method `.members(profile, ident)` - *The hashes in one owned album, newest photo first.*
   - Method `.add(profile, ident, sha256, member)` - *Put a photo in an album or take it out; True when the album changed.*
   - Method `.add_many(profile, ident, sha256s, member)` - *Add or remove several photos in one lock; returns how many rows changed.*
   - Method `.favorite(profile, sha256, favorite)` - *Mark or unmark one photo for one person; True when the mark changed.*
@@ -97,7 +98,7 @@
 ### [`photo_harbor/albums_api.py`](photo_harbor/albums_api.py)
 > *Endpoints for personal albums and favorites; every write stays inside the caller's profile.*
 
-**Size**: `106` lines (`4768` bytes)
+**Size**: `61` lines (`2675` bytes)
 
 **Classes:**
 - `class AlbumsApi`
@@ -109,8 +110,6 @@
   - Method `.favorite(request)`
 
 **Functions:**
-- `def _named(body)` - *The hashes in ``sha256`` or ``sha256s``, de-duplicated and bounded.*
-- `def _photos(request, catalog, body)` - *Validate every named photo before any write, so a batch is all or nothing.*
 - `def _flag(body, name)`
 
 ---
@@ -118,12 +117,12 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `120` lines (`5464` bytes)
+**Size**: `126` lines (`5814` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
   - Method `.__init__(settings, port, thumbs, now, autostart, password_iterations)`
-  - Method `._register(sync, library, people, albums, setup)`
+  - Method `._register(sync, library, people, albums, downloads, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -351,6 +350,37 @@
 
 ---
 
+### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
+> *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
+
+**Size**: `106` lines (`4327` bytes)
+
+**Classes:**
+- `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
+  - Method `.__init__(state_dir, clock)`
+  - Method `.clean()` - *Startup cleanup: no token survives a restart, so no archive should either.*
+  - Method `.prepare(entries, name, profile)` - *Write ``[(PhotoRecord, path), ...]`` to a new ZIP and return its token details.*
+  - Method `.take(token, profile)` - *The ``(path, name, bytes)`` for this person's live token, removing it.*
+  - Method `._expire_locked()`
+
+**Functions:**
+- `def _entry_name(record, used)`
+
+---
+
+### [`photo_harbor/downloads_api.py`](photo_harbor/downloads_api.py)
+> *Prepare one ZIP for a selection or album, then serve it once through a short token.*
+
+**Size**: `60` lines (`2798` bytes)
+
+**Classes:**
+- `class DownloadsApi`
+  - Method `.__init__(downloads, albums, catalog, store)`
+  - Method `.prepare(request)`
+  - Method `.serve(request, token)`
+
+---
+
 ### [`photo_harbor/errors.py`](photo_harbor/errors.py)
 > *The one error type photo-harbor raises for problems a person can fix.*
 
@@ -377,7 +407,7 @@
 ### [`photo_harbor/http_server.py`](photo_harbor/http_server.py)
 > *The socket side: turns HTTP into a Request, runs the matched endpoint and sends its Reply.*
 
-**Size**: `159` lines (`7132` bytes)
+**Size**: `166` lines (`7469` bytes)
 
 **Classes:**
 - `class HarborHandler` - *Built per connection by ThreadingHTTPServer; ``router`` and ``guard`` come from the server.*
@@ -483,7 +513,7 @@
 ### [`photo_harbor/messages.py`](photo_harbor/messages.py)
 > *Transport-free request and reply values, so the API can be tested without sockets.*
 
-**Size**: `92` lines (`3354` bytes)
+**Size**: `93` lines (`3385` bytes)
 
 **Classes:**
 - `class Request`
@@ -645,6 +675,18 @@
 
 ---
 
+### [`photo_harbor/selection.py`](photo_harbor/selection.py)
+> *Validate the photos a bulk request names, so a batch is all or nothing.*
+
+**Size**: `63` lines (`2889` bytes)
+
+**Functions:**
+- `def named(body, limit)` - *The hashes in ``sha256`` or ``sha256s``, de-duplicated and bounded.*
+- `def check(request, catalog, sha256s, limit)` - *Validate a known list of hashes before any write.*
+- `def visible(request, catalog, body, limit)` - *Validate the photos a request body names before any write.*
+
+---
+
 ### [`photo_harbor/setup_api.py`](photo_harbor/setup_api.py)
 > *What the setup page shows: the address and key to type into the iPhone Shortcut.*
 
@@ -783,6 +825,21 @@
 
 ---
 
+### [`tests/test_downloads.py`](tests/test_downloads.py)
+**Size**: `67` lines (`3062` bytes)
+
+**Classes:**
+- `class DownloadsTest`
+  - Method `.setUp()`
+  - Method `.photo(data, name)`
+  - Method `.test_a_selection_becomes_one_zip_with_original_names()`
+  - Method `.test_duplicate_names_get_a_hash_prefix()`
+  - Method `.test_a_token_expires_and_removes_its_file()`
+  - Method `.test_a_token_belongs_to_the_person_who_prepared_it()`
+  - Method `.test_an_empty_download_is_refused()`
+
+---
+
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
@@ -813,7 +870,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `422` lines (`23438` bytes)
+**Size**: `459` lines (`25360` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -833,6 +890,7 @@
   - Method `.test_calls_without_the_key_are_refused_but_the_page_loads()`
   - Method `.test_login_sets_a_cookie_that_opens_the_api()`
   - Method `.test_photo_details_are_visible_only_with_the_photo()`
+  - Method `.test_a_selection_and_an_album_download_as_one_zip()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
   - Method `.test_photos_lists_newest_first_with_paging()`
   - Method `.test_a_chunked_upload_is_accepted()`

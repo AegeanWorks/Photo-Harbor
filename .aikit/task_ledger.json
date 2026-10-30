@@ -1,72 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "photo-details",
+    "task_id": "bulk-download",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1793356988.2323177,
-    "owner": "opencode:details",
-    "started_by": "opencode:details",
-    "continuations": [],
-    "completed_at": 1793357027.1453824
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1793358951.851196,
+    "owner": "opencode:download",
+    "started_by": "opencode:download",
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "albums-favorites",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/6] Catalog format 5 with favorites, albums and album_photos; additive migration from 4; AlbumBook domain; 7 tests cover membership, privacy, names and migration",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345086.7147503,
-      "timestamp_str": "2026-10-30 10:24:46",
-      "agent": "opencode:albums"
-    },
-    {
-      "task_id": "albums-favorites",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/6] API: GET/POST /api/albums, POST /api/albums/<id>, /api/album-photos, /api/favorite; ?favorite=1 and ?album=ID; per-viewer favorite flag; HTTP tests for lifecycle and cross-person refusal",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345086.9894333,
-      "timestamp_str": "2026-10-30 10:24:46",
-      "agent": "opencode:albums"
-    },
-    {
-      "task_id": "albums-favorites",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[4/6] Gallery: Favorites and album rail, heart in the viewer and on tiles, Add to album menu, Remove from album, rename/delete; browser dogfood created an album and favorited a photo with zero JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345087.2609653,
-      "timestamp_str": "2026-10-30 10:24:47",
-      "agent": "opencode:albums"
-    },
-    {
-      "task_id": "albums-favorites",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[5/6] README how-it-works and API rows, format 5 note, file tree; ADR-010; codebase map regenerated",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345087.5180306,
-      "timestamp_str": "2026-10-30 10:24:47",
-      "agent": "opencode:albums"
-    },
-    {
-      "task_id": "albums-favorites",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[6/6] 108 tests pass; 4/4 project gates; Edge dogfood 1 favorite + 1 album, no console errors; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793345087.7834983,
-      "timestamp_str": "2026-10-30 10:24:47",
-      "agent": "opencode:albums"
-    },
     {
       "task_id": "albums-favorites",
       "phase": "completed",
@@ -247,6 +191,67 @@
       "timestamp": 1793357027.1453865,
       "timestamp_str": "2026-10-30 13:43:47",
       "agent": "opencode:details"
+    },
+    {
+      "task_id": "bulk-download",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/5] Plan: selection.py centralizes bulk hash validation; downloads.py builds a stored zip in .harbor/downloads with size/free-space caps and one-time expiring tokens; POST /api/download {sha256s|album} returns a URL; GET /api/download/<token> serves and deletes; Reply delete_after; UI Download in the selection bar and album scope; tests, dogfood, ADR-013, README",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793357929.2613866,
+      "timestamp_str": "2026-10-30 13:58:49",
+      "agent": "opencode:download",
+      "impact_assessment": {
+        "why": "Albums and selection can collect photos, but taking them out still means opening and downloading originals one at a time",
+        "benefits": "One zip for a trip, album or selection; no recompression, no second copy of the library, and no schema change",
+        "risks": "contract: new endpoint, token store and Reply cleanup; dependency: stdlib zipfile only; concurrency: token map and temp file creation under a lock; state: temporary zips and expiry",
+        "mitigation": "Cap batches at 500 hashes and 8 GiB, require free space, use random one-time tokens with a 15-minute expiry, delete after send or on startup, and sanitize zip entry names"
+      }
+    },
+    {
+      "task_id": "bulk-download",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/5] selection.py owns bulk hash parsing/validation; downloads.py builds stored ZIPs with duplicate-name handling, 8 GiB and free-space checks, profile-bound one-time tokens and 15-minute expiry; 5 unit tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793358949.079968,
+      "timestamp_str": "2026-10-30 14:15:49",
+      "agent": "opencode:download"
+    },
+    {
+      "task_id": "bulk-download",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/5] POST /api/download {sha256s|album} and GET /api/download/<token>; Reply.delete_after removes the ZIP in a finally; HTTP tests cover selection, album, one-time use, auth and no leftover file",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793358949.959802,
+      "timestamp_str": "2026-10-30 14:15:49",
+      "agent": "opencode:download"
+    },
+    {
+      "task_id": "bulk-download",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[4/5] Selection bar Download and album Download album; 500-photo selection cap with album fallback; browser dogfood downloaded both ZIPs and verified one.png inside, 0 JS errors",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793358950.8698916,
+      "timestamp_str": "2026-10-30 14:15:50",
+      "agent": "opencode:download"
+    },
+    {
+      "task_id": "bulk-download",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[5/5] 120 tests; 4/4 project gates; README, limits and API; ADR-013; codebase map regenerated; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1793358951.851196,
+      "timestamp_str": "2026-10-30 14:15:51",
+      "agent": "opencode:download"
     }
   ]
 }

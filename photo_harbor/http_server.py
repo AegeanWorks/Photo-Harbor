@@ -110,24 +110,31 @@ class HarborHandler(BaseHTTPRequestHandler):
             self.wfile.write(reply.body)
 
     def _send_file(self, reply: Reply) -> None:
-        size = reply.file.stat().st_size
-        span = parse_range(self.headers.get("Range"), size)
-        first, last = span if span else (0, size - 1)
-        self.send_response(206 if span else 200)
-        self._headers(reply, last - first + 1)
-        self.send_header("Accept-Ranges", "bytes")
-        if span:
-            self.send_header("Content-Range", f"bytes {first}-{last}/{size}")
-        self.end_headers()
-        with open(reply.file, "rb") as handle:
-            handle.seek(first)
-            remaining = last - first + 1
-            while remaining > 0:
-                block = handle.read(min(COPY_CHUNK, remaining))
-                if not block:
-                    break
-                self.wfile.write(block)
-                remaining -= len(block)
+        try:
+            size = reply.file.stat().st_size
+            span = parse_range(self.headers.get("Range"), size)
+            first, last = span if span else (0, size - 1)
+            self.send_response(206 if span else 200)
+            self._headers(reply, last - first + 1)
+            self.send_header("Accept-Ranges", "bytes")
+            if span:
+                self.send_header("Content-Range", f"bytes {first}-{last}/{size}")
+            self.end_headers()
+            with open(reply.file, "rb") as handle:
+                handle.seek(first)
+                remaining = last - first + 1
+                while remaining > 0:
+                    block = handle.read(min(COPY_CHUNK, remaining))
+                    if not block:
+                        break
+                    self.wfile.write(block)
+                    remaining -= len(block)
+        finally:
+            if reply.delete_after:
+                try:
+                    reply.file.unlink(missing_ok=True)
+                except OSError:  # hygiene: allow locked temp download must not break the response
+                    pass
 
     def _headers(self, reply: Reply, length: int) -> None:
         self.send_header("Content-Type", reply.content_type)

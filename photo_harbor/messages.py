@@ -64,6 +64,7 @@ class Reply:
     content_type: str = "application/json; charset=utf-8"
     headers: tuple = ()
     file: Optional[Path] = None
+    delete_after: bool = False
 
 
 def json_reply(data, status: int = 200, headers: tuple = ()) -> Reply:

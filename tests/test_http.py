@@ -1,12 +1,15 @@
 """The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it."""
 
 import http.client
+import io
 import json
 import os
 import shutil
 import tempfile
 import threading
+import time
 import unittest
+import zipfile
 from pathlib import Path
 
 from photo_harbor.app import HarborApp
@@ -134,6 +137,40 @@ class ServerTest(unittest.TestCase):
         response, body = self.call("GET", f"/api/details/{sha(b'hers')}", key=False,
                                    headers=as_her)
         self.assertEqual((response.status, json.loads(body)["name"]), (200, "hers.jpg"))
+
+    def test_a_selection_and_an_album_download_as_one_zip(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        response, body = self.call("POST", "/api/download",
+                                   body={"sha256s": [sha(b"one"), sha(b"two")]})
+        download = json.loads(body)
+        self.assertEqual(response.status, 200, body)
+        self.assertIn("count", download, body)
+        self.assertEqual(download["count"], 2)
+        response, body = self.call("GET", download["url"])
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.getheader("Content-Type"), "application/zip")
+        with zipfile.ZipFile(io.BytesIO(body)) as archive:
+            self.assertEqual(sorted(archive.namelist()), ["one.jpg", "two.jpg"])
+        for _ in range(10):
+            if not list((self.settings.state_dir / "downloads").glob("*.zip")):
+                break
+            time.sleep(0.01)
+        self.assertEqual(list((self.settings.state_dir / "downloads").glob("*.zip")), [])
+        response, _ = self.call("GET", download["url"])
+        self.assertEqual(response.status, 404)
+        _, body = self.call("POST", "/api/albums", body={"name": "Trip"})
+        album = json.loads(body)["id"]
+        self.call("POST", "/api/album-photos",
+                  body={"album": album, "sha256": sha(b"one"), "member": True})
+        response, body = self.call("POST", "/api/download", body={"album": album})
+        download = json.loads(body)
+        self.assertEqual((response.status, download["count"]), (200, 1))
+        response, body = self.call("GET", download["url"], key=False)
+        self.assertEqual(response.status, 401)
+        response, body = self.call("GET", download["url"])
+        with zipfile.ZipFile(io.BytesIO(body)) as archive:
+            self.assertEqual(archive.namelist(), ["one.jpg"])
 
     def test_media_serves_ranges_for_video_scrubbing(self):
         self.upload(b"0123456789", name="clip.MOV")
