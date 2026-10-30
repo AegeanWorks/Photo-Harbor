@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "android-update",
     "last_phase": "phase 3",
-    "active_phase": 3,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1793379009.2655556,
     "owner": "opencode:android",
     "started_by": "opencode:android",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1793379052.9738996
   },
   "checkpoints": [
-    {
-      "task_id": "android-client",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] Native Android 8+ source: programmatic settings UI, MediaStore hash-first sync, /api/has before /api/upload, sync journal start/done, optional 6-hour unmetered JobService; pure-SDK build.py using aapt2/javac/d8/zipalign/apksigner",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793375744.3871953,
-      "timestamp_str": "2026-10-30 18:55:44",
-      "agent": "opencode:android"
-    },
     {
       "task_id": "android-client",
       "phase": "phase 3",
@@ -254,6 +244,16 @@
       "status": "in_progress",
       "timestamp": 1793379009.2655556,
       "timestamp_str": "2026-10-30 19:50:09",
+      "agent": "opencode:android"
+    },
+    {
+      "task_id": "android-update",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'android-update' completed successfully.",
+      "status": "completed",
+      "timestamp": 1793379052.9739022,
+      "timestamp_str": "2026-10-30 19:50:52",
       "agent": "opencode:android"
     }
   ]
