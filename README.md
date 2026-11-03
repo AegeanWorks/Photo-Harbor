@@ -331,3 +331,11 @@ these, so on a phone the network sets the pace):
 ## 📜 License
 
 Free for personal use under the Aegean License 1.1 (AL-1.1); see [LICENSE](LICENSE). Any commercial use needs the Aegean Commercial License 1.0 (ACL-1.0); see [COMMERCIAL.md](COMMERCIAL.md).
+
+<!-- aegean:screenshots:start -->
+## Screenshots
+
+<a href="https://github.com/AegeanWorks/Photo-Harbor/commit/c73fa38"><img src="assets/screenshots/2026-11-03-signin.png" alt="Photo Harbor sign-in at 2026-11-03"></a>
+
+*commit `c73fa38` · 2026-11-03 · viewport 1440x900 · first-run gate; gallery views withheld (personal library, no demo mode — ADR-030)*
+<!-- aegean:screenshots:end -->

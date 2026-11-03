@@ -42,6 +42,26 @@
       }
     }
   },
-  "screenshots": [],
+  "screenshots": [
+    {
+      "path": "assets/screenshots/2026-11-03-signin.png",
+      "alt": "Photo Harbor sign-in at 2026-11-03",
+      "caption": "First-run gate from python -m photo_harbor serve: profile picker plus key sign-in. Gallery views intentionally uncaptured (owner personal library, no demo mode) \u2014 see ADR-030.",
+      "commit": "c73fa38b9b382e22f8dfb476dedd54a2818cf97e",
+      "taken_at": "2026-11-03",
+      "viewport": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "status": "approved",
+      "review": {
+        "status": "approved",
+        "reviewer": "agent:kilo",
+        "method": "vision",
+        "notes": "Real headless-Edge capture of the unauthenticated gate: Harbor card, Main profile, key link. No credential, no personal photo exposed.",
+        "score": 91,
+        "reviewed_at": "2026-11-03"
+      }
+    }
+  ],
   "model": "community/scriptsnsenses-sys/flux-2-dev-free"
 }

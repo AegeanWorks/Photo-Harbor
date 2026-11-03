@@ -577,3 +577,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   and a failed target is visible as text. A restart shows a fresh “starting” state until the
   first run completes. The check remains a separate explicit action; this endpoint never starts
   a long verification from a page request.
+
+### ADR-030: Sign-in gate keeper; gallery views withheld for privacy
+- **Date**: 2026-11-03
+- **Status**: Accepted
+- **Context**: The browser UI past sign-in shows the owner's personal photo library; there is no
+  demo or seeded library mode, and signing in with the live main key to screenshot private
+  photos would expose personal data and risk state changes.
+- **Decision**: Register only `2026-11-03-signin.png` (unauthenticated profile picker plus key
+  link, commit `c73fa38`, viewport 1440x900) in `.aikit/media.json` and the README
+  `aegean:screenshots` block. Gallery/browse views stay uncaptured until a seeded demo
+  library mode exists.
+- **Consequences**: README proves the real first-run gate without leaking credentials or
+  personal photos. A demo-library feature would unlock full coverage; that is new scope,
+  explicitly not this change.
