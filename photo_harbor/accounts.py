@@ -35,7 +35,12 @@ def password_matches(password: str, stored: Optional[str]) -> bool:
         return False
     if scheme != "pbkdf2_sha256":
         return False
-    candidate = hash_password(password, int(iterations), base64.b64decode(salt))
+    try:
+        count = int(iterations)
+        raw_salt = base64.b64decode(salt)
+    except (ValueError, base64.binascii.Error):
+        return False
+    candidate = hash_password(password, count, raw_salt)
     return hmac.compare_digest(candidate.split("$")[3], expected)
 
 

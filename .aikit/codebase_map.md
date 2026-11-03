@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
-- **Total Classes**: `113`
+- **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `445`
-- **Total Source Lines**: `7344`
+- **Total Class Methods**: `447`
+- **Total Source Lines**: `7366`
 
 ---
 
@@ -54,7 +54,7 @@
 ### [`photo_harbor/accounts.py`](photo_harbor/accounts.py)
 > *Signing in with a name and a password: password hashes, sessions, and a brake on guessing.*
 
-**Size**: `149` lines (`6027` bytes)
+**Size**: `154` lines (`6155` bytes)
 
 **Classes:**
 - `class Passwords`
@@ -740,7 +740,7 @@
 ### [`photo_harbor/setup_api.py`](photo_harbor/setup_api.py)
 > *What the setup page shows: the address and key to type into the iPhone Shortcut.*
 
-**Size**: `50` lines (`2104` bytes)
+**Size**: `52` lines (`2159` bytes)
 
 **Classes:**
 - `class SetupApi` - *The address and this PC's startup setting; each person's key comes from /api/profiles.*
@@ -1060,7 +1060,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `181` lines (`7666` bytes)
+**Size**: `196` lines (`8403` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1088,6 +1088,9 @@
   - Method `.test_a_backup_run_records_its_last_status()`
 - `class ThumbnailerTest`
   - Method `.test_without_pillow_previews_are_off()`
+- `class PasswordHashTest`
+  - Method `.test_malformed_stored_hash_returns_false_not_500()`
+  - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
 - `class DamagedConfigTest`
   - Method `.test_both_copies_damaged_is_a_clear_error()`
 

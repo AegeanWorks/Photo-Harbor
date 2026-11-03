@@ -169,6 +169,21 @@ class ThumbnailerTest(unittest.TestCase):
         self.assertFalse(thumbs.enabled)
 
 
+class PasswordHashTest(unittest.TestCase):
+    def test_malformed_stored_hash_returns_false_not_500(self):
+        from photo_harbor.accounts import password_matches
+        self.assertFalse(password_matches("x", "pbkdf2_sha256$notanint$c2FsdA==$aGFzaA=="))
+        self.assertFalse(password_matches("x", "pbkdf2_sha256$240000$!!!$AAA="))
+        self.assertFalse(password_matches("x", "not-a-hash"))
+
+    def test_lan_address_falls_back_when_socket_creation_fails(self):
+        import socket
+        from unittest.mock import patch
+        from photo_harbor.setup_api import lan_address
+        with patch.object(socket, "socket", side_effect=OSError("too many open files")):
+            self.assertEqual(lan_address(), "127.0.0.1")
+
+
 class DamagedConfigTest(unittest.TestCase):
     def test_both_copies_damaged_is_a_clear_error(self):
         library = temp_dir(self)
