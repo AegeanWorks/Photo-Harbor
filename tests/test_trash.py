@@ -47,6 +47,15 @@ class TrashBookTest(unittest.TestCase):
         self.assertEqual(self.book.listing("main"), [])
         self.assertEqual(list(self.book.root.rglob("*.jpg")), [])
 
+    def test_trash_id_rejects_floats_and_bools_like_albums(self):
+        record = self.lib.put(b"one", name="one.jpg").record
+        trash_id = self.book.move("main", record.sha256)
+        self.assertEqual(trash_id, 1)
+        for bad in (1.5, True, False, 1.0, None, [1], {"id": 1}):
+            with self.assertRaises(HarborError, msg=repr(bad)):
+                self.book.restore("main", bad)
+        self.assertEqual(len(self.book.listing("main")), 1)
+
     def test_another_person_cannot_restore_or_delete_the_entry(self):
         record = self.lib.put(b"one", name="one.jpg").record
         self.book.move("main", record.sha256)

@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `447`
-- **Total Source Lines**: `7366`
+- **Total Class Methods**: `449`
+- **Total Source Lines**: `7418`
 
 ---
 
@@ -380,7 +380,7 @@
 ### [`photo_harbor/details.py`](photo_harbor/details.py)
 > *File and camera facts for one original, read on demand without touching the catalog.*
 
-**Size**: `110` lines (`3177` bytes)
+**Size**: `110` lines (`3209` bytes)
 
 **Functions:**
 - `def _text(value)`
@@ -825,7 +825,7 @@
 ### [`photo_harbor/trash.py`](photo_harbor/trash.py)
 > *A per-person trash: move a copy aside, restore it through the normal ingest, or delete it.*
 
-**Size**: `124` lines (`5568` bytes)
+**Size**: `131` lines (`5789` bytes)
 
 **Classes:**
 - `class TrashBook`
@@ -1060,7 +1060,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `196` lines (`8403` bytes)
+**Size**: `232` lines (`9642` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1091,6 +1091,7 @@
 - `class PasswordHashTest`
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
+  - Method `.test_details_corrupt_exif_returns_file_facts()`
 - `class DamagedConfigTest`
   - Method `.test_both_copies_damaged_is_a_clear_error()`
 
@@ -1248,7 +1249,7 @@
 ---
 
 ### [`tests/test_trash.py`](tests/test_trash.py)
-**Size**: `77` lines (`3773` bytes)
+**Size**: `86` lines (`4233` bytes)
 
 **Classes:**
 - `class TrashBookTest`
@@ -1256,6 +1257,7 @@
   - Method `.test_a_copy_moves_to_trash_and_restores_its_bytes()`
   - Method `.test_a_shared_photo_stays_for_the_other_person()`
   - Method `.test_permanent_delete_and_empty_remove_the_files()`
+  - Method `.test_trash_id_rejects_floats_and_bools_like_albums()`
   - Method `.test_another_person_cannot_restore_or_delete_the_entry()`
 - `class TrashMigrationTest`
   - Method `.test_a_format_5_catalog_gains_the_trash_table()`

@@ -101,10 +101,10 @@ def read_details(record: PhotoRecord, path: Path) -> dict:
 
             def tag(number):
                 return exif_ifd[number] if number in exif_ifd else exif.get(number)
+            facts.update(width=width, height=height, camera=_camera(tag(MAKE), tag(MODEL)),
+                         lens=_text(tag(LENS)), exposure=_exposure(tag(EXPOSURE)),
+                         aperture=_aperture(tag(APERTURE)), iso=_iso(tag(ISO)),
+                         focal_length=_focal(tag(FOCAL_LENGTH)))
     except Exception:  # hygiene: allow Pillow raises many types for unreadable formats
         return facts
-    facts.update(width=width, height=height, camera=_camera(tag(MAKE), tag(MODEL)),
-                 lens=_text(tag(LENS)), exposure=_exposure(tag(EXPOSURE)),
-                 aperture=_aperture(tag(APERTURE)), iso=_iso(tag(ISO)),
-                 focal_length=_focal(tag(FOCAL_LENGTH)))
     return facts

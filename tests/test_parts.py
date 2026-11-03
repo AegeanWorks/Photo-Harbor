@@ -183,6 +183,42 @@ class PasswordHashTest(unittest.TestCase):
         with patch.object(socket, "socket", side_effect=OSError("too many open files")):
             self.assertEqual(lan_address(), "127.0.0.1")
 
+    def test_details_corrupt_exif_returns_file_facts(self):
+        from unittest.mock import patch
+        from photo_harbor.details import read_details
+        from tests.test_details import record_for
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "x.jpg"
+            path.write_bytes(b"not jpeg")
+
+            class BadExif(dict):
+                def get(self, k, d=None):
+                    raise ValueError("bad tag decode")
+
+                def get_ifd(self, _):
+                    return {}
+
+            class FakeImg:
+                def __enter__(self):
+                    return self
+
+                def __exit__(self, *args):
+                    return False
+
+                @property
+                def size(self):
+                    return (10, 10)
+
+                def getexif(self):
+                    return BadExif()
+
+            with patch("photo_harbor.details.load_image") as loader:
+                loader.return_value = type("M", (), {"open": staticmethod(lambda p: FakeImg())})
+                facts = read_details(record_for(path, "x.jpg"), path)
+            self.assertEqual(facts["name"], "x.jpg")
+            self.assertIsNone(facts["width"])
+
 
 class DamagedConfigTest(unittest.TestCase):
     def test_both_copies_damaged_is_a_clear_error(self):

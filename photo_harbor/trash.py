@@ -99,9 +99,16 @@ class TrashBook:
         return count
 
     def _owned(self, profile: str, ident):
-        try:
-            number = int(ident)
-        except (TypeError, ValueError):
+        if isinstance(ident, bool):
+            number = 0
+        elif isinstance(ident, int):
+            number = ident
+        elif isinstance(ident, str):
+            try:
+                number = int(ident.strip())
+            except (TypeError, ValueError):
+                number = 0
+        else:
             number = 0
         with self._db.lock:
             row = self._db.conn.execute(
