@@ -74,7 +74,15 @@ class Downloads:
             with zipfile.ZipFile(target, "w", zipfile.ZIP_STORED, allowZip64=True) as archive:
                 used = set()
                 for record, path in entries:
-                    archive.write(path, _entry_name(record, used))
+                    try:
+                        archive.write(path, _entry_name(record, used))
+                    except OSError as exc:
+                        raise HarborError("a photo disappeared before it could be zipped",
+                                          str(exc), "reload the gallery and try again",
+                                          status=404) from exc
+        except HarborError:
+            target.unlink(missing_ok=True)
+            raise
         except Exception:  # hygiene: allow zipfile errors must not leave a tokenless temp file
             target.unlink(missing_ok=True)
             raise

@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `454`
-- **Total Source Lines**: `7476`
+- **Total Class Methods**: `456`
+- **Total Source Lines**: `7526`
 
 ---
 
@@ -396,7 +396,7 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `106` lines (`4327` bytes)
+**Size**: `114` lines (`4730` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
@@ -786,7 +786,7 @@
 ### [`photo_harbor/sync_api.py`](photo_harbor/sync_api.py)
 > *The endpoints the iPhone Shortcut calls: start, upload, done, and the cleanup's "has" check.*
 
-**Size**: `94` lines (`4828` bytes)
+**Size**: `103` lines (`5228` bytes)
 
 **Classes:**
 - `class SyncApi`
@@ -928,7 +928,7 @@
 ---
 
 ### [`tests/test_downloads.py`](tests/test_downloads.py)
-**Size**: `67` lines (`3062` bytes)
+**Size**: `83` lines (`3644` bytes)
 
 **Classes:**
 - `class DownloadsTest`
@@ -939,6 +939,7 @@
   - Method `.test_a_token_expires_and_removes_its_file()`
   - Method `.test_a_token_belongs_to_the_person_who_prepared_it()`
   - Method `.test_an_empty_download_is_refused()`
+  - Method `.test_a_file_vanishing_mid_zip_is_a_404()`
 
 ---
 
@@ -1062,7 +1063,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `242` lines (`10109` bytes)
+**Size**: `259` lines (`10892` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1093,6 +1094,7 @@
 - `class PasswordHashTest`
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
+  - Method `.test_sync_done_rejects_a_future_started_at()`
   - Method `.test_too_long_password_names_the_maximum()`
   - Method `.test_details_corrupt_exif_returns_file_facts()`
 - `class DamagedConfigTest`

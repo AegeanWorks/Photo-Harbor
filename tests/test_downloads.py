@@ -65,3 +65,19 @@ class DownloadsTest(unittest.TestCase):
     def test_an_empty_download_is_refused(self):
         with self.assertRaises(HarborError):
             self.downloads.prepare([], "Harbor.zip", "main")
+
+    def test_a_file_vanishing_mid_zip_is_a_404(self):
+        import zipfile as zf
+        orig_write = zf.ZipFile.write
+
+        def boom(self, *args, **kwargs):
+            raise FileNotFoundError("gone mid-zip")
+
+        zf.ZipFile.write = boom
+        try:
+            with self.assertRaises(HarborError) as ctx:
+                self.downloads.prepare([self.one], "Harbor.zip", "main")
+            self.assertEqual(ctx.exception.status, 404)
+        finally:
+            zf.ZipFile.write = orig_write
+        self.assertEqual(list((self.root / "downloads").glob("*.zip")), [])

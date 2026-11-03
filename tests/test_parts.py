@@ -183,6 +183,23 @@ class PasswordHashTest(unittest.TestCase):
         with patch.object(socket, "socket", side_effect=OSError("too many open files")):
             self.assertEqual(lan_address(), "127.0.0.1")
 
+    def test_sync_done_rejects_a_future_started_at(self):
+        import io
+        import json
+        from photo_harbor.errors import HarborError
+        from photo_harbor.messages import Request
+        from photo_harbor.records import Identity
+        from photo_harbor.sync_api import SyncApi
+        from tests.library_fixture import Library
+        lib = Library(self)
+        api = SyncApi(lib.store, lib.journal, None)
+        body = json.dumps({"started_at": "2999-01-01T00:00:00+00:00"}).encode()
+        req = Request("POST", "/api/sync/done", body=io.BytesIO(body), length=len(body),
+                      identity=Identity("main", True))
+        with self.assertRaises(HarborError) as ctx:
+            api.done(req)
+        self.assertEqual(ctx.exception.status, 400)
+
     def test_too_long_password_names_the_maximum(self):
         from photo_harbor.accounts import check_new_password
         from photo_harbor.errors import HarborError

@@ -85,10 +85,19 @@ class SyncApi:
 
     def done(self, request: Request) -> Reply:
         started = str(request.json().get("started_at", ""))
-        if parse_taken(started) is None:
+        moment = parse_taken(started)
+        if moment is None:
             raise HarborError("the sync's start time is missing",
                               "`done` needs the started_at value that `start` returned",
                               "send {\"started_at\": <value from start>} as JSON")
+        try:
+            too_far = moment > self._now() + timedelta(minutes=5)
+        except TypeError:
+            too_far = False
+        if too_far:
+            raise HarborError("that start time is in the future",
+                              f"got {started!r} after the PC's clock",
+                              "send the started_at value that `start` just returned")
         self._journal.record(_stamp(self._now()), kinds.SYNC_DONE, None, started,
                              request.profile)
         return json_reply({"ok": True})
