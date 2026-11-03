@@ -46,10 +46,12 @@ def password_matches(password: str, stored: Optional[str]) -> bool:
 
 def check_new_password(password: str) -> str:
     if not isinstance(password, str) or not MIN_PASSWORD <= len(password) <= MAX_PASSWORD:
-        raise HarborError("that password is too short" if isinstance(password, str)
-                          and len(password) < MIN_PASSWORD else "that password is not usable",
+        too_short = isinstance(password, str) and len(password) < MIN_PASSWORD
+        raise HarborError("that password is too short" if too_short else "that password is too long"
+                          if isinstance(password, str) else "that password is not usable",
                           f"passwords are {MIN_PASSWORD} to {MAX_PASSWORD} characters",
-                          f"choose one of at least {MIN_PASSWORD} characters")
+                          f"choose one of at least {MIN_PASSWORD} characters" if too_short
+                          else f"choose one of at most {MAX_PASSWORD} characters")
     return password
 
 

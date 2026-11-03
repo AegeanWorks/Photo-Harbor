@@ -99,6 +99,13 @@ class CatalogAndJournalTest(unittest.TestCase):
         with self.assertRaises(HarborError):
             Database(path)
 
+    def test_corrupt_row_is_not_reported_as_duplicate(self):
+        from photo_harbor.records import PhotoRecord
+        bad = PhotoRecord("b" * 64, "main/2026/2026-05/a.jpg", None, "a.jpg",
+                          "image/jpeg", None, "2026-05-01T11:00:00")
+        with self.assertRaises(Exception):
+            self.lib.catalog.add(bad)
+
 
 class SearchEscapingTest(unittest.TestCase):
     def test_wildcards_in_a_search_are_literal(self):

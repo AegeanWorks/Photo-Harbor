@@ -183,6 +183,16 @@ class PasswordHashTest(unittest.TestCase):
         with patch.object(socket, "socket", side_effect=OSError("too many open files")):
             self.assertEqual(lan_address(), "127.0.0.1")
 
+    def test_too_long_password_names_the_maximum(self):
+        from photo_harbor.accounts import check_new_password
+        from photo_harbor.errors import HarborError
+        with self.assertRaises(HarborError) as ctx:
+            check_new_password("x" * 201)
+        self.assertIn("at most 200", ctx.exception.fix)
+        with self.assertRaises(HarborError) as ctx:
+            check_new_password("x" * 5)
+        self.assertIn("at least 6", ctx.exception.fix)
+
     def test_details_corrupt_exif_returns_file_facts(self):
         from unittest.mock import patch
         from photo_harbor.details import read_details

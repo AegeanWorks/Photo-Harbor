@@ -104,9 +104,9 @@ class Catalog:
             except sqlite3.Error as exc:
                 self._db.conn.execute("ROLLBACK TO add_photo")
                 self._db.conn.execute("RELEASE add_photo")
-                if not isinstance(exc, sqlite3.IntegrityError) or "rel_path" in str(exc):
-                    raise
-                return False
+                if isinstance(exc, sqlite3.IntegrityError) and "photos.sha256" in str(exc):
+                    return False
+                raise
             self._db.conn.execute("RELEASE add_photo")
         return True
 

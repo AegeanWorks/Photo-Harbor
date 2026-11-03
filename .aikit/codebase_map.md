@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `449`
-- **Total Source Lines**: `7418`
+- **Total Class Methods**: `451`
+- **Total Source Lines**: `7437`
 
 ---
 
@@ -54,7 +54,7 @@
 ### [`photo_harbor/accounts.py`](photo_harbor/accounts.py)
 > *Signing in with a name and a password: password hashes, sessions, and a brake on guessing.*
 
-**Size**: `154` lines (`6155` bytes)
+**Size**: `156` lines (`6342` bytes)
 
 **Classes:**
 - `class Passwords`
@@ -262,7 +262,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `238` lines (`12034` bytes)
+**Size**: `238` lines (`12036` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -1060,7 +1060,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `232` lines (`9642` bytes)
+**Size**: `242` lines (`10109` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1091,6 +1091,7 @@
 - `class PasswordHashTest`
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
+  - Method `.test_too_long_password_names_the_maximum()`
   - Method `.test_details_corrupt_exif_returns_file_facts()`
 - `class DamagedConfigTest`
   - Method `.test_both_copies_damaged_is_a_clear_error()`
@@ -1212,7 +1213,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `154` lines (`6943` bytes)
+**Size**: `161` lines (`7286` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1235,6 +1236,7 @@
   - Method `.test_missing_report_clears_once_the_photo_arrives()`
   - Method `.test_last_sync_and_counts()`
   - Method `.test_an_unknown_catalog_version_is_refused_untouched()`
+  - Method `.test_corrupt_row_is_not_reported_as_duplicate()`
 - `class SearchEscapingTest`
   - Method `.test_wildcards_in_a_search_are_literal()`
 - `class EmbeddedDateTest`
