@@ -24,9 +24,16 @@ def _clean_name(value) -> str:
 
 
 def _album_id(value) -> int:
-    try:
-        ident = int(value)
-    except (TypeError, ValueError):
+    if isinstance(value, bool):
+        ident = 0
+    elif isinstance(value, int):
+        ident = value
+    elif isinstance(value, str):
+        try:
+            ident = int(value.strip())
+        except (TypeError, ValueError):
+            ident = 0
+    else:
         ident = 0
     if ident < 1:
         raise HarborError("that is not an album id", f"{value!r} is not a whole number",

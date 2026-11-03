@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `113`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `444`
-- **Total Source Lines**: `7327`
+- **Total Class Methods**: `445`
+- **Total Source Lines**: `7344`
 
 ---
 
@@ -85,7 +85,7 @@
 ### [`photo_harbor/albums.py`](photo_harbor/albums.py)
 > *Personal albums and favorites: named collections that never move or copy a file.*
 
-**Size**: `199` lines (`9422` bytes)
+**Size**: `206` lines (`9612` bytes)
 
 **Classes:**
 - `class AlbumBook` - *Albums belong to one person; favorites are that person's own mark on a photo.*
@@ -879,7 +879,7 @@
 ---
 
 ### [`tests/test_albums.py`](tests/test_albums.py)
-**Size**: `137` lines (`7266` bytes)
+**Size**: `147` lines (`7727` bytes)
 
 **Classes:**
 - `class AlbumBookTest`
@@ -895,6 +895,7 @@
   - Method `.test_a_format_4_catalog_gains_collections_and_keeps_its_photos()`
   - Method `.test_a_format_6_catalog_gains_the_album_cover_column()`
   - Method `.test_a_bad_collection_id_is_a_clear_error()`
+  - Method `.test_a_non_integer_collection_id_is_a_clear_error()`
 
 ---
 

@@ -135,3 +135,13 @@ class CollectionMigrationTest(unittest.TestCase):
             book.owned("main", "not-a-number")
         with self.assertRaises(HarborError):
             book.owned("main", 0)
+
+    def test_a_non_integer_collection_id_is_a_clear_error(self):
+        lib = Library(self)
+        book = AlbumBook(lib.db)
+        for bad in (1.5, 1.0, True, False, None, [1], {"id": 1}):
+            with self.assertRaises(HarborError, msg=f"{bad!r}"):
+                book.owned("main", bad)
+        album = book.create("main", "Strict ids")
+        self.assertTrue(book.owned("main", album.id))
+        self.assertTrue(book.owned("main", str(album.id)))
