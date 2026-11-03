@@ -49,7 +49,11 @@ class ServerRunner:
                 raise HarborError("the server is already running", "Start was pressed twice",
                                   "press Stop first")
             app = HarborApp(load_or_create(self._library), self._port)
-            moved = app.layout.prepare()
+            try:
+                moved = app.layout.prepare()
+            except Exception:
+                app.close()
+                raise
             if moved:
                 self._log(f"Moved {moved} photos into the per-person folders.")
             try:

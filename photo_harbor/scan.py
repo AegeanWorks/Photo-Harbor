@@ -83,7 +83,10 @@ class LibraryScanner:
                 outcome = self._register(profile.id, path, rel, missing)
                 added += outcome == "added"
                 moved += outcome == "moved"
-        if len(missing) > MASS_MISSING and len(missing) > MASS_MISSING_SHARE * len(tracked):
+        mass_missing = (len(missing) > MASS_MISSING
+                        and len(missing) > MASS_MISSING_SHARE * len(tracked))
+        small_full_loss = (0 < len(tracked) <= MASS_MISSING and len(missing) >= len(tracked))
+        if mass_missing or small_full_loss:
             self._journal.record(_stamp(self._now()), SCANNED, None,
                                  f"{len(missing)} files missing at once: none removed")
             return ScanReport(added, moved, 0, held_back=len(missing))

@@ -40,6 +40,19 @@ class RunnerTest(unittest.TestCase):
             second.start()
         self.assertFalse(second.running)
 
+    def test_prepare_failure_closes_the_library(self):
+        import photo_harbor.runner as runmod
+        from unittest.mock import patch
+        runner = ServerRunner(self.root / "lib", 0, host="127.0.0.1", verbose=False,
+                              log=lambda text: None)
+        with patch.object(runmod, "HarborApp") as mock_app_cls:
+            inst = mock_app_cls.return_value
+            inst.layout.prepare.side_effect = RuntimeError("prepare boom")
+            with self.assertRaises(RuntimeError):
+                runner.start()
+            inst.close.assert_called_once_with()
+        self.assertFalse(runner.running)
+
 
 class PrefsTest(unittest.TestCase):
     def test_round_trip_and_fallbacks(self):

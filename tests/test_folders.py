@@ -135,6 +135,25 @@ class ScannerTest(unittest.TestCase):
         self.assertEqual((report.removed, report.held_back), (0, 60))
         self.assertEqual(app.store._catalog.stats().count, 60)
 
+    def test_drive_loss_with_fewer_than_50_files_removes_nothing(self):
+        root, app = make_app(self)
+        for i in range(10):
+            put(app, f"photo {i}".encode(), name=f"{i}.jpg")
+        shutil.rmtree(root / "Main")
+        report = app.scanner.reconcile()
+        self.assertEqual((report.removed, report.held_back), (0, 10))
+        self.assertEqual(app.store._catalog.stats().count, 10)
+
+    def test_single_delete_in_small_library_still_allowed(self):
+        root, app = make_app(self)
+        for i in range(10):
+            put(app, f"photo {i}".encode(), name=f"{i}.jpg")
+        gone = sorted((root / "Main").rglob("*.jpg"))[0]
+        gone.unlink()
+        report = app.scanner.reconcile()
+        self.assertEqual(report.removed, 1)
+        self.assertEqual(report.held_back, 0)
+
     def test_the_file_check_reports_damage_without_deleting(self):
         root, app = make_app(self)
         record = put(app, b"original").record

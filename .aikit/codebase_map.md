@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `451`
-- **Total Source Lines**: `7437`
+- **Total Class Methods**: `454`
+- **Total Source Lines**: `7476`
 
 ---
 
@@ -683,7 +683,7 @@
 ### [`photo_harbor/runner.py`](photo_harbor/runner.py)
 > *Starts and stops one server in the background, for the command line and the Harbor window.*
 
-**Size**: `93` lines (`3753` bytes)
+**Size**: `97` lines (`3854` bytes)
 
 **Classes:**
 - `class RunningServer`
@@ -699,7 +699,7 @@
 ### [`photo_harbor/scan.py`](photo_harbor/scan.py)
 > *Keeping the catalog in step with the folders, and checking that every file is still intact.*
 
-**Size**: `238` lines (`10035` bytes)
+**Size**: `241` lines (`10210` bytes)
 
 **Classes:**
 - `class ScanReport`
@@ -945,7 +945,7 @@
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
-**Size**: `144` lines (`6578` bytes)
+**Size**: `163` lines (`7386` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -961,6 +961,8 @@
 - `class ScannerTest`
   - Method `.test_files_added_moved_and_deleted_in_explorer_are_noticed()`
   - Method `.test_a_vanished_drive_removes_nothing()`
+  - Method `.test_drive_loss_with_fewer_than_50_files_removes_nothing()`
+  - Method `.test_single_delete_in_small_library_still_allowed()`
   - Method `.test_the_file_check_reports_damage_without_deleting()`
 
 **Functions:**
@@ -1129,13 +1131,14 @@
 ### [`tests/test_runner.py`](tests/test_runner.py)
 > *The background server the Harbor window and `serve` use, and the window's saved settings.*
 
-**Size**: `58` lines (`2353` bytes)
+**Size**: `71` lines (`2987` bytes)
 
 **Classes:**
 - `class RunnerTest`
   - Method `.setUp()`
   - Method `.test_start_serves_and_stop_frees_everything()`
   - Method `.test_a_busy_port_is_a_clear_error()`
+  - Method `.test_prepare_failure_closes_the_library()`
 - `class PrefsTest`
   - Method `.test_round_trip_and_fallbacks()`
   - Method `.test_mask_shows_only_the_last_four()`
