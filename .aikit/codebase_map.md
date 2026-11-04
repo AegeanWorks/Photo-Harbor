@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `461`
-- **Total Source Lines**: `7602`
+- **Total Class Methods**: `463`
+- **Total Source Lines**: `7630`
 
 ---
 
@@ -262,7 +262,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `238` lines (`12036` bytes)
+**Size**: `252` lines (`12648` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -973,13 +973,15 @@
 ---
 
 ### [`tests/test_hashes.py`](tests/test_hashes.py)
-**Size**: `27` lines (`1328` bytes)
+**Size**: `41` lines (`1993` bytes)
 
 **Classes:**
 - `class HashSelectionTest`
   - Method `.setUp()`
   - Method `.test_hashes_follow_the_same_filter_and_order_as_the_page()`
   - Method `.test_a_limit_caps_the_result()`
+  - Method `.test_negative_limit_is_rejected()`
+  - Method `.test_known_and_copies_of_chunk_large_batches()`
 
 ---
 

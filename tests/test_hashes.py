@@ -25,3 +25,17 @@ class HashSelectionTest(unittest.TestCase):
 
     def test_a_limit_caps_the_result(self):
         self.assertEqual(len(self.lib.catalog.hashes(PhotoFilter(), limit=2)), 2)
+
+    def test_negative_limit_is_rejected(self):
+        with self.assertRaises(ValueError):
+            self.lib.catalog.hashes(PhotoFilter(), limit=-1)
+        with self.assertRaises(ValueError):
+            self.lib.catalog.page(0, -1)
+
+    def test_known_and_copies_of_chunk_large_batches(self):
+        import hashlib
+        big = [hashlib.sha256(f"k{i}".encode()).hexdigest() for i in range(2000)]
+        self.assertEqual(self.lib.catalog.known(big), set())
+        self.assertEqual(self.lib.catalog.copies_of("main", big), set())
+        have = [r.sha256 for r in self.records]
+        self.assertEqual(self.lib.catalog.known(have + big[:1500]), set(have))

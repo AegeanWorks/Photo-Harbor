@@ -121,26 +121,38 @@ class Catalog:
         """The hashes in ``sha256s`` that the catalog holds, in one query."""
         if not sha256s:
             return set()
-        marks = ",".join("?" for _ in sha256s)
+        found = set()
         with self._db.lock:
-            rows = self._db.conn.execute(
-                f"SELECT sha256 FROM photos WHERE sha256 IN ({marks})", tuple(sha256s)
-            ).fetchall()
-        return {row[0] for row in rows}
+            for i in range(0, len(sha256s), 500):
+                chunk = list(sha256s)[i:i + 500]
+                marks = ",".join("?" for _ in chunk)
+                rows = self._db.conn.execute(
+                    f"SELECT sha256 FROM photos WHERE sha256 IN ({marks})", tuple(chunk)
+                ).fetchall()
+                found.update(row[0] for row in rows)
+        return found
 
     def copies_of(self, profile: str, sha256s: list) -> set:
         """The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query."""
         if not sha256s:
             return set()
-        marks = ",".join("?" for _ in sha256s)
+        found = set()
         with self._db.lock:
-            rows = self._db.conn.execute(
-                f"SELECT sha256 FROM copies WHERE profile = ? AND sha256 IN ({marks})",
-                (profile, *sha256s)).fetchall()
-        return {row[0] for row in rows}
+            for i in range(0, len(sha256s), 500):
+                chunk = list(sha256s)[i:i + 500]
+                marks = ",".join("?" for _ in chunk)
+                rows = self._db.conn.execute(
+                    f"SELECT sha256 FROM copies WHERE profile = ? AND sha256 IN ({marks})",
+                    (profile, *chunk)).fetchall()
+                found.update(row[0] for row in rows)
+        return found
 
     def page(self, offset: int, limit: int, narrow: PhotoFilter = PhotoFilter()) -> list:
         """Records in the requested order, newest first by default (taken time, then received)."""
+        if limit < 0:
+            raise ValueError(f"limit must be >= 0, got {limit!r}")
+        if offset < 0:
+            raise ValueError(f"offset must be >= 0, got {offset!r}")
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
         order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
@@ -156,6 +168,8 @@ class Catalog:
 
     def hashes(self, narrow: PhotoFilter = PhotoFilter(), limit: int = 10_000) -> list:
         """Every matching hash in the same order as the gallery, capped by ``limit``."""
+        if limit < 0:
+            raise ValueError(f"limit must be >= 0, got {limit!r}")
         table, _, owner = _source(narrow)
         where, params = _where(narrow, owner)
         order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
