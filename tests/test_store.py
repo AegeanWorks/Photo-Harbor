@@ -49,6 +49,14 @@ class IngestTest(unittest.TestCase):
             self.lib.store.ingest(io.BytesIO(b"x"), 1, UploadClaim("a.jpg", sha256="abc"))
         self.assertEqual(caught.exception.status, 400)
 
+    def test_ensure_copy_returns_false_when_source_vanishes(self):
+        from unittest.mock import patch
+        record = self.lib.put(b"vanish", name="gone.jpg").record
+        self.assertTrue(self.lib.store.ensure_copy("ayse", record.sha256))
+        with patch("photo_harbor.store.link_or_copy",
+                   side_effect=FileNotFoundError("source gone")):
+            self.assertFalse(self.lib.store.ensure_copy("fatma", record.sha256))
+
     def test_copy_fallback_fsyncs_before_replace(self):
         import os
         from unittest.mock import patch

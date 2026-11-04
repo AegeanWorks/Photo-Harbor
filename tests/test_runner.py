@@ -40,6 +40,21 @@ class RunnerTest(unittest.TestCase):
             second.start()
         self.assertFalse(second.running)
 
+    def test_wait_returns_immediately_when_never_started(self):
+        runner = ServerRunner(self.root / "idle", 0, host="127.0.0.1", verbose=False)
+        runner.wait()
+
+    def test_wait_unblocks_after_stop(self):
+        import threading
+        runner = ServerRunner(self.root / "lib", 0, host="127.0.0.1", verbose=False)
+        runner.start()
+        self.addCleanup(runner.stop)
+        done = threading.Event()
+        watcher = threading.Thread(target=lambda: (runner.wait(), done.set()), daemon=True)
+        watcher.start()
+        runner.stop()
+        self.assertTrue(done.wait(timeout=10))
+
     def test_prepare_failure_closes_the_library(self):
         import photo_harbor.runner as runmod
         from unittest.mock import patch

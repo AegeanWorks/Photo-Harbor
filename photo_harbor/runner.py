@@ -93,5 +93,6 @@ class ServerRunner:
 
     def wait(self) -> None:
         """Block until the server stops (Ctrl+C in a console stops it)."""
-        while self._thread is not None and self._thread.is_alive():
-            self._thread.join(0.5)
+        thread = self._thread
+        while thread is not None and thread.is_alive():
+            thread.join(0.5)

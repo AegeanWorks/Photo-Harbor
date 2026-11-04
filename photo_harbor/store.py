@@ -151,10 +151,16 @@ class PhotoStore:
             own = self._copies.path_for(profile, sha256)
             if own is not None:
                 (self.root / own).unlink(missing_ok=True)
-                link_or_copy(source, self.root / own)
+                try:
+                    link_or_copy(source, self.root / own)
+                except OSError:
+                    return False
                 return True
             record = self._catalog.get(sha256)
-            self._link_new_copy(source, record, profile, record.original_name)
+            try:
+                self._link_new_copy(source, record, profile, record.original_name)
+            except OSError:
+                return False
             return True
 
     # ---------- receiving ----------

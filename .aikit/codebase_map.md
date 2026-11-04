@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `467`
-- **Total Source Lines**: `7724`
+- **Total Class Methods**: `470`
+- **Total Source Lines**: `7754`
 
 ---
 
@@ -683,7 +683,7 @@
 ### [`photo_harbor/runner.py`](photo_harbor/runner.py)
 > *Starts and stops one server in the background, for the command line and the Harbor window.*
 
-**Size**: `97` lines (`3854` bytes)
+**Size**: `98` lines (`3866` bytes)
 
 **Classes:**
 - `class RunningServer`
@@ -756,7 +756,7 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `311` lines (`14542` bytes)
+**Size**: `317` lines (`14710` bytes)
 
 **Classes:**
 - `class PhotoStore`
@@ -1142,13 +1142,15 @@
 ### [`tests/test_runner.py`](tests/test_runner.py)
 > *The background server the Harbor window and `serve` use, and the window's saved settings.*
 
-**Size**: `71` lines (`2987` bytes)
+**Size**: `86` lines (`3594` bytes)
 
 **Classes:**
 - `class RunnerTest`
   - Method `.setUp()`
   - Method `.test_start_serves_and_stop_frees_everything()`
   - Method `.test_a_busy_port_is_a_clear_error()`
+  - Method `.test_wait_returns_immediately_when_never_started()`
+  - Method `.test_wait_unblocks_after_stop()`
   - Method `.test_prepare_failure_closes_the_library()`
 - `class PrefsTest`
   - Method `.test_round_trip_and_fallbacks()`
@@ -1227,7 +1229,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `174` lines (`7918` bytes)
+**Size**: `182` lines (`8367` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1238,6 +1240,7 @@
   - Method `.test_hash_mismatch_keeps_nothing()`
   - Method `.test_a_short_body_is_refused_and_leaves_no_temp_file()`
   - Method `.test_a_malformed_hash_is_a_usage_error()`
+  - Method `.test_ensure_copy_returns_false_when_source_vanishes()`
   - Method `.test_copy_fallback_fsyncs_before_replace()`
 - `class VerifyTest`
   - Method `.setUp()`
