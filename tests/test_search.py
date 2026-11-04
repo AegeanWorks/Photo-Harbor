@@ -24,6 +24,11 @@ class SearchTest(unittest.TestCase):
         self.assertEqual(self.names("may", start="2026-05-05"), ["may-tenth.jpg"])
         self.assertEqual(self.names("may", start="2026-06-01"), [])
 
+    def test_words_past_the_eighth_still_narrow(self):
+        self.lib.put(b"five", name="w1-w2-w3-w4-w5-w6-w7-w8.jpg",
+                     taken="2026-05-12T10:00:00")
+        self.assertEqual(self.names("w1 w2 w3 w4 w5 w6 w7 w8 w9"), [])
+
     def test_like_wildcards_are_literal(self):
         self.lib.put(b"four", name="100%-done.jpg", taken="2026-05-11T10:00:00")
         self.assertEqual(self.names("100%"), ["100%-done.jpg"])

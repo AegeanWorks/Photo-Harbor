@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `472`
-- **Total Source Lines**: `7820`
+- **Total Class Methods**: `473`
+- **Total Source Lines**: `7825`
 
 ---
 
@@ -262,7 +262,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `254` lines (`12810` bytes)
+**Size**: `254` lines (`12806` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -1195,7 +1195,7 @@
 ---
 
 ### [`tests/test_search.py`](tests/test_search.py)
-**Size**: `30` lines (`1327` bytes)
+**Size**: `35` lines (`1570` bytes)
 
 **Classes:**
 - `class SearchTest`
@@ -1203,6 +1203,7 @@
   - Method `.names(query, **kwargs)`
   - Method `.test_every_word_must_appear_in_the_file_name()`
   - Method `.test_search_combines_with_other_narrowing()`
+  - Method `.test_words_past_the_eighth_still_narrow()`
   - Method `.test_like_wildcards_are_literal()`
 
 ---
