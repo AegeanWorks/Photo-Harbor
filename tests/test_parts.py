@@ -140,6 +140,19 @@ class BackupTest(unittest.TestCase):
                          (2, 1, 1, 1))
         self.assertEqual(sorted(kind for _, kind in damaged.problems), ["different", "missing"])
 
+    def test_mirror_recopies_same_size_content_change(self):
+        root = temp_dir(self)
+        source, target = root / "photos", root / "backup"
+        (source / "2026" / "10").mkdir(parents=True)
+        (source / "2026" / "10" / "a.jpg").write_bytes(b"original-bytes!!")
+        self.assertEqual(mirror(source, target).copied, 1)
+        (target / "2026" / "10" / "a.jpg").write_bytes(b"tampered-xxxxxxx")
+        report = mirror(source, target)
+        self.assertEqual((report.copied, report.unchanged), (1, 0))
+        self.assertEqual((target / "2026" / "10" / "a.jpg").read_bytes(),
+                         b"original-bytes!!")
+        self.assertTrue(verify(source, target).ok)
+
     def test_verify_refuses_a_target_that_is_not_there(self):
         root = temp_dir(self)
         with self.assertRaises(HarborError):

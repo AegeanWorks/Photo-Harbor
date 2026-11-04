@@ -116,8 +116,12 @@ def mirror(source: Path, target: Path) -> BackupReport:
         dest = target / path.relative_to(source)
         size = path.stat().st_size
         if dest.is_file() and dest.stat().st_size == size:
-            unchanged += 1
-            continue
+            try:
+                if _digest(path) == _digest(dest):
+                    unchanged += 1
+                    continue
+            except OSError:  # hygiene: allow unreadable backup falls through to re-copy
+                pass
         dest.parent.mkdir(parents=True, exist_ok=True)
         tmp = dest.with_name(f".tmp_{dest.name}")
         shutil.copyfile(path, tmp)

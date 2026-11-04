@@ -32,6 +32,10 @@ class HashSelectionTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.lib.catalog.page(0, -1)
 
+    def test_unknown_kind_is_rejected_not_silently_ignored(self):
+        with self.assertRaises(ValueError):
+            self.lib.catalog.hashes(PhotoFilter(kind="Video"))
+
     def test_known_and_copies_of_chunk_large_batches(self):
         import hashlib
         big = [hashlib.sha256(f"k{i}".encode()).hexdigest() for i in range(2000)]

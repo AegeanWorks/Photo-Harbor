@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `465`
-- **Total Source Lines**: `7701`
+- **Total Class Methods**: `467`
+- **Total Source Lines**: `7724`
 
 ---
 
@@ -204,7 +204,7 @@
 ### [`photo_harbor/backup.py`](photo_harbor/backup.py)
 > *A second copy of the library's originals on another drive, so one disk failure loses nothing.*
 
-**Size**: `174` lines (`5838` bytes)
+**Size**: `178` lines (`6032` bytes)
 
 **Classes:**
 - `class BackupReport`
@@ -262,7 +262,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `252` lines (`12648` bytes)
+**Size**: `254` lines (`12810` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -973,7 +973,7 @@
 ---
 
 ### [`tests/test_hashes.py`](tests/test_hashes.py)
-**Size**: `41` lines (`1993` bytes)
+**Size**: `45` lines (`2167` bytes)
 
 **Classes:**
 - `class HashSelectionTest`
@@ -981,6 +981,7 @@
   - Method `.test_hashes_follow_the_same_filter_and_order_as_the_page()`
   - Method `.test_a_limit_caps_the_result()`
   - Method `.test_negative_limit_is_rejected()`
+  - Method `.test_unknown_kind_is_rejected_not_silently_ignored()`
   - Method `.test_known_and_copies_of_chunk_large_batches()`
 
 ---
@@ -1067,7 +1068,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `318` lines (`13111` bytes)
+**Size**: `331` lines (`13804` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1091,6 +1092,7 @@
   - Method `.test_copies_new_files_and_skips_ones_already_there()`
   - Method `.test_refuses_a_target_inside_the_library()`
   - Method `.test_verify_hashes_every_copy_and_reports_damage()`
+  - Method `.test_mirror_recopies_same_size_content_change()`
   - Method `.test_verify_refuses_a_target_that_is_not_there()`
   - Method `.test_a_backup_run_records_its_last_status()`
 - `class ThumbnailerTest`

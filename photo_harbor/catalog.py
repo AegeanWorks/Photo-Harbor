@@ -58,6 +58,8 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
         escaped = term.replace("!", "!!").replace("%", "!%").replace("_", "!_")
         clauses.append(f"{owner}.original_name LIKE ? ESCAPE '!'")
         params.append(f"%{escaped}%")
+    if narrow.kind is not None and narrow.kind not in ("video", "photo"):
+        raise ValueError(f"kind must be 'photo', 'video' or None, got {narrow.kind!r}")
     if narrow.kind in ("video", "photo"):
         wanted = "=" if narrow.kind == "video" else "!="
         clauses.append(f"c.is_video {wanted} 1" if owner == "c" else
