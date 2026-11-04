@@ -21,7 +21,7 @@ def _entry_name(record: PhotoRecord, used: set) -> str:
     name = safe_name(record.original_name)
     if name in used:
         name = f"{record.sha256[:8]}-{name}"
-    if name in used:
+    while name in used:
         name = f"{len(used) + 1}-{name}"
     used.add(name)
     return name
