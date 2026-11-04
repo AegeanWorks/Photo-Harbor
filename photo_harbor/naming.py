@@ -21,7 +21,7 @@ def safe_name(original: str) -> str:
     stem, dot, ext = base.rpartition(".")
     if not dot:
         stem, ext = base, ""
-    stem = stem[:MAX_STEM] or "photo"
+    stem = (stem[:MAX_STEM].strip(" .")) or "photo"
     if stem.upper() in _RESERVED:
         stem = f"_{stem}"
     return f"{stem}.{ext.lower()}" if ext else stem
@@ -32,7 +32,10 @@ def parse_taken(value: Optional[str]) -> Optional[datetime]:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+        text = value.strip()
+        if text.endswith(("Z", "z")):
+            text = text[:-1] + "+00:00"
+        return datetime.fromisoformat(text)
     except ValueError:
         return None
 

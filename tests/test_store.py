@@ -49,6 +49,19 @@ class IngestTest(unittest.TestCase):
             self.lib.store.ingest(io.BytesIO(b"x"), 1, UploadClaim("a.jpg", sha256="abc"))
         self.assertEqual(caught.exception.status, 400)
 
+    def test_copy_fallback_fsyncs_before_replace(self):
+        import os
+        from unittest.mock import patch
+        from photo_harbor import store as storemod
+        calls = []
+        orig_fsync = os.fsync
+        with patch.object(storemod.os, "link", side_effect=OSError("no links")):
+            with patch.object(storemod.os, "fsync",
+                              side_effect=lambda fd: calls.append(fd) or orig_fsync(fd)):
+                self.lib.put(b"fsync-me", name="sync.jpg")
+        self.assertTrue(calls, "copy fallback should fsync the temp file")
+        self.assertEqual(self.lib.catalog.stats().count, 1)
+
 
 class VerifyTest(unittest.TestCase):
     def setUp(self):

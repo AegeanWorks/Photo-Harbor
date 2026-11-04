@@ -61,6 +61,9 @@ def link_or_copy(source: Path, target: Path) -> None:
     except OSError:
         tmp = target.with_name(f".tmp_{target.name}")
         shutil.copyfile(source, tmp)
+        with open(tmp, "r+b") as handle:
+            handle.flush()
+            os.fsync(handle.fileno())
         replace_with_retry(tmp, target)
     fsync_dir(target.parent)
 

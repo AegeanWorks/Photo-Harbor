@@ -17,6 +17,10 @@ class SafeNameTest(unittest.TestCase):
     def test_prefixes_reserved_device_names(self):
         self.assertEqual(safe_name("CON.jpg"), "_CON.jpg")
 
+    def test_reserved_name_with_trailing_space_is_neutered(self):
+        self.assertEqual(safe_name("con .jpg"), "_con.jpg")
+        self.assertEqual(safe_name("aux .png"), "_aux.png")
+
     def test_falls_back_when_nothing_is_left(self):
         self.assertEqual(safe_name("..."), "photo")
 
@@ -24,6 +28,11 @@ class SafeNameTest(unittest.TestCase):
 class ParseTakenTest(unittest.TestCase):
     def test_reads_shortcuts_iso_with_zulu(self):
         self.assertEqual(parse_taken("2026-05-01T10:20:30Z").year, 2026)
+
+    def test_lowercase_zulu_parses_as_utc(self):
+        taken = parse_taken("2026-05-01T10:20:30z")
+        self.assertIsNotNone(taken)
+        self.assertEqual(taken.year, 2026)
 
     def test_unreadable_text_is_unknown(self):
         self.assertIsNone(parse_taken("yesterday"))

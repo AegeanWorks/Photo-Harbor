@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `458`
-- **Total Source Lines**: `7574`
+- **Total Class Methods**: `461`
+- **Total Source Lines**: `7602`
 
 ---
 
@@ -579,7 +579,7 @@
 ### [`photo_harbor/naming.py`](photo_harbor/naming.py)
 > *Where an original lands on disk: <Person>/<YYYY>/<YYYY-MM>/<safe file name>.*
 
-**Size**: `60` lines (`2178` bytes)
+**Size**: `63` lines (`2267` bytes)
 
 **Functions:**
 - `def safe_name(original)` - *A Windows-safe base name; a name that sanitises to nothing becomes ``photo``.*
@@ -756,7 +756,7 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `308` lines (`14436` bytes)
+**Size**: `311` lines (`14542` bytes)
 
 **Classes:**
 - `class PhotoStore`
@@ -1044,7 +1044,7 @@
 ---
 
 ### [`tests/test_naming.py`](tests/test_naming.py)
-**Size**: `38` lines (`1391` bytes)
+**Size**: `47` lines (`1759` bytes)
 
 **Classes:**
 - `class SafeNameTest`
@@ -1052,9 +1052,11 @@
   - Method `.test_strips_directories_from_either_separator()`
   - Method `.test_replaces_characters_windows_forbids()`
   - Method `.test_prefixes_reserved_device_names()`
+  - Method `.test_reserved_name_with_trailing_space_is_neutered()`
   - Method `.test_falls_back_when_nothing_is_left()`
 - `class ParseTakenTest`
   - Method `.test_reads_shortcuts_iso_with_zulu()`
+  - Method `.test_lowercase_zulu_parses_as_utc()`
   - Method `.test_unreadable_text_is_unknown()`
   - Method `.test_month_folder_is_zero_padded()`
 - `class MediaTypeTest`
@@ -1219,7 +1221,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `161` lines (`7286` bytes)
+**Size**: `174` lines (`7918` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1230,6 +1232,7 @@
   - Method `.test_hash_mismatch_keeps_nothing()`
   - Method `.test_a_short_body_is_refused_and_leaves_no_temp_file()`
   - Method `.test_a_malformed_hash_is_a_usage_error()`
+  - Method `.test_copy_fallback_fsyncs_before_replace()`
 - `class VerifyTest`
   - Method `.setUp()`
   - Method `.test_an_intact_file_verifies()`
