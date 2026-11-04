@@ -98,7 +98,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   every upload succeeded.
 - **Every byte is proven.** The phone sends the SHA-256 of each file with it. The PC streams the
   upload to a temporary file, hashes it, and keeps it only if the hashes match. Then it fsyncs
-  the file and moves it into `photos/YYYY/MM/` under its original name. A name clash with different
+  the file and moves it into `<Person>/YYYY/YYYY-MM/` under its original name. A name clash with different
   bytes gets a hash suffix; identical bytes are stored once.
 - **Deletion only after a fresh check.** *Harbor Cleanup* asks `GET /api/has` for each phone photo
   older than 30 days. The PC answers `yes` only after re-hashing its own copy. Only those photos
