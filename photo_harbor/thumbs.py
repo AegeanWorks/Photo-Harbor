@@ -92,7 +92,7 @@ class PreviewWarmer:
                     try:
                         batch = self._catalog.page(offset, self._page)
                     except Exception:  # hygiene: allow background previews retry later on transient DB errors
-                        backlog = False
+                        self._stop.wait(1)
                         continue
                     offset += len(batch)
                     backlog = len(batch) == self._page

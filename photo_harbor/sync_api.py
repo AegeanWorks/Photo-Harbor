@@ -90,8 +90,11 @@ class SyncApi:
             raise HarborError("the sync's start time is missing",
                               "`done` needs the started_at value that `start` returned",
                               "send {\"started_at\": <value from start>} as JSON")
+        now = self._now()
+        if moment.tzinfo is None and now.tzinfo is not None:
+            moment = moment.replace(tzinfo=now.tzinfo)
         try:
-            too_far = moment > self._now() + timedelta(minutes=5)
+            too_far = moment > now + timedelta(minutes=5)
         except TypeError:
             too_far = False
         if too_far:

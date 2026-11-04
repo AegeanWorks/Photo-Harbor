@@ -213,6 +213,23 @@ class PasswordHashTest(unittest.TestCase):
             api.done(req)
         self.assertEqual(ctx.exception.status, 400)
 
+    def test_sync_done_rejects_a_naive_future_started_at(self):
+        import io
+        import json
+        from photo_harbor.errors import HarborError
+        from photo_harbor.messages import Request
+        from photo_harbor.records import Identity
+        from photo_harbor.sync_api import SyncApi
+        from tests.library_fixture import Library
+        lib = Library(self)
+        api = SyncApi(lib.store, lib.journal, None)
+        body = json.dumps({"started_at": "2999-01-01T00:00:00"}).encode()
+        req = Request("POST", "/api/sync/done", body=io.BytesIO(body), length=len(body),
+                      identity=Identity("main", True))
+        with self.assertRaises(HarborError) as ctx:
+            api.done(req)
+        self.assertEqual(ctx.exception.status, 400)
+
     def test_media_and_thumb_vary_by_cookie(self):
         import io
         from photo_harbor.albums import AlbumBook
@@ -271,6 +288,52 @@ class PasswordHashTest(unittest.TestCase):
             time.sleep(0.01)
         time.sleep(0.5)
         self.assertTrue(warmer._thread.is_alive())
+
+    def test_warmer_retries_backlog_after_a_transient_failure(self):
+        import time
+        from photo_harbor.records import PhotoRecord
+        from photo_harbor.thumbs import PreviewWarmer
+
+        record = PhotoRecord(sha256="a" * 64, rel_path="Main/2026/2026-10/a.jpg",
+                             size=3, original_name="a.jpg", media_type="image/jpeg",
+                             taken_at=None, received_at="2026-10-24T12:00:00")
+
+        class FlakyCatalog:
+            def __init__(self):
+                self.calls = 0
+
+            def page(self, offset, limit):
+                self.calls += 1
+                if self.calls == 1:
+                    raise RuntimeError("transient db boom")
+                if offset == 0:
+                    return [record]
+                return []
+
+        class FakeStore:
+            def __init__(self):
+                self.lookups = 0
+
+            def locate(self, sha):
+                self.lookups += 1
+                return ("original-path", record)
+
+        class FakeThumbs:
+            def __init__(self):
+                self.previews = 0
+
+            def preview(self, *args):
+                self.previews += 1
+                return "preview-path"
+
+        catalog, store, thumbs = FlakyCatalog(), FakeStore(), FakeThumbs()
+        warmer = PreviewWarmer(thumbs, catalog, store, page=10)
+        warmer.start()
+        self.addCleanup(warmer.stop)
+        deadline = time.time() + 10
+        while thumbs.previews == 0 and time.time() < deadline:
+            time.sleep(0.05)
+        self.assertEqual(thumbs.previews, 1)
 
     def test_too_long_password_names_the_maximum(self):
         from photo_harbor.accounts import check_new_password

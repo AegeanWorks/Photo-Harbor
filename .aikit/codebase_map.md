@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `470`
-- **Total Source Lines**: `7754`
+- **Total Class Methods**: `472`
+- **Total Source Lines**: `7820`
 
 ---
 
@@ -786,7 +786,7 @@
 ### [`photo_harbor/sync_api.py`](photo_harbor/sync_api.py)
 > *The endpoints the iPhone Shortcut calls: start, upload, done, and the cleanup's "has" check.*
 
-**Size**: `103` lines (`5228` bytes)
+**Size**: `106` lines (`5362` bytes)
 
 **Classes:**
 - `class SyncApi`
@@ -805,7 +805,7 @@
 ### [`photo_harbor/thumbs.py`](photo_harbor/thumbs.py)
 > *Small JPEG previews, made only when the optional Pillow (and pillow-heif for HEIC) is installed.*
 
-**Size**: `111` lines (`4244` bytes)
+**Size**: `111` lines (`4247` bytes)
 
 **Classes:**
 - `class Thumbnailer`
@@ -1068,7 +1068,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `331` lines (`13804` bytes)
+**Size**: `394` lines (`16177` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1101,8 +1101,10 @@
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
   - Method `.test_sync_done_rejects_a_future_started_at()`
+  - Method `.test_sync_done_rejects_a_naive_future_started_at()`
   - Method `.test_media_and_thumb_vary_by_cookie()`
   - Method `.test_warmer_survives_a_catalog_failure()`
+  - Method `.test_warmer_retries_backlog_after_a_transient_failure()`
   - Method `.test_too_long_password_names_the_maximum()`
   - Method `.test_details_corrupt_exif_returns_file_facts()`
 - `class DamagedConfigTest`
