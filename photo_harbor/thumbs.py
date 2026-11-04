@@ -89,13 +89,23 @@ class PreviewWarmer:
             except queue.Empty:
                 record = None
                 if backlog:
-                    batch = self._catalog.page(offset, self._page)
+                    try:
+                        batch = self._catalog.page(offset, self._page)
+                    except Exception:  # hygiene: allow background previews retry later on transient DB errors
+                        backlog = False
+                        continue
                     offset += len(batch)
                     backlog = len(batch) == self._page
                     for older in batch:
                         if self._stop.is_set() or not self._fresh.empty():
                             break
-                        self._warm(older)
+                        try:
+                            self._warm(older)
+                        except Exception:  # hygiene: allow one bad photo skips without killing the warmer
+                            continue
                 continue
             if record is not None:
-                self._warm(record)
+                try:
+                    self._warm(record)
+                except Exception:  # hygiene: allow one bad photo skips without killing the warmer
+                    continue

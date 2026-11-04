@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `463`
-- **Total Source Lines**: `7630`
+- **Total Class Methods**: `465`
+- **Total Source Lines**: `7701`
 
 ---
 
@@ -530,7 +530,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `195` lines (`9627` bytes)
+**Size**: `197` lines (`9722` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -805,7 +805,7 @@
 ### [`photo_harbor/thumbs.py`](photo_harbor/thumbs.py)
 > *Small JPEG previews, made only when the optional Pillow (and pillow-heif for HEIC) is installed.*
 
-**Size**: `101` lines (`3701` bytes)
+**Size**: `111` lines (`4244` bytes)
 
 **Classes:**
 - `class Thumbnailer`
@@ -1067,7 +1067,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `259` lines (`10892` bytes)
+**Size**: `318` lines (`13111` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1099,6 +1099,8 @@
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
   - Method `.test_sync_done_rejects_a_future_started_at()`
+  - Method `.test_media_and_thumb_vary_by_cookie()`
+  - Method `.test_warmer_survives_a_catalog_failure()`
   - Method `.test_too_long_password_names_the_maximum()`
   - Method `.test_details_corrupt_exif_returns_file_facts()`
 - `class DamagedConfigTest`

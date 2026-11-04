@@ -200,6 +200,65 @@ class PasswordHashTest(unittest.TestCase):
             api.done(req)
         self.assertEqual(ctx.exception.status, 400)
 
+    def test_media_and_thumb_vary_by_cookie(self):
+        import io
+        from photo_harbor.albums import AlbumBook
+        from photo_harbor.library_api import LibraryApi
+        from photo_harbor.messages import Request
+        from photo_harbor.records import Identity
+        from tests.library_fixture import Library
+        lib = Library(self)
+        rec = lib.put(b"img", name="a.jpg").record
+
+        class _Thumbs:
+            def preview(self, record, original):
+                return original
+
+        api = LibraryApi(lib.store, lib.catalog, lib.journal, _Thumbs(),
+                          AlbumBook(lib.db), now=lambda: None)
+        ident = Identity("main", True)
+        for reply in (api.media(Request("GET", f"/media/{rec.sha256}",
+                                        identity=ident), rec.sha256),
+                      api.thumb(Request("GET", f"/thumb/{rec.sha256}",
+                                        identity=ident), rec.sha256)):
+            headers = dict(reply.headers)
+            self.assertIn("must-revalidate", headers.get("Cache-Control", ""))
+            self.assertNotIn("immutable", headers.get("Cache-Control", ""))
+            self.assertEqual(headers.get("Vary"), "Cookie")
+
+    def test_warmer_survives_a_catalog_failure(self):
+        import queue
+        import time
+        from photo_harbor.thumbs import PreviewWarmer
+
+        class BoomOnce:
+            def __init__(self):
+                self.calls = 0
+                self.records = []
+
+            def page(self, offset, limit):
+                self.calls += 1
+                if self.calls == 1:
+                    raise RuntimeError("db boom")
+                return []
+
+        class FakeStore:
+            def locate(self, sha):
+                return None
+
+        class FakeThumbs:
+            def preview(self, *args):
+                return None
+
+        warmer = PreviewWarmer(FakeThumbs(), BoomOnce(), FakeStore(), page=10)
+        warmer.start()
+        self.addCleanup(warmer.stop)
+        deadline = time.time() + 5
+        while not warmer._thread.is_alive() and time.time() < deadline:
+            time.sleep(0.01)
+        time.sleep(0.5)
+        self.assertTrue(warmer._thread.is_alive())
+
     def test_too_long_password_names_the_maximum(self):
         from photo_harbor.accounts import check_new_password
         from photo_harbor.errors import HarborError

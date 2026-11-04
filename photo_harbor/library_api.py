@@ -18,6 +18,8 @@ from .thumbs import Thumbnailer
 PAGE_MAX = 200
 HASH_LIMIT = 10_000
 IMMUTABLE = (("Cache-Control", "private, max-age=31536000, immutable"),)
+PRIVATE = (("Cache-Control", "private, must-revalidate, max-age=60"),
+           ("Vary", "Cookie"))
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 MAX_QUERY = 100
@@ -180,9 +182,9 @@ class LibraryApi:
             raise _not_found(sha256)
         path, record = found
         if _displayable(record.media_type):
-            return Reply(200, content_type=record.media_type, headers=IMMUTABLE, file=path)
+            return Reply(200, content_type=record.media_type, headers=PRIVATE, file=path)
         return Reply(200, content_type="application/octet-stream", file=path,
-                     headers=IMMUTABLE + (("Content-Disposition", "attachment"),))
+                     headers=PRIVATE + (("Content-Disposition", "attachment"),))
 
     def thumb(self, request: Request, sha256: str) -> Reply:
         found = self._store.locate(normalise_sha(sha256) or "",
@@ -192,4 +194,4 @@ class LibraryApi:
         preview = self._thumbs.preview(found[1], found[0])
         if preview is None:
             return json_reply({"preview": None}, status=404)
-        return Reply(200, content_type="image/jpeg", headers=IMMUTABLE, file=preview)
+        return Reply(200, content_type="image/jpeg", headers=PRIVATE, file=preview)
