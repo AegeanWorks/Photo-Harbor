@@ -323,6 +323,10 @@ class ServerTest(unittest.TestCase):
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["june.jpg"])
         response, _ = self.call("GET", "/api/photos?from=05-01-2026")
         self.assertEqual(response.status, 400)
+        response, _ = self.call("GET", "/api/photos?from=2026-13-01")
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("GET", "/api/photos?to=2026-05-32")
+        self.assertEqual(response.status, 400)
         response, _ = self.call("GET", "/api/photos?from=2026-06-01&to=2026-05-01")
         self.assertEqual(response.status, 400)
 

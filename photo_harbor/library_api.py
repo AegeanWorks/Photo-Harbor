@@ -21,7 +21,7 @@ IMMUTABLE = (("Cache-Control", "private, max-age=31536000, immutable"),)
 PRIVATE = (("Cache-Control", "private, must-revalidate, max-age=60"),
            ("Vary", "Cookie"))
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
-DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+DATE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
 MAX_QUERY = 100
 LOW_DISK_BYTES = 20 * 1024 ** 3     # warn under 20 GB free...
 LOW_DISK_SHARE = 0.10               # ...or under 10 % of the drive, whichever is larger

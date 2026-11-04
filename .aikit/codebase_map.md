@@ -10,7 +10,7 @@
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
 - **Total Class Methods**: `473`
-- **Total Source Lines**: `7825`
+- **Total Source Lines**: `7829`
 
 ---
 
@@ -530,7 +530,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `197` lines (`9722` bytes)
+**Size**: `197` lines (`9751` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -989,7 +989,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `657` lines (`37234` bytes)
+**Size**: `661` lines (`37466` bytes)
 
 **Classes:**
 - `class _NoPreviews`
