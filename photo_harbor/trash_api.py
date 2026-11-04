@@ -33,6 +33,11 @@ class TrashApi:
 
     def update(self, request: Request, ident: str) -> Reply:
         body = request.json()
+        if body.get("restore") is True and body.get("delete") is True:
+            raise HarborError("say restore or delete, not both",
+                              "both restore and delete were true",
+                              "send only one of {\"restore\": true} or {\"delete\": true}",
+                              status=400)
         if body.get("restore") is True:
             result = self._trash.restore(request.profile, ident)
             return json_reply({"restored": True, "id": int(ident), "status": result.status})

@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `456`
-- **Total Source Lines**: `7526`
+- **Total Class Methods**: `458`
+- **Total Source Lines**: `7574`
 
 ---
 
@@ -627,7 +627,7 @@
 ### [`photo_harbor/profiles_api.py`](photo_harbor/profiles_api.py)
 > *Listing people and, for the library owner, adding, renaming and re-keying them.*
 
-**Size**: `65` lines (`3102` bytes)
+**Size**: `68` lines (`3201` bytes)
 
 **Classes:**
 - `class ProfilesApi`
@@ -843,7 +843,7 @@
 ### [`photo_harbor/trash_api.py`](photo_harbor/trash_api.py)
 > *Endpoints for the per-person trash: list, move, restore, delete and empty.*
 
-**Size**: `47` lines (`2170` bytes)
+**Size**: `52` lines (`2507` bytes)
 
 **Classes:**
 - `class TrashApi`
@@ -1106,7 +1106,7 @@
 ---
 
 ### [`tests/test_profiles.py`](tests/test_profiles.py)
-**Size**: `149` lines (`7523` bytes)
+**Size**: `173` lines (`8753` bytes)
 
 **Classes:**
 - `class ProfileBookTest`
@@ -1115,6 +1115,7 @@
   - Method `.test_a_new_library_key_reaches_the_owner_profile()`
   - Method `.test_ids_are_folder_safe_and_unique()`
   - Method `.test_a_new_key_retires_the_old_one()`
+  - Method `.test_rekey_invalidates_existing_session_cookies()`
 - `class MigrationTest`
   - Method `.test_a_format_1_catalog_is_upgraded_and_owned_by_main()`
   - Method `.test_a_format_2_catalog_gains_the_import_list()`
@@ -1256,7 +1257,7 @@
 ---
 
 ### [`tests/test_trash.py`](tests/test_trash.py)
-**Size**: `86` lines (`4233` bytes)
+**Size**: `102` lines (`5027` bytes)
 
 **Classes:**
 - `class TrashBookTest`
@@ -1265,6 +1266,7 @@
   - Method `.test_a_shared_photo_stays_for_the_other_person()`
   - Method `.test_permanent_delete_and_empty_remove_the_files()`
   - Method `.test_trash_id_rejects_floats_and_bools_like_albums()`
+  - Method `.test_update_rejects_restore_and_delete_together()`
   - Method `.test_another_person_cannot_restore_or_delete_the_entry()`
 - `class TrashMigrationTest`
   - Method `.test_a_format_5_catalog_gains_the_trash_table()`

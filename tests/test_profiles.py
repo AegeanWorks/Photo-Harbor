@@ -55,6 +55,30 @@ class ProfileBookTest(unittest.TestCase):
         with self.assertRaises(HarborError):
             self.book.update("main", new_key=True)
 
+    def test_rekey_invalidates_existing_session_cookies(self):
+        import io
+        import json
+        from datetime import datetime, timezone
+        from unittest.mock import MagicMock
+        from photo_harbor.accounts import Passwords, Sessions
+        from photo_harbor.messages import Request
+        from photo_harbor.profiles_api import ProfilesApi
+        from photo_harbor.records import Identity
+        passwords = Passwords(self.lib.db, iterations=1000)
+        sessions = Sessions(self.lib.db,
+                            now=lambda: datetime(2026, 10, 24, 12, 0, 0, tzinfo=timezone.utc))
+        book = ProfileBook(self.lib.db, "owner-key-0123456789")
+        person = book.create("Ayşe")
+        token = sessions.start(person.id)
+        self.assertEqual(sessions.find(token), "ayse")
+        api = ProfilesApi(book, self.lib.catalog, self.lib.journal, passwords, sessions,
+                          MagicMock())
+        body = json.dumps({"new_key": True}).encode()
+        req = Request("POST", f"/api/profiles/{person.id}", body=io.BytesIO(body),
+                      length=len(body), identity=Identity("main", True))
+        api.update(req, person.id)
+        self.assertIsNone(sessions.find(token))
+
 
 class MigrationTest(unittest.TestCase):
     def test_a_format_1_catalog_is_upgraded_and_owned_by_main(self):

@@ -56,6 +56,22 @@ class TrashBookTest(unittest.TestCase):
                 self.book.restore("main", bad)
         self.assertEqual(len(self.book.listing("main")), 1)
 
+    def test_update_rejects_restore_and_delete_together(self):
+        import io
+        import json
+        from photo_harbor.messages import Request
+        from photo_harbor.records import Identity
+        from photo_harbor.trash_api import TrashApi
+        record = self.lib.put(b"one", name="one.jpg").record
+        trash_id = self.book.move("main", record.sha256)
+        api = TrashApi(self.book, self.lib.catalog)
+        body = json.dumps({"restore": True, "delete": True}).encode()
+        req = Request("POST", f"/api/trash/{trash_id}", body=io.BytesIO(body),
+                      length=len(body), identity=Identity("main", True))
+        with self.assertRaises(HarborError):
+            api.update(req, str(trash_id))
+        self.assertEqual(len(self.book.listing("main")), 1)
+
     def test_another_person_cannot_restore_or_delete_the_entry(self):
         record = self.lib.put(b"one", name="one.jpg").record
         self.book.move("main", record.sha256)

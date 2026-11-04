@@ -61,5 +61,8 @@ class ProfilesApi:
         if body.get("password") is not None:
             self._passwords.set(self._book.get(ident).id, body["password"])
             self._sessions.close(profile=ident)
-        profile = self._book.update(ident, new_key=body.get("new_key") is True)
+        new_key = body.get("new_key") is True
+        profile = self._book.update(ident, new_key=new_key)
+        if new_key:
+            self._sessions.close(profile=profile.id)
         return json_reply({"id": profile.id, "name": profile.name, "key": profile.key})
