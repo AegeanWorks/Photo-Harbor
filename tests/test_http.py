@@ -535,6 +535,26 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(self.call("GET", "/api/status", key=False, headers={"Cookie": second})[0].status, 401)
         self.assertEqual(self.sign_in("ayse", "yeni-sifre")[0], 200)
 
+    def test_a_successful_password_change_resets_the_brake(self):
+        self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
+        _, cookie = self.sign_in("ayse", "deniz123")
+        headers = {"Cookie": cookie}
+        for _ in range(4):
+            response, _ = self.call("POST", "/api/password",
+                                    body={"current": "nope", "new": "yeni-sifre"},
+                                    key=False, headers=headers)
+            self.assertEqual(response.status, 403)
+        response, _ = self.call("POST", "/api/password",
+                                body={"current": "deniz123", "new": "sifre123"},
+                                key=False, headers=headers)
+        self.assertEqual(response.status, 200)
+        for _ in range(2):
+            response, _ = self.call("POST", "/api/password",
+                                    body={"current": "nope", "new": "xxx"},
+                                    key=False, headers=headers)
+            self.assertEqual(response.status, 403)
+        self.assertEqual(self.sign_in("ayse", "sifre123")[0], 200)
+
     def test_last_day_counts_follow_the_signed_in_person(self):
         self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
         self.upload(b"main photo", name="mine.jpg")

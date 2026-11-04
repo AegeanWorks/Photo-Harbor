@@ -100,5 +100,6 @@ class KeyGuard:
                 raise HarborError("the current password is wrong", "it did not match",
                                   "type your current password again", status=403)
         self._passwords.set(me, body.get("new"))
+        self._brake.passed(request.client)
         self._sessions.close(profile=me, keep=request.cookies.get(SESSION_COOKIE))
         return json_reply({"ok": True})

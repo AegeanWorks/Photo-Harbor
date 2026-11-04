@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `114`
 - **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `474`
-- **Total Source Lines**: `7839`
+- **Total Class Methods**: `475`
+- **Total Source Lines**: `7860`
 
 ---
 
@@ -163,7 +163,7 @@
 ### [`photo_harbor/auth.py`](photo_harbor/auth.py)
 > *Who is asking: a phone's Shortcut presents its key; a browser signs in with a name and password.*
 
-**Size**: `104` lines (`4976` bytes)
+**Size**: `105` lines (`5019` bytes)
 
 **Classes:**
 - `class KeyGuard`
@@ -990,7 +990,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `661` lines (`37466` bytes)
+**Size**: `681` lines (`38591` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1039,6 +1039,7 @@
   - Method `.test_people_sign_in_with_a_password_and_see_only_their_own_photos()`
   - Method `.test_wrong_passwords_are_refused_then_braked()`
   - Method `.test_changing_a_password_needs_the_current_one_and_signs_out_other_browsers()`
+  - Method `.test_a_successful_password_change_resets_the_brake()`
   - Method `.test_last_day_counts_follow_the_signed_in_person()`
   - Method `.test_the_owner_can_reset_a_password_and_a_key_still_signs_in()`
   - Method `.test_albums_and_favorites_page_the_photos_they_hold()`
