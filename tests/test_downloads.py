@@ -50,6 +50,18 @@ class DownloadsTest(unittest.TestCase):
         name = _entry_name(record, set(used))
         self.assertNotIn(name, used)
 
+    def test_many_collisions_stay_unique_with_a_counter(self):
+        from photo_harbor.downloads import _entry_name
+        record = PhotoRecord(
+            sha256="c" * 64, rel_path="main/2026/2026-05/x.jpg", size=1,
+            original_name="x.jpg", media_type="image/jpeg", taken_at=None,
+            received_at="2026-05-01T11:00:00")
+        used = set()
+        names = [_entry_name(record, used) for _ in range(5)]
+        self.assertEqual(len(set(names)), 5)
+        self.assertEqual(names[0], "x.jpg")
+        self.assertEqual(names[1], f"{'c' * 8}-x.jpg")
+
     def test_duplicate_names_get_a_hash_prefix(self):
         same_record, same_path = self.photo(b"three", "one.jpg")
         same_record = PhotoRecord(**{**same_record.__dict__, "sha256": "b" * 64})

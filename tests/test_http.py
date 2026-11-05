@@ -327,6 +327,12 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(response.status, 400)
         response, _ = self.call("GET", "/api/photos?to=2026-05-32")
         self.assertEqual(response.status, 400)
+        response, _ = self.call("GET", "/api/photos?from=2026-02-30")
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("GET", "/api/photos?to=2026-04-31")
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("GET", "/api/photos?from=2025-02-29")
+        self.assertEqual(response.status, 400)
         response, _ = self.call("GET", "/api/photos?from=2026-06-01&to=2026-05-01")
         self.assertEqual(response.status, 400)
 
@@ -575,6 +581,14 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(self.sign_in("ayse", "baslangic")[0], 200)
         response, _ = self.call("POST", "/api/login", body={"key": ayse["key"]}, key=False)
         self.assertEqual(response.status, 200)
+
+    def test_an_owner_password_reset_clears_the_brake(self):
+        self.call("POST", "/api/profiles", body={"name": "Ayşe", "password": "deniz123"})
+        for _ in range(5):
+            self.assertEqual(self.sign_in("ayse", "wrong")[0], 401)
+        self.assertEqual(self.sign_in("ayse", "deniz123")[0], 429)
+        self.call("POST", "/api/profiles/ayse", body={"password": "yeni-sifre"})
+        self.assertEqual(self.sign_in("ayse", "yeni-sifre")[0], 200)
 
     def test_albums_and_favorites_page_the_photos_they_hold(self):
         self.upload(b"one", name="one.jpg")

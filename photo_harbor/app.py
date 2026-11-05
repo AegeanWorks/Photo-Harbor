@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional
 
-from .accounts import ITERATIONS, Passwords, Sessions
+from .accounts import ITERATIONS, LoginBrake, Passwords, Sessions
 from .albums import AlbumBook
 from .albums_api import AlbumsApi
 from .auth import KeyGuard
@@ -86,12 +86,13 @@ class HarborApp:
                                  self.store, journal)
         self.scanner = scanner
         self.schedule = ScanSchedule(scanner, journal)
-        self.guard = KeyGuard(self.profiles, self.passwords, self.sessions)
+        self.brake = LoginBrake()
+        self.guard = KeyGuard(self.profiles, self.passwords, self.sessions, brake=self.brake)
         self.router = Router()
         self._register(SyncApi(self.store, journal, self.profiles, now),
                        LibraryApi(self.store, catalog, journal, thumbs, self.albums, now),
                        ProfilesApi(self.profiles, catalog, journal, self.passwords,
-                                   self.sessions, self.layout),
+                                   self.sessions, self.layout, brake=self.brake),
                        AlbumsApi(self.albums, catalog),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),

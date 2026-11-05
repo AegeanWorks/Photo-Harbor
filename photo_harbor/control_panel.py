@@ -353,6 +353,7 @@ class ControlPanel:
         try:
             self._runner.app.passwords.set(ident, password)
             self._runner.app.sessions.close(profile=ident)
+            self._runner.app.brake.reset()
         except HarborError as error:
             self.log(error.as_text(), error=True)
             return

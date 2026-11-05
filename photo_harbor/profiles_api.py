@@ -1,6 +1,8 @@
 """Listing people and, for the library owner, adding, renaming and re-keying them."""
 
-from .accounts import Passwords, Sessions
+from typing import Optional
+
+from .accounts import LoginBrake, Passwords, Sessions
 from .catalog import Catalog
 from .layout import LibraryLayout
 from .errors import HarborError
@@ -18,13 +20,15 @@ def _require_owner(request: Request) -> None:
 
 class ProfilesApi:
     def __init__(self, book: ProfileBook, catalog: Catalog, journal: SyncJournal,
-                 passwords: Passwords, sessions: Sessions, layout: LibraryLayout) -> None:
+                 passwords: Passwords, sessions: Sessions, layout: LibraryLayout,
+                 brake: Optional[LoginBrake] = None) -> None:
         self._book = book
         self._catalog = catalog
         self._journal = journal
         self._passwords = passwords
         self._sessions = sessions
         self._layout = layout
+        self._brake = brake or LoginBrake()
 
     def listing(self, request: Request) -> Reply:
         """The owner sees everyone; anyone else sees only themselves (with their own key)."""
@@ -48,6 +52,7 @@ class ProfilesApi:
         self._layout.prepare()
         if body.get("password"):
             self._passwords.set(profile.id, body["password"])
+            self._brake.reset()
         return json_reply({"id": profile.id, "name": profile.name, "key": profile.key})
 
     def update(self, request: Request, ident: str) -> Reply:
@@ -61,6 +66,7 @@ class ProfilesApi:
         if body.get("password") is not None:
             self._passwords.set(self._book.get(ident).id, body["password"])
             self._sessions.close(profile=ident)
+            self._brake.reset()
         new_key = body.get("new_key") is True
         profile = self._book.update(ident, new_key=new_key)
         if new_key:

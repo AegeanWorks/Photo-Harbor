@@ -2,7 +2,7 @@
 
 import re
 import shutil
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Callable
 
 from .albums import AlbumBook
@@ -22,6 +22,17 @@ PRIVATE = (("Cache-Control", "private, must-revalidate, max-age=60"),
            ("Vary", "Cookie"))
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 DATE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
+
+
+def _valid_date(value: str) -> bool:
+    """Shape plus a real calendar day: 2026-02-30 and 2025-02-29 fail."""
+    if not DATE.match(value):
+        return False
+    try:
+        date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
 MAX_QUERY = 100
 LOW_DISK_BYTES = 20 * 1024 ** 3     # warn under 20 GB free...
 LOW_DISK_SHARE = 0.10               # ...or under 10 % of the drive, whichever is larger
@@ -85,7 +96,7 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
         raise HarborError(f"{month!r} is not a month", "months are written YYYY-MM",
                           "use ?month=2026-10")
     for name, value in (("from", start), ("to", end)):
-        if value is not None and not DATE.match(value):
+        if value is not None and not _valid_date(value):
             raise HarborError(f"{value!r} is not a date", "dates are written YYYY-MM-DD",
                               f"use ?{name}=2026-10-01")
     if start is not None and end is not None and start > end:

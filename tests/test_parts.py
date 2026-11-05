@@ -230,6 +230,25 @@ class PasswordHashTest(unittest.TestCase):
             api.done(req)
         self.assertEqual(ctx.exception.status, 400)
 
+    def test_sync_done_rejects_future_when_clocks_mix_naive_and_aware(self):
+        import io
+        import json
+        from datetime import datetime
+        from photo_harbor.errors import HarborError
+        from photo_harbor.messages import Request
+        from photo_harbor.records import Identity
+        from photo_harbor.sync_api import SyncApi
+        from tests.library_fixture import Library
+        lib = Library(self)
+        api = SyncApi(lib.store, lib.journal, None,
+                      now=lambda: datetime(2026, 5, 1, 12, 0, 0))
+        body = json.dumps({"started_at": "2999-01-01T00:00:00+00:00"}).encode()
+        req = Request("POST", "/api/sync/done", body=io.BytesIO(body), length=len(body),
+                      identity=Identity("main", True))
+        with self.assertRaises(HarborError) as ctx:
+            api.done(req)
+        self.assertEqual(ctx.exception.status, 400)
+
     def test_media_and_thumb_vary_by_cookie(self):
         import io
         from photo_harbor.albums import AlbumBook

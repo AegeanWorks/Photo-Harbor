@@ -91,8 +91,11 @@ class SyncApi:
                               "`done` needs the started_at value that `start` returned",
                               "send {\"started_at\": <value from start>} as JSON")
         now = self._now()
-        if moment.tzinfo is None and now.tzinfo is not None:
-            moment = moment.replace(tzinfo=now.tzinfo)
+        if (moment.tzinfo is None) != (now.tzinfo is None):
+            if moment.tzinfo is None:
+                moment = moment.replace(tzinfo=now.tzinfo)
+            else:
+                now = now.replace(tzinfo=moment.tzinfo)
         try:
             too_far = moment > now + timedelta(minutes=5)
         except TypeError:

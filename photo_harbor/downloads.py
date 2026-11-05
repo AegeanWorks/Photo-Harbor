@@ -18,13 +18,21 @@ TTL_SECONDS = 15 * 60
 
 
 def _entry_name(record: PhotoRecord, used: set) -> str:
-    name = safe_name(record.original_name)
-    if name in used:
-        name = f"{record.sha256[:8]}-{name}"
-    while name in used:
-        name = f"{len(used) + 1}-{name}"
-    used.add(name)
-    return name
+    base = safe_name(record.original_name)
+    if base not in used:
+        used.add(base)
+        return base
+    hashed = f"{record.sha256[:8]}-{base}"
+    if hashed not in used:
+        used.add(hashed)
+        return hashed
+    counter = len(used) + 1
+    while True:
+        name = f"{counter}-{hashed}"
+        if name not in used:
+            used.add(name)
+            return name
+        counter += 1
 
 
 class Downloads:

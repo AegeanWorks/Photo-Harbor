@@ -154,3 +154,8 @@ class LoginBrake:
     def passed(self, address: str) -> None:
         with self._lock:
             self._failures.pop(address, None)
+
+    def reset(self) -> None:
+        """An owner set a password: guessing protection restarts for every address."""
+        with self._lock:
+            self._failures.clear()
