@@ -145,3 +145,10 @@ class CollectionMigrationTest(unittest.TestCase):
         album = book.create("main", "Strict ids")
         self.assertTrue(book.owned("main", album.id))
         self.assertTrue(book.owned("main", str(album.id)))
+
+    def test_a_collection_id_beyond_sqlite_is_a_clear_error(self):
+        lib = Library(self)
+        book = AlbumBook(lib.db)
+        for huge in (2 ** 63, 10 ** 30, str(10 ** 30)):
+            with self.assertRaises(HarborError, msg=f"{huge!r}"):
+                book.owned("main", huge)

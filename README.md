@@ -99,14 +99,16 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Every byte is proven.** The phone sends the SHA-256 of each file with it. The PC streams the
   upload to a temporary file, hashes it, and keeps it only if the hashes match. Then it fsyncs
   the file and moves it into `<Person>/YYYY/YYYY-MM/` under its original name. A name clash with different
-  bytes gets a hash suffix; identical bytes are stored once.
+  bytes gets a hash suffix; identical bytes are stored once. A name another Harbor process takes
+  at the same moment is never overwritten: the photo moves to the next free name instead.
 - **Deletion only after a fresh check.** *Harbor Cleanup* asks `GET /api/has` for each phone photo
   older than 30 days. The PC answers `yes` only after re-hashing its own copy. Only those photos
   are deleted, and iOS asks once to confirm. A `no` uploads the photo instead and appears under
   **Sync → On the iPhone, not yet on the PC** until it arrives.
 - **Home network only.** Requests from public IP addresses are refused even if a router forwards
   the port. Every API call needs a signed-in browser session or a profile's key in
-  `X-Harbor-Key` (the Shortcuts).
+  `X-Harbor-Key` (the Shortcuts). Private API answers are sent `Cache-Control: no-store`, so a
+  shared browser cannot replay one person's data after a sign-in switch.
 - **A library browser.** The gallery has a sidebar of years and months with counts, a Videos
   filter and search by file name; on a phone the sidebar becomes a scrolling row of chips. Days
   are labelled in the browser's language. Click any photo for a full-screen viewer (arrow keys,
@@ -221,7 +223,7 @@ photo-harbor/
 │   ├── __init__.py           <- package version
 │   ├── __main__.py           <- `python -m photo_harbor` commands
 │   ├── app.py                <- wires storage, APIs and the web page into routes
-│   ├── atomic_file.py        <- temp + fsync + replace placement
+│   ├── atomic_file.py        <- temp + fsync + replace, and exclusive placement
 │   ├── accounts.py           <- password hashes, sessions, wrong-password brake
 │   ├── albums.py             <- personal albums and favorites; no files move
 │   ├── albums_api.py         <- albums and favorites; single or up to 500 hashes per call
@@ -245,7 +247,7 @@ photo-harbor/
 │   ├── journal.py            <- uploads, finished syncs, photos reported missing, scans
 │   ├── layout.py             <- person folders, guide file, old-layout move, folder renames
 │   ├── library_api.py        <- status, month outline, filtered photo list, originals, previews
-│   ├── messages.py           <- Request and Reply values, Range parsing
+│   ├── messages.py           <- Request and Reply values, JSON body reading, Range parsing
 │   ├── naming.py             <- safe file names, month folders, media types
 │   ├── pillow_support.py     <- optional Pillow and HEIC loading in one place
 │   ├── profiles.py           <- people, folder ids and keys

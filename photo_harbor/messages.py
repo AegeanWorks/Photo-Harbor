@@ -9,6 +9,22 @@ from .errors import HarborError
 from .records import Identity
 
 MAX_JSON_BYTES = 64 * 1024
+READ_BLOCK = 64 * 1024
+NO_STORE = (("Cache-Control", "no-store"),)
+
+
+def _read_body(body: BinaryIO, limit: int) -> bytes:
+    """Read up to ``limit`` bytes plus one, even when a chunked stream stops at every chunk.
+    The extra byte lets the caller tell an oversized body from one that exactly fills the cap."""
+    chunks = []
+    total = 0
+    while total <= limit:
+        block = body.read(min(READ_BLOCK, limit + 1 - total))
+        if not block:
+            break
+        chunks.append(block)
+        total += len(block)
+    return b"".join(chunks)
 
 
 @dataclass(frozen=True)
@@ -40,8 +56,13 @@ class Request:
 
     def json(self) -> dict:
         """The body as a JSON object, or HarborError for anything else."""
-        want = MAX_JSON_BYTES + 1 if self.length is None else self.length
-        raw = self.body.read(want) if self.body is not None and want <= MAX_JSON_BYTES + 1 else None
+        if self.body is None:
+            raw = b""
+        elif self.length is not None and self.length > MAX_JSON_BYTES:
+            raw = None
+        else:
+            cap = MAX_JSON_BYTES if self.length is None else self.length
+            raw = _read_body(self.body, cap)
         if raw is None or len(raw) > MAX_JSON_BYTES:
             raise HarborError("the request body was refused",
                               f"a JSON body must be at most {MAX_JSON_BYTES} bytes",
@@ -68,7 +89,8 @@ class Reply:
 
 
 def json_reply(data, status: int = 200, headers: tuple = ()) -> Reply:
-    return Reply(status, json.dumps(data, ensure_ascii=False).encode("utf-8"), headers=headers)
+    return Reply(status, json.dumps(data, ensure_ascii=False).encode("utf-8"),
+                 headers=NO_STORE + tuple(headers))
 
 
 def error_reply(error: HarborError) -> Reply:

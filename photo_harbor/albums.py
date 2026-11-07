@@ -4,7 +4,7 @@ import sqlite3
 from datetime import datetime
 from typing import Callable
 
-from .database import Database
+from .database import Database, MAX_ROW_ID
 from .errors import HarborError
 from .records import Album
 from .store import local_now
@@ -35,8 +35,9 @@ def _album_id(value) -> int:
             ident = 0
     else:
         ident = 0
-    if ident < 1:
-        raise HarborError("that is not an album id", f"{value!r} is not a whole number",
+    if ident < 1 or ident > MAX_ROW_ID:
+        raise HarborError("that is not an album id",
+                          f"{value!r} is not a whole number this library can use",
                           "reload the gallery and try again", status=400)
     return ident
 

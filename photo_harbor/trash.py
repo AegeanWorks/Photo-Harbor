@@ -8,7 +8,7 @@ from typing import Callable
 
 from .atomic_file import fsync_dir, replace_with_retry
 from .copies import CopyIndex
-from .database import Database
+from .database import Database, MAX_ROW_ID
 from .errors import HarborError
 from .naming import safe_name
 from .records import TrashItem, UploadClaim
@@ -110,6 +110,10 @@ class TrashBook:
                 number = 0
         else:
             number = 0
+        if number < 1 or number > MAX_ROW_ID:
+            raise HarborError("that is not a trash id",
+                              f"{ident!r} is not a whole number this library can use",
+                              "reload the Trash tab and try again", status=400)
         with self._db.lock:
             row = self._db.conn.execute(
                 "SELECT id, sha256, original_name, size, media_type, taken_at, trashed_at,"

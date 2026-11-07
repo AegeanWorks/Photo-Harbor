@@ -3,7 +3,7 @@
 import sqlite3
 from typing import Optional
 
-from .database import Database
+from .database import Database, MAX_ROW_ID
 from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRecord,
                       StorageFile, StorageReport)
 
@@ -153,8 +153,8 @@ class Catalog:
         """Records in the requested order, newest first by default (taken time, then received)."""
         if limit < 0:
             raise ValueError(f"limit must be >= 0, got {limit!r}")
-        if offset < 0:
-            raise ValueError(f"offset must be >= 0, got {offset!r}")
+        if offset < 0 or offset > MAX_ROW_ID:
+            raise ValueError(f"offset is outside the database range, got {offset!r}")
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
         order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
@@ -172,6 +172,8 @@ class Catalog:
         """Every matching hash in the same order as the gallery, capped by ``limit``."""
         if limit < 0:
             raise ValueError(f"limit must be >= 0, got {limit!r}")
+        if limit > MAX_ROW_ID:
+            raise ValueError(f"limit is outside the database range, got {limit!r}")
         table, _, owner = _source(narrow)
         where, params = _where(narrow, owner)
         order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)

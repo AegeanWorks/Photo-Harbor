@@ -7,6 +7,7 @@ from typing import Callable
 
 from .albums import AlbumBook
 from .catalog import Catalog
+from .database import MAX_ROW_ID
 from .details import read_details
 from .errors import HarborError
 from .journal import SyncJournal
@@ -163,6 +164,10 @@ class LibraryApi:
         except ValueError as exc:
             raise HarborError("offset and limit must be whole numbers", str(exc),
                               "use ?offset=0&limit=120") from exc
+        if offset > MAX_ROW_ID:
+            raise HarborError("the page offset is too large",
+                              f"offsets are at most {MAX_ROW_ID}",
+                              "start from the first page and load more", status=400)
         records = self._catalog.page(offset, limit, _narrowing(request, self._albums))
         return json_reply({"photos": [photo_json(r) for r in records],
                            "next": offset + len(records) if len(records) == limit else None})

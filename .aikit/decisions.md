@@ -591,3 +591,28 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: README proves the real first-run gate without leaking credentials or
   personal photos. A demo-library feature would unlock full coverage; that is new scope,
   explicitly not this change.
+
+### ADR-031: Bounded ids, whole chunked JSON, and exclusive file placement
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: An audit of the request, catalog and placement paths found four gaps that the
+  188 passing tests did not cover. Album ids, trash ids and page offsets were turned into
+  Python integers and bound to SQLite, which only accepts signed 64-bit values, so a crafted
+  request produced an uncaught `OverflowError` and a 500. `Request.json` read a chunked body
+  once, so JSON split over two chunks was rejected. A new photo was moved into its month folder
+  before the catalog accepted its path, so a server upload and a CLI import that chose the same
+  name could make the second write overwrite the first file. And private JSON answers carried no
+  `Cache-Control`, leaving a shared browser free to reuse one person's data after a sign-in
+  switch.
+- **Decision**: `MAX_ROW_ID` (2^63-1) bounds every album id, trash id and page offset; an
+  out-of-range value is a clear 400 before SQLite sees it, and `Catalog.page`/`hashes` keep the
+  same guard defensively. `Request.json` reads through `_read_body` until the cap or the end of
+  the body, so chunked and partial streams are parsed whole; a body over 64 KiB still gets 413.
+  `place_exclusive` gives a new name its bytes with a hard link or an exclusive ``xb`` copy and
+  raises `FileExistsError` instead of replacing a rival; `link_or_copy` uses the same exclusive
+  copy, and `_place`/`_link_new_copy` simply try the next candidate on a clash. JSON replies
+  carry `Cache-Control: no-store`.
+- **Consequences**: A malformed request is a 400, not a traceback. Chunked JSON clients work.
+  Two Harbor processes may add photos at the same time without losing either file. Private API
+  answers are re-fetched rather than replayed from the browser cache. The fallback copy path is
+  used on filesystems without hard links; it costs one extra write only there.

@@ -1,103 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "audit-waves-0-30",
-    "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
-    "updated_at": 1793723299.5939083,
-    "owner": "kilo:audit",
-    "started_by": "kilo:audit",
-    "continuations": []
+    "task_id": "harbor-hardening-31",
+    "last_phase": "verification",
+    "active_phase": 5,
+    "status": "completed",
+    "updated_at": 1794093343.4094858,
+    "owner": "opencode:deepseek",
+    "started_by": "opencode:deepseek",
+    "continuations": [],
+    "completed_at": 1794093350.9842298
   },
   "checkpoints": [
-    {
-      "task_id": "apk-metadata",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] build.py writes Harbor.apk.json after apksigner verify (version/code/size/sha256/built_at); /android/Harbor.apk.json served no-cache; install page displays it; HTTP test and byte/checksum dogfood",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793378595.2071857,
-      "timestamp_str": "2026-10-30 19:43:15",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "apk-metadata",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] README/android README/ADR-026; 151 tests; 4/4 gates; served page/APK/metadata all 200 with matching SHA-256; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793378595.6882706,
-      "timestamp_str": "2026-10-30 19:43:15",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "apk-metadata",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'apk-metadata' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793378652.4133818,
-      "timestamp_str": "2026-10-30 19:44:12",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "android-update",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Plan: app reads /android/Harbor.apk.json on launch, compares versionCode with the installed build, shows Update Harbor and opens the install page when newer; keep the existing Test/sync/share paths; rebuild, emulator-check, README/ADR-027",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793378744.4987419,
-      "timestamp_str": "2026-10-30 19:45:44",
-      "agent": "opencode:android",
-      "impact_assessment": {
-        "why": "The APK page now carries a version, but the installed app has no way to notice that the server has a newer build",
-        "benefits": "Users can see an update is available without manually comparing versions; reuses the public metadata route",
-        "risks": "contract: one public metadata read from the app; dependency: none; concurrency: launch-time background check only; state: none",
-        "mitigation": "Treat a missing or malformed sidecar as no update, compare integer versionCode, and only show the button when the served code is newer"
-      }
-    },
-    {
-      "task_id": "android-update",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/2] App reads Harbor.apk.json on launch, compares versionCode and shows Update Harbor; emulator with a temporary versionCode 2 showed 'Harbor 2 is available' and the button; metadata restored to 1.0; 151 tests, 4/4 gates; README/ADR-027; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793379009.2655556,
-      "timestamp_str": "2026-10-30 19:50:09",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "android-update",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'android-update' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793379052.9739022,
-      "timestamp_str": "2026-10-30 19:50:52",
-      "agent": "opencode:android"
-    },
-    {
-      "task_id": "web-pwa",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/3] Plan: 192/512 PNG icons, manifest entries, /sw.js with root scope, network-first shell caching and API/media bypass, registration in index.html; service-worker and icon tests; Playwright registration dogfood; README/ADR-028",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793379233.7264943,
-      "timestamp_str": "2026-10-30 19:53:53",
-      "agent": "opencode:pwa",
-      "impact_assessment": {
-        "why": "Android users can install the APK, but the browser gallery itself cannot be installed to the home screen as a standalone app",
-        "benefits": "One-tap PWA install on Android/Chrome; cached shell opens offline; photos and API stay network-only and private",
-        "risks": "contract: public /sw.js, static icons and manifest; dependency: none; concurrency: service worker updates asynchronously; state: cache storage on the device",
-        "mitigation": "Serve /sw.js no-cache with Service-Worker-Allowed, use network-first so online clients see fresh assets, bypass /api, /media and /thumb, and delete old caches on activate"
-      }
-    },
     {
       "task_id": "web-pwa",
       "phase": "phase 3",
@@ -256,6 +170,89 @@
       "timestamp": 1793723299.5939083,
       "timestamp_str": "2026-11-03 19:28:19",
       "agent": "kilo:audit"
+    },
+    {
+      "task_id": "audit-waves-0-30",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'audit-waves-0-30' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794092539.843626,
+      "timestamp_str": "2026-11-08 02:02:19",
+      "agent": "opencode:deepseek",
+      "continued_from": "kilo:audit"
+    },
+    {
+      "task_id": "harbor-hardening-31",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Plan: prove and fix four HTTP/file defects - huge numeric ids and offsets must answer 400 not 500; chunked JSON must be read across chunk boundaries; a new photo must never overwrite a rival file placed at the same name; JSON replies must never be browser-cached",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794092553.2501876,
+      "timestamp_str": "2026-11-08 02:02:33",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "A code audit of the request, store and catalog paths found four reproducible robustness/privacy gaps that survive 188 passing tests: SQLite rejects Python ints over 2^63-1 with an uncaught OverflowError after album/trash/offset parsing, Request.json reads only one chunk of a chunked body, ingest moves a temp file over an existing name before the catalog rejects the clash, and per-person JSON replies carry no Cache-Control so a browser may reuse one profile's data after a sign-in switch",
+        "benefits": "Malformed input answers a clear 400 instead of a 500 traceback; chunked JSON clients work; two processes adding a same-named photo cannot destroy the first file; private API data is never cached on disk",
+        "risks": "contract: HTTP errors and store placement order change, existing clients keep working; dependency: stdlib only; concurrency: new exclusive-create path closes a server-vs-CLI race without changing the in-process lock; state: no schema or format change",
+        "mitigation": "Add failing-first unit and HTTP tests, keep every message inside the Error/Why/Fix shape, change only the three bounded modules plus messages, atomic_file and store, run the full 188-test suite and 4/4 project gates before committing, and record the decisions in ADR-031"
+      },
+      "plan_digest": "9ee30fc787ebb114b131ee72591d45959dc69995ec0f996b1632b882d8dc0581"
+    },
+    {
+      "task_id": "harbor-hardening-31",
+      "phase": "implementation",
+      "phase_num": 3,
+      "description": "[2/6] Failing-first tests proved red for all four gaps, then MAX_ROW_ID bounds (album, trash, paging offset, catalog defence) and whole-body JSON reading (_read_body across chunk boundaries) landed; targeted unit and HTTP tests green",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093336.328247,
+      "timestamp_str": "2026-11-08 02:15:36",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-hardening-31",
+      "phase": "implementation",
+      "phase_num": 3,
+      "description": "[3/6] Exclusive placement: place_exclusive/copy_exclusive never replace an existing name, link_or_copy refuses a rival, and store ingest/link paths retry the next candidate; the rival-file regression now keeps the first photo",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093336.4044974,
+      "timestamp_str": "2026-11-08 02:15:36",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-hardening-31",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[4/6] JSON replies now carry Cache-Control: no-store; README explains the no-overwrite and no-cache behaviour; ADR-031 recorded; codebase map refreshed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093343.3090506,
+      "timestamp_str": "2026-11-08 02:15:43",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-hardening-31",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[5/6] Full suite 202 tests OK; project check 4/4 gates (test, hygiene, guidelines, secrets); ADR IDs consecutive; map fresh; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093343.4094858,
+      "timestamp_str": "2026-11-08 02:15:43",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-hardening-31",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'harbor-hardening-31' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794093350.9842327,
+      "timestamp_str": "2026-11-08 02:15:50",
+      "agent": "opencode:deepseek"
     }
   ]
 }

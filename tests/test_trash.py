@@ -56,6 +56,11 @@ class TrashBookTest(unittest.TestCase):
                 self.book.restore("main", bad)
         self.assertEqual(len(self.book.listing("main")), 1)
 
+    def test_a_trash_id_beyond_sqlite_is_a_clear_error(self):
+        for huge in (2 ** 63, 10 ** 30, str(10 ** 30)):
+            with self.assertRaises(HarborError, msg=repr(huge)):
+                self.book.restore("main", huge)
+
     def test_update_rejects_restore_and_delete_together(self):
         import io
         import json

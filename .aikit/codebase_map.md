@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
-- **Total Classes**: `114`
-- **Total Top-Level Functions**: `96`
-- **Total Class Methods**: `475`
-- **Total Source Lines**: `7860`
+- **Total Classes**: `115`
+- **Total Top-Level Functions**: `100`
+- **Total Class Methods**: `493`
+- **Total Source Lines**: `8162`
 
 ---
 
@@ -54,7 +54,7 @@
 ### [`photo_harbor/accounts.py`](photo_harbor/accounts.py)
 > *Signing in with a name and a password: password hashes, sessions, and a brake on guessing.*
 
-**Size**: `156` lines (`6342` bytes)
+**Size**: `161` lines (`6519` bytes)
 
 **Classes:**
 - `class Passwords`
@@ -72,6 +72,7 @@
   - Method `.check(address)`
   - Method `.failed(address)`
   - Method `.passed(address)`
+  - Method `.reset()` - *An owner set a password: guessing protection restarts for every address.*
 
 **Functions:**
 - `def hash_password(password, iterations, salt)` - *``pbkdf2_sha256$<iterations>$<salt>$<hash>``: the password itself is never stored.*
@@ -85,7 +86,7 @@
 ### [`photo_harbor/albums.py`](photo_harbor/albums.py)
 > *Personal albums and favorites: named collections that never move or copy a file.*
 
-**Size**: `206` lines (`9612` bytes)
+**Size**: `207` lines (`9693` bytes)
 
 **Classes:**
 - `class AlbumBook` - *Albums belong to one person; favorites are that person's own mark on a photo.*
@@ -131,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `181` lines (`8841` bytes)
+**Size**: `182` lines (`8923` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -149,13 +150,15 @@
 ---
 
 ### [`photo_harbor/atomic_file.py`](photo_harbor/atomic_file.py)
-> *Crash-safe file placement: temp file, fsync, atomic replace, directory fsync.*
+> *Crash-safe file placement: temp file, fsync, atomic replace, directory fsync, and exclusive*
 
-**Size**: `45` lines (`1420` bytes)
+**Size**: `81` lines (`2721` bytes)
 
 **Functions:**
 - `def write_atomic(path, data, keep_backup)` - *Replace ``path`` with ``data`` so a power cut leaves the old or the new file, never half.*
 - `def replace_with_retry(src, dst)` - *os.replace, retried because Windows briefly locks files that a scanner has open.*
+- `def copy_exclusive(source, target)` - *Copy ``source`` to ``target`` only when that name is free; a failed copy leaves nothing.*
+- `def place_exclusive(source, target)` - *Give ``target`` the bytes of ``source`` only when the name is free, then remove ``source``.*
 - `def fsync_dir(directory)` - *Persist a directory entry; Windows cannot open a directory, and NTFS journals it anyway.*
 
 ---
@@ -262,7 +265,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `254` lines (`12806` bytes)
+**Size**: `256` lines (`12973` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -305,7 +308,7 @@
 ### [`photo_harbor/control_panel.py`](photo_harbor/control_panel.py)
 > *The Harbor window: Start/Stop the server, open the photo browser, manage people, import folders.*
 
-**Size**: `568` lines (`27217` bytes)
+**Size**: `569` lines (`27260` bytes)
 
 **Classes:**
 - `class ControlPanel` - *Builds the window; background work reports back through ``_inbox`` on the Tk thread.*
@@ -365,7 +368,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `245` lines (`8806` bytes)
+**Size**: `247` lines (`8918` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -396,7 +399,7 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `114` lines (`4733` bytes)
+**Size**: `122` lines (`4934` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
@@ -530,7 +533,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `197` lines (`9751` bytes)
+**Size**: `213` lines (`10304` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -546,6 +549,7 @@
   - Method `.thumb(request, sha256)`
 
 **Functions:**
+- `def _valid_date(value)` - *Shape plus a real calendar day: 2026-02-30 and 2025-02-29 fail.*
 - `def _not_found(sha256)`
 - `def _displayable(kind)` - *Images and videos show inline; anything else (HTML, SVG with scripts) only downloads.*
 - `def photo_json(record)`
@@ -558,7 +562,7 @@
 ### [`photo_harbor/messages.py`](photo_harbor/messages.py)
 > *Transport-free request and reply values, so the API can be tested without sockets.*
 
-**Size**: `93` lines (`3385` bytes)
+**Size**: `115` lines (`4079` bytes)
 
 **Classes:**
 - `class Request`
@@ -570,6 +574,7 @@
 - `class Reply`
 
 **Functions:**
+- `def _read_body(body, limit)` - *Read up to ``limit`` bytes plus one, even when a chunked stream stops at every chunk.*
 - `def json_reply(data, status, headers)`
 - `def error_reply(error)`
 - `def parse_range(value, size)` - *``(first, last)`` for one satisfiable ``bytes=`` range, else None for the whole file.*
@@ -627,11 +632,11 @@
 ### [`photo_harbor/profiles_api.py`](photo_harbor/profiles_api.py)
 > *Listing people and, for the library owner, adding, renaming and re-keying them.*
 
-**Size**: `68` lines (`3201` bytes)
+**Size**: `74` lines (`3403` bytes)
 
 **Classes:**
 - `class ProfilesApi`
-  - Method `.__init__(book, catalog, journal, passwords, sessions, layout)`
+  - Method `.__init__(book, catalog, journal, passwords, sessions, layout, brake)`
   - Method `.listing(request)` - *The owner sees everyone; anyone else sees only themselves (with their own key).*
   - Method `.create(request)`
   - Method `.update(request, ident)` - *JSON ``{"name": "..."}`` renames (and renames their folder); ``{"new_key": true}``*
@@ -756,7 +761,7 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `317` lines (`14710` bytes)
+**Size**: `339` lines (`15704` bytes)
 
 **Classes:**
 - `class PhotoStore`
@@ -786,7 +791,7 @@
 ### [`photo_harbor/sync_api.py`](photo_harbor/sync_api.py)
 > *The endpoints the iPhone Shortcut calls: start, upload, done, and the cleanup's "has" check.*
 
-**Size**: `106` lines (`5362` bytes)
+**Size**: `109` lines (`5477` bytes)
 
 **Classes:**
 - `class SyncApi`
@@ -825,7 +830,7 @@
 ### [`photo_harbor/trash.py`](photo_harbor/trash.py)
 > *A per-person trash: move a copy aside, restore it through the normal ingest, or delete it.*
 
-**Size**: `131` lines (`5789` bytes)
+**Size**: `135` lines (`6070` bytes)
 
 **Classes:**
 - `class TrashBook`
@@ -879,7 +884,7 @@
 ---
 
 ### [`tests/test_albums.py`](tests/test_albums.py)
-**Size**: `147` lines (`7727` bytes)
+**Size**: `154` lines (`8019` bytes)
 
 **Classes:**
 - `class AlbumBookTest`
@@ -896,6 +901,7 @@
   - Method `.test_a_format_6_catalog_gains_the_album_cover_column()`
   - Method `.test_a_bad_collection_id_is_a_clear_error()`
   - Method `.test_a_non_integer_collection_id_is_a_clear_error()`
+  - Method `.test_a_collection_id_beyond_sqlite_is_a_clear_error()`
 
 ---
 
@@ -928,7 +934,7 @@
 ---
 
 ### [`tests/test_downloads.py`](tests/test_downloads.py)
-**Size**: `93` lines (`4138` bytes)
+**Size**: `105` lines (`4709` bytes)
 
 **Classes:**
 - `class DownloadsTest`
@@ -936,6 +942,7 @@
   - Method `.photo(data, name)`
   - Method `.test_a_selection_becomes_one_zip_with_original_names()`
   - Method `.test_a_third_collision_still_gets_a_unique_name()`
+  - Method `.test_many_collisions_stay_unique_with_a_counter()`
   - Method `.test_duplicate_names_get_a_hash_prefix()`
   - Method `.test_a_token_expires_and_removes_its_file()`
   - Method `.test_a_token_belongs_to_the_person_who_prepared_it()`
@@ -990,7 +997,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `681` lines (`38591` bytes)
+**Size**: `725` lines (`40850` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1007,6 +1014,10 @@
   - Method `.test_a_full_sync_round()`
   - Method `.test_has_answers_yes_only_for_verified_photos()`
   - Method `.test_a_mismatched_hash_is_rejected_and_counted()`
+  - Method `.test_a_huge_page_offset_is_a_clear_400()`
+  - Method `.test_a_huge_album_id_is_a_clear_400()`
+  - Method `.test_a_chunked_json_login_is_accepted()`
+  - Method `.test_json_answers_are_never_browser_cached()`
   - Method `.test_the_gallery_is_installable_as_a_pwa()`
   - Method `.test_android_page_and_apk_are_public()`
   - Method `.test_calls_without_the_key_are_refused_but_the_page_loads()`
@@ -1042,6 +1053,7 @@
   - Method `.test_a_successful_password_change_resets_the_brake()`
   - Method `.test_last_day_counts_follow_the_signed_in_person()`
   - Method `.test_the_owner_can_reset_a_password_and_a_key_still_signs_in()`
+  - Method `.test_an_owner_password_reset_clears_the_brake()`
   - Method `.test_albums_and_favorites_page_the_photos_they_hold()`
   - Method `.test_bulk_selection_writes_a_validated_batch()`
   - Method `.test_albums_and_favorites_never_cross_people()`
@@ -1070,7 +1082,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `394` lines (`16177` bytes)
+**Size**: `474` lines (`20043` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1080,6 +1092,13 @@
   - Method `.test_length_reader_stops_at_the_length()`
   - Method `.test_chunked_reader_decodes_and_consumes_the_trailer()`
   - Method `.test_json_body_must_be_an_object()`
+  - Method `.test_a_json_body_split_over_chunks_is_read_whole()`
+  - Method `.test_a_chunked_json_body_over_the_cap_is_refused()`
+- `class AtomicPlacementTest`
+  - Method `.test_placing_a_new_name_refuses_an_existing_file()`
+  - Method `.test_placing_moves_the_bytes_and_removes_the_source()`
+  - Method `.test_a_copy_fallback_also_refuses_an_existing_file()`
+  - Method `.test_a_copy_fallback_still_places_the_bytes()`
 - `class RouterTest`
   - Method `.test_exact_and_prefix_routes()`
   - Method `.test_an_exact_trailing_slash_route_is_not_a_prefix()`
@@ -1104,6 +1123,7 @@
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
   - Method `.test_sync_done_rejects_a_future_started_at()`
   - Method `.test_sync_done_rejects_a_naive_future_started_at()`
+  - Method `.test_sync_done_rejects_future_when_clocks_mix_naive_and_aware()`
   - Method `.test_media_and_thumb_vary_by_cookie()`
   - Method `.test_warmer_survives_a_catalog_failure()`
   - Method `.test_warmer_retries_backlog_after_a_transient_failure()`
@@ -1234,7 +1254,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `182` lines (`8367` bytes)
+**Size**: `207` lines (`9479` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1269,12 +1289,14 @@
   - Method `.test_resending_a_photo_whose_pc_copy_vanished_restores_it()`
   - Method `.test_resending_over_a_damaged_copy_restores_it()`
   - Method `.test_a_name_held_by_a_catalogued_but_missing_file_is_not_reused()`
+  - Method `.test_a_rival_file_at_the_chosen_name_is_never_overwritten()`
+  - Method `.test_linking_a_second_copy_never_overwrites()`
   - Method `.test_a_connection_error_mid_upload_is_a_clear_failure()`
 
 ---
 
 ### [`tests/test_trash.py`](tests/test_trash.py)
-**Size**: `102` lines (`5027` bytes)
+**Size**: `107` lines (`5259` bytes)
 
 **Classes:**
 - `class TrashBookTest`
@@ -1283,6 +1305,7 @@
   - Method `.test_a_shared_photo_stays_for_the_other_person()`
   - Method `.test_permanent_delete_and_empty_remove_the_files()`
   - Method `.test_trash_id_rejects_floats_and_bools_like_albums()`
+  - Method `.test_a_trash_id_beyond_sqlite_is_a_clear_error()`
   - Method `.test_update_rejects_restore_and_delete_together()`
   - Method `.test_another_person_cannot_restore_or_delete_the_entry()`
 - `class TrashMigrationTest`

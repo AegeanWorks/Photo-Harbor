@@ -1,4 +1,5 @@
-"""Crash-safe file placement: temp file, fsync, atomic replace, directory fsync."""
+"""Crash-safe file placement: temp file, fsync, atomic replace, directory fsync, and exclusive
+placement that never overwrites a name another writer already holds."""
 
 import os
 import shutil
@@ -32,6 +33,41 @@ def replace_with_retry(src: Path, dst: Path) -> None:
             if attempt == REPLACE_TRIES - 1:
                 raise
             time.sleep(0.05 * (attempt + 1))
+
+
+def copy_exclusive(source: Path, target: Path) -> None:
+    """Copy ``source`` to ``target`` only when that name is free; a failed copy leaves nothing."""
+    try:
+        with open(target, "xb") as out, open(source, "rb") as handle:
+            shutil.copyfileobj(handle, out, 1 << 20)
+            out.flush()
+            os.fsync(out.fileno())
+    except FileExistsError:
+        raise
+    except OSError:
+        try:
+            target.unlink()
+        # hygiene: allow [silent-except] scanner may still hold the partial copy; the copy error wins
+        except OSError:
+            pass
+        raise
+
+
+def place_exclusive(source: Path, target: Path) -> None:
+    """Give ``target`` the bytes of ``source`` only when the name is free, then remove ``source``.
+    ``FileExistsError`` leaves both files untouched, so a rival caller never loses its file."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.link(source, target)
+    except FileExistsError:
+        raise
+    except OSError:
+        copy_exclusive(source, target)
+    try:
+        source.unlink()
+    except OSError:  # hygiene: allow the caller's own temp cleanup to finish the job
+        pass
+    fsync_dir(target.parent)
 
 
 def fsync_dir(directory: Path) -> None:

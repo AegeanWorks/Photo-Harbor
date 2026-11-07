@@ -8,6 +8,8 @@ from .errors import HarborError
 
 SCHEMA_VERSION = 7
 OWNER_PROFILE = "main"
+# SQLite INTEGER is signed 64-bit; a larger Python int cannot be bound as a parameter.
+MAX_ROW_ID = 2 ** 63 - 1
 
 # Format 7, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and

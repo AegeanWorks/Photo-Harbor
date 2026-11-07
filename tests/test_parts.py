@@ -50,6 +50,67 @@ class BodyReaderTest(unittest.TestCase):
         with self.assertRaises(HarborError):
             request.json()
 
+    def test_a_json_body_split_over_chunks_is_read_whole(self):
+        raw = io.BytesIO(b'7\r\n{"a": 1\r\n1\r\n}\r\n0\r\n\r\n')
+        request = Request("POST", "/", body=ChunkedReader(raw), length=None)
+        self.assertEqual(request.json(), {"a": 1})
+
+    def test_a_chunked_json_body_over_the_cap_is_refused(self):
+        from photo_harbor.messages import MAX_JSON_BYTES
+        payload = b"x" * (MAX_JSON_BYTES + 10)
+        raw = io.BytesIO(f"{len(payload):x}\r\n".encode() + payload + b"\r\n0\r\n\r\n")
+        request = Request("POST", "/", body=ChunkedReader(raw), length=None)
+        with self.assertRaises(HarborError) as caught:
+            request.json()
+        self.assertEqual(caught.exception.status, 413)
+
+
+class AtomicPlacementTest(unittest.TestCase):
+    def test_placing_a_new_name_refuses_an_existing_file(self):
+        from photo_harbor.atomic_file import place_exclusive
+        root = temp_dir(self)
+        source, target = root / "incoming", root / "month" / "photo.jpg"
+        target.parent.mkdir(parents=True)
+        source.write_bytes(b"new bytes")
+        target.write_bytes(b"older bytes")
+        with self.assertRaises(FileExistsError):
+            place_exclusive(source, target)
+        self.assertEqual(target.read_bytes(), b"older bytes")
+        self.assertEqual(source.read_bytes(), b"new bytes")
+
+    def test_placing_moves_the_bytes_and_removes_the_source(self):
+        from photo_harbor.atomic_file import place_exclusive
+        root = temp_dir(self)
+        source, target = root / "incoming", root / "month" / "photo.jpg"
+        source.write_bytes(b"new bytes")
+        place_exclusive(source, target)
+        self.assertFalse(source.exists())
+        self.assertEqual(target.read_bytes(), b"new bytes")
+
+    def test_a_copy_fallback_also_refuses_an_existing_file(self):
+        from unittest.mock import patch
+        from photo_harbor.atomic_file import place_exclusive
+        root = temp_dir(self)
+        source, target = root / "incoming", root / "month" / "photo.jpg"
+        target.parent.mkdir(parents=True)
+        source.write_bytes(b"new bytes")
+        target.write_bytes(b"older bytes")
+        with patch("photo_harbor.atomic_file.os.link", side_effect=OSError("no links here")):
+            with self.assertRaises(FileExistsError):
+                place_exclusive(source, target)
+        self.assertEqual(target.read_bytes(), b"older bytes")
+
+    def test_a_copy_fallback_still_places_the_bytes(self):
+        from unittest.mock import patch
+        from photo_harbor.atomic_file import place_exclusive
+        root = temp_dir(self)
+        source, target = root / "incoming", root / "month" / "photo.jpg"
+        source.write_bytes(b"new bytes")
+        with patch("photo_harbor.atomic_file.os.link", side_effect=OSError("no links here")):
+            place_exclusive(source, target)
+        self.assertFalse(source.exists())
+        self.assertEqual(target.read_bytes(), b"new bytes")
+
 
 class RouterTest(unittest.TestCase):
     def test_exact_and_prefix_routes(self):

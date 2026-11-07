@@ -15,7 +15,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import BinaryIO, Callable, Optional
 
-from .atomic_file import fsync_dir, replace_with_retry
+from .atomic_file import copy_exclusive, fsync_dir, place_exclusive, replace_with_retry
 from .catalog import Catalog
 from .copies import CopyIndex
 from .exif_dates import read_taken
@@ -54,17 +54,15 @@ def normalise_sha(value: Optional[str]) -> Optional[str]:
 
 
 def link_or_copy(source: Path, target: Path) -> None:
-    """A second name for the same file (no extra space); a real copy where links are refused."""
+    """A second name for the same file (no extra space); a real copy where links are refused.
+    Raises ``FileExistsError`` instead of replacing a file another writer already placed."""
     target.parent.mkdir(parents=True, exist_ok=True)
     try:
         os.link(source, target)
+    except FileExistsError:
+        raise
     except OSError:
-        tmp = target.with_name(f".tmp_{target.name}")
-        shutil.copyfile(source, tmp)
-        with open(tmp, "r+b") as handle:
-            handle.flush()
-            os.fsync(handle.fileno())
-        replace_with_retry(tmp, target)
+        copy_exclusive(source, target)
     fsync_dir(target.parent)
 
 
@@ -153,9 +151,15 @@ class PhotoStore:
                 (self.root / own).unlink(missing_ok=True)
                 try:
                     link_or_copy(source, self.root / own)
+                # hygiene: allow [silent-except] parallel writer recreated it; the hash check below decides
+                except FileExistsError:
+                    pass
                 except OSError:
                     return False
-                return True
+                try:
+                    return hash_file(self.root / own) == sha256
+                except OSError:
+                    return False
             record = self._catalog.get(sha256)
             try:
                 self._link_new_copy(source, record, profile, record.original_name)
@@ -221,8 +225,10 @@ class PhotoStore:
                 return self._known(tmp, existing, claim)
             for target in self.candidate_paths(claim.profile, taken or received, claim.original_name,
                                            sha256):
-                replace_with_retry(tmp, target)
-                fsync_dir(target.parent)
+                try:
+                    place_exclusive(tmp, target)
+                except FileExistsError:
+                    continue
                 record = PhotoRecord(
                     sha256=sha256, rel_path=self._rel(target), size=size,
                     original_name=claim.original_name[:255],
@@ -235,6 +241,9 @@ class PhotoStore:
                 except sqlite3.IntegrityError:
                     replace_with_retry(target, tmp)
                     continue
+                except sqlite3.Error:
+                    target.unlink(missing_ok=True)
+                    raise
                 if not added:
                     # Another process (a CLI import) catalogued the same bytes meanwhile.
                     target.unlink(missing_ok=True)
@@ -257,13 +266,20 @@ class PhotoStore:
             for _, rel in self._copies.paths_of(existing.sha256):
                 if self.root / rel != source:
                     (self.root / rel).unlink(missing_ok=True)
-                    link_or_copy(source, self.root / rel)
+                    try:
+                        link_or_copy(source, self.root / rel)
+                    except FileExistsError:
+                        continue  # a parallel repair recreated it first
         own = self._copies.path_for(claim.profile, existing.sha256)
         if own is None:
             return IngestResult("stored", self._link_new_copy(source, existing, claim.profile,
                                                               claim.original_name[:255]))
         if not (self.root / own).is_file():
-            link_or_copy(source, self.root / own)
+            try:
+                link_or_copy(source, self.root / own)
+            # hygiene: allow [silent-except] parallel writer recreated it; repaired is still true
+            except FileExistsError:
+                pass
             repaired = True
         mine = PhotoRecord(**{**existing.__dict__, "rel_path": own, "profile": claim.profile})
         return IngestResult("stored" if repaired else "duplicate", mine)
@@ -272,12 +288,18 @@ class PhotoStore:
                        name: str) -> PhotoRecord:
         moment = parse_taken(record.sort_time) or self._now()
         for target in self.candidate_paths(profile, moment, name, record.sha256):
-            link_or_copy(source, target)
+            try:
+                link_or_copy(source, target)
+            except FileExistsError:
+                continue  # another writer placed a file there first; keep its bytes
             try:
                 added = self._copies.add(profile, record, self._rel(target), name,
                                          _stamp(self._now()))
             except sqlite3.IntegrityError:
                 added = False  # that path belongs to another photo: try the next name
+            except sqlite3.Error:
+                target.unlink(missing_ok=True)
+                raise
             if added:
                 return PhotoRecord(**{**record.__dict__, "rel_path": self._rel(target),
                                       "original_name": name, "profile": profile})

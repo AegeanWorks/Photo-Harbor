@@ -107,6 +107,36 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/status")
         self.assertEqual(json.loads(body)["last_day"]["rejected"], 1)
 
+    def test_a_huge_page_offset_is_a_clear_400(self):
+        response, body = self.call("GET", f"/api/photos?offset={2 ** 63}")
+        self.assertEqual(response.status, 400)
+        self.assertIn("error", json.loads(body))
+
+    def test_a_huge_album_id_is_a_clear_400(self):
+        response, body = self.call("GET", f"/api/photos?album={10 ** 30}")
+        self.assertEqual(response.status, 400)
+        self.assertIn("error", json.loads(body))
+
+    def test_a_chunked_json_login_is_accepted(self):
+        conn = http.client.HTTPConnection("127.0.0.1", self.server.server_address[1], timeout=5)
+        self.addCleanup(conn.close)
+        conn.putrequest("POST", "/api/login")
+        conn.putheader("Transfer-Encoding", "chunked")
+        conn.putheader("Content-Type", "application/json")
+        conn.endheaders()
+        payload = json.dumps({"key": self.settings.key}).encode()
+        for part in (payload[:7], payload[7:]):
+            conn.send(f"{len(part):X}\r\n".encode() + part + b"\r\n")
+        conn.send(b"0\r\n\r\n")
+        response = conn.getresponse()
+        self.assertEqual(response.status, 200)
+        self.assertIn("harbor_session", response.getheader("Set-Cookie", ""))
+
+    def test_json_answers_are_never_browser_cached(self):
+        for path in ("/api/status", "/api/people"):
+            response, _ = self.call("GET", path)
+            self.assertEqual(response.getheader("Cache-Control"), "no-store", path)
+
     def test_the_gallery_is_installable_as_a_pwa(self):
         response, body = self.call("GET", "/sw.js", key=False)
         self.assertEqual(response.status, 200)

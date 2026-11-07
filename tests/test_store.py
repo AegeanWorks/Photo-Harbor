@@ -173,6 +173,31 @@ class RepairAndNamingTest(unittest.TestCase):
         self.assertEqual(self.lib.catalog.get(second.sha256), second)
         self.assertTrue(self.lib.store.verify(second.sha256))
 
+    def test_a_rival_file_at_the_chosen_name_is_never_overwritten(self):
+        first = self.lib.put(b"first").record
+        target = self.lib.root / first.rel_path
+        real = self.lib.store.candidate_paths
+
+        def rival_candidates(profile, moment, original, sha256):
+            yield target
+            yield from real(profile, moment, original, sha256)
+
+        self.lib.store.candidate_paths = rival_candidates
+        second = self.lib.put(b"second").record
+        self.assertEqual(target.read_bytes(), b"first")
+        self.assertNotEqual(second.rel_path, first.rel_path)
+        self.assertEqual((self.lib.root / second.rel_path).read_bytes(), b"second")
+
+    def test_linking_a_second_copy_never_overwrites(self):
+        from photo_harbor.store import link_or_copy
+        source = self.lib.root / "source.jpg"
+        target = self.lib.root / "target.jpg"
+        source.write_bytes(b"new bytes")
+        target.write_bytes(b"old bytes")
+        with self.assertRaises(FileExistsError):
+            link_or_copy(source, target)
+        self.assertEqual(target.read_bytes(), b"old bytes")
+
     def test_a_connection_error_mid_upload_is_a_clear_failure(self):
         class Broken(io.BytesIO):
             def read(self, size=-1):
