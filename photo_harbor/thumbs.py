@@ -47,6 +47,20 @@ class Thumbnailer:
             write_atomic(target, buffer.getvalue())
         return target
 
+    def prune(self, live: set) -> int:
+        """Delete previews whose photo is gone; they are disposable and remade on demand."""
+        removed = 0
+        for path in self._cache.glob("*/*.jpg"):
+            if path.stem in live:
+                continue
+            try:
+                path.unlink()
+                removed += 1
+            # hygiene: allow [silent-except] scanner may still hold a preview; next start retries it
+            except OSError:
+                pass
+        return removed
+
 
 class PreviewWarmer:
     """Makes previews ahead of time on one background thread, so a large library scrolls without

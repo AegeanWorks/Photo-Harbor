@@ -134,6 +134,11 @@ class Catalog:
                 found.update(row[0] for row in rows)
         return found
 
+    def stored_hashes(self) -> set:
+        """Every hash still in the catalog; the preview cache keeps only these."""
+        with self._db.lock:
+            return {row[0] for row in self._db.conn.execute("SELECT sha256 FROM photos")}
+
     def copies_of(self, profile: str, sha256s: list) -> set:
         """The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query."""
         if not sha256s:

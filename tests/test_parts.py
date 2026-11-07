@@ -242,6 +242,20 @@ class ThumbnailerTest(unittest.TestCase):
         thumbs = Thumbnailer(temp_dir(self), pillow=lambda: None)
         self.assertFalse(thumbs.enabled)
 
+    def test_prune_removes_only_previews_of_photos_that_are_gone(self):
+        from photo_harbor.thumbs import Thumbnailer
+        cache = temp_dir(self)
+        live = "a" * 64
+        gone = "b" * 64
+        for digest in (live, gone):
+            path = cache / digest[:2] / f"{digest}.jpg"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(b"jpeg")
+        thumbs = Thumbnailer(cache, pillow=lambda: None)
+        self.assertEqual(thumbs.prune({live}), 1)
+        self.assertTrue((cache / live[:2] / f"{live}.jpg").exists())
+        self.assertFalse((cache / gone[:2] / f"{gone}.jpg").exists())
+
 
 class PasswordHashTest(unittest.TestCase):
     def test_malformed_stored_hash_returns_false_not_500(self):

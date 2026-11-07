@@ -28,6 +28,30 @@ class _NoRegistry:
         return None
 
 
+class PreviewCacheTest(unittest.TestCase):
+    def test_startup_drops_previews_of_photos_that_are_gone(self):
+        from photo_harbor.thumbs import Thumbnailer
+        root = Path(tempfile.mkdtemp(prefix="harbor_cache_"))
+        self.addCleanup(shutil.rmtree, root, True)
+        settings = load_or_create(root)
+        first = HarborApp(settings, port=0, thumbs=_NoPreviews(), now=lambda: FIXED_NOW,
+                          password_iterations=1000)
+        record = first.store.ingest(io.BytesIO(b"kept"), 4, UploadClaim(
+            "kept.jpg", sha256=sha(b"kept"), taken_at="2026-01-01T00:00:00")).record
+        first.close()
+        cache = settings.state_dir / "thumbs"
+        for digest in (record.sha256, "b" * 64):
+            path = cache / digest[:2] / f"{digest}.jpg"
+            path.parent.mkdir(parents=True)
+            path.write_bytes(b"jpeg")
+        thumbs = Thumbnailer(cache, pillow=lambda: (None, None))
+        app = HarborApp(settings, port=0, thumbs=thumbs, now=lambda: FIXED_NOW,
+                        password_iterations=1000)
+        self.addCleanup(app.close)
+        self.assertTrue((cache / record.sha256[:2] / f"{record.sha256}.jpg").exists())
+        self.assertFalse((cache / ("b" * 64)[:2] / f"{'b' * 64}.jpg").exists())
+
+
 def make_app(test_case, root=None):
     root = root or Path(tempfile.mkdtemp(prefix="harbor_folders_"))
     test_case.addCleanup(shutil.rmtree, root, True)

@@ -49,8 +49,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   Re-importing a folder skips files already imported (same path, size and modification time,
   photo still present) without reading them. With Pillow installed, a background thread makes
   thumbnails for new photos first and then for every older one, so a large library scrolls
-  without waiting, and JPEG previews decode at reduced size. The browser sends 3 uploads at
-  once. See *Performance* below for measured numbers.
+  without waiting, and JPEG previews decode at reduced size. At start-up, cached previews whose
+  photo is gone are deleted, so deleting photos also reclaims their preview space. The browser
+  sends 3 uploads at once. See *Performance* below for measured numbers.
 - **One profile per person, each with their own photos.** Everyone signs in to the photo browser
   with their **name and password** and sees **only their own** photos; the **main** profile sees
   everyone's and manages people (add, rename, set a password, new Shortcut key). A person changes
@@ -260,7 +261,7 @@ photo-harbor/
 │   ├── setup_api.py          <- address and key for the Setup tab
 │   ├── store.py              <- hash-verified ingest and re-verification
 │   ├── sync_api.py           <- the endpoints the Shortcuts call
-│   ├── thumbs.py             <- optional Pillow previews and the background warmer
+│   ├── thumbs.py             <- optional Pillow previews, background warmer, cache pruning
 │   ├── trash.py              <- move a copy aside, restore through ingest, delete forever
 │   ├── trash_api.py          <- list, move, restore, delete and empty the trash
 │   └── web/                  <- gallery, icons, PWA sw.js and web/android/ (APK page)

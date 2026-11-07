@@ -616,3 +616,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   Two Harbor processes may add photos at the same time without losing either file. Private API
   answers are re-fetched rather than replayed from the browser cache. The fallback copy path is
   used on filesystems without hard links; it costs one extra write only there.
+
+### ADR-032: Preview cache is pruned to the live catalog
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The preview cache under `.harbor/thumbs` keeps one JPEG per photo ever previewed.
+  Deleting a photo forever, emptying the trash, or removing a file in File Explorer removed the
+  catalog row but not its preview, so the hidden cache could accumulate dead bytes that the
+  Storage tab could not attribute to any photo.
+- **Decision**: `Thumbnailer.prune` deletes every cached preview whose SHA-256 is not in
+  `Catalog.stored_hashes()`. `HarborApp` calls it once while opening the library, before server
+  threads start; a preview a scanner still holds is skipped and retried on the next start.
+  Previews are disposable: a live photo is regenerated on demand, and a deleted one never is.
+- **Consequences**: The cache stays bounded by the live catalog and deleting photos reclaims
+  their preview bytes at the next start. Startup scans the two-level cache directory once, which
+  is proportional to the number of previews, and a missing cache directory simply has nothing
+  to do.

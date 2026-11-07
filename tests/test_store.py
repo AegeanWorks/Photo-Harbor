@@ -127,6 +127,13 @@ class CatalogAndJournalTest(unittest.TestCase):
         with self.assertRaises(Exception):
             self.lib.catalog.add(bad)
 
+    def test_stored_hashes_are_the_live_catalog(self):
+        one = self.lib.put(b"one").record
+        two = self.lib.put(b"two").record
+        self.assertEqual(self.lib.catalog.stored_hashes(), {one.sha256, two.sha256})
+        self.lib.copies.forget("main", one.sha256)
+        self.assertEqual(self.lib.catalog.stored_hashes(), {two.sha256})
+
 
 class SearchEscapingTest(unittest.TestCase):
     def test_wildcards_in_a_search_are_literal(self):

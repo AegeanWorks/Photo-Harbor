@@ -74,6 +74,9 @@ class HarborApp:
         self.trash = TrashBook(self.db, settings.library, self.store, self.copies, now=now)
         thumbs = thumbs or Thumbnailer(settings.state_dir / "thumbs")
         self.previews = thumbs.enabled
+        prune = getattr(thumbs, "prune", None)
+        if prune is not None:
+            prune(catalog.stored_hashes())
         self.warmer = PreviewWarmer(thumbs, catalog, self.store) if thumbs.enabled else None
         if self.warmer is not None:
             self.store.on_stored = self.warmer.add

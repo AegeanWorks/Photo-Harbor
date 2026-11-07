@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
-- **Total Classes**: `115`
+- **Total Classes**: `116`
 - **Total Top-Level Functions**: `100`
-- **Total Class Methods**: `493`
-- **Total Source Lines**: `8162`
+- **Total Class Methods**: `498`
+- **Total Source Lines**: `8229`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `182` lines (`8923` bytes)
+**Size**: `185` lines (`9043` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -265,7 +265,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `256` lines (`12973` bytes)
+**Size**: `261` lines (`13211` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -273,6 +273,7 @@
   - Method `.add(record)` - *Insert ``record``; False when its hash is already catalogued. A path another record*
   - Method `.get(sha256)`
   - Method `.known(sha256s)` - *The hashes in ``sha256s`` that the catalog holds, in one query.*
+  - Method `.stored_hashes()` - *Every hash still in the catalog; the preview cache keeps only these.*
   - Method `.copies_of(profile, sha256s)` - *The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query.*
   - Method `.page(offset, limit, narrow)` - *Records in the requested order, newest first by default (taken time, then received).*
   - Method `.hashes(narrow, limit)` - *Every matching hash in the same order as the gallery, capped by ``limit``.*
@@ -810,13 +811,14 @@
 ### [`photo_harbor/thumbs.py`](photo_harbor/thumbs.py)
 > *Small JPEG previews, made only when the optional Pillow (and pillow-heif for HEIC) is installed.*
 
-**Size**: `111` lines (`4247` bytes)
+**Size**: `125` lines (`4757` bytes)
 
 **Classes:**
 - `class Thumbnailer`
   - Method `.__init__(cache_dir, pillow)`
   - Property `.enabled`
   - Method `.preview(record, original)` - *The cached preview, made on first request; None for videos or unreadable images.*
+  - Method `.prune(live)` - *Delete previews whose photo is gone; they are disposable and remade on demand.*
 - `class PreviewWarmer` - *Makes previews ahead of time on one background thread, so a large library scrolls without*
   - Method `.__init__(thumbs, catalog, store, page)`
   - Method `.start()`
@@ -954,13 +956,15 @@
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
-**Size**: `163` lines (`7386` bytes)
+**Size**: `187` lines (`8654` bytes)
 
 **Classes:**
 - `class _NoPreviews`
   - Method `.preview(record, original)`
 - `class _NoRegistry`
   - Method `.read()`
+- `class PreviewCacheTest`
+  - Method `.test_startup_drops_previews_of_photos_that_are_gone()`
 - `class LayoutTest`
   - Method `.test_photos_go_to_person_year_month_folders_with_a_guide()`
   - Method `.test_a_shared_photo_is_in_both_folders_but_stored_once()`
@@ -1082,7 +1086,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `474` lines (`20043` bytes)
+**Size**: `488` lines (`20667` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1118,6 +1122,7 @@
   - Method `.test_a_backup_run_records_its_last_status()`
 - `class ThumbnailerTest`
   - Method `.test_without_pillow_previews_are_off()`
+  - Method `.test_prune_removes_only_previews_of_photos_that_are_gone()`
 - `class PasswordHashTest`
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`
@@ -1254,7 +1259,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `207` lines (`9479` bytes)
+**Size**: `214` lines (`9828` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1280,6 +1285,7 @@
   - Method `.test_last_sync_and_counts()`
   - Method `.test_an_unknown_catalog_version_is_refused_untouched()`
   - Method `.test_corrupt_row_is_not_reported_as_duplicate()`
+  - Method `.test_stored_hashes_are_the_live_catalog()`
 - `class SearchEscapingTest`
   - Method `.test_wildcards_in_a_search_are_literal()`
 - `class EmbeddedDateTest`

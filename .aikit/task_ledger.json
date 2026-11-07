@@ -1,66 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "harbor-hardening-31",
+    "task_id": "harbor-thumb-cache",
     "last_phase": "verification",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794093343.4094858,
+    "updated_at": 1794093751.7536287,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": [],
-    "completed_at": 1794093350.9842298
+    "completed_at": 1794093758.057844
   },
   "checkpoints": [
-    {
-      "task_id": "web-pwa",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] 192/512 icons, manifest entries, /sw.js root-scope no-cache, network-first shell cache with API/media bypass, registration moved to app.js (CSP-safe); HTTP test and Chromium SW registration/controller dogfood",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793379837.4878335,
-      "timestamp_str": "2026-10-30 20:03:57",
-      "agent": "opencode:pwa"
-    },
-    {
-      "task_id": "web-pwa",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] README install/PWA bullet and tree, ADR-028, Apple touch icon; 152 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793379838.3613513,
-      "timestamp_str": "2026-10-30 20:03:58",
-      "agent": "opencode:pwa"
-    },
-    {
-      "task_id": "web-pwa",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'web-pwa' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793379888.473673,
-      "timestamp_str": "2026-10-30 20:04:48",
-      "agent": "opencode:pwa"
-    },
-    {
-      "task_id": "backup-status",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/4] Plan: DailyBackup records last run/copied/unchanged/bytes/error; ServerRunner attaches it to HarborApp; owner-only GET /api/backup; Sync tab Backup panel; tests, dogfood, ADR-029",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793380080.3671806,
-      "timestamp_str": "2026-10-30 20:08:00",
-      "agent": "opencode:backup",
-      "impact_assessment": {
-        "why": "The daily mirror only reports into the Harbor window log; web users cannot see whether a backup is configured or when it last succeeded",
-        "benefits": "Backup state is visible wherever the gallery is open; no new storage or background thread; owner-only path",
-        "risks": "contract: one owner-only read endpoint and runner wiring; dependency: none; concurrency: status snapshot under a lock; state: status is in memory",
-        "mitigation": "Keep a small immutable status, update it after every mirror attempt, expose only to the owner, and show 'not configured' when no --backup-to was supplied"
-      }
-    },
     {
       "task_id": "backup-status",
       "phase": "phase 3",
@@ -252,6 +203,56 @@
       "status": "completed",
       "timestamp": 1794093350.9842327,
       "timestamp_str": "2026-11-08 02:15:50",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-thumb-cache",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/4] Plan: drop cached previews whose photo is gone at Harbor start, with a failing-first prune test, README and ADR-032",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093581.8942702,
+      "timestamp_str": "2026-11-08 02:19:41",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The preview cache under .harbor/thumbs keeps a JPEG for every photo ever previewed. Deleting a photo forever, emptying trash, or removing it in File Explorer leaves that JPEG behind, so a long-lived library slowly accumulates dead cache files that the Storage tab cannot explain",
+        "benefits": "Reclaims orphaned preview bytes on every start, keeps the cache bounded by the live catalog, and is safe because previews are disposable and regenerated on demand",
+        "risks": "contract: only cache files outside the live SHA-256 set are touched; dependency: stdlib only; concurrency: startup runs before server threads start; state: cache-only deletion, no catalog or photo change",
+        "mitigation": "Implement prune on Thumbnailer over the two-level SHA cache, pass the catalog's live hashes from HarborApp, ignore a locked preview without aborting, test orphan removal and live retention, and run all 202+ tests plus 4/4 gates before committing"
+      },
+      "plan_digest": "de126afd910bbaee68da9a6986f473de14c51588698217a32362220f508a3c3d"
+    },
+    {
+      "task_id": "harbor-thumb-cache",
+      "phase": "implementation",
+      "phase_num": 3,
+      "description": "[2/4] Failing-first prune, stored_hashes and startup tests went red, then Thumbnailer.prune, Catalog.stored_hashes and HarborApp startup wiring landed; targeted tests green",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093751.7045963,
+      "timestamp_str": "2026-11-08 02:22:31",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-thumb-cache",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[3/4] README preview-cache sentence and tree, ADR-032, refreshed codebase map; 205 tests OK; project check 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794093751.7536287,
+      "timestamp_str": "2026-11-08 02:22:31",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-thumb-cache",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'harbor-thumb-cache' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794093758.0578463,
+      "timestamp_str": "2026-11-08 02:22:38",
       "agent": "opencode:deepseek"
     }
   ]
