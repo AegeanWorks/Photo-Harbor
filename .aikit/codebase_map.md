@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `173`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `694`
-- **Total Source Lines**: `11394`
+- **Total Class Methods**: `696`
+- **Total Source Lines**: `11408`
 
 ---
 
@@ -1393,7 +1393,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `881` lines (`41086` bytes)
+**Size**: `895` lines (`41934` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1470,6 +1470,8 @@
   - Method `.test_health_coverage_rows_open_missing_filters()`
   - Method `.test_health_format_rows_open_format_filters()`
   - Method `.test_health_integrity_panel_reads_the_check_journal()`
+  - Method `.test_start_loads_people_before_the_persisted_view()`
+  - Method `.test_health_waits_for_owner_status_when_opened_early()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

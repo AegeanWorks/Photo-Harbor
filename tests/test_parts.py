@@ -557,6 +557,20 @@ class HealthUiTest(unittest.TestCase):
                      '"Integrity"', "No damaged files reported.", "Check all files"):
             self.assertIn(text, script)
 
+    def test_start_loads_people_before_the_persisted_view(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        start = script.split("async function start()", 1)[1].split("function ", 1)[0]
+        self.assertIn("await loadPeople();", start)
+        self.assertLess(start.index("await loadPeople();"), start.index("show(view);"))
+
+    def test_health_waits_for_owner_status_when_opened_early(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        health = script.split("async function loadHealth()", 1)[1].split("async function", 1)[0]
+        self.assertIn("state.people.length === 0", health)
+        self.assertIn("await loadPeople();", health)
+
 
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
