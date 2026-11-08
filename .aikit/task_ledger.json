@@ -5,22 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794111142.9906886,
+    "updated_at": 1794111399.7497127,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-thumb-cache",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'harbor-thumb-cache' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794093758.0578463,
-      "timestamp_str": "2026-11-08 02:22:38",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-stale-buffers",
       "phase": "planning",
@@ -253,6 +243,17 @@
       "status": "in_progress",
       "timestamp": 1794111142.9906886,
       "timestamp_str": "2026-11-08 07:12:22",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[5/6] Run 9 (pushes 54-80): accessible viewer focus, trap, keys and focus return reviewed; Run 8 range corrected; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111399.7497127,
+      "timestamp_str": "2026-11-08 07:16:39",
       "agent": "opencode:deepseek"
     }
   ]

@@ -87,9 +87,10 @@ audit output and do not extend the numbered target.
   The Python tree has no defect attributable to this batch.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
-## Run 8 - pushes 57-80
+## Run 8 - pushes 57-59
 
-- Range: `eb04454` (push 57), `cacc760` (push 58), `b5d98d3` (push 59), plus the last 21 pushes.
+- Range: `cacc760` (push 57), `b5d98d3` (push 58), `706132a` (push 59), plus the last 21 pushes.
+  The Android client at push 56 was also reviewed while checking the share/upload path.
 - Reviewed: native Android client, manifest/share target, scheduled job service, APK serving and
   install page, plus the previous runs.
 - Finding: `SyncEngine.share` skipped every item whose provider reports no size; Harbor accepts
@@ -98,7 +99,17 @@ audit output and do not extend the numbered target.
   sidecar integrity pinned by a test. ADR-041.
 - Verification: 215 tests OK; project check 4/4 gates; APK badging shows versionCode 2/1.1.
 
+## Run 9 - pushes 54-80
+
+- Range: `88e80e1` (push 54), `1a60456` (push 55), `eb04454` (push 56), `706132a` (push 59),
+  plus the last 24 pushes.
+- Reviewed: the accessible photo viewer (dialog semantics, initial focus, tab trap, Escape and
+  arrow keys, focus return), the keyboard panel, the library pushes and the previous runs.
+- Finding: none actionable. Focus returns to the tile, the trap filters hidden controls, arrow
+  boundaries are disabled and the dialog carries `aria-modal`; no current regression found.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 8 (pushes 57-80).
-- Next run: last 27 pushes, adding pushes 54-56.
+- Runs completed: 9 (pushes 54-80).
+- Next run: last 30 pushes, adding pushes 51-53.
