@@ -141,7 +141,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   link works once, for 15 minutes, and only for the person who prepared it. A selection download
   takes up to 500 photos; an album can be larger. Downloads are capped at 8 GB and need that
   much free space plus a 1 GB reserve. A prepared archive abandoned by a crash is cleaned at a
-  later start once it is an hour old; if one vanishes, its link answers 404.
+  later start once it is an hour old; if one vanishes, its link answers 404. Entry names are
+  unique even when two files differ only by letter case, as Windows treats them as one name.
 - **Know where the space went.** **Sync → Storage** shows the file and byte total, the
   photo/video split, how many photos are shared (stored once but counted in each person's
   share), each person's share, and the ten largest files. A person sees only their own share;

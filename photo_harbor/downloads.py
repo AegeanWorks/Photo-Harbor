@@ -20,18 +20,18 @@ STALE_SECONDS = 3600
 
 def _entry_name(record: PhotoRecord, used: set) -> str:
     base = safe_name(record.original_name)
-    if base not in used:
-        used.add(base)
+    if base.casefold() not in used:
+        used.add(base.casefold())
         return base
     hashed = f"{record.sha256[:8]}-{base}"
-    if hashed not in used:
-        used.add(hashed)
+    if hashed.casefold() not in used:
+        used.add(hashed.casefold())
         return hashed
     counter = len(used) + 1
     while True:
         name = f"{counter}-{hashed}"
-        if name not in used:
-            used.add(name)
+        if name.casefold() not in used:
+            used.add(name.casefold())
             return name
         counter += 1
 

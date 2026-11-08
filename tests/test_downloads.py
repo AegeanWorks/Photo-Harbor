@@ -92,6 +92,17 @@ class DownloadsTest(unittest.TestCase):
             self.assertEqual(archive.namelist(), ["one.jpg", f"{'b' * 8}-one.jpg"])
         path.unlink()
 
+    def test_names_that_differ_only_by_case_do_not_collide_on_windows(self):
+        upper, upper_path = self.photo(b"upper", "IMG.JPG")
+        lower, lower_path = self.photo(b"lower", "img.jpg")
+        info = self.downloads.prepare([(upper, upper_path), (lower, lower_path)],
+                                      "Harbor.zip", "main")
+        path, _, _ = self.downloads.take(info["url"].rsplit("/", 1)[-1], "main")
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+        self.assertEqual(len(names), 2)
+        self.assertEqual(len({name.casefold() for name in names}), 2)
+
     def test_a_token_expires_and_removes_its_file(self):
         info = self.downloads.prepare([self.one], "Harbor.zip", "main")
         token = info["url"].rsplit("/", 1)[-1]

@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "harbor-reject-atomic",
+    "task_id": "push-audit-retrospective",
     "last_phase": "verification",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794106525.667833,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794108501.819336,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794106531.3888233
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "audit-waves-0-30",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/3] Strict _album_id plus failing-first test; 155 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793723299.5939083,
-      "timestamp_str": "2026-11-03 19:28:19",
-      "agent": "kilo:audit"
-    },
-    {
-      "task_id": "audit-waves-0-30",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'audit-waves-0-30' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794092539.843626,
-      "timestamp_str": "2026-11-08 02:02:19",
-      "agent": "opencode:deepseek",
-      "continued_from": "kilo:audit"
-    },
     {
       "task_id": "harbor-hardening-31",
       "phase": "planning",
@@ -254,6 +231,35 @@
       "status": "completed",
       "timestamp": 1794106531.3888257,
       "timestamp_str": "2026-11-08 05:55:31",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Retrospective push audit in expanding windows: last 3, 6, 9 ... all 80 pushes, newest to oldest; Run 1 (pushes 78-80) found case-only ZIP collisions, fix with failing-first test, ADR-035, then push",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794107678.7626314,
+      "timestamp_str": "2026-11-08 06:14:38",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The user asked for push-by-push verification in expanding windows; Run 1 covers pushes 78-80, including the ZIP entry-name counter added by push 79. Downloads._entry_name treats IMG.jpg and img.jpg as distinct, but Windows extraction is case-insensitive, so one photo can overwrite another in the delivered ZIP",
+        "benefits": "Downloads stay lossless on Windows and every later audit run starts from a proven baseline; each finding is attributed to its push range",
+        "risks": "contract: ZIP entry names can gain a hash suffix for case-only collisions; dependency: stdlib only; concurrency: unchanged; state: no schema change",
+        "mitigation": "Casefold the used-name set, add a real two-photo ZIP regression, keep existing collision tests green, run 209+ tests and 4/4 gates, record ADR-035, commit and publish Run 1"
+      },
+      "plan_digest": "17a6c3acb8d00b245d521339464bc83a13709dea29d7d08e06f80dd1b33ee26f"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[2/6] Run 1 (pushes 78-80): case-only ZIP names now deduplicated by casefold; 210 tests; 4/4 gates; checklists: passed; audit log records the finding and ADR-035",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794108501.819336,
+      "timestamp_str": "2026-11-08 06:28:21",
       "agent": "opencode:deepseek"
     }
   ]

@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `117`
 - **Total Top-Level Functions**: `100`
-- **Total Class Methods**: `502`
-- **Total Source Lines**: `8312`
+- **Total Class Methods**: `503`
+- **Total Source Lines**: `8323`
 
 ---
 
@@ -400,7 +400,7 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `126` lines (`5123` bytes)
+**Size**: `126` lines (`5189` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
@@ -936,7 +936,7 @@
 ---
 
 ### [`tests/test_downloads.py`](tests/test_downloads.py)
-**Size**: `126` lines (`5576` bytes)
+**Size**: `137` lines (`6193` bytes)
 
 **Classes:**
 - `class DownloadsTest`
@@ -948,6 +948,7 @@
   - Method `.test_a_third_collision_still_gets_a_unique_name()`
   - Method `.test_many_collisions_stay_unique_with_a_counter()`
   - Method `.test_duplicate_names_get_a_hash_prefix()`
+  - Method `.test_names_that_differ_only_by_case_do_not_collide_on_windows()`
   - Method `.test_a_token_expires_and_removes_its_file()`
   - Method `.test_a_token_belongs_to_the_person_who_prepared_it()`
   - Method `.test_an_empty_download_is_refused()`

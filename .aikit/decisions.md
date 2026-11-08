@@ -666,3 +666,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   untouched. A vanished download archive answers 404 instead of a broken transfer. A filesystem
   failure in the middle of a valid rename can still leave the folder and database disagreeing;
   the next `layout.prepare` reconciles what it can.
+
+### ADR-035: ZIP entry names are unique case-insensitively
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Push 79 added a counter for repeated ZIP entry names, but `_entry_name` compared
+  exact strings. `IMG.JPG` and `img.jpg` are distinct strings and became two entries, while
+  Windows extraction treats them as the same name and one photo can overwrite the other.
+- **Decision**: The set of used names is compared with `str.casefold()`, so the second name gets
+  the existing SHA-8 prefix and further collisions get the same counter. The entry itself keeps
+  its original case.
+- **Consequences**: A downloaded ZIP keeps every photo on Windows, macOS and Linux. A
+  case-only duplicate gains a hash prefix in its entry name; the library file name is unchanged.
