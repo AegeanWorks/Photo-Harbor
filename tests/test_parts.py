@@ -475,6 +475,21 @@ class TagsOverviewUiTest(unittest.TestCase):
         self.assertIn("tag.count", script)
 
 
+class PeopleOverviewUiTest(unittest.TestCase):
+    def test_people_overview_is_wired_to_profiles(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="people"', 'id="view-people"',
+                        'id="people-grid"', 'id="people-status"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/profiles", script)
+        self.assertIn("loadPeopleOverview", script)
+        self.assertIn("selectPerson", script)
+        self.assertIn("last_sync", script)
+        self.assertIn("person.folder", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

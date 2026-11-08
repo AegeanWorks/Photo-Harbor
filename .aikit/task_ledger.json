@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-tags-overview",
+    "task_id": "immich-people-overview",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794146728.784955,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794147126.9932642,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794146887.8966906
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-virtual-grid",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Virtual day grid: day metadata, measured placeholders, windowed sections and scroll/resize refresh, static tests; [2/2] 50k browser check, gates, review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794144433.1485682,
-      "timestamp_str": "2026-11-08 16:27:13",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The 50k timeline still appends every tile to the DOM; virtualizing day sections keeps rendering bounded without changing the API",
-        "benefits": "A 50k-photo gallery remains responsive while selection, viewer indices and the sentinel keep working",
-        "risks": "contract: gallery rendering internals; dependency: browser APIs only; concurrency: one scroll/window scheduler; state: no schema change",
-        "mitigation": "Keep state.photos as the source of truth, render only visible day sections, preserve selection/favorite state, test with 50k synthetic photos and review"
-      },
-      "plan_digest": "fd578da72bcac8276be92c0b24ded18c435d81440e9bfd69b04e3ca1aaf39aae"
-    },
-    {
-      "task_id": "immich-virtual-grid",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/3] Virtual grid: day metadata, measured placeholders, windowed sections, scroll/resize scheduler and static test",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794144699.8856382,
-      "timestamp_str": "2026-11-08 16:31:39",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-virtual-grid",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/3] Virtual grid: 287 tests OK; 4/4 gates; checklists: passed; 50k browser check next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794144700.3919656,
-      "timestamp_str": "2026-11-08 16:31:40",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-virtual-grid",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794146887.8966928,
       "timestamp_str": "2026-11-08 17:08:07",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-people-overview",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] People overview: cards from /api/profiles with counts, folders and last sync, click opens person scope, static/HTTP tests; [2/2] gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794147021.7938118,
+      "timestamp_str": "2026-11-08 17:10:21",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "People are only in the rail and Setup; a read-only overview makes per-person storage and sync state visible without new endpoints",
+        "benefits": "A clear household overview with folder paths, counts and last-sync values that opens the existing person scope",
+        "risks": "contract: new People tab; dependency: browser only; concurrency: read-only; state: none",
+        "mitigation": "Reuse the tested profiles response, keep key management in Setup, add static/HTTP coverage, gate and review"
+      },
+      "plan_digest": "57d30fe56a913a64a1b7c36008e2eee0cc989bb1dca048733d0541501f62da11"
+    },
+    {
+      "task_id": "immich-people-overview",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] People overview: cards with counts, folders, bytes and last sync from /api/profiles, click opens person scope, static/HTTP tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794147126.2841067,
+      "timestamp_str": "2026-11-08 17:12:06",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-people-overview",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] People overview done: 295 tests OK; 4/4 gates; profile fields covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794147126.9932642,
+      "timestamp_str": "2026-11-08 17:12:06",
       "agent": "opencode:deepseek"
     }
   ]

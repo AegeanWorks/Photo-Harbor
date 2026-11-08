@@ -44,6 +44,7 @@
         <button role="tab" data-view="explore" aria-selected="false">Explore</button>
         <button role="tab" data-view="albums" aria-selected="false">Albums</button>
         <button role="tab" data-view="tags" aria-selected="false">Tags</button>
+        <button role="tab" data-view="people" aria-selected="false">People</button>
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
         <button role="tab" data-view="similar" aria-selected="false">Similar</button>
@@ -202,6 +203,15 @@
         </div>
         <p class="hint">Read-only tag counts. Create and edit tags from Photos.</p>
         <div id="tags-grid" class="tags-grid"></div>
+      </section>
+
+      <section id="view-people" class="view narrow" hidden>
+        <div class="scope">
+          <h1>People</h1>
+          <span id="people-status" aria-live="polite"></span>
+        </div>
+        <p class="hint">Read-only per-person counts, folder paths and last sync times. Manage passwords and keys in Setup.</p>
+        <div id="people-grid" class="people-grid"></div>
       </section>
 
       <section id="view-sync" class="view narrow" hidden>

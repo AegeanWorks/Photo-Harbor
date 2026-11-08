@@ -656,6 +656,14 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(json.loads(body)["tags"][0]["name"], "Keepers")
         self.assertEqual(json.loads(body)["tags"][0]["count"], 1)
 
+    def test_people_overview_has_counts_folders_and_last_sync(self):
+        self.upload(b"one", name="one.jpg")
+        _, body = self.call("GET", "/api/profiles")
+        person = json.loads(body)["profiles"][0]
+        self.assertEqual((person["name"], person["count"]), ("Main", 1))
+        self.assertTrue(person["folder"])
+        self.assertIn("last_sync", person)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

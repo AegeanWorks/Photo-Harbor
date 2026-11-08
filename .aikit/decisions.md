@@ -1071,3 +1071,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   scope. Creation/editing remains in Photos and no schema or endpoint is added.
 - **Consequences**: The overview cannot drift from the rail; archived photos remain excluded
   from the count exactly as in the outline.
+
+### ADR-065: People overview presents the existing profile response
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Per-person counts and sync state were visible only in the rail and Setup; a
+  separate people statistics endpoint would duplicate the tested profile response.
+- **Decision**: Add a read-only **People** tab that calls the existing `/api/profiles`, renders
+  initials, name, folder, count/bytes and last sync, and opens the existing person scope.
+  Password/key management stays in Setup. No schema or endpoint is added.
+- **Consequences**: The overview cannot drift from the profile list and respects owner/self
+  visibility. Counts are stats over each person's copies, as elsewhere.

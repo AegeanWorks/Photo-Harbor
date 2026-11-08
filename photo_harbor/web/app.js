@@ -1721,6 +1721,30 @@ async function loadPeople() {
   renderPeopleRail();
   renderPeopleSetup();
   renderScope();
+  return listing;
+}
+
+async function loadPeopleOverview() {
+  const listing = await loadPeople();
+  const count = listing.profiles.length;
+  $("people-status").textContent =
+    `${count.toLocaleString()} ${count === 1 ? "person" : "people"}`;
+  const grid = $("people-grid");
+  grid.replaceChildren();
+  for (const person of listing.profiles) {
+    const card = el("button", "people-card");
+    card.type = "button";
+    const copy = el("span", "people-copy");
+    copy.append(el("span", "people-name", person.name),
+      el("span", "people-meta", `${person.folder} · ${items(person.count)} · ${bytes(person.bytes)}`),
+      el("span", "people-meta", `synced ${ago(person.last_sync)}`));
+    card.append(el("span", "people-avatar", initials(person.name)), copy);
+    card.addEventListener("click", () => {
+      selectPerson(person.id);
+      show("photos");
+    });
+    grid.append(card);
+  }
 }
 
 function wirePeople() {
@@ -2456,14 +2480,15 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "folders", "explore", "albums", "tags", "sync",
-    "setup", "similar", "map", "trash"]) {
+  for (const name of ["photos", "folders", "explore", "albums", "tags", "people",
+    "sync", "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "folders") loadFolders().catch(handle);
   if (view === "explore") loadExplore().catch(handle);
   if (view === "albums") loadAlbumOverview().catch(handle);
   if (view === "tags") loadTagOverview().catch(handle);
+  if (view === "people") loadPeopleOverview().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

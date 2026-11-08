@@ -181,7 +181,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps directly to a month without loading the whole library, and the sidebar and scrubber
   stay in sync.
-- **Albums and tags overviews.** Covers, names and counts; click one to open it. Creating/editing stays in Photos.
+- **Overview tabs.** Albums, tags and people show covers/counts, folder paths and sync times; click a card to open its gallery.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
 - **Read-only folders.** The **Folders** tab mirrors the plain
   `<Person>/<YYYY>/<YYYY-MM>` layout with real paths and counts. Click a month to open it; owners
