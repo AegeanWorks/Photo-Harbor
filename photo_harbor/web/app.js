@@ -1439,8 +1439,34 @@ async function loadSetup() {
   const setup = await api("/api/setup");
   $("setup-server").textContent = setup.server;
   await loadPeople();
+  await loadAndroid();
   $("this-pc").hidden = !(state.owner && setup.startup.supported);
   $("startup-toggle").checked = setup.startup.enabled;
+}
+
+async function loadAndroid() {
+  const meta = $("android-meta");
+  const download = $("android-download");
+  try {
+    const info = await api("/api/android");
+    if (!info.available) {
+      meta.textContent = "The APK is not built yet. On the PC run: python android/build.py";
+      download.hidden = true;
+      return;
+    }
+    meta.textContent = `Version ${info.version} · ${bytes(info.size)} · SHA-256 ${info.sha256}`;
+    download.hidden = false;
+    download.href = info.apk;
+    download.setAttribute("download", `Harbor-${info.version}.apk`);
+  } catch (error) {
+    meta.textContent = "The Android build details could not be read.";
+    download.hidden = true;
+    if (error instanceof Unauthorised) throw error;
+  }
+}
+
+function wireAndroid() {
+  $("android-copy").addEventListener("click", () => copyText(new URL("/android/", location.origin).href));
 }
 
 function wireStartup() {
@@ -1644,6 +1670,7 @@ wireBrowser();
 wireAccount();
 wirePeople();
 wireStartup();
+wireAndroid();
 wireUploads();
 wireViewer();
 start();

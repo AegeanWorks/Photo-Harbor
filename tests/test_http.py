@@ -182,9 +182,20 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(body, b"fake apk")
         response, body = self.call("GET", "/android/Harbor.apk.json", key=False)
         self.assertEqual((response.status, json.loads(body)["version"]), (200, "1.0"))
+        response, body = self.call("GET", "/api/android", key=False)
+        info = json.loads(body)
+        self.assertEqual((response.status, info["available"], info["version"],
+                          info["versionCode"], info["size"], info["sha256"]),
+                         (200, True, "1.0", 1, 8, "a" * 64))
+        self.assertEqual(info["apk"], "/android/Harbor.apk")
+        (self.android_dir / "Harbor.apk.json").write_text("{broken", encoding="utf-8")
+        response, body = self.call("GET", "/api/android", key=False)
+        self.assertFalse(json.loads(body)["available"])
         self.app.android_dir = self.android_dir / "removed"
         response, _ = self.call("GET", "/android/Harbor.apk", key=False)
         self.assertEqual(response.status, 404)
+        response, body = self.call("GET", "/api/android", key=False)
+        self.assertFalse(json.loads(body)["available"])
 
     def test_calls_without_the_key_are_refused_but_the_page_loads(self):
         response, _ = self.call("GET", "/api/status", key=False)

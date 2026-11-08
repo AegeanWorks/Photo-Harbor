@@ -17,8 +17,8 @@ BUILD = ROOT / "build"
 OUTPUT = PROJECT / "photo_harbor" / "web" / "android" / "Harbor.apk"
 KEYSTORE = Path.home() / ".harbor-android" / "debug.keystore"
 STOREPASS = "android"
-VERSION = "1.1"
-VERSION_CODE = 2
+VERSION = "1.2"
+VERSION_CODE = 3
 
 
 def find_sdk() -> Path:

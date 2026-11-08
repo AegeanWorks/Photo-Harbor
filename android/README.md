@@ -39,6 +39,8 @@ key. The keystore is deliberately outside the repository.
 5. Press **Test** to check the address and key, then **Sync now**. The first sync sends photos
    and videos newer than the last finished sync. A background schedule (Wi-Fi only, every
    6 hours) is optional.
+6. **Open photo gallery** opens this server in the phone's browser. After a background run, the
+   result appears under the buttons when the app is opened again.
 
 ## Updates
 

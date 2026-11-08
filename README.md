@@ -90,11 +90,13 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Android app too.** A small native Android 8+ client can be installed from
   `http://<pc>:8642/android/`; it sends new photos and videos with the same hash-first protocol,
   keeps the phone's copy, can run every 6 hours on Wi-Fi, and appears in Android's share sheet
-  for chosen photos. **Test** checks the address and key before a sync. The **APK** is served by
-  Harbor itself with its version, size and SHA-256 from `Harbor.apk.json`; **Setup → Android
-  phone** links to the install page, and the app itself offers **Update Harbor** when the server
-  carries a newer build. Build it with `python android/build.py` (JDK 17 and Android SDK 34 at
-  build time only).
+  for chosen photos. **Test** checks the address and key before a sync. **Setup → Android app**
+  shows the served APK's version, size and SHA-256, with a direct download and **Copy install
+  link**; the app can open the gallery and shows its last background result. The **APK** is
+  served by Harbor itself with its version, size and SHA-256 from `Harbor.apk.json`; **Setup →
+  Android phone** links to the install page, and the app itself offers **Update Harbor** when the
+  server carries a newer build. Build it with `python android/build.py` (JDK 17 and Android SDK
+  34 at build time only).
 - **Automatic on home Wi-Fi.** Automations run *Harbor Sync* when the phone joins the home
   network and when it is plugged in. The Shortcut stops at once on any other network.
 - **Only what is new is sent.** `POST /api/sync/start` returns the time of the last finished
@@ -198,6 +200,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/has?sha256=…[&name=…&report=1]` | `{present, answer: yes\|no}` after re-hashing the PC's copy |
 | `POST /api/sync/done` | JSON `{started_at}`: records a finished sync |
 | `GET /api/status`, `GET /api/outline` `[?profile=]` | counts, sync state, months with photos |
+| `GET /api/android` | served APK availability, version, version code, size, SHA-256 and install page |
 | `GET /api/storage` `[?profile=]` | file/byte totals, photo/video split, shared count, per-person shares and the ten largest files |
 | `GET /api/backup` | owner: configured target, last attempt, copied/unchanged bytes and any error |
 | `GET /api/people`, `POST /api/login`, `POST /api/logout` | public sign-in: names; `{profile, password}` or `{key}` → session cookie |

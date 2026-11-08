@@ -198,9 +198,18 @@
         </article>
 
         <article class="panel" id="android-app">
-          <h2>Android phone</h2>
-          <p class="hint">Harbor has a small Android app for phones without a Shortcut. Download the APK from this server and sign in with your key.</p>
-          <a class="ghost" href="/android/">Android app and APK</a>
+          <h2>Android app</h2>
+          <p class="hint">Harbor's native Android app sends new photos and videos, can run every
+            6 hours on Wi-Fi, and opens this gallery. Download the APK from this server and enter
+            the key for the person using the phone.</p>
+          <p class="android-meta" id="android-meta">Checking this server's APK…</p>
+          <div class="android-actions">
+            <a class="primary" id="android-download" href="/android/Harbor.apk" download hidden>Download APK</a>
+            <a class="ghost" href="/android/" target="_blank" rel="noopener">Install page</a>
+            <button class="ghost" id="android-copy" type="button">Copy install link</button>
+          </div>
+          <p class="hint">Android 8 or newer. Allow installation from the browser when Android
+            asks; the app never deletes a photo from the phone.</p>
         </article>
 
         <article class="panel" id="shortcuts">

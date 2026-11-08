@@ -269,6 +269,16 @@ class ThumbnailerTest(unittest.TestCase):
 
 
 class AndroidVersionTest(unittest.TestCase):
+    def test_gallery_android_card_has_live_download_controls(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="android-download"', page)
+        self.assertIn('id="android-meta"', page)
+        self.assertIn("/android/Harbor.apk", page)
+        self.assertIn("/api/android", script)
+        self.assertIn("loadAndroid", script)
+
     def test_android_page_loads_its_script_from_a_csp_allowed_file(self):
         root = Path(__file__).resolve().parents[1]
         page = (root / "photo_harbor" / "web" / "android" / "index.html").read_text(

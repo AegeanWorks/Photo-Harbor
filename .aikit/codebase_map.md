@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `119`
 - **Total Top-Level Functions**: `103`
-- **Total Class Methods**: `512`
-- **Total Source Lines**: `8507`
+- **Total Class Methods**: `514`
+- **Total Source Lines**: `8548`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `203` lines (`10032` bytes)
+**Size**: `223` lines (`11120` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -141,6 +141,7 @@
   - Method `.android_apk(request)`
   - Method `.service_worker(request)`
   - Method `.android_apk_info(request)`
+  - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
   - Method `._register(sync, library, people, albums, downloads, trash, backup, setup)`
@@ -1010,7 +1011,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `759` lines (`42843` bytes)
+**Size**: `770` lines (`43560` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1096,7 +1097,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `570` lines (`25001` bytes)
+**Size**: `580` lines (`25543` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1135,6 +1136,7 @@
   - Method `.test_without_pillow_previews_are_off()`
   - Method `.test_prune_removes_only_previews_of_photos_that_are_gone()`
 - `class AndroidVersionTest`
+  - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
   - Method `.test_android_version_constants_match_the_build()`
 - `class CliErrorTest`

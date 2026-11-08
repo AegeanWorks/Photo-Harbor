@@ -23,14 +23,15 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
     private static final int ASK_MEDIA = 41;
     private static final int JOB_ID = 1;
-    private static final int VERSION_CODE = 2;
-    private static final String VERSION_NAME = "1.1";
+    private static final int VERSION_CODE = 3;
+    private static final String VERSION_NAME = "1.2";
 
     private EditText server;
     private EditText key;
     private CheckBox wifi;
     private CheckBox background;
     private TextView status;
+    private TextView backgroundStatus;
     private Button syncButton;
     private Button updateButton;
     private SharedPreferences prefs;
@@ -125,6 +126,12 @@ public class MainActivity extends Activity {
         status.setPadding(0, dp(8), 0, dp(8));
         form.addView(status);
 
+        backgroundStatus = new TextView(this);
+        backgroundStatus.setTextSize(12);
+        backgroundStatus.setPadding(0, 0, 0, dp(8));
+        form.addView(backgroundStatus);
+        updateBackgroundStatus();
+
         updateButton = new Button(this);
         updateButton.setText("Update Harbor");
         updateButton.setVisibility(View.GONE);
@@ -140,6 +147,22 @@ public class MainActivity extends Activity {
             }
         });
         form.addView(updateButton);
+
+        Button gallery = new Button(this);
+        gallery.setText("Open photo gallery");
+        gallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String address = server.getText().toString().trim();
+                if (address.isEmpty()) {
+                    status.setText("Enter the server address first.");
+                    return;
+                }
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse(SyncEngine.webUrl(address) + "/")));
+            }
+        });
+        form.addView(gallery);
 
         TextView note = new TextView(this);
         note.setText("Version " + VERSION_NAME + ". The first sync may take a while. "
@@ -162,6 +185,27 @@ public class MainActivity extends Activity {
             schedule(true);
         }
         checkForUpdate();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateBackgroundStatus();
+    }
+
+    private void updateBackgroundStatus() {
+        if (backgroundStatus == null || prefs == null) {
+            return;
+        }
+        String last = prefs.getString("last_background", "");
+        long at = prefs.getLong("last_background_at", 0L);
+        if (last.isEmpty()) {
+            backgroundStatus.setText("");
+            return;
+        }
+        String when = at > 0 ? " · " + java.text.DateFormat.getTimeInstance(
+                java.text.DateFormat.SHORT).format(new java.util.Date(at)) : "";
+        backgroundStatus.setText("Background: " + last + when);
     }
 
     private void checkForUpdate() {

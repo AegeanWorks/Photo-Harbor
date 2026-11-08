@@ -1,68 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-final",
+    "task_id": "android-download-ui",
     "last_phase": "verification",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794113889.4223478,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794126457.1482537,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794113890.0104752
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-4",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Audit band 4: runs 16-21, expanding from the newest 48 to the newest 63 historical pushes (pushes 18-80); review downloads, details, batch selection, albums, reforge and licensing/UI metadata, fix defects, verify and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112553.394319,
-      "timestamp_str": "2026-11-08 07:35:53",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The audit must continue past push 36 to the beginning; band 4 covers the remaining feature and governance pushes down to push 18",
-        "benefits": "Every remaining push in this band is checked against the current tree with a durable record and attributed fixes",
-        "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
-        "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
-      },
-      "plan_digest": "dcfaa7cc15d7f4626ca1cb093310c5e916d2e31fcaa9c1ac0453c84d8e6cd8ca"
-    },
-    {
-      "task_id": "push-audit-band-4",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[2/6] Run 16 (pushes 33-80): downloads, tokens, expiry and entry names reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112624.6932442,
-      "timestamp_str": "2026-11-08 07:37:04",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-4",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/6] Run 17 (pushes 30-80): batch selection and details reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112700.9374976,
-      "timestamp_str": "2026-11-08 07:38:20",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-4",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[4/6] Run 18 (pushes 27-80): bookkeeping/UI-contract/reforge batch reviewed; no code change; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112761.5881605,
-      "timestamp_str": "2026-11-08 07:39:21",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-4",
       "phase": "verification",
@@ -254,6 +202,57 @@
       "status": "completed",
       "timestamp": 1794113890.0104778,
       "timestamp_str": "2026-11-08 07:58:10",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "android-download-ui",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/5] Plan: /api/android metadata endpoint; a live APK card in web Setup (version, size, SHA-256, download, install page); Android 1.2 with Open gallery and background-status reporting; rebuild APK; tests, UI review, publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794126143.6633377,
+      "timestamp_str": "2026-11-08 11:22:23",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The server already builds and serves an APK, but the main gallery UI only has a small link to the separate install page. The objective asks for an APK download section in the web UI and proper Android integration",
+        "benefits": "Users see the current APK version, size and checksum inside the signed-in gallery, download it directly, and the app can open the gallery and report its last background run",
+        "risks": "contract: new public metadata route, new Setup markup and APK 1.2/3; dependency: stdlib and existing Android SDK only; concurrency: metadata read only; state: SharedPreferences last_background only",
+        "mitigation": "Keep the sidecar as the source of truth, return available=false for missing/malformed files, keep existing install page and APK route, failing-first HTTP/static tests, rebuild and signature-verify APK, run 217+ tests and 4/4 gates, repeat UI evidence review"
+      },
+      "plan_digest": "c73692527a90e5bf72d68117bf44708fc107e6f1681c4403cebe9a3679db9493"
+    },
+    {
+      "task_id": "android-download-ui",
+      "phase": "implementation",
+      "phase_num": 3,
+      "description": "[2/5] Added public GET /api/android (available/version/code/size/SHA/page, malformed-safe), live Setup APK card with direct download, install page and copy link; HTTP and static tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794126456.5972219,
+      "timestamp_str": "2026-11-08 11:27:36",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "android-download-ui",
+      "phase": "implementation",
+      "phase_num": 3,
+      "description": "[3/5] Built Android 1.2/3 with Open photo gallery and last background result stored by SyncJobService; APK signature-verified, sidecar rebuilt",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794126456.8742754,
+      "timestamp_str": "2026-11-08 11:27:36",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "android-download-ui",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[4/5] README/Android README and ADR-044; 218 tests; 4/4 gates; Setup card reviewed in Chromium (Version 1.2, SHA, download/install/copy, no console errors); checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794126457.1482537,
+      "timestamp_str": "2026-11-08 11:27:37",
       "agent": "opencode:deepseek"
     }
   ]

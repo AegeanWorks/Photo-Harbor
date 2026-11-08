@@ -781,3 +781,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   HarborError with status 507 and the drive remedy; the existing `finally` removes the temp.
 - **Consequences**: A full drive answers 507 with Error/Why/Fix and stores nothing partial.
   The pre-flight free-space check stays as the fast path for known lengths.
+
+### ADR-044: In-gallery Android download card and app 1.2
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The APK and install page existed, but the signed-in gallery only linked to them.
+  Users could not see whether the build was current, its checksum, or download it from the
+  Setup view. The Android app also had no shortcut to the gallery and hid its last background
+  result.
+- **Decision**: Add a public `GET /api/android` that reports availability, version, versionCode,
+  size, SHA-256 and page from the sidecar (available=false for a missing or malformed build).
+  Setup's Android app card fetches it, shows the metadata, offers a direct APK download and a
+  copy-install-link button. The app moves to 1.2/3 with **Open photo gallery** and a
+  `last_background`/`last_background_at` summary recorded by `SyncJobService` and shown on
+  resume. The APK is rebuilt and signature-verified.
+- **Consequences**: The web UI is the single place to inspect and download the current build;
+  a missing/malformed APK is a clear message instead of a broken link. The app reports its last
+  background run and can open the gallery. Version constants, manifest and sidecar remain
+  pinned by the existing integrity test.

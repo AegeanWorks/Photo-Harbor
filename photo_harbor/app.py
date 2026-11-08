@@ -1,6 +1,7 @@
 """Wires one library's storage, APIs and web page into a Router."""
 
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -21,7 +22,7 @@ from .importer import ImportLedger
 from .layout import LibraryLayout
 from .journal import SyncJournal
 from .library_api import LibraryApi
-from .messages import Reply, Request
+from .messages import Reply, Request, json_reply
 from .profiles import ProfileBook
 from .profiles_api import ProfilesApi
 from .router import Router
@@ -133,6 +134,24 @@ class HarborApp:
         return Reply(200, content_type="application/json; charset=utf-8",
                      headers=NO_CACHE, file=path)
 
+    def android_metadata(self, request: Request) -> Reply:
+        """The gallery's APK card: built state plus the signed build's sidecar fields."""
+        apk = self.android_dir / "Harbor.apk"
+        if not apk.is_file():
+            return json_reply({"available": False, "page": "/android/"})
+        try:
+            data = json.loads((self.android_dir / "Harbor.apk.json").read_text(encoding="utf-8"))
+            version = str(data["version"])
+            code = int(data["versionCode"])
+            size = int(data["size"])
+            sha256 = str(data["sha256"])
+        except (OSError, ValueError, KeyError, TypeError):
+            return json_reply({"available": False, "page": "/android/"})
+        return json_reply({"available": True, "page": "/android/",
+                           "apk": "/android/Harbor.apk", "version": version,
+                           "versionCode": code, "size": size, "sha256": sha256,
+                           "built_at": data.get("built_at")})
+
     def android_script(self, request: Request) -> Reply:
         path = self.android_dir / "meta.js"
         if not path.is_file():
@@ -160,6 +179,7 @@ class HarborApp:
         self.router.add_exact("GET", "/android/", self.android_page, public=True)
         add("GET", "/android/Harbor.apk", self.android_apk, public=True)
         add("GET", "/android/Harbor.apk.json", self.android_apk_info, public=True)
+        add("GET", "/api/android", self.android_metadata, public=True)
         add("GET", "/android/meta.js", self.android_script, public=True)
         add("GET", "/android/style.css", self.android_style, public=True)
         add("POST", "/api/login", self.guard.login, public=True)
