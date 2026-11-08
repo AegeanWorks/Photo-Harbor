@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "place-bucket-agreement",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794159009.4988654,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794159056.078801
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-reject-drain",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Drain: LengthReader remaining, bounded _drain before close, 128 KiB rejected-upload regression test",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794151396.2882617,
-      "timestamp_str": "2026-11-08 18:23:16",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-reject-drain",
       "phase": "phase 4",
@@ -255,6 +245,16 @@
       "status": "in_progress",
       "timestamp": 1794159009.4988654,
       "timestamp_str": "2026-11-08 20:30:09",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "place-bucket-agreement",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'place-bucket-agreement' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794159056.078803,
+      "timestamp_str": "2026-11-08 20:30:56",
       "agent": "commandcode:vscode"
     }
   ]
