@@ -1,67 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-lenses",
+    "task_id": "quality-http-flake",
     "last_phase": "phase 4",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794142736.4085798,
+    "updated_at": 1794143257.9926898,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": [],
-    "completed_at": 1794142882.7073572
+    "completed_at": 1794143274.085411
   },
   "checkpoints": [
-    {
-      "task_id": "immich-similar-distance",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Similar distance: Hamming radius 8 over cached hashes, connected read-only groups, tests; [2/2] UI threshold text, docs, gates, review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794138510.7941864,
-      "timestamp_str": "2026-11-08 14:48:30",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "Exact dHash groups miss re-encoded or resized near-duplicates; the read-only review can safely link hashes a few bits apart",
-        "benefits": "A more useful Similar review without any delete action, reusing the existing hash cache and no schema change",
-        "risks": "contract: grouping changes from exact to connected Hamming components; dependency: stdlib only; concurrency: read-only grouping; state: no new columns",
-        "mitigation": "A BK-tree avoids an O(n^2) scan, tests cover distance boundaries and privacy, and the UI explains the 8-bit threshold"
-      },
-      "plan_digest": "5d14cf33a422db926ad7dfb2f1689172cdc34e36540861c47279ce6cb528cb3b"
-    },
-    {
-      "task_id": "immich-similar-distance",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Similar distance: band-index Hamming grouping radius 4, connected read-only groups, threshold API, tests and docs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794139286.3008676,
-      "timestamp_str": "2026-11-08 15:01:26",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-similar-distance",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Similar distance done: 262 tests OK; 4/4 gates; 50k grouping 2.1 s; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794139287.7945516,
-      "timestamp_str": "2026-11-08 15:01:27",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-similar-distance",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-similar-distance' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794139437.677853,
-      "timestamp_str": "2026-11-08 15:03:57",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-similar-cache",
       "phase": "phase 2",
@@ -260,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794142882.7073596,
       "timestamp_str": "2026-11-08 16:01:22",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "quality-http-flake",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Harden HTTP tests against intermittent ConnectionAbortedError with a fresh socket per request and a dedicated keep-alive test; [2/2] repeat suite, gates and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794143071.1821601,
+      "timestamp_str": "2026-11-08 16:04:31",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The HTTP suite intermittently aborts a reused keep-alive socket on Windows, making 4/4 gates flaky and obscuring real failures",
+        "benefits": "Reliable test evidence while still covering one explicit keep-alive exchange",
+        "risks": "contract: test harness only; dependency: none; concurrency: fresh sockets avoid stale shared state; state: none",
+        "mitigation": "Use a per-call connection plus Connection: close, add a keep-alive regression test, run the suite repeatedly and publish"
+      },
+      "plan_digest": "167c51672db832a3274bf23bbaee251b424e40ff523590d6cdcfaaa9071e41db"
+    },
+    {
+      "task_id": "quality-http-flake",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] HTTP test harness uses a fresh socket and Connection: close per call; added a dedicated keep-alive two-request test",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794143256.8478668,
+      "timestamp_str": "2026-11-08 16:07:36",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "quality-http-flake",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Flake fix verified: 3 consecutive 279-test runs OK; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794143257.9926898,
+      "timestamp_str": "2026-11-08 16:07:37",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "quality-http-flake",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'quality-http-flake' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794143274.0854135,
+      "timestamp_str": "2026-11-08 16:07:54",
       "agent": "opencode:deepseek"
     }
   ]
