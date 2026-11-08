@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `117`
 - **Total Top-Level Functions**: `100`
-- **Total Class Methods**: `500`
-- **Total Source Lines**: `8273`
+- **Total Class Methods**: `502`
+- **Total Source Lines**: `8312`
 
 ---
 
@@ -400,7 +400,7 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `126` lines (`5101` bytes)
+**Size**: `126` lines (`5123` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
@@ -633,7 +633,7 @@
 ### [`photo_harbor/profiles_api.py`](photo_harbor/profiles_api.py)
 > *Listing people and, for the library owner, adding, renaming and re-keying them.*
 
-**Size**: `74` lines (`3403` bytes)
+**Size**: `88` lines (`4111` bytes)
 
 **Classes:**
 - `class ProfilesApi`
@@ -936,12 +936,13 @@
 ---
 
 ### [`tests/test_downloads.py`](tests/test_downloads.py)
-**Size**: `120` lines (`5270` bytes)
+**Size**: `126` lines (`5576` bytes)
 
 **Classes:**
 - `class DownloadsTest`
   - Method `.setUp()`
   - Method `.test_startup_keeps_a_fresh_archive_and_drops_a_stale_one()`
+  - Method `.test_a_vanished_archive_is_not_taken()`
   - Method `.photo(data, name)`
   - Method `.test_a_selection_becomes_one_zip_with_original_names()`
   - Method `.test_a_third_collision_still_gets_a_unique_name()`
@@ -1002,7 +1003,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `725` lines (`40850` bytes)
+**Size**: `744` lines (`41888` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1048,6 +1049,7 @@
   - Method `.add_person(name)`
   - Method `.test_a_persons_key_uploads_into_their_own_profile()`
   - Method `.test_only_the_owner_may_target_or_manage_other_profiles()`
+  - Method `.test_a_rejected_profile_write_changes_nothing()`
   - Method `.test_a_retired_key_is_refused()`
   - Method `.test_a_client_hanging_up_prints_no_traceback()`
   - Method `.test_the_owner_can_turn_starting_with_windows_on_and_off()`

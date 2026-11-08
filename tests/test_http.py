@@ -492,6 +492,25 @@ class ServerTest(unittest.TestCase):
         listing = json.loads(body)
         self.assertEqual((listing["me"], listing["owner"]), ("ayse", False))
         self.assertEqual([p["id"] for p in listing["profiles"]], ["ayse"])
+
+    def test_a_rejected_profile_write_changes_nothing(self):
+        self.add_person()
+        response, _ = self.call("POST", "/api/profiles/ayse",
+                                body={"name": "Renamed", "password": "x"})
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("POST", "/api/profiles/main",
+                                body={"name": "Renamed Main", "new_key": True})
+        self.assertEqual(response.status, 403)
+        response, _ = self.call("POST", "/api/profiles",
+                                body={"name": "Bob", "password": "x"})
+        self.assertEqual(response.status, 400)
+        _, body = self.call("GET", "/api/profiles")
+        people = {p["id"]: p for p in json.loads(body)["profiles"]}
+        self.assertEqual((people["ayse"]["name"], people["ayse"]["folder"]),
+                         ("Ayşe", "Ayşe"))
+        self.assertEqual((people["main"]["name"], people["main"]["folder"]),
+                         ("Main", "Main"))
+        self.assertNotIn("bob", people)
         response, body = self.call("POST", "/api/upload", body=b"for her",
                                    headers={"X-Name": "b.jpg", "X-Profile": "ayse"})
         self.assertEqual(response.status, 200)

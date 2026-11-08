@@ -113,7 +113,7 @@ class Downloads:
                 return None
             self._tokens.pop(token, None)
         path, name, _, expires, total = item
-        if expires < self._clock():
+        if expires < self._clock() or not path.is_file():
             path.unlink(missing_ok=True)
             return None
         return path, name, total

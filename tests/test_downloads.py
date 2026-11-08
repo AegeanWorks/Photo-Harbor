@@ -34,6 +34,12 @@ class DownloadsTest(unittest.TestCase):
         self.assertTrue(fresh.exists())
         self.assertFalse(old.exists())
 
+    def test_a_vanished_archive_is_not_taken(self):
+        info = self.downloads.prepare([self.one], "Harbor - selection.zip", "main")
+        token = info["url"].rsplit("/", 1)[-1]
+        (self.root / "downloads" / f"{token}.zip").unlink()
+        self.assertIsNone(self.downloads.take(token, "main"))
+
     def photo(self, data: bytes, name: str):
         path = self.root / name
         path.write_bytes(data)

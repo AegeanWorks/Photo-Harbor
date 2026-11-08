@@ -2,8 +2,9 @@
 
 from typing import Optional
 
-from .accounts import LoginBrake, Passwords, Sessions
+from .accounts import LoginBrake, Passwords, Sessions, check_new_password
 from .catalog import Catalog
+from .database import OWNER_PROFILE
 from .layout import LibraryLayout
 from .errors import HarborError
 from .journal import SyncJournal
@@ -48,10 +49,13 @@ class ProfilesApi:
     def create(self, request: Request) -> Reply:
         _require_owner(request)
         body = request.json()
+        password = body.get("password")
+        if password:
+            check_new_password(password)
         profile = self._book.create(str(body.get("name", "")))
         self._layout.prepare()
-        if body.get("password"):
-            self._passwords.set(profile.id, body["password"])
+        if password:
+            self._passwords.set(profile.id, password)
             self._brake.reset()
         return json_reply({"id": profile.id, "name": profile.name, "key": profile.key})
 
@@ -61,13 +65,23 @@ class ProfilesApi:
         person out everywhere."""
         _require_owner(request)
         body = request.json()
-        if body.get("name") is not None:
-            self._layout.rename_person(ident, str(body["name"]))
-        if body.get("password") is not None:
-            self._passwords.set(self._book.get(ident).id, body["password"])
+        name = body.get("name")
+        password = body.get("password")
+        new_key = body.get("new_key") is True
+        # Validate every input before the first write: a rejected request must not rename or
+        # insert anything (the folder move and the database are not one transaction).
+        if password is not None:
+            check_new_password(password)
+        if new_key and ident == OWNER_PROFILE:
+            raise HarborError("the main profile's key is the library key",
+                              "it is changed on the PC, not from the gallery",
+                              "run `python -m photo_harbor key --new`", status=403)
+        if name is not None:
+            self._layout.rename_person(ident, str(name))
+        if password is not None:
+            self._passwords.set(self._book.get(ident).id, password)
             self._sessions.close(profile=ident)
             self._brake.reset()
-        new_key = body.get("new_key") is True
         profile = self._book.update(ident, new_key=new_key)
         if new_key:
             self._sessions.close(profile=profile.id)

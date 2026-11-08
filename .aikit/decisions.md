@@ -648,3 +648,21 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Starting an import or a second Harbor window can no longer break an upload
   or download already in flight. An abandoned buffer can linger for up to its threshold instead
   of being removed immediately; it is still cleaned on a later start.
+
+### ADR-034: Rejected profile writes and vanished archives leave no partial state
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `ProfilesApi.update` renamed the person and their folder before validating a new
+  password, and before the owner-key refusal, so a 400/403 response still applied the rename.
+  `ProfilesApi.create` inserted the person before rejecting a bad password. And
+  `Downloads.take` returned a token for a ZIP that had been deleted underneath it, which then
+  failed with a 500 while serving.
+- **Decision**: Validate the password (`check_new_password`) and the owner-key rule before the
+  first rename or insert; validate a new profile's password before creating the person. A name
+  and password change is still applied in two steps because a folder move and SQLite are not one
+  transaction, but every validation failure now happens before either step. `Downloads.take`
+  drops the token and returns None when its file is missing, which the API maps to 404.
+- **Consequences**: A rejected profile request leaves the name, folder, person list and key
+  untouched. A vanished download archive answers 404 instead of a broken transfer. A filesystem
+  failure in the middle of a valid rename can still leave the folder and database disagreeing;
+  the next `layout.prepare` reconciles what it can.

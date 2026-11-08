@@ -57,7 +57,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   everyone's and manages people (add, rename, set a password, new Shortcut key). A person changes
   their own password under **Setup → My account**, which signs out their other devices. Each
   person's iPhone Shortcut uses their own key. After 5 wrong passwords a device waits 5 minutes.
-  Passwords are stored only as salted PBKDF2-SHA256 hashes.
+  Passwords are stored only as salted PBKDF2-SHA256 hashes. A name and password change is
+  validated before anything moves, so a rejected request leaves the name and folder untouched.
 - **Plain folders you can open without Harbor.** The library is ordinary Windows folders:
   `D:\Harbor\Ayşe\2026\2026-10\IMG_1234.HEIC`. One folder per person (named after them, renamed
   with them), then year, then month, then the original file. A photo two people have appears in
@@ -140,7 +141,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   link works once, for 15 minutes, and only for the person who prepared it. A selection download
   takes up to 500 photos; an album can be larger. Downloads are capped at 8 GB and need that
   much free space plus a 1 GB reserve. A prepared archive abandoned by a crash is cleaned at a
-  later start once it is an hour old.
+  later start once it is an hour old; if one vanishes, its link answers 404.
 - **Know where the space went.** **Sync → Storage** shows the file and byte total, the
   photo/video split, how many photos are shared (stored once but counted in each person's
   share), each person's share, and the ten largest files. A person sees only their own share;
