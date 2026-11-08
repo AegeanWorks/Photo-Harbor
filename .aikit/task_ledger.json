@@ -3,24 +3,15 @@
   "active_task": {
     "task_id": "immich-tags-overview",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794146728.784955,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794146887.8966906
   },
   "checkpoints": [
-    {
-      "task_id": "immich-scrubber",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-scrubber' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794144180.0953152,
-      "timestamp_str": "2026-11-08 16:23:00",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-virtual-grid",
       "phase": "phase 2",
@@ -259,6 +250,16 @@
       "status": "in_progress",
       "timestamp": 1794146728.784955,
       "timestamp_str": "2026-11-08 17:05:28",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-tags-overview",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'immich-tags-overview' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794146887.8966928,
+      "timestamp_str": "2026-11-08 17:08:07",
       "agent": "opencode:deepseek"
     }
   ]
