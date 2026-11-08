@@ -60,18 +60,21 @@ class ServerTest(unittest.TestCase):
         self.addCleanup(thread.join)
         self.addCleanup(self.server.server_close)
         self.addCleanup(self.server.shutdown)
+        self._conn = None
 
     def call(self, method, path, body=None, headers=None, key=True):
-        conn = http.client.HTTPConnection("127.0.0.1", self.server.server_address[1], timeout=5)
-        self.addCleanup(conn.close)
+        if self._conn is None:
+            self._conn = http.client.HTTPConnection(
+                "127.0.0.1", self.server.server_address[1], timeout=5)
+            self.addCleanup(self._conn.close)
         sent = dict(headers or {})
         if key:
             sent["X-Harbor-Key"] = self.settings.key
         if isinstance(body, dict):
             body = json.dumps(body).encode()
             sent["Content-Type"] = "application/json"
-        conn.request(method, path, body=body, headers=sent)
-        response = conn.getresponse()
+        self._conn.request(method, path, body=body, headers=sent)
+        response = self._conn.getresponse()
         return response, response.read()
 
     def upload(self, data, name="IMG_0001.HEIC", digest=None):

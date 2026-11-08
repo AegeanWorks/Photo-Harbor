@@ -2,39 +2,15 @@
   "version": 1,
   "active_task": {
     "task_id": "push-audit-band-2",
-    "last_phase": "planning",
-    "active_phase": 2,
+    "last_phase": "verification",
+    "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794110245.3928628,
+    "updated_at": 1794110461.0302472,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "impact_assessment": {
-      "why": "The retrospective audit must continue backward to the beginning; band 1 covered runs 1-5 (newest 3 to 15 pushes), band 2 adds pushes 60-65 down to 45-47",
-      "benefits": "Every older batch is checked against the current tree with attributed fixes and a pushed audit record",
-      "risks": "contract: none expected beyond the found defect; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
-      "mitigation": "Review each batch's diff, probe current code, failing-first test any fix, keep M<=6 runs per band, run full suite and 4/4 gates, publish each fix"
-    }
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-thumb-cache",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/4] Plan: drop cached previews whose photo is gone at Harbor start, with a failing-first prune test, README and ADR-032",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093581.8942702,
-      "timestamp_str": "2026-11-08 02:19:41",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The preview cache under .harbor/thumbs keeps a JPEG for every photo ever previewed. Deleting a photo forever, emptying trash, or removing it in File Explorer leaves that JPEG behind, so a long-lived library slowly accumulates dead cache files that the Storage tab cannot explain",
-        "benefits": "Reclaims orphaned preview bytes on every start, keeps the cache bounded by the live catalog, and is safe because previews are disposable and regenerated on demand",
-        "risks": "contract: only cache files outside the live SHA-256 set are touched; dependency: stdlib only; concurrency: startup runs before server threads start; state: cache-only deletion, no catalog or photo change",
-        "mitigation": "Implement prune on Thumbnailer over the two-level SHA cache, pass the catalog's live hashes from HarborApp, ignore a locked preview without aborting, test orphan removal and live retention, and run all 202+ tests plus 4/4 gates before committing"
-      },
-      "plan_digest": "de126afd910bbaee68da9a6986f473de14c51588698217a32362220f508a3c3d"
-    },
     {
       "task_id": "harbor-thumb-cache",
       "phase": "implementation",
@@ -267,6 +243,17 @@
         "mitigation": "Review each batch's diff, probe current code, failing-first test any fix, keep M<=6 runs per band, run full suite and 4/4 gates, publish each fix"
       },
       "plan_digest": "f17cf6893a1176dd45f10bdfd3e9f39f283d494d0c12148bbbfd061d0576e9de"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[2/6] Run 6 (pushes 63-80): Android install page moved to CSP-allowed meta.js/style.css; version constants pinned; HTTP tests reuse one socket to stop ephemeral-port flakes; 215 tests; 4/4 gates; checklists: passed; ADR-040",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794110461.0302472,
+      "timestamp_str": "2026-11-08 07:01:01",
+      "agent": "opencode:deepseek"
     }
   ]
 }
