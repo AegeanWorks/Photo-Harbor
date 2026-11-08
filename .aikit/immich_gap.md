@@ -63,8 +63,22 @@ returns coarse one-decimal buckets, the rail lists **Places** with counts, and
 `GET /api/photos?place=LAT,LON` narrows the gallery. The Details panel shows the exact point.
 No map tiles, reverse geocoding or network lookup are involved; archived photos leave the list.
 
-## Next candidates
+## Decision summary
 
-1. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
-2. **Metadata search** - expose camera/lens filters once EXIF is parsed into columns.
-3. **Global map** - only with an offline tile story that preserves the home-network promise.
+Implemented in this pass: **Memories, Archive, Tags and Places**. All four reuse local data,
+avoid ML services and network dependencies, and never move or rewrite originals. Archive and
+Tags add only private per-person marks; Places stores the camera's point once. They compose with
+the existing person, album, date, kind, name and sort filters.
+
+Deliberately not now:
+
+- **Near-duplicate utility** - requires perceptual hashing, backfilling existing photos and a
+  false-positive review flow; a wrong cluster could lead to deleting a keeper. Revisit with a
+  read-only similarity list before any deletion action.
+- **Metadata search (camera/lens)** - useful, but needs another stored EXIF field set and filter
+  UI. The existing name, date, tag, place and album filters already cover the common cases.
+- **Global map** - needs an offline tile story; the Places rail already exposes the stored
+  coordinates without sending them anywhere.
+- **Sharing, OAuth, RAW/360/LivePhoto, storage templates, transcoding and offline write queues**
+  - each breaks the home-network privacy or plain-folder/lightweight-server promise, or is a
+  much larger state machine than the value justifies here.
