@@ -913,6 +913,11 @@ function healthPanel(title) {
 }
 
 async function loadHealth() {
+  if (state.people.length === 0) {
+    try {
+      await loadPeople();
+    } catch (_) { /* keep owner-only panels hidden if the profile list cannot be read */ }
+  }
   const jobs = [api("/api/status"), api("/api/storage"), api("/api/trash")];
   jobs.push(state.owner ? api("/api/backup") : Promise.resolve(null));
   jobs.push(state.owner ? api("/api/integrity") : Promise.resolve(null));
@@ -2852,8 +2857,12 @@ async function start() {
   $("shell").hidden = false;
   let view = "photos";
   try { view = localStorage.getItem("harbor-view") || "photos"; } catch (_) { /* private mode */ }
+  try {
+    await loadPeople();
+  } catch (error) {
+    handle(error);
+  }
   show(view);
-  loadPeople().catch(handle);
   loadOutline().catch(handle);
   loadAlbums().catch(handle);
   loadTags().catch(handle);
