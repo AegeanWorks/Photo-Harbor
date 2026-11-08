@@ -227,7 +227,17 @@ audit output and do not extend the numbered target.
   still sees everyone; rename validation happens before the folder move.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 22 - pushes 15-80
+
+- Range: `e91794c` (push 15), `d2d2151` (push 16), `3e6a330` (push 17), plus the last 63
+  pushes.
+- Reviewed: social-preview documentation, AI-generated brand disclosure, license/AIKit badges
+  and the brand-assets section; no application code or tests changed.
+- Finding: none actionable; the claims now match the assets and the secure-context note from
+  Run 5.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 21 (pushes 18-80).
-- Next run: last 66 pushes, adding pushes 15-17.
+- Runs completed: 22 (pushes 15-80).
+- Next run: last 69 pushes, adding pushes 12-14.
