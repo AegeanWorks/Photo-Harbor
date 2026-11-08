@@ -5,8 +5,8 @@ from typing import Optional
 
 from .database import Database, MAX_ROW_ID
 from .phash import hash_components
-from .records import (LibraryStats, MetadataCoverage, Outline, PersonStorage, PhotoFilter,
-                      PhotoRecord, StorageFile, StorageReport)
+from .records import (FormatStorage, LibraryStats, MetadataCoverage, Outline, PersonStorage,
+                      PhotoFilter, PhotoRecord, StorageFile, StorageReport)
 
 _COLUMNS = ("sha256, rel_path, size, original_name, media_type, taken_at, received_at,"
             " profile, latitude, longitude, camera, lens")
@@ -423,6 +423,11 @@ class Catalog:
                 largest = self._db.conn.execute(
                     "SELECT sha256, original_name, size, sort_time FROM copies"
                     " WHERE profile = ? ORDER BY size DESC, sha256 LIMIT 10", (profile,)).fetchall()
+                formats = self._db.conn.execute(
+                    "SELECT p.media_type, COUNT(*), COALESCE(SUM(c.size), 0)"
+                    " FROM copies c JOIN photos p ON p.sha256 = c.sha256"
+                    " WHERE c.profile = ? GROUP BY p.media_type"
+                    " ORDER BY SUM(c.size) DESC, p.media_type", (profile,)).fetchall()
                 people = ()
             else:
                 row = self._db.conn.execute(
@@ -436,6 +441,10 @@ class Catalog:
                 largest = self._db.conn.execute(
                     "SELECT sha256, original_name, size, sort_time FROM photos"
                     " ORDER BY size DESC, sha256 LIMIT 10").fetchall()
+                formats = self._db.conn.execute(
+                    "SELECT media_type, COUNT(*), COALESCE(SUM(size), 0)"
+                    " FROM photos GROUP BY media_type"
+                    " ORDER BY SUM(size) DESC, media_type").fetchall()
                 people = tuple(PersonStorage(row[0], row[1], row[2]) for row in
                                self._db.conn.execute(
                                    "SELECT profile, COUNT(*), COALESCE(SUM(size), 0) FROM copies"
@@ -444,4 +453,6 @@ class Catalog:
                              shared=shared,
                              largest=tuple(StorageFile(row[0], row[1], row[2], row[3])
                                            for row in largest),
-                             people=people)
+                             people=people,
+                             formats=tuple(FormatStorage(row[0], row[1], row[2])
+                                           for row in formats))

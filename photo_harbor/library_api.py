@@ -208,6 +208,8 @@ class LibraryApi:
             "photos": report.photos, "videos": report.videos, "shared": report.shared,
             "largest": [{"sha256": item.sha256, "name": item.name, "size": item.size,
                          "time": item.time} for item in report.largest],
+            "formats": [{"media_type": item.media_type, "count": item.count,
+                         "bytes": item.bytes} for item in report.formats],
             "people": [{"profile": item.profile, "count": item.count, "bytes": item.bytes}
                        for item in report.people],
             "disk": self._disk(),

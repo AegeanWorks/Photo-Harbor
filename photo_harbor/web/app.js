@@ -61,6 +61,16 @@ function items(n) {
   return `${n.toLocaleString()} item${n === 1 ? "" : "s"}`;
 }
 
+function formatLabel(type) {
+  const labels = {
+    "image/jpeg": "JPEG", "image/png": "PNG", "image/heic": "HEIC", "image/heif": "HEIF",
+    "image/gif": "GIF", "image/webp": "WebP", "image/tiff": "TIFF",
+    "image/x-adobe-dng": "DNG", "video/mp4": "MP4", "video/quicktime": "MOV",
+    "video/x-m4v": "M4V", "video/webm": "WebM",
+  };
+  return labels[type] || String(type).split("/").pop().toUpperCase();
+}
+
 function parseTime(text) {
   const date = text ? new Date(text) : null;
   return date && !Number.isNaN(date.getTime()) ? date : null;
@@ -927,6 +937,19 @@ async function loadHealth() {
       `${items(person.count)} · ${bytes(person.bytes)}`));
   }
   panels.append(library);
+  const formatsPanel = healthPanel("Formats");
+  if (storage.formats.length === 0) {
+    formatsPanel.append(el("p", "hint", "No files yet."));
+  } else {
+    for (const item of storage.formats.slice(0, 12)) {
+      formatsPanel.append(healthRow(formatLabel(item.media_type),
+        `${items(item.count)} · ${bytes(item.bytes)}`));
+    }
+    if (storage.formats.length > 12) {
+      formatsPanel.append(el("p", "hint", `${storage.formats.length - 12} more formats.`));
+    }
+  }
+  panels.append(formatsPanel);
   const coveragePanel = healthPanel("Metadata coverage");
   const coverage = status.coverage;
   const anyMissing = coverage.missing_dates + coverage.missing_places

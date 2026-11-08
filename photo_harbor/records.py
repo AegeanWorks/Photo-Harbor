@@ -152,6 +152,15 @@ class StorageFile:
 
 
 @dataclass(frozen=True)
+class FormatStorage:
+    """One media type's visible files and bytes."""
+
+    media_type: str
+    count: int
+    bytes: int
+
+
+@dataclass(frozen=True)
 class StorageReport:
     """Disk use for one profile, or for the whole library when ``profile`` is None."""
 
@@ -162,6 +171,7 @@ class StorageReport:
     shared: int
     largest: tuple
     people: tuple = ()
+    formats: tuple = ()
 
 
 @dataclass(frozen=True)

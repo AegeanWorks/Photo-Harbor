@@ -527,8 +527,10 @@ class HealthUiTest(unittest.TestCase):
         self.assertIn("loadHealth", script)
         self.assertIn("healthPanel", script)
         self.assertIn("status.coverage", script)
+        self.assertIn("storage.formats", script)
+        self.assertIn("formatLabel", script)
         for label in ("Metadata coverage", "Missing dates", "Missing places",
-                      "Missing cameras", "Missing lenses"):
+                      "Missing cameras", "Missing lenses", "Formats"):
             self.assertIn(label, script)
         self.assertNotIn("emptyTrash", script.split("async function loadHealth")[1].split("const ACTIVITY_LABELS")[0])
 

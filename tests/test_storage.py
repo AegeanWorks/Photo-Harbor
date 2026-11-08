@@ -19,6 +19,9 @@ class StorageReportTest(unittest.TestCase):
                          (2, 1, 1, 1))
         self.assertEqual(report.bytes, self.picture.size + self.video.size)
         self.assertEqual([item.name for item in report.largest], ["two.mp4", "one.jpg"])
+        self.assertEqual([(f.media_type, f.count, f.bytes) for f in report.formats],
+                         [("video/mp4", 1, self.video.size),
+                          ("image/jpeg", 1, self.picture.size)])
         self.assertEqual([(p.profile, p.count) for p in report.people],
                          [("main", 2), ("ayse", 1)])
 
@@ -28,4 +31,6 @@ class StorageReportTest(unittest.TestCase):
                          (1, 1, 0, 1))
         self.assertEqual(report.bytes, self.picture.size)
         self.assertEqual([item.name for item in report.largest], ["ayse.jpg"])
+        self.assertEqual([(f.media_type, f.count, f.bytes) for f in report.formats],
+                         [("image/jpeg", 1, self.picture.size)])
         self.assertEqual(report.people, ())

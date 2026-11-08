@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
-- **Total Classes**: `172`
+- **Total Classes**: `173`
 - **Total Top-Level Functions**: `126`
 - **Total Class Methods**: `684`
-- **Total Source Lines**: `11228`
+- **Total Source Lines**: `11261`
 
 ---
 
@@ -306,7 +306,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `447` lines (`23284` bytes)
+**Size**: `458` lines (`24046` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -610,7 +610,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `276` lines (`13524` bytes)
+**Size**: `278` lines (`13676` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -742,7 +742,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `195` lines (`4875` bytes)
+**Size**: `205` lines (`5049` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -758,6 +758,7 @@
 - `class Tag` - *One person's label; ``count`` is how many visible photos carry it.*
 - `class PersonStorage` - *One person's share: shared photos count in each person's share.*
 - `class StorageFile` - *One row of the largest-files list.*
+- `class FormatStorage` - *One media type's visible files and bytes.*
 - `class StorageReport` - *Disk use for one profile, or for the whole library when ``profile`` is None.*
 - `class TrashItem` - *One recoverable removal; the bytes sit under ``.harbor/trash`` until restored or deleted.*
 - `class Profile` - *A person: ``folder`` is their folder in the library, ``key`` is what their Shortcut sends.*
@@ -1265,7 +1266,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1136` lines (`64033` bytes)
+**Size**: `1139` lines (`64191` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1384,7 +1385,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `865` lines (`40196` bytes)
+**Size**: `867` lines (`40301` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1664,7 +1665,7 @@
 ---
 
 ### [`tests/test_storage.py`](tests/test_storage.py)
-**Size**: `31` lines (`1537` bytes)
+**Size**: `36` lines (`1898` bytes)
 
 **Classes:**
 - `class StorageReportTest`

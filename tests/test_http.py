@@ -704,7 +704,10 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(status["count"], 1)
         self.assertIn("disk", status)
         _, body = self.call("GET", "/api/storage")
-        self.assertIn("photos", json.loads(body))
+        storage = json.loads(body)
+        self.assertIn("photos", storage)
+        self.assertEqual([(f["media_type"], f["count"]) for f in storage["formats"]],
+                         [("image/jpeg", 1)])
         _, body = self.call("GET", "/api/backup")
         self.assertFalse(json.loads(body)["configured"])
         _, body = self.call("GET", "/api/trash")

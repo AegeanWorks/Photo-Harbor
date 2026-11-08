@@ -1138,3 +1138,13 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   person\'s view. The Sort menu offers **Recently added**. No schema or stored preference is added.
 - **Consequences**: New arrivals are easy to find without changing capture dates or moving files.
   The order composes with every filter and falls back to newest for unknown values.
+### ADR-071: Health lists storage formats from one grouped query
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Storage totals and largest files do not show which media types consume the
+  library, although photos.media_type already records the format for every original.
+- **Decision**: Extend Catalog.storage with a ormats list grouped by stored media type,
+  counting visible files and bytes (one person\'s copies or the whole library). GET /api/storage
+  returns it and the **Health** tab renders a **Formats** panel. No schema or new endpoint is added.
+- **Consequences**: The format split follows the same owner/self scope as storage. The panel is
+  read-only and bounded to twelve rows; unknown types still show their subtype.
