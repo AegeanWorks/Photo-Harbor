@@ -1,56 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-band-4",
-    "last_phase": "verification",
-    "active_phase": 4,
+    "task_id": "push-audit-band-5",
+    "last_phase": "planning",
+    "active_phase": 2,
     "status": "in_progress",
-    "updated_at": 1794112828.7304401,
+    "updated_at": 1794112900.673616,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "impact_assessment": {
+      "why": "Only the oldest pushes remain; band 5 completes the retrospective down to push 1",
+      "benefits": "The original feature commit and all intermediate pushes are verified against today's tree with a durable record",
+      "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+      "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-2",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Audit band 2: runs 6-11, expanding the newest-push window from 18 to 33 pushes; each run reviews three older pushes, fixes any current defect, verifies and publishes",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794110245.3928628,
-      "timestamp_str": "2026-11-08 06:57:25",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The retrospective audit must continue backward to the beginning; band 1 covered runs 1-5 (newest 3 to 15 pushes), band 2 adds pushes 60-65 down to 45-47",
-        "benefits": "Every older batch is checked against the current tree with attributed fixes and a pushed audit record",
-        "risks": "contract: none expected beyond the found defect; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
-        "mitigation": "Review each batch's diff, probe current code, failing-first test any fix, keep M<=6 runs per band, run full suite and 4/4 gates, publish each fix"
-      },
-      "plan_digest": "f17cf6893a1176dd45f10bdfd3e9f39f283d494d0c12148bbbfd061d0576e9de"
-    },
-    {
-      "task_id": "push-audit-band-2",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[2/6] Run 6 (pushes 63-80): Android install page moved to CSP-allowed meta.js/style.css; version constants pinned; HTTP tests reuse one socket to stop ephemeral-port flakes; 215 tests; 4/4 gates; checklists: passed; ADR-040",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794110461.0302472,
-      "timestamp_str": "2026-11-08 07:01:01",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-2",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/6] Run 7 (pushes 60-80): Android share fallback and scheduled-job evidence reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed; clean run recorded",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794110909.278954,
-      "timestamp_str": "2026-11-08 07:08:29",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-2",
       "phase": "verification",
@@ -249,6 +215,45 @@
       "timestamp": 1794112828.7304401,
       "timestamp_str": "2026-11-08 07:40:28",
       "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-4",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[6/6] Run 20 (pushes 21-80): reforge bookkeeping reviewed; no code change; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794112893.644516,
+      "timestamp_str": "2026-11-08 07:41:33",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-4",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-audit-band-4' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794112893.982191,
+      "timestamp_str": "2026-11-08 07:41:33",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-5",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Audit band 5: runs 21-26, expanding from the newest 63 to the newest 78 historical pushes (pushes 3-80); review the reforge fix, branding/media, licensing and the final core-feature pushes, fix defects, verify and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794112900.673616,
+      "timestamp_str": "2026-11-08 07:41:40",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Only the oldest pushes remain; band 5 completes the retrospective down to push 1",
+        "benefits": "The original feature commit and all intermediate pushes are verified against today's tree with a durable record",
+        "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+        "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
+      },
+      "plan_digest": "20cd0eb1856bb816c629903129a8b77e8c6b0f4b9536d47cf41c98af5f3529b5"
     }
   ]
 }
