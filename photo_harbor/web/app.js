@@ -828,7 +828,9 @@ async function loadTags() {
 
 async function loadTagOverview() {
   const listing = await loadTags();
-  $("tags-status").textContent = `${listing.tags.length.toLocaleString()} tags`;
+  const count = listing.tags.length;
+  $("tags-status").textContent =
+    `${count.toLocaleString()} ${count === 1 ? "tag" : "tags"}`;
   const grid = $("tags-grid");
   grid.replaceChildren();
   if (listing.tags.length === 0) {
