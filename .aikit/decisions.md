@@ -972,3 +972,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   written into the photo folders and no schema changes are needed.
 - **Consequences**: Users can move metadata into other tools without mutating originals. The
   export inherits the same per-person visibility and 500-hash batch limit as other bulk actions.
+
+### ADR-057: Lenses reuse the stored EXIF lens strings
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Camera strings already drive a rail and `camera=` filter; the lens is stored in
+  the same format-11 records and needs no new EXIF pass or schema.
+- **Decision**: Add `PhotoFilter.lens`, an exact `p.lens = ?` predicate, outline lens counts and
+  a **Lenses** rail. `GET /api/photos?lens=NAME` narrows the gallery exactly like the camera
+  filter; archived photos leave the count and non-owners only see their own copies.
+- **Consequences**: Lens search is a read-only local filter with no new writes. Empty EXIF lens
+  values simply do not appear; no lens equivalence or model inference is claimed.

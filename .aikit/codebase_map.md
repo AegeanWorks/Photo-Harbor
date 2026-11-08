@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `78`
-- **Total Classes**: `155`
+- **Total Python Modules**: `79`
+- **Total Classes**: `157`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `637`
-- **Total Source Lines**: `10577`
+- **Total Class Methods**: `644`
+- **Total Source Lines**: `10655`
 
 ---
 
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `403` lines (`21052` bytes)
+**Size**: `412` lines (`21499` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -583,7 +583,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `261` lines (`12565` bytes)
+**Size**: `264` lines (`12738` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -715,7 +715,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `180` lines (`4404` bytes)
+**Size**: `182` lines (`4515` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -1213,7 +1213,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `941` lines (`53305` bytes)
+**Size**: `953` lines (`53908` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1253,6 +1253,7 @@
   - Method `.test_camera_metadata_groups_and_filters()`
   - Method `.test_similar_review_groups_hashes_without_deleting()`
   - Method `.test_sidecar_export_is_a_read_only_zip()`
+  - Method `.test_lens_metadata_groups_and_filters()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1284,6 +1285,19 @@
 
 ---
 
+### [`tests/test_lenses.py`](tests/test_lenses.py)
+**Size**: `40` lines (`1865` bytes)
+
+**Classes:**
+- `class LensFilterTest`
+  - Method `.setUp()`
+  - Method `._add(data, name, lens)`
+  - Method `.test_a_lens_filters_and_lists_the_rail()`
+  - Method `.test_archiving_removes_the_lens_count()`
+  - Method `.test_another_person_sees_only_their_copies()`
+
+---
+
 ### [`tests/test_naming.py`](tests/test_naming.py)
 **Size**: `47` lines (`1759` bytes)
 
@@ -1306,7 +1320,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `695` lines (`31423` bytes)
+**Size**: `707` lines (`32003` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1358,6 +1372,8 @@
   - Method `.test_offline_map_is_embedded_and_wired()`
 - `class SidecarUiTest`
   - Method `.test_sidecar_export_is_reachable_for_selection_and_viewer()`
+- `class LensUiTest`
+  - Method `.test_gallery_lenses_are_reachable_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

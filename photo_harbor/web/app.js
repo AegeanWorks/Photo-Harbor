@@ -6,7 +6,8 @@ const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
   scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
-    camera: null, start: null, end: null, day: null, archived: false, order: "newest" },
+    camera: null, lens: null, start: null, end: null, day: null, archived: false,
+    order: "newest" },
   query: "",
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
@@ -205,6 +206,7 @@ function filterParams() {
   if (state.scope.tag) params.set("tag", String(state.scope.tag));
   if (state.scope.place) params.set("place", state.scope.place);
   if (state.scope.camera) params.set("camera", state.scope.camera);
+  if (state.scope.lens) params.set("lens", state.scope.lens);
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
   if (state.scope.day) params.set("day", state.scope.day);
@@ -287,6 +289,7 @@ function scopeTitle() {
   else if (state.scope.tag) base = currentTag()?.name || "Tag";
   else if (state.scope.place) base = `Near ${placeLabel(state.scope.place)}`;
   else if (state.scope.camera) base = `Shot with ${state.scope.camera}`;
+  else if (state.scope.lens) base = `Lens ${state.scope.lens}`;
   else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
@@ -299,7 +302,7 @@ function scopeTitle() {
 function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
     || state.scope.end || state.scope.day || state.scope.place || state.scope.camera
-    || state.query);
+    || state.scope.lens || state.query);
   const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
     || state.scope.tag || state.scope.archived);
   const shown = state.photos.length;
@@ -334,7 +337,9 @@ function renderScope() {
             ? "No photos with a location here."
             : state.scope.camera
               ? "No photos from this camera."
-              : state.scope.day
+              : state.scope.lens
+                ? "No photos from this lens."
+                : state.scope.day
                 ? "No photos from this day in other years."
                 : narrowed
               ? "No photo matches. Try another month or search."
@@ -345,7 +350,7 @@ function renderScope() {
 
 function markScope() {
   const active = state.scope.album || state.scope.tag || state.scope.place
-    || state.scope.camera ? null
+    || state.scope.camera || state.scope.lens ? null
     : state.scope.archived ? "archive"
       : state.scope.day ? "memories"
         : state.scope.favorite ? "favorite"
@@ -365,6 +370,9 @@ function markScope() {
   for (const item of document.querySelectorAll("[data-camera]")) {
     item.setAttribute("aria-pressed", String(item.dataset.camera === state.scope.camera));
   }
+  for (const item of document.querySelectorAll("[data-lens]")) {
+    item.setAttribute("aria-pressed", String(item.dataset.lens === state.scope.lens));
+  }
   $("date-filter").setAttribute("aria-pressed",
     String(Boolean(state.scope.start || state.scope.end)));
 }
@@ -372,7 +380,7 @@ function markScope() {
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
   state.scope = { kind, month, favorite: false, album: null, tag: null, place: null,
-    camera: null, start: null, end: null, day: null, archived: false,
+    camera: null, lens: null, start: null, end: null, day: null, archived: false,
     order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
@@ -466,6 +474,21 @@ async function loadOutline() {
       camerasRail.append(button);
     }
   }
+  const lensesRail = $("rail-lenses");
+  lensesRail.replaceChildren();
+  if (outline.lenses?.length) {
+    lensesRail.append(el("h4", "rail-year", "Lenses"));
+    for (const lens of outline.lenses) {
+      const button = el("button", "rail-item");
+      button.type = "button";
+      button.dataset.lens = lens.name;
+      button.setAttribute("aria-pressed", String(lens.name === state.scope.lens));
+      button.append(el("span", "", lens.name),
+        el("b", "", lens.count.toLocaleString()));
+      button.addEventListener("click", () => selectLens(lens.name));
+      lensesRail.append(button);
+    }
+  }
   $("rail-videos").textContent = outline.videos.toLocaleString();
   state.favorites = outline.favorites || 0;
   state.visible = outline.total || 0;
@@ -498,8 +521,8 @@ function selectPerson(id) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
   state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-    place: null, camera: null, start: null, end: null, day: null, archived: false,
-    order: state.scope.order || "newest" };
+    place: null, camera: null, lens: null, start: null, end: null, day: null,
+    archived: false, order: state.scope.order || "newest" };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -545,6 +568,11 @@ function selectPlace(key) {
 function selectCamera(name) {
   clearPersonScope();
   setScope(null, null, { camera: name });
+}
+
+function selectLens(name) {
+  clearPersonScope();
+  setScope(null, null, { lens: name });
 }
 
 function selectAlbum(id) {
@@ -659,7 +687,7 @@ async function deleteAlbum() {
   try {
     await post(`/api/albums/${album.id}`, { delete: true });
     state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-      place: null, camera: null, day: null, archived: false,
+      place: null, camera: null, lens: null, day: null, archived: false,
       order: state.scope.order || "newest" };
     markScope();
     await loadAlbums();

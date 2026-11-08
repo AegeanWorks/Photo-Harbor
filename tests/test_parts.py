@@ -372,6 +372,18 @@ class SidecarUiTest(unittest.TestCase):
         self.assertIn("sidecarCurrent", script)
 
 
+class LensUiTest(unittest.TestCase):
+    def test_gallery_lenses_are_reachable_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="rail-lenses"', page)
+        self.assertIn('params.set("lens", state.scope.lens)', script)
+        self.assertIn("selectLens", script)
+        self.assertIn("data-lens", script)
+        self.assertIn("outline.lenses", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

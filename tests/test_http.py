@@ -563,6 +563,18 @@ class ServerTest(unittest.TestCase):
                                 body={"sha256s": ["f" * 64]})
         self.assertEqual(response.status, 404)
 
+    def test_lens_metadata_groups_and_filters(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET lens = ? WHERE sha256 = ?", ("35 mm", one))
+        _, body = self.call("GET", "/api/outline")
+        self.assertEqual(json.loads(body)["lenses"], [{"name": "35 mm", "count": 1}])
+        _, body = self.call("GET", "/api/photos?lens=35%20mm")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

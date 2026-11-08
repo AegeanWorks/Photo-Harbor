@@ -18,7 +18,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Scrubbable bar / virtual scroll | Paginated day grid with lazy images | Medium: current scale is measured at 50k photos (12-33 ms pages) | Later |
 | RAW / 360 / LivePhoto / MotionPhoto | HEIC via optional Pillow; no RAW/360/pairing | Low-medium: needs decoders or paired-file model | Not now |
 | Metadata view (EXIF, map) | EXIF facts; GPS point and Places rail, no map | Medium: GPS extraction and coarse place grouping are local; map tiles would be a network dependency | **Places implemented**, map later |
-| Search by metadata/objects/faces/CLIP | File-name, date, person, album, tag, place and camera filters; no ML | Low for ML (RAM/CPU/extra services); local metadata search is worthwhile | **Camera search implemented**, ML later |
+| Search by metadata/objects/faces/CLIP | File-name, date, person, album, tag, place, camera and lens filters; no ML | Low for ML (RAM/CPU/extra services); local metadata search is worthwhile | **Camera/lens search implemented**, ML later |
 | Admin/user management | Owner manages people, passwords and keys | - | Keep |
 | OAuth / API keys | Profile keys and browser sessions | Low for a home LAN | Not now |
 | User-defined storage structure | Fixed readable `<Person>/<YYYY>/<YYYY-MM>` layout | Low: the plain layout is a deliberate feature | Not now |
@@ -92,9 +92,9 @@ A synthetic 50k-photo cache with 25k groups loaded through `similar_groups` in 0
 ## Implemented in this pass: Cameras
 
 Format 11 stores `camera` and `lens` from EXIF once at ingest (Pillow optional). The outline
-returns camera names with visible counts, the rail lists **Cameras**, and
-`GET /api/photos?camera=NAME` narrows the gallery. Details already shows the same camera/lens
-facts. Archived photos leave the camera count; no ML, network or file rewrite is involved.
+returns camera and lens names with visible counts, the rails list **Cameras** and **Lenses**, and
+`GET /api/photos?camera=NAME` or `?lens=NAME` narrows the gallery. Details already shows the same
+camera/lens facts. Archived photos leave both counts; no ML, network or file rewrite is involved.
 
 ## Decision summary
 

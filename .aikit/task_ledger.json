@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-sidecar",
+    "task_id": "immich-lenses",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794142159.7027774,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794142736.4085798,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794142393.155008
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-similar",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Read-only Similar review: perceptual dHash column, on-demand scan, exact-hash groups, tests; [2/2] Similar tab UI, docs, gates, review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794137913.217667,
-      "timestamp_str": "2026-11-08 14:38:33",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The near-duplicate gap is the remaining safe Immich feature: a read-only review needs perceptual hashes but no automatic deletion",
-        "benefits": "Users can find re-encoded or resized copies that exact SHA-256 dedupe misses, inspect them side by side, and decide manually",
-        "risks": "contract: new dhash column and similar endpoints; dependency: optional Pillow; concurrency: scan writes under the database lock; state: format 12 and on-demand index",
-        "mitigation": "Keep the review read-only with no delete action, skip unreadable files once, test grouping/privacy/migration and HTTP, run 4/4 gates, review the tab in Chromium"
-      },
-      "plan_digest": "58b65362dd5324ae69d62317a0af20c315534b63a9e33b1e3a80ba9c70c7fb99"
-    },
-    {
-      "task_id": "immich-similar",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Similar backend: format 12 photo_hashes, dHash, batch scan, exact-hash groups, read-only API/tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794138196.20007,
-      "timestamp_str": "2026-11-08 14:43:16",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-similar",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Similar backend done: 261 tests OK; 4/4 gates; migration/privacy/scan covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794138196.6416392,
-      "timestamp_str": "2026-11-08 14:43:16",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-similar",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794142393.1550102,
       "timestamp_str": "2026-11-08 15:53:13",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-lenses",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Lens filter: lens=NAME query, outline lens counts, Lenses rail and tests; [2/2] gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794142550.9394324,
+      "timestamp_str": "2026-11-08 15:55:50",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Lens strings are already stored with camera metadata; exposing a lens filter closes the remaining local metadata-search gap",
+        "benefits": "A read-only Lenses rail and exact lens filter using stored EXIF data, no new schema or file changes",
+        "risks": "contract: new lens query field and outline entry; dependency: stdlib only; concurrency: read-only; state: unchanged",
+        "mitigation": "Mirror the proven camera filter, validate privacy through the catalog, add unit/HTTP/static tests, gate and review"
+      },
+      "plan_digest": "477a6a3e54864e7681f57fe099ed1c2f4fac7ccc4c81cf81a5288138a8913364"
+    },
+    {
+      "task_id": "immich-lenses",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Lenses: lens=NAME filter, outline lens counts, Lenses rail and tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794142735.7906387,
+      "timestamp_str": "2026-11-08 15:58:55",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-lenses",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Lenses done: 278 tests OK; 4/4 gates; privacy/archive covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794142736.4085798,
+      "timestamp_str": "2026-11-08 15:58:56",
       "agent": "opencode:deepseek"
     }
   ]

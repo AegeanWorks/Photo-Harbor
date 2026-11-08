@@ -95,6 +95,9 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
     if narrow.camera:
         clauses.append("p.camera = ?")
         params.append(narrow.camera)
+    if narrow.lens:
+        clauses.append("p.lens = ?")
+        params.append(narrow.lens)
     return (" WHERE " + " AND ".join(clauses) if clauses else ""), params
 
 
@@ -347,10 +350,16 @@ class Catalog:
                 f"SELECT p.camera, COUNT(*) FROM {table}{camera_where}"
                 " GROUP BY p.camera ORDER BY COUNT(*) DESC, p.camera LIMIT 50",
                 params).fetchall()
+            lens_where = f"{where} AND p.lens IS NOT NULL"
+            lenses = self._db.conn.execute(
+                f"SELECT p.lens, COUNT(*) FROM {table}{lens_where}"
+                " GROUP BY p.lens ORDER BY COUNT(*) DESC, p.lens LIMIT 50",
+                params).fetchall()
         return Outline(months=tuple((row[0], row[1]) for row in months), videos=videos,
                        favorites=favorites, total=total, archived=archived,
                        places=tuple((row[0], row[1], row[2]) for row in places),
-                       cameras=tuple((row[0], row[1]) for row in cameras))
+                       cameras=tuple((row[0], row[1]) for row in cameras),
+                       lenses=tuple((row[0], row[1]) for row in lenses))
 
     def stats(self, profile: Optional[str] = None) -> LibraryStats:
         table, where, params = _totals_source(profile)
