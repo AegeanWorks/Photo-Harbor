@@ -60,26 +60,43 @@ class ServerTest(unittest.TestCase):
         self.addCleanup(thread.join)
         self.addCleanup(self.server.server_close)
         self.addCleanup(self.server.shutdown)
-        self._conn = None
 
     def call(self, method, path, body=None, headers=None, key=True):
-        if self._conn is None:
-            self._conn = http.client.HTTPConnection(
-                "127.0.0.1", self.server.server_address[1], timeout=5)
-            self.addCleanup(self._conn.close)
+        # A fresh socket keeps each assertion independent: reusing one keep-alive
+        # connection through hundreds of tests made Windows occasionally report a
+        # stale ConnectionAbortedError. The dedicated keep-alive test below still
+        # exercises connection reuse explicitly.
         sent = dict(headers or {})
         if key:
             sent["X-Harbor-Key"] = self.settings.key
         if isinstance(body, dict):
             body = json.dumps(body).encode()
             sent["Content-Type"] = "application/json"
-        self._conn.request(method, path, body=body, headers=sent)
-        response = self._conn.getresponse()
-        return response, response.read()
+        sent.setdefault("Connection", "close")
+        connection = http.client.HTTPConnection(
+            "127.0.0.1", self.server.server_address[1], timeout=5)
+        try:
+            connection.request(method, path, body=body, headers=sent)
+            response = connection.getresponse()
+            return response, response.read()
+        finally:
+            connection.close()
 
     def upload(self, data, name="IMG_0001.HEIC", digest=None):
         headers = {"X-Name": name, "X-Sha256": digest or sha(data), "X-Taken": "2026-05-01T08:00:00Z"}
         return self.call("POST", "/api/upload", body=data, headers=headers)
+
+    def test_keep_alive_serves_two_requests_on_one_connection(self):
+        connection = http.client.HTTPConnection(
+            "127.0.0.1", self.server.server_address[1], timeout=5)
+        self.addCleanup(connection.close)
+        headers = {"X-Harbor-Key": self.settings.key, "Connection": "keep-alive"}
+        for _ in range(2):
+            connection.request("GET", "/api/status", headers=headers)
+            response = connection.getresponse()
+            body = response.read()
+            self.assertEqual(response.status, 200)
+            self.assertIn(b'"count"', body)
 
     def test_a_full_sync_round(self):
         response, body = self.call("POST", "/api/sync/start", body={})

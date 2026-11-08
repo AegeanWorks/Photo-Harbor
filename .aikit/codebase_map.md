@@ -9,8 +9,8 @@
 - **Total Python Modules**: `79`
 - **Total Classes**: `157`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `644`
-- **Total Source Lines**: `10655`
+- **Total Class Methods**: `645`
+- **Total Source Lines**: `10672`
 
 ---
 
@@ -1213,7 +1213,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `953` lines (`53908` bytes)
+**Size**: `970` lines (`54797` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1227,6 +1227,7 @@
   - Method `.setUp()`
   - Method `.call(method, path, body, headers, key)`
   - Method `.upload(data, name, digest)`
+  - Method `.test_keep_alive_serves_two_requests_on_one_connection()`
   - Method `.test_a_full_sync_round()`
   - Method `.test_has_answers_yes_only_for_verified_photos()`
   - Method `.test_a_mismatched_hash_is_rejected_and_counted()`
