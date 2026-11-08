@@ -275,10 +275,12 @@ function renderWindow() {
 
 function scheduleWindow() {
   if (state.dayWindowFrame !== null) return;
-  state.dayWindowFrame = requestAnimationFrame(() => {
+  // A timer, not requestAnimationFrame: the window must also update in a background
+  // tab where Chromium pauses animation frames.
+  state.dayWindowFrame = setTimeout(() => {
     state.dayWindowFrame = null;
     renderWindow();
-  });
+  }, 16);
 }
 
 function addPhotos(photos) {
@@ -354,7 +356,7 @@ function resetPhotos() {
   state.dayEls.clear();
   state.dayList = [];
   if (state.dayWindowFrame !== null) {
-    cancelAnimationFrame(state.dayWindowFrame);
+    clearTimeout(state.dayWindowFrame);
     state.dayWindowFrame = null;
   }
   $("days").replaceChildren();
