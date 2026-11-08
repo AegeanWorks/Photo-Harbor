@@ -264,7 +264,16 @@ audit output and do not extend the numbered target.
 - Finding: none actionable; the media and license records are consistent.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 26 - pushes 3-80
+
+- Range: `a584dc7` (push 3), `9400a41` (push 4), `6523eaf` (push 5), plus the last 75
+  pushes.
+- Reviewed: the Aegean licensing adoption, clarification and migration to AL-1.1; no
+  application code or tests changed.
+- Finding: none actionable; LICENSE, REUSE and README agree.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 25 (pushes 6-80).
-- Next run: final band, adding pushes 3-5 and then the original core feature.
+- Runs completed: 26 (pushes 3-80).
+- Next run: the beginning, pushes 1-2 (original Shortcut sync, accounts, per-person folders).

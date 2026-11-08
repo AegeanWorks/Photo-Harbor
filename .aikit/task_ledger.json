@@ -1,50 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-band-5",
+    "task_id": "push-audit-band-6",
     "last_phase": "verification",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794113315.0199335,
+    "updated_at": 1794113388.4104655,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": [],
-    "completed_at": 1794113315.5705192
+    "completed_at": 1794113388.7299082
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-3",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/6] Run 12 (pushes 45-80): trash move/restore/delete and shared copies reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794111682.95056,
-      "timestamp_str": "2026-11-08 07:21:22",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-3",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[4/6] Run 13 (pushes 42-80): inclusive date windows and stable sort orders reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794111809.0592103,
-      "timestamp_str": "2026-11-08 07:23:29",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-3",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[5/6] Run 14 (pushes 39-80): CLI OSError now prints Error/Why/Fix; 216 tests; 4/4 gates; checklists: passed; ADR-043",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794111956.581414,
-      "timestamp_str": "2026-11-08 07:25:56",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-3",
       "phase": "verification",
@@ -241,6 +208,45 @@
       "status": "completed",
       "timestamp": 1794113315.5705216,
       "timestamp_str": "2026-11-08 07:48:35",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-6",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/2] Final audit band: run 26 covers licensing pushes 3-5; run 27 covers pushes 1-2, the original Shortcut sync/accounts core, to finish at the beginning",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794113375.8040018,
+      "timestamp_str": "2026-11-08 07:49:35",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Two runs remain before the audit window reaches push 1",
+        "benefits": "The original ingest, per-person and browser feature set is re-verified against today's hardened tree",
+        "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+        "mitigation": "Review the push diffs, probe current code, failing-first test any fix, run the full suite and 4/4 gates, publish each run"
+      },
+      "plan_digest": "2967f47083db1513a4d19c69fcf2df4a96831a1b6c0a1561a1e2637232675283"
+    },
+    {
+      "task_id": "push-audit-band-6",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[2/2] Run 26 (pushes 3-80): licensing records reviewed; no code change; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794113388.4104655,
+      "timestamp_str": "2026-11-08 07:49:48",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-6",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-audit-band-6' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794113388.7299106,
+      "timestamp_str": "2026-11-08 07:49:48",
       "agent": "opencode:deepseek"
     }
   ]
