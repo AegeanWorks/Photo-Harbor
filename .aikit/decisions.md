@@ -703,3 +703,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   `FIRST_SYNC_SINCE`. `SyncApi.done` uses the same `_comparable` helper.
 - **Consequences**: An old skew causes one full rescan instead of a stalled sync. A cursor
   inside the ten-minute slack is still honoured; a naive and an aware cursor compare safely.
+
+### ADR-038: Backup refuses a missing source
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `mirror` and `verify` iterated a missing source folder as if it were empty. An
+  unplugged library drive therefore produced "0 copied, 0 unchanged" or "0 checked, 0 missing"
+  and looked like a clean backup; `DailyBackup` recorded no error and the Sync tab showed success.
+- **Decision**: Both functions require `source.is_dir()` before scanning and raise the
+  Error/Why/Fix triad when it is missing. A missing or disconnected library is recorded as a
+  backup failure by `DailyBackup`, and the CLI exits 1.
+- **Consequences**: The backup status can no longer claim success for a library it never read.
+  A target that is missing is still refused separately (ADR-016); only a real source is copied.

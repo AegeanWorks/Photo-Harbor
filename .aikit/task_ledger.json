@@ -5,23 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794109019.1562395,
+    "updated_at": 1794109228.0438838,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-hardening-31",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[3/6] Exclusive placement: place_exclusive/copy_exclusive never replace an existing name, link_or_copy refuses a rival, and store ingest/link paths retry the next candidate; the rival-file regression now keeps the first photo",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093336.4044974,
-      "timestamp_str": "2026-11-08 02:15:36",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-hardening-31",
       "phase": "verification",
@@ -253,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794109019.1562395,
       "timestamp_str": "2026-11-08 06:36:59",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[5/6] Run 4 (pushes 69-80): backup refuses a missing source and records it as an error; 213 tests; 4/4 gates; checklists: passed; ADR-038 and audit log updated",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794109228.0438838,
+      "timestamp_str": "2026-11-08 06:40:28",
       "agent": "opencode:deepseek"
     }
   ]

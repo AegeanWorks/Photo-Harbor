@@ -41,7 +41,17 @@ Push numbers are the `update by push` entries in `git reflog show origin/master`
   slack and rescan once. Regression covers aware and naive future cursors. ADR-037.
 - Verification: 212 tests OK; project check 4/4 gates.
 
+## Run 4 - pushes 69-80
+
+- Range: `79c3796` (push 69), `49ad061` (push 70), `4213a1c` (push 71), plus the last 9 pushes.
+- Reviewed: PWA close-out, owner-only backup status, its Sync panel and runner wiring.
+- Finding: `mirror`/`verify` scanned a missing source as empty, so an unplugged library drive
+  looked like a clean backup and `DailyBackup` recorded success.
+- Fix: require a real source directory before scanning; the status records the failure and the
+  CLI exits 1. ADR-038.
+- Verification: 213 tests OK; project check 4/4 gates.
+
 ## Status
 
-- Runs completed: 3 (pushes 72-80).
-- Next run: last 12 pushes, adding pushes 69-71.
+- Runs completed: 4 (pushes 69-80).
+- Next run: last 15 pushes, adding pushes 66-68.

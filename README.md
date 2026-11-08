@@ -167,7 +167,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   twice there, because the backup drive gets plain copies. **Sync → Backup** shows the target
   and the last attempt for the main profile; **Check backup** in the window, or
   `python -m photo_harbor backup --to DIR --check`, re-hashes every source file against its
-  copy and reports missing, different and extra files.
+  copy and reports missing, different and extra files. A missing library folder is a backup
+  error, never an empty success.
 
 ### Commands
 

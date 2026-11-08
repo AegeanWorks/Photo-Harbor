@@ -219,6 +219,17 @@ class BackupTest(unittest.TestCase):
         with self.assertRaises(HarborError):
             verify(root, root / "missing")
 
+    def test_a_missing_source_is_refused_instead_of_an_empty_success(self):
+        root = temp_dir(self)
+        target = root / "backup"
+        target.mkdir()
+        with self.assertRaises(HarborError):
+            mirror(root / "missing", target)
+        with self.assertRaises(HarborError):
+            verify(root / "missing", target)
+        missing = DailyBackup(root / "missing", target, log=lambda text: None)
+        self.assertIsNotNone(missing.run_once().error)
+
     def test_a_backup_run_records_its_last_status(self):
         root = temp_dir(self)
         source, target = root / "photos", root / "backup"

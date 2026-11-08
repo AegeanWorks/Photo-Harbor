@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
 - **Total Classes**: `117`
-- **Total Top-Level Functions**: `102`
-- **Total Class Methods**: `505`
-- **Total Source Lines**: `8371`
+- **Total Top-Level Functions**: `103`
+- **Total Class Methods**: `506`
+- **Total Source Lines**: `8391`
 
 ---
 
@@ -207,7 +207,7 @@
 ### [`photo_harbor/backup.py`](photo_harbor/backup.py)
 > *A second copy of the library's originals on another drive, so one disk failure loses nothing.*
 
-**Size**: `178` lines (`6032` bytes)
+**Size**: `187` lines (`6394` bytes)
 
 **Classes:**
 - `class BackupReport`
@@ -224,6 +224,7 @@
 
 **Functions:**
 - `def _refuse_inside(source, target)`
+- `def _require_source(source)`
 - `def _files(root)` - *Every visible file below ``root``, skipping Harbor's dot folders.*
 - `def _digest(path)`
 - `def verify(source, target)` - *Re-hash every source original against its backup copy; extras there are reported only.*
@@ -1093,7 +1094,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `505` lines (`21629` bytes)
+**Size**: `516` lines (`22106` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1126,6 +1127,7 @@
   - Method `.test_verify_hashes_every_copy_and_reports_damage()`
   - Method `.test_mirror_recopies_same_size_content_change()`
   - Method `.test_verify_refuses_a_target_that_is_not_there()`
+  - Method `.test_a_missing_source_is_refused_instead_of_an_empty_success()`
   - Method `.test_a_backup_run_records_its_last_status()`
 - `class ThumbnailerTest`
   - Method `.test_without_pillow_previews_are_off()`

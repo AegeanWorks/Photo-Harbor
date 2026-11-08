@@ -54,6 +54,13 @@ def _refuse_inside(source: Path, target: Path) -> None:
                           "choose a folder on another drive, e.g. E:\\HarborBackup")
 
 
+def _require_source(source: Path) -> None:
+    if not source.is_dir():
+        raise HarborError(f"{source} is not a folder",
+                          "the library drive is not connected, or --library points elsewhere",
+                          "reconnect the drive, or pass the right library folder")
+
+
 def _files(root: Path):
     """Every visible file below ``root``, skipping Harbor's dot folders."""
     for path in sorted(root.rglob("*")):
@@ -73,6 +80,7 @@ def _digest(path: Path) -> str:
 def verify(source: Path, target: Path) -> VerifyReport:
     """Re-hash every source original against its backup copy; extras there are reported only."""
     _refuse_inside(source, target)
+    _require_source(source)
     if not target.is_dir():
         raise HarborError(f"{target} is not a folder",
                           "no backup exists there yet",
@@ -109,6 +117,7 @@ def verify(source: Path, target: Path) -> VerifyReport:
 def mirror(source: Path, target: Path) -> BackupReport:
     """Copy each original missing from ``target`` or differing in size; never deletes there."""
     _refuse_inside(source, target)
+    _require_source(source)
     copied = unchanged = total = 0
     for path in sorted(source.rglob("*")):
         if not path.is_file() or any(part.startswith(".") for part in path.relative_to(source).parts):
