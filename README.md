@@ -181,11 +181,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps directly to a month without loading the whole library, and the sidebar and scrubber
   stay in sync.
-- **Overview tabs.** Albums, tags and people show covers/counts, folder paths and sync times; click a card to open its gallery. **Activity** lists recent journal events.
+- **Overview tabs.** Albums, tags and people show covers/counts, folder paths and sync times; click a card to open it. **Activity** shows recent events.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
-- **Read-only folders.** The **Folders** tab mirrors the plain
-  `<Person>/<YYYY>/<YYYY-MM>` layout with real paths and counts. Click a month to open it; owners
-  see everyone, others only themselves. It is a view, not a second storage model.
+- **Read-only folders.** The **Folders** tab mirrors the real `<Person>/<YYYY>/<YYYY-MM>` paths; click a month to open it. Owners see everyone, others themselves.
 - **Read-only sidecars.** Select photos and choose **Sidecars… → JSON** or **XMP** for a metadata
   ZIP; the viewer's **Sidecar** exports JSON. Tags, GPS, camera and lens are included; originals
   are never rewritten.
@@ -291,6 +289,7 @@ photo-harbor/
 │   ├── app.py                <- wires storage, APIs and the web page into routes
 │   ├── atomic_file.py        <- temp + fsync + replace, and exclusive placement
 │   ├── accounts.py           <- password hashes, sessions, wrong-password brake
+│   ├── activity_api.py       <- read-only recent journal events
 │   ├── albums.py             <- personal albums and favorites; no files move
 │   ├── albums_api.py         <- albums and favorites; single or up to 500 hashes per call
 │   ├── archive.py            <- per-person hidden photos; no files move
@@ -343,6 +342,7 @@ photo-harbor/
 └── tests/
     ├── __init__.py
     ├── library_fixture.py    <- a throwaway library for tests
+    ├── test_activity.py      <- recent journal events and per-person visibility
     ├── test_albums.py        <- personal albums, favorites and format 5 migration
     ├── test_archive.py       <- per-person archive and format 7 migration
     ├── test_cameras.py       <- camera EXIF, camera filter and format 10 migration
