@@ -424,6 +424,14 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .explore-link { grid-template-columns: 1fr auto; border: 0; border-bottom: 1px solid var(--line); background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
 .explore-link:hover, .explore-link:focus-visible { color: var(--accent); }
 
+.activity-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }
+.activity-item { display: grid; grid-template-columns: 110px 130px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 9px 12px; border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); font-size: 13px; }
+.activity-when { color: var(--muted); font: 12px/1.4 var(--mono); }
+.activity-kind { color: var(--accent); font-weight: 600; }
+.activity-detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-person { color: var(--muted); font-size: 12px; }
+@media (max-width: 640px) { .activity-item { grid-template-columns: 90px 1fr; } .activity-person { display: none; } }
+
 .people-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-top: 14px; }
 .people-card { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: inherit; text-align: left; cursor: pointer; font: inherit; box-shadow: var(--shadow); }
 .people-card:hover, .people-card:focus-visible { border-color: var(--accent); color: var(--accent); }

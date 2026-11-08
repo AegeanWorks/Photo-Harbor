@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-people-overview",
+    "task_id": "immich-activity",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794147126.9932642,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794147983.0237315,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794147725.3531117
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-compare",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Similar compare overlay: side-by-side read-only media grid, close/Escape and static/HTTP tests; [2/2] gates, Chromium review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794145030.6016986,
-      "timestamp_str": "2026-11-08 16:37:10",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "Similar groups currently open originals one at a time; a side-by-side review is the natural read-only next step",
-        "benefits": "Compare re-encoded/resized copies in one view without mutating or deleting anything",
-        "risks": "contract: new Similar overlay and group action; dependency: browser only; concurrency: read-only; state: none",
-        "mitigation": "Reuse group photo URLs, keep only a close action, test the overlay wiring and API media fields, review in Chromium"
-      },
-      "plan_digest": "7820570c8c43aa7fd45accd9ddab9874ee004275a1e8594856452257f87782fd"
-    },
-    {
-      "task_id": "immich-compare",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Similar side-by-side overlay: read-only media figures, group Compare action, Close/Escape, static/HTTP tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794145233.5925393,
-      "timestamp_str": "2026-11-08 16:40:33",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-compare",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Compare overlay done: 287 tests OK; 4/4 gates; media fields covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794145235.0197365,
-      "timestamp_str": "2026-11-08 16:40:35",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-compare",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794147725.3531144,
       "timestamp_str": "2026-11-08 17:22:05",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-activity",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Activity overview: recent journal events via /api/activity, read-only timeline with person labels; [2/2] unit/HTTP/static tests, gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794147860.0367072,
+      "timestamp_str": "2026-11-08 17:24:20",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The sync journal already records uploads, syncs, scans and missing reports; an Activity view makes that local history legible without new storage",
+        "benefits": "A read-only household activity timeline that exposes sync and library events already in SQLite",
+        "risks": "contract: new activity endpoint and tab; dependency: stdlib only; concurrency: read-only; state: none",
+        "mitigation": "Limit and validate the query, enforce owner/self visibility, add unit/HTTP/static tests, gate and review"
+      },
+      "plan_digest": "dfcf224dc380d9377ae09731fa38384f200eabb96bf7f11890eef7eec692794c"
+    },
+    {
+      "task_id": "immich-activity",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Activity: /api/activity recent journal slice, privacy filter, read-only timeline and unit/HTTP/static tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794147982.417692,
+      "timestamp_str": "2026-11-08 17:26:22",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-activity",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Activity done: 299 tests OK; 4/4 gates; privacy/limit covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794147983.0237315,
+      "timestamp_str": "2026-11-08 17:26:23",
       "agent": "opencode:deepseek"
     }
   ]

@@ -664,6 +664,25 @@ class ServerTest(unittest.TestCase):
         self.assertTrue(person["folder"])
         self.assertIn("last_sync", person)
 
+    def test_activity_journal_is_recent_and_private(self):
+        ayse = self.add_person()
+        self.upload(b"mine", name="mine.jpg")
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        self.call("POST", "/api/sync/done", body={"started_at": "2026-05-01T08:00:00"})
+        _, body = self.call("GET", "/api/activity?limit=10")
+        events = json.loads(body)["events"]
+        self.assertIn("stored", [event["kind"] for event in events])
+        self.assertIn("sync_done", [event["kind"] for event in events])
+        _, body = self.call("GET", "/api/activity", key=False,
+                            headers={"X-Harbor-Key": ayse["key"]})
+        hers = json.loads(body)["events"]
+        self.assertTrue(hers)
+        self.assertTrue(all(event["profile"] == "ayse" for event in hers))
+        response, _ = self.call("GET", "/api/activity?limit=0")
+        self.assertEqual(response.status, 400)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

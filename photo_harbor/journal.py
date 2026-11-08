@@ -42,6 +42,17 @@ class SyncJournal:
                 "SELECT at FROM events WHERE kind = ? ORDER BY id DESC LIMIT 1", (kind,)).fetchone()
         return row[0] if row else None
 
+    def recent(self, limit: int = 100, profile: Optional[str] = None) -> list:
+        """Newest journal events, for everyone or one person; old profile-less events are main."""
+        mine = " WHERE COALESCE(profile, 'main') = ?" if profile else ""
+        params = (profile, limit) if profile else (limit,)
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                "SELECT at, kind, sha256, detail, COALESCE(profile, 'main')"
+                f" FROM events{mine} ORDER BY id DESC LIMIT ?", params).fetchall()
+        return [{"at": row[0], "kind": row[1], "sha256": row[2], "detail": row[3],
+                 "profile": row[4]} for row in rows]
+
     def counts_since(self, since: str, profile: Optional[str] = None) -> dict:
         query = "SELECT kind, COUNT(*) FROM events WHERE at >= ? AND kind IN (?, ?, ?)"
         params = [since, STORED, DUPLICATE, REJECTED]

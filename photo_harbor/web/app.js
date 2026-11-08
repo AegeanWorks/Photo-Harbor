@@ -852,6 +852,44 @@ async function loadTagOverview() {
   }
 }
 
+const ACTIVITY_LABELS = {
+  stored: "Stored",
+  duplicate: "Already present",
+  rejected: "Rejected",
+  sync_done: "Sync finished",
+  missing: "Reported missing",
+  scanned: "Folder scan",
+  checked: "Library check",
+  removed: "Removed",
+  damaged: "Damaged",
+};
+
+async function loadActivity() {
+  const data = await api("/api/activity?limit=100");
+  const events = data.events || [];
+  $("activity-status").textContent =
+    `${events.length.toLocaleString()} recent ${events.length === 1 ? "event" : "events"}`;
+  const list = $("activity-list");
+  list.replaceChildren();
+  if (events.length === 0) {
+    list.append(el("li", "none", "No activity yet."));
+    return;
+  }
+  const showPerson = state.people.length > 1;
+  for (const event of events) {
+    const row = el("li", "activity-item");
+    const when = el("span", "activity-when", ago(event.at));
+    when.title = event.at;
+    const detail = event.detail
+      || (event.sha256 ? `${event.sha256.slice(0, 12)}…` : "");
+    row.append(when,
+      el("span", "activity-kind", ACTIVITY_LABELS[event.kind] || event.kind),
+      el("span", "activity-detail", detail));
+    if (showPerson) row.append(el("span", "activity-person", personName(event.profile)));
+    list.append(row);
+  }
+}
+
 async function newTag() {
   const name = prompt("Name for the new tag:");
   if (!name) return;
@@ -2481,7 +2519,7 @@ function show(view) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
   for (const name of ["photos", "folders", "explore", "albums", "tags", "people",
-    "sync", "setup", "similar", "map", "trash"]) {
+    "activity", "sync", "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "folders") loadFolders().catch(handle);
@@ -2489,6 +2527,7 @@ function show(view) {
   if (view === "albums") loadAlbumOverview().catch(handle);
   if (view === "tags") loadTagOverview().catch(handle);
   if (view === "people") loadPeopleOverview().catch(handle);
+  if (view === "activity") loadActivity().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

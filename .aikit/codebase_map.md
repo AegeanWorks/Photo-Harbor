@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `81`
-- **Total Classes**: `166`
+- **Total Python Modules**: `83`
+- **Total Classes**: `169`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `665`
-- **Total Source Lines**: `10931`
+- **Total Class Methods**: `673`
+- **Total Source Lines**: `11030`
 
 ---
 
@@ -83,6 +83,18 @@
 
 ---
 
+### [`photo_harbor/activity_api.py`](photo_harbor/activity_api.py)
+> *Read-only recent journal events for the Activity view.*
+
+**Size**: `25` lines (`934` bytes)
+
+**Classes:**
+- `class ActivityApi`
+  - Method `.__init__(journal)`
+  - Method `.listing(request)`
+
+---
+
 ### [`photo_harbor/albums.py`](photo_harbor/albums.py)
 > *Personal albums and favorites: named collections that never move or copy a file.*
 
@@ -132,7 +144,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `249` lines (`12394` bytes)
+**Size**: `253` lines (`12572` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -144,7 +156,7 @@
   - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
-  - Method `._register(sync, library, people, albums, archive, tags, similar, sidecar, folders, downloads, trash, backup, setup)`
+  - Method `._register(sync, library, people, albums, archive, tags, similar, sidecar, folders, activity, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -560,7 +572,7 @@
 ### [`photo_harbor/journal.py`](photo_harbor/journal.py)
 > *What the phone did and when: uploads, finished syncs and photos the PC lacked at cleanup.*
 
-**Size**: `68` lines (`3048` bytes)
+**Size**: `79` lines (`3725` bytes)
 
 **Classes:**
 - `class SyncJournal`
@@ -568,6 +580,7 @@
   - Method `.record(at, kind, sha256, detail, profile)`
   - Method `.last_sync(profile)` - *The start time of the latest finished sync, for one profile or (None) anyone.*
   - Method `.last_event(kind)` - *When the latest event of ``kind`` was recorded.*
+  - Method `.recent(limit, profile)` - *Newest journal events, for everyone or one person; old profile-less events are main.*
   - Method `.counts_since(since, profile)`
   - Method `.missing(limit, profile)` - *Photos a phone holds that the PC still lacks, newest report first; one person's*
 
@@ -1059,6 +1072,17 @@
 
 ---
 
+### [`tests/test_activity.py`](tests/test_activity.py)
+**Size**: `26` lines (`1187` bytes)
+
+**Classes:**
+- `class JournalRecentTest`
+  - Method `.setUp()`
+  - Method `.test_recent_events_are_newest_first_and_limit()`
+  - Method `.test_one_person_sees_only_their_events()`
+
+---
+
 ### [`tests/test_albums.py`](tests/test_albums.py)
 **Size**: `162` lines (`8601` bytes)
 
@@ -1238,7 +1262,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1042` lines (`58715` bytes)
+**Size**: `1061` lines (`59774` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1286,6 +1310,7 @@
   - Method `.test_albums_overview_has_cover_and_count()`
   - Method `.test_tags_overview_has_name_and_count()`
   - Method `.test_people_overview_has_counts_folders_and_last_sync()`
+  - Method `.test_activity_journal_is_recent_and_private()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1352,7 +1377,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `813` lines (`37360` bytes)
+**Size**: `827` lines (`38068` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1420,6 +1445,8 @@
   - Method `.test_tags_overview_is_wired_to_counts()`
 - `class PeopleOverviewUiTest`
   - Method `.test_people_overview_is_wired_to_profiles()`
+- `class ActivityUiTest`
+  - Method `.test_activity_overview_is_read_only_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

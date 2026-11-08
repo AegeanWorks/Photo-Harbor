@@ -1082,3 +1082,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   Password/key management stays in Setup. No schema or endpoint is added.
 - **Consequences**: The overview cannot drift from the profile list and respects owner/self
   visibility. Counts are stats over each person's copies, as elsewhere.
+
+### ADR-066: Activity presents a bounded slice of the journal
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The sync journal already records uploads, syncs, scans and missing reports, but
+  the UI exposed only last-sync/count summaries. A separate audit store would duplicate events.
+- **Decision**: Add `GET /api/activity?limit=1..500` over the existing events table, newest first,
+  with owner-all/self-only visibility. The **Activity** tab labels known kinds and shows relative
+  time, detail and person. It is read-only and adds no schema.
+- **Consequences**: Users can inspect recent household/library activity without a new source of
+  truth. History is intentionally bounded and not exported or editable.

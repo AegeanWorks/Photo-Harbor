@@ -181,7 +181,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps directly to a month without loading the whole library, and the sidebar and scrubber
   stay in sync.
-- **Overview tabs.** Albums, tags and people show covers/counts, folder paths and sync times; click a card to open its gallery.
+- **Overview tabs.** Albums, tags and people show covers/counts, folder paths and sync times; click a card to open its gallery. **Activity** lists recent journal events.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
 - **Read-only folders.** The **Folders** tab mirrors the plain
   `<Person>/<YYYY>/<YYYY-MM>` layout with real paths and counts. Click a month to open it; owners
@@ -189,9 +189,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Read-only sidecars.** Select photos and choose **Sidecars… → JSON** or **XMP** for a metadata
   ZIP; the viewer's **Sidecar** exports JSON. Tags, GPS, camera and lens are included; originals
   are never rewritten.
-- **Offline photo map.** The **Map** tab draws an embedded SVG world outline and plots the
-  stored one-decimal Places as markers; clicking a place opens its gallery view. No tiles, CDN
-  or network lookups are used.
+- **Offline photo map.** Embedded SVG world outline with Places markers; clicking one opens its gallery. No tiles or network lookups.
 - **Read-only Similar review.** The **Similar** tab indexes optional perceptual hashes on
   demand and lists connected groups whose hashes differ by at most 8 bits. **Scan library**
   hashes up to 10,000 photos per press; **Build groups** (started automatically after a scan)

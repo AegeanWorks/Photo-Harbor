@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from .accounts import ITERATIONS, LoginBrake, Passwords, Sessions
+from .activity_api import ActivityApi
 from .albums import AlbumBook
 from .albums_api import AlbumsApi
 from .archive import ArchiveBook
@@ -113,6 +114,7 @@ class HarborApp:
                        SimilarApi(catalog, self.store),
                        SidecarApi(catalog, self.tags),
                        FoldersApi(self.profiles, catalog),
+                       ActivityApi(journal),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),
                        BackupApi(lambda: self.backup),
@@ -185,8 +187,9 @@ class HarborApp:
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
                   albums: AlbumsApi, archive: ArchiveApi, tags: TagApi, similar: SimilarApi,
-                  sidecar: SidecarApi, folders: FoldersApi, downloads: DownloadsApi,
-                  trash: TrashApi, backup: BackupApi, setup: SetupApi) -> None:
+                  sidecar: SidecarApi, folders: FoldersApi, activity: ActivityApi,
+                  downloads: DownloadsApi, trash: TrashApi, backup: BackupApi,
+                  setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -232,6 +235,7 @@ class HarborApp:
         add("POST", "/api/similar/build", similar.build)
         add("POST", "/api/sidecar", sidecar.export)
         add("GET", "/api/folders", folders.listing)
+        add("GET", "/api/activity", activity.listing)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/trash", trash.listing)

@@ -490,6 +490,20 @@ class PeopleOverviewUiTest(unittest.TestCase):
         self.assertIn("person.folder", script)
 
 
+class ActivityUiTest(unittest.TestCase):
+    def test_activity_overview_is_read_only_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="activity"', 'id="view-activity"',
+                        'id="activity-list"', 'id="activity-status"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/activity", script)
+        self.assertIn("loadActivity", script)
+        self.assertIn("ACTIVITY_LABELS", script)
+        self.assertNotIn("deleteActivity", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]
