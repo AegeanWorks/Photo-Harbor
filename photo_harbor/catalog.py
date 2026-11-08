@@ -98,6 +98,16 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
     if narrow.lens:
         clauses.append("p.lens = ?")
         params.append(narrow.lens)
+    if narrow.missing is not None:
+        missing_clauses = {
+            "date": "p.taken_at IS NULL",
+            "place": "(p.latitude IS NULL OR p.longitude IS NULL)",
+            "camera": "(p.camera IS NULL OR p.camera = '')",
+            "lens": "(p.lens IS NULL OR p.lens = '')",
+        }
+        if narrow.missing not in missing_clauses:
+            raise ValueError(f"missing must be date, place, camera or lens, got {narrow.missing!r}")
+        clauses.append(missing_clauses[narrow.missing])
     return (" WHERE " + " AND ".join(clauses) if clauses else ""), params
 
 

@@ -107,6 +107,7 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     place = request.arg("place") or None
     camera = request.arg("camera").strip()[:MAX_CAMERA] or None
     lens = request.arg("lens").strip()[:MAX_LENS] or None
+    missing = request.arg("missing") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
     day = request.arg("day").strip() or None
@@ -131,6 +132,10 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     if kind not in (None, "photo", "video"):
         raise HarborError(f"{kind!r} is not a kind", "kind is photo or video",
                           "use ?kind=video, or leave it out")
+    if missing not in (None, "date", "place", "camera", "lens"):
+        raise HarborError(f"{missing!r} is not a metadata gap",
+                          "missing is date, place, camera or lens",
+                          "use ?missing=date, or leave it out")
     if album is not None:
         if not albums.owned(request.profile, album):
             raise HarborError(f"no album {album}", "it was deleted or belongs to someone else",
@@ -154,8 +159,8 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
         place = (round(latitude, 1), round(longitude, 1))
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album, tag=tag,
-                       place=place, camera=camera, lens=lens, start=start, end=end, day=day,
-                       archived=archived, order=order)
+                       place=place, camera=camera, lens=lens, missing=missing,
+                       start=start, end=end, day=day, archived=archived, order=order)
 
 
 class LibraryApi:

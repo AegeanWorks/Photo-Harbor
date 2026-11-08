@@ -523,6 +523,15 @@ class HealthUiTest(unittest.TestCase):
             self.assertIn(label, script)
         self.assertNotIn("emptyTrash", script.split("async function loadHealth")[1].split("const ACTIVITY_LABELS")[0])
 
+    def test_health_coverage_rows_open_missing_filters(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        styles = (root / "photo_harbor" / "web" / "app.css").read_text(encoding="utf-8")
+        for text in ('params.set("missing"', "selectMissing", "health-action",
+                     "Click a missing row to see those photos."):
+            self.assertIn(text, script)
+        self.assertIn(".health-action", styles)
+
 
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):

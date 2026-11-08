@@ -172,8 +172,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   area; **Details** shows the exact stored point. No map tiles or network lookup are needed.
 - **Cameras and lenses.** When EXIF names the camera, Harbor stores the make/model and lens
   once. The **Cameras** and **Lenses** rails list each value with a count; clicking one narrows
-  the gallery, and **Details** shows both too. This needs Pillow for the EXIF read, works fully
-  offline, and composes with the other filters.
+  the gallery, and **Details** shows both too. This needs Pillow, works offline, and composes
+  with other filters.
 - **Virtual day grid.** Only nearby day sections exist; placeholder heights keep the scrollbar
   stable. This bounds a 50,000-photo gallery while selection, favorites, viewer indices and the
   sentinel use the in-memory list.
@@ -181,7 +181,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps directly to a month without loading the whole library, and the sidebar and scrubber
   stay in sync.
-- **Overview tabs.** Albums, tags and people show counts; **Activity** shows recent events; **Health** shows disk, backup, trash and metadata coverage.
+- **Overview tabs.** Albums, tags and people show counts; **Activity** shows recent events; **Health** shows disk, backup, trash and metadata gaps you can open.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
 - **Read-only folders.** The **Folders** tab mirrors the real `<Person>/<YYYY>/<YYYY-MM>` paths; click a month to open it. Owners see everyone, others themselves.
 - **Read-only sidecars.** Select photos and choose **Sidecars… → JSON** or **XMP** for a metadata

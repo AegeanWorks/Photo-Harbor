@@ -10,8 +10,8 @@ const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(), dayList: [],
   dayWindowFrame: null,
   scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
-    camera: null, lens: null, start: null, end: null, day: null, archived: false,
-    order: "newest" },
+    camera: null, lens: null, missing: null, start: null, end: null, day: null,
+    archived: false, order: "newest" },
   query: "",
   months: [],
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
@@ -311,6 +311,7 @@ function filterParams() {
   if (state.scope.place) params.set("place", state.scope.place);
   if (state.scope.camera) params.set("camera", state.scope.camera);
   if (state.scope.lens) params.set("lens", state.scope.lens);
+  if (state.scope.missing) params.set("missing", state.scope.missing);
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
   if (state.scope.day) params.set("day", state.scope.day);
@@ -400,6 +401,10 @@ function scopeTitle() {
   else if (state.scope.place) base = `Near ${placeLabel(state.scope.place)}`;
   else if (state.scope.camera) base = `Shot with ${state.scope.camera}`;
   else if (state.scope.lens) base = `Lens ${state.scope.lens}`;
+  else if (state.scope.missing === "date") base = "Missing dates";
+  else if (state.scope.missing === "place") base = "Missing places";
+  else if (state.scope.missing === "camera") base = "Missing cameras";
+  else if (state.scope.missing === "lens") base = "Missing lenses";
   else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
@@ -412,7 +417,7 @@ function scopeTitle() {
 function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
     || state.scope.end || state.scope.day || state.scope.place || state.scope.camera
-    || state.scope.lens || state.query);
+    || state.scope.lens || state.scope.missing || state.query);
   const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
     || state.scope.tag || state.scope.archived);
   const shown = state.photos.length;
@@ -449,7 +454,15 @@ function renderScope() {
               ? "No photos from this camera."
               : state.scope.lens
                 ? "No photos from this lens."
-                : state.scope.day
+                : state.scope.missing === "date"
+                  ? "Every photo has an embedded date."
+                  : state.scope.missing === "place"
+                    ? "Every photo has a location."
+                    : state.scope.missing === "camera"
+                      ? "Every photo names its camera."
+                      : state.scope.missing === "lens"
+                        ? "Every photo names its lens."
+                        : state.scope.day
                 ? "No photos from this day in other years."
                 : narrowed
               ? "No photo matches. Try another month or search."
@@ -460,7 +473,7 @@ function renderScope() {
 
 function markScope() {
   const active = state.scope.album || state.scope.tag || state.scope.place
-    || state.scope.camera || state.scope.lens ? null
+    || state.scope.camera || state.scope.lens || state.scope.missing ? null
     : state.scope.archived ? "archive"
       : state.scope.day ? "memories"
         : state.scope.favorite ? "favorite"
@@ -490,8 +503,8 @@ function markScope() {
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
   state.scope = { kind, month, favorite: false, album: null, tag: null, place: null,
-    camera: null, lens: null, start: null, end: null, day: null, archived: false,
-    order: state.scope.order || "newest", ...extra };
+    camera: null, lens: null, missing: null, start: null, end: null, day: null,
+    archived: false, order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
   renderScrubber();
@@ -724,6 +737,12 @@ function selectLens(name) {
   setScope(null, null, { lens: name });
 }
 
+function selectMissing(field) {
+  clearPersonScope();
+  setScope(null, null, { missing: field });
+  show("photos");
+}
+
 function selectAlbum(id) {
   if (!state.albums.some((album) => album.id === id)) return;
   clearPersonScope();
@@ -858,6 +877,14 @@ function healthRow(label, value, warning = false) {
   return row;
 }
 
+function healthAction(label, value, action) {
+  const row = el("button", "health-row health-action");
+  row.type = "button";
+  row.append(el("span", "", label), el("b", "health-warning", String(value)));
+  row.addEventListener("click", action);
+  return row;
+}
+
 function healthPanel(title) {
   const panel = el("article", "card explore-panel");
   panel.append(el("h2", "", title));
@@ -902,14 +929,21 @@ async function loadHealth() {
   panels.append(library);
   const coveragePanel = healthPanel("Metadata coverage");
   const coverage = status.coverage;
-  for (const [label, missing] of [
-    ["Missing dates", coverage.missing_dates],
-    ["Missing places", coverage.missing_places],
-    ["Missing cameras", coverage.missing_cameras],
-    ["Missing lenses", coverage.missing_lenses],
+  const anyMissing = coverage.missing_dates + coverage.missing_places
+    + coverage.missing_cameras + coverage.missing_lenses;
+  for (const [label, field, missing] of [
+    ["Missing dates", "date", coverage.missing_dates],
+    ["Missing places", "place", coverage.missing_places],
+    ["Missing cameras", "camera", coverage.missing_cameras],
+    ["Missing lenses", "lens", coverage.missing_lenses],
   ]) {
-    coveragePanel.append(healthRow(label,
-      `${missing.toLocaleString()} of ${coverage.total.toLocaleString()}`, missing > 0));
+    const value = `${missing.toLocaleString()} of ${coverage.total.toLocaleString()}`;
+    coveragePanel.append(missing > 0
+      ? healthAction(label, value, () => selectMissing(field))
+      : healthRow(label, value));
+  }
+  if (anyMissing > 0) {
+    coveragePanel.append(el("p", "hint", "Click a missing row to see those photos."));
   }
   if (coverage.missing_dates > 0) {
     coveragePanel.append(el("p", "hint", "Photos without an embedded date are dated by arrival time."));

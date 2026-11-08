@@ -427,6 +427,8 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .health-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
 .health-row:last-child { border-bottom: 0; }
 .health-row b { font: 600 13px/1.4 var(--mono); text-align: right; }
+.health-action { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.health-action:hover b { color: var(--accent); text-decoration: underline; }
 .health-warning { color: var(--danger); font-weight: 600; }
 
 .activity-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }

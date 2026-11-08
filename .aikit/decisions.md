@@ -1116,3 +1116,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Gaps are actionable beside storage and backup health. Counts follow the
   same owner-all/self-only scope as the status endpoint; archived photos remain counted because
   they are still stored. Photos without an embedded date keep the arrival-time fallback.
+### ADR-069: Metadata gaps open their matching gallery subset
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The Health coverage panel showed how many photos lack a date, place, camera or
+  lens, but not which ones; the existing filter pipeline already selects visible photos.
+- **Decision**: Add missing=date|place|camera|lens to GET /api/photos, implemented as
+  PhotoFilter.missing clauses over the same source and privacy rules. Coverage rows with a
+  non-zero count become buttons that open the Photos view with that filter. Invalid values are
+  rejected with a 400. No schema, endpoint or stored state is added.
+- **Consequences**: Every gap is actionable from Health. The filter composes with person,
+  album, tag, date, kind, name and sort filters; counts and results follow the same archived
+  and owner/self rules as the rest of the gallery.

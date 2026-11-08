@@ -713,6 +713,40 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(coverage, {"total": 2, "missing_dates": 1, "missing_places": 1,
                                     "missing_cameras": 1, "missing_lenses": 1})
 
+    def test_missing_metadata_filter_narrows_to_gaps(self):
+        self.call("POST", "/api/upload", body=b"undated",
+                  headers={"X-Name": "undated.jpg", "X-Sha256": sha(b"undated")})
+        self.upload(b"dated", name="dated.jpg")
+        self.upload(b"full", name="full.jpg")
+        full = sha(b"full")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET camera = ?, lens = ?, latitude = ?, longitude = ?"
+                " WHERE sha256 = ?", ("Acme Cam 1", "35 mm", 37.04, 23.72, full))
+        for field, expected in (("date", {"undated.jpg"}),
+                                ("place", {"undated.jpg", "dated.jpg"}),
+                                ("camera", {"undated.jpg", "dated.jpg"}),
+                                ("lens", {"undated.jpg", "dated.jpg"})):
+            _, body = self.call("GET", f"/api/photos?missing={field}")
+            self.assertEqual({p["name"] for p in json.loads(body)["photos"]}, expected, field)
+        response, body = self.call("GET", "/api/photos?missing=colour")
+        self.assertEqual(response.status, 400)
+        self.assertIn("metadata gap", json.loads(body)["error"])
+
+    def test_missing_metadata_filter_respects_person_scope(self):
+        ayse = self.add_person()
+        self.call("POST", "/api/upload", body=b"mine",
+                  headers={"X-Name": "mine.jpg", "X-Sha256": sha(b"mine")})
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        _, body = self.call("GET", "/api/photos?missing=date")
+        self.assertEqual({p["name"] for p in json.loads(body)["photos"]},
+                         {"mine.jpg", "hers.jpg"})
+        _, body = self.call("GET", "/api/photos?missing=date", key=False,
+                            headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["hers.jpg"])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})
