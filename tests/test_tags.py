@@ -85,6 +85,8 @@ class TagMigrationTest(unittest.TestCase):
         old.conn.executescript("DROP TABLE photo_tags; DROP TABLE tags;"
                                "ALTER TABLE photos DROP COLUMN latitude;"
                                "ALTER TABLE photos DROP COLUMN longitude;"
+                               "ALTER TABLE photos DROP COLUMN camera;"
+                               "ALTER TABLE photos DROP COLUMN lens;"
                                "PRAGMA user_version=8;")
         old.close()
         db = Database(path)

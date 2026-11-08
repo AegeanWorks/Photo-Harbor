@@ -8,7 +8,7 @@ from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRe
                       StorageFile, StorageReport)
 
 _COLUMNS = ("sha256, rel_path, size, original_name, media_type, taken_at, received_at,"
-            " profile, latitude, longitude")
+            " profile, latitude, longitude, camera, lens")
 _ORDERS = {
     "newest": "{owner}.sort_time DESC, {owner}.sha256 DESC",
     "oldest": "{owner}.sort_time ASC, {owner}.sha256 ASC",
@@ -91,6 +91,9 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
         clauses.append("p.latitude IS NOT NULL AND p.longitude IS NOT NULL"
                        " AND ROUND(p.latitude, 1) = ? AND ROUND(p.longitude, 1) = ?")
         params.extend(narrow.place)
+    if narrow.camera:
+        clauses.append("p.camera = ?")
+        params.append(narrow.camera)
     return (" WHERE " + " AND ".join(clauses) if clauses else ""), params
 
 
@@ -112,10 +115,11 @@ class Catalog:
             try:
                 self._db.conn.execute(
                     f"INSERT INTO photos ({_COLUMNS}, sort_time)"
-                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (record.sha256, record.rel_path, record.size, record.original_name,
                      record.media_type, record.taken_at, record.received_at, record.profile,
-                     record.latitude, record.longitude, record.sort_time),
+                     record.latitude, record.longitude, record.camera, record.lens,
+                     record.sort_time),
                 )
                 self._db.conn.execute(
                     "INSERT INTO copies (profile, sha256, rel_path, original_name, added_at,"
@@ -241,9 +245,15 @@ class Catalog:
                 f" FROM {table}{place_where}"
                 " GROUP BY lat, lon ORDER BY COUNT(*) DESC, lat, lon LIMIT 100",
                 params).fetchall()
+            camera_where = f"{where} AND p.camera IS NOT NULL"
+            cameras = self._db.conn.execute(
+                f"SELECT p.camera, COUNT(*) FROM {table}{camera_where}"
+                " GROUP BY p.camera ORDER BY COUNT(*) DESC, p.camera LIMIT 50",
+                params).fetchall()
         return Outline(months=tuple((row[0], row[1]) for row in months), videos=videos,
                        favorites=favorites, total=total, archived=archived,
-                       places=tuple((row[0], row[1], row[2]) for row in places))
+                       places=tuple((row[0], row[1], row[2]) for row in places),
+                       cameras=tuple((row[0], row[1]) for row in cameras))
 
     def stats(self, profile: Optional[str] = None) -> LibraryStats:
         table, where, params = _totals_source(profile)

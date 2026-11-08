@@ -18,7 +18,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Scrubbable bar / virtual scroll | Paginated day grid with lazy images | Medium: current scale is measured at 50k photos (12-33 ms pages) | Later |
 | RAW / 360 / LivePhoto / MotionPhoto | HEIC via optional Pillow; no RAW/360/pairing | Low-medium: needs decoders or paired-file model | Not now |
 | Metadata view (EXIF, map) | EXIF facts; GPS point and Places rail, no map | Medium: GPS extraction and coarse place grouping are local; map tiles would be a network dependency | **Places implemented**, map later |
-| Search by metadata/objects/faces/CLIP | File-name search + date/person/album/kind filters | Low for ML (RAM/CPU/extra services); tags/metadata search is worthwhile | Search metadata later |
+| Search by metadata/objects/faces/CLIP | File-name, date, person, album, tag, place and camera filters; no ML | Low for ML (RAM/CPU/extra services); local metadata search is worthwhile | **Camera search implemented**, ML later |
 | Admin/user management | Owner manages people, passwords and keys | - | Keep |
 | OAuth / API keys | Profile keys and browser sessions | Low for a home LAN | Not now |
 | User-defined storage structure | Fixed readable `<Person>/<YYYY>/<YYYY-MM>` layout | Low: the plain layout is a deliberate feature | Not now |
@@ -63,20 +63,26 @@ returns coarse one-decimal buckets, the rail lists **Places** with counts, and
 `GET /api/photos?place=LAT,LON` narrows the gallery. The Details panel shows the exact point.
 No map tiles, reverse geocoding or network lookup are involved; archived photos leave the list.
 
+## Implemented in this pass: Cameras
+
+Format 11 stores `camera` and `lens` from EXIF once at ingest (Pillow optional). The outline
+returns camera names with visible counts, the rail lists **Cameras**, and
+`GET /api/photos?camera=NAME` narrows the gallery. Details already shows the same camera/lens
+facts. Archived photos leave the camera count; no ML, network or file rewrite is involved.
+
 ## Decision summary
 
-Implemented in this pass: **Memories, Archive, Tags and Places**. All four reuse local data,
-avoid ML services and network dependencies, and never move or rewrite originals. Archive and
-Tags add only private per-person marks; Places stores the camera's point once. They compose with
-the existing person, album, date, kind, name and sort filters.
+Implemented in this pass: **Memories, Archive, Tags, Places and Cameras**. All five reuse local
+data, avoid ML services and network dependencies, and never move or rewrite originals. Archive
+and Tags add only private per-person marks; Places stores the camera's point once; Cameras stores
+the EXIF make/model and lens once. They compose with the existing person, album, date, kind, name
+and sort filters.
 
 Deliberately not now:
 
 - **Near-duplicate utility** - requires perceptual hashing, backfilling existing photos and a
   false-positive review flow; a wrong cluster could lead to deleting a keeper. Revisit with a
   read-only similarity list before any deletion action.
-- **Metadata search (camera/lens)** - useful, but needs another stored EXIF field set and filter
-  UI. The existing name, date, tag, place and album filters already cover the common cases.
 - **Global map** - needs an offline tile story; the Places rail already exposes the stored
   coordinates without sending them anywhere.
 - **Sharing, OAuth, RAW/360/LivePhoto, storage templates, transcoding and offline write queues**

@@ -91,6 +91,8 @@ class PlaceMigrationTest(unittest.TestCase):
         old = Database(path)
         old.conn.executescript("ALTER TABLE photos DROP COLUMN latitude;"
                                "ALTER TABLE photos DROP COLUMN longitude;"
+                               "ALTER TABLE photos DROP COLUMN camera;"
+                               "ALTER TABLE photos DROP COLUMN lens;"
                                "PRAGMA user_version=9;")
         old.close()
         db = Database(path)

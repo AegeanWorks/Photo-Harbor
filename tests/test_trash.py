@@ -96,6 +96,8 @@ class TrashMigrationTest(unittest.TestCase):
                                "ALTER TABLE albums DROP COLUMN cover_sha;"
                                "ALTER TABLE photos DROP COLUMN latitude;"
                                "ALTER TABLE photos DROP COLUMN longitude;"
+                               "ALTER TABLE photos DROP COLUMN camera;"
+                               "ALTER TABLE photos DROP COLUMN lens;"
                                "PRAGMA user_version=5;")
         old.close()
         db = Database(path)

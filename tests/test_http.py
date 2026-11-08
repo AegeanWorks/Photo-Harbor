@@ -496,6 +496,19 @@ class ServerTest(unittest.TestCase):
             response, _ = self.call("GET", f"/api/photos?place={bad}")
             self.assertEqual(response.status, 400, bad)
 
+    def test_camera_metadata_groups_and_filters(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET camera = ?, lens = ? WHERE sha256 = ?",
+                ("Acme Cam 1", "35 mm", one))
+        _, body = self.call("GET", "/api/outline")
+        self.assertEqual(json.loads(body)["cameras"], [{"name": "Acme Cam 1", "count": 1}])
+        _, body = self.call("GET", "/api/photos?camera=Acme%20Cam%201")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

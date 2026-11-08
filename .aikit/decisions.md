@@ -886,3 +886,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Users get a local, offline place browse without reverse geocoding or tiles.
   Names like "Athens" are deliberately not invented from coordinates; a future map can render
   the stored points without re-reading originals.
+
+### ADR-051: Cameras are stored EXIF strings, not inferred models
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Camera/lens metadata is the next local search gap after Places. Deriving a
+  shared camera identity from make/model or matching lenses would add guessing and migration
+  complexity; the EXIF strings themselves are stable and human-readable.
+- **Decision**: Add format 11 with nullable `camera`/`lens` on `photos`, read once at ingest
+  through the optional Pillow path. `GET /api/outline` returns camera names with visible
+  counts; `GET /api/photos?camera=NAME` exact-matches the stored make/model; the rail lists
+  **Cameras**. Archived photos leave the count. Details keeps reading the original file for its
+  full camera/lens facts.
+- **Consequences**: A camera filter works offline and composes with every existing filter. An
+  EXIF-less photo simply has no camera entry; no model inference or network lookup is claimed.

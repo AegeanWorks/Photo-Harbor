@@ -105,6 +105,8 @@ class CollectionMigrationTest(unittest.TestCase):
         old.conn.executescript("DROP TABLE album_photos; DROP TABLE favorites; DROP TABLE albums;"
                                "ALTER TABLE photos DROP COLUMN latitude;"
                                "ALTER TABLE photos DROP COLUMN longitude;"
+                               "ALTER TABLE photos DROP COLUMN camera;"
+                               "ALTER TABLE photos DROP COLUMN lens;"
                                "PRAGMA user_version=4;")
         old.close()
         db = Database(path)
@@ -124,6 +126,8 @@ class CollectionMigrationTest(unittest.TestCase):
         old.conn.executescript("ALTER TABLE albums DROP COLUMN cover_sha;"
                                "ALTER TABLE photos DROP COLUMN latitude;"
                                "ALTER TABLE photos DROP COLUMN longitude;"
+                               "ALTER TABLE photos DROP COLUMN camera;"
+                               "ALTER TABLE photos DROP COLUMN lens;"
                                "PRAGMA user_version=6;")
         old.close()
         db = Database(path)

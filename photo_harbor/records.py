@@ -19,6 +19,8 @@ class PhotoRecord:
     favorite: bool = False
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    camera: Optional[str] = None
+    lens: Optional[str] = None
 
     @property
     def sort_time(self) -> str:
@@ -74,6 +76,7 @@ class PhotoFilter:
     album: Optional[int] = None
     tag: Optional[int] = None
     place: Optional[tuple] = None
+    camera: Optional[str] = None
     start: Optional[str] = None
     end: Optional[str] = None
     day: Optional[str] = None
@@ -92,6 +95,7 @@ class Outline:
     total: int = 0
     archived: int = 0
     places: tuple = ()
+    cameras: tuple = ()
 
 
 @dataclass(frozen=True)

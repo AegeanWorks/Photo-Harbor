@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-gap-2",
+    "task_id": "immich-metadata",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794133704.0360792,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794135003.9326415,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794133990.1065729
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "android-download-ui",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/5] Plan: /api/android metadata endpoint; a live APK card in web Setup (version, size, SHA-256, download, install page); Android 1.2 with Open gallery and background-status reporting; rebuild APK; tests, UI review, publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794126143.6633377,
-      "timestamp_str": "2026-11-08 11:22:23",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The server already builds and serves an APK, but the main gallery UI only has a small link to the separate install page. The objective asks for an APK download section in the web UI and proper Android integration",
-        "benefits": "Users see the current APK version, size and checksum inside the signed-in gallery, download it directly, and the app can open the gallery and report its last background run",
-        "risks": "contract: new public metadata route, new Setup markup and APK 1.2/3; dependency: stdlib and existing Android SDK only; concurrency: metadata read only; state: SharedPreferences last_background only",
-        "mitigation": "Keep the sidecar as the source of truth, return available=false for missing/malformed files, keep existing install page and APK route, failing-first HTTP/static tests, rebuild and signature-verify APK, run 217+ tests and 4/4 gates, repeat UI evidence review"
-      },
-      "plan_digest": "c73692527a90e5bf72d68117bf44708fc107e6f1681c4403cebe9a3679db9493"
-    },
-    {
-      "task_id": "android-download-ui",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[2/5] Added public GET /api/android (available/version/code/size/SHA/page, malformed-safe), live Setup APK card with direct download, install page and copy link; HTTP and static tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794126456.5972219,
-      "timestamp_str": "2026-11-08 11:27:36",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "android-download-ui",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[3/5] Built Android 1.2/3 with Open photo gallery and last background result stored by SyncJobService; APK signature-verified, sidecar rebuilt",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794126456.8742754,
-      "timestamp_str": "2026-11-08 11:27:36",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "android-download-ui",
       "phase": "verification",
@@ -254,6 +213,46 @@
       "status": "completed",
       "timestamp": 1794133990.1065757,
       "timestamp_str": "2026-11-08 13:33:10",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-metadata",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Camera metadata: store camera and lens at ingest, camera=LAT-style filter, Cameras rail, tests and docs; [2/2] verify UI, gates and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794134431.3125145,
+      "timestamp_str": "2026-11-08 13:40:31",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The Immich gap matrix leaves camera/lens metadata search as the next worthwhile local gap; users with several cameras cannot narrow the gallery today",
+        "benefits": "A local Cameras rail and camera= filter over existing EXIF facts, with no ML, no network and no file changes",
+        "risks": "contract: new camera filter and outline field; dependency: optional Pillow only; concurrency: unchanged; state: format 11 columns and migration",
+        "mitigation": "Store values once at ingest, keep exact-match SQL parameterized, add unit/HTTP/static tests, update every older-format migration simulation, run 4/4 gates and review the rail in Chromium"
+      },
+      "plan_digest": "9e2aeb8fe12d9e4eeafae0774c80a2aecc27aa4d6f5baa353c23053122832489"
+    },
+    {
+      "task_id": "immich-metadata",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Cameras: format 11 camera/lens columns, EXIF read at ingest, camera=NAME filter, Cameras rail, tests and docs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794135000.3684053,
+      "timestamp_str": "2026-11-08 13:50:00",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-metadata",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Cameras done: 252 tests OK; 4/4 gates; migration/privacy covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794135003.9326415,
+      "timestamp_str": "2026-11-08 13:50:03",
       "agent": "opencode:deepseek"
     }
   ]

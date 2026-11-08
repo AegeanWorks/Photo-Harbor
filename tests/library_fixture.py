@@ -32,7 +32,8 @@ class Library:
         self.copies = CopyIndex(self.db)
         self.store = PhotoStore(self.root, self.catalog, self.copies, now=lambda: FIXED_NOW,
                                 embedded_date=lambda path: None,
-                                embedded_place=lambda path: None)
+                                embedded_place=lambda path: None,
+                                embedded_camera=lambda path: (None, None))
 
     def put(self, data: bytes, name: str = "IMG_0001.HEIC", taken: str = None):
         claim = UploadClaim(original_name=name, sha256=sha(data), taken_at=taken)

@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `71`
-- **Total Classes**: `137`
-- **Total Top-Level Functions**: `112`
-- **Total Class Methods**: `573`
-- **Total Source Lines**: `9523`
+- **Total Python Modules**: `72`
+- **Total Classes**: `144`
+- **Total Top-Level Functions**: `113`
+- **Total Class Methods**: `591`
+- **Total Source Lines**: `9716`
 
 ---
 
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `296` lines (`15311` bytes)
+**Size**: `306` lines (`15848` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -398,7 +398,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `292` lines (`10380` bytes)
+**Size**: `302` lines (`10732` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -413,7 +413,7 @@
 ### [`photo_harbor/details.py`](photo_harbor/details.py)
 > *File and camera facts for one original, read on demand without touching the catalog.*
 
-**Size**: `112` lines (`3285` bytes)
+**Size**: `133` lines (`4122` bytes)
 
 **Functions:**
 - `def _text(value)`
@@ -422,6 +422,7 @@
 - `def _focal(value)`
 - `def _iso(value)`
 - `def _camera(make, model)`
+- `def read_camera(path)` - *``(camera, lens)`` from EXIF, or ``(None, None)`` without Pillow or readable tags.*
 - `def read_details(record, path)` - *File facts always; width, height and EXIF fields when Pillow can read them.*
 
 ---
@@ -577,7 +578,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `258` lines (`12378` bytes)
+**Size**: `261` lines (`12565` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -694,7 +695,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `176` lines (`4283` bytes)
+**Size**: `180` lines (`4404` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -807,11 +808,11 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `358` lines (`16605` bytes)
+**Size**: `363` lines (`16855` bytes)
 
 **Classes:**
 - `class PhotoStore`
-  - Method `.__init__(library, catalog, copies, folder_of, now, embedded_date, embedded_place, on_stored)` - *``folder_of`` maps a profile id to that person's folder name in the library.*
+  - Method `.__init__(library, catalog, copies, folder_of, now, embedded_date, embedded_place, embedded_camera, on_stored)` - *``folder_of`` maps a profile id to that person's folder name in the library.*
   - Method `.ingest(stream, length, claim)` - *Stream ``length`` bytes (None: until the stream ends) to disk; keep them only when the*
   - Method `.verify(sha256)` - *True only when some catalogued copy exists and its bytes still hash to ``sha256``.*
   - Method `.locate(sha256, profile)` - *``(path, record)`` of ``profile``'s copy, or of any copy when no profile is given.*
@@ -962,7 +963,7 @@
 ### [`tests/library_fixture.py`](tests/library_fixture.py)
 > *A throwaway library for tests: temp folder, database, catalog, journal and store.*
 
-**Size**: `39` lines (`1492` bytes)
+**Size**: `40` lines (`1567` bytes)
 
 **Classes:**
 - `class Library`
@@ -975,7 +976,7 @@
 ---
 
 ### [`tests/test_albums.py`](tests/test_albums.py)
-**Size**: `158` lines (`8317` bytes)
+**Size**: `162` lines (`8601` bytes)
 
 **Classes:**
 - `class AlbumBookTest`
@@ -997,7 +998,7 @@
 ---
 
 ### [`tests/test_archive.py`](tests/test_archive.py)
-**Size**: `86` lines (`4662` bytes)
+**Size**: `88` lines (`4804` bytes)
 
 **Classes:**
 - `class ArchiveBookTest`
@@ -1009,6 +1010,35 @@
   - Method `.test_forgetting_a_copy_drops_its_archive_mark()`
 - `class ArchiveMigrationTest`
   - Method `.test_a_format_7_catalog_gains_the_archive_table()`
+
+---
+
+### [`tests/test_cameras.py`](tests/test_cameras.py)
+**Size**: `103` lines (`3783` bytes)
+
+**Classes:**
+- `class _Exif`
+  - Method `.__init__(tags)`
+  - Method `.get_ifd(number)`
+  - Method `.get(number)`
+- `class _Image`
+  - Method `.__init__(tags)`
+  - Method `.__enter__()`
+  - Method `.__exit__(*args)`
+  - Method `.getexif()`
+- `class _ImageModule`
+  - Method `.__init__(tags)`
+  - Method `.open(path)`
+- `class CameraTest`
+  - Method `.test_make_model_and_lens_are_read_together()`
+  - Method `.test_unreadable_or_missing_exif_is_empty()`
+- `class CameraFilterTest`
+  - Method `.setUp()`
+  - Method `._add(data, name, camera)`
+  - Method `.test_a_camera_filters_and_lists_the_rail()`
+  - Method `.test_archiving_removes_the_camera_count()`
+- `class CameraMigrationTest`
+  - Method `.test_a_format_10_catalog_gains_the_camera_columns()`
 
 ---
 
@@ -1111,7 +1141,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `874` lines (`49781` bytes)
+**Size**: `887` lines (`50443` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1148,6 +1178,7 @@
   - Method `.test_archive_hides_restores_and_stays_out_of_the_timeline()`
   - Method `.test_tags_are_personal_and_filter_the_gallery()`
   - Method `.test_places_group_and_filter_a_gps_point()`
+  - Method `.test_camera_metadata_groups_and_filters()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1201,7 +1232,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `634` lines (`28361` bytes)
+**Size**: `645` lines (`28905` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1245,6 +1276,8 @@
   - Method `.test_gallery_tags_are_reachable_and_wired()`
 - `class PlaceUiTest`
   - Method `.test_gallery_places_are_reachable_and_wired()`
+- `class CameraUiTest`
+  - Method `.test_gallery_cameras_are_reachable_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
@@ -1273,7 +1306,7 @@
 ---
 
 ### [`tests/test_places.py`](tests/test_places.py)
-**Size**: `102` lines (`3865` bytes)
+**Size**: `104` lines (`4007` bytes)
 
 **Classes:**
 - `class _Exif`
@@ -1463,7 +1496,7 @@
 ---
 
 ### [`tests/test_tags.py`](tests/test_tags.py)
-**Size**: `97` lines (`5034` bytes)
+**Size**: `99` lines (`5176` bytes)
 
 **Classes:**
 - `class TagBookTest`
@@ -1480,7 +1513,7 @@
 ---
 
 ### [`tests/test_trash.py`](tests/test_trash.py)
-**Size**: `109` lines (`5408` bytes)
+**Size**: `111` lines (`5550` bytes)
 
 **Classes:**
 - `class TrashBookTest`

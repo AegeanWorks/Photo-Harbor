@@ -6,12 +6,12 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 10
+SCHEMA_VERSION = 11
 OWNER_PROFILE = "main"
 # SQLite INTEGER is signed 64-bit; a larger Python int cannot be bound as a parameter.
 MAX_ROW_ID = 2 ** 63 - 1
 
-# Format 10, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 11, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
 _COLLECTIONS = """
@@ -94,7 +94,9 @@ CREATE TABLE IF NOT EXISTS photos (
     sort_time TEXT NOT NULL,
     profile TEXT NOT NULL DEFAULT 'main',
     latitude REAL,
-    longitude REAL
+    longitude REAL,
+    camera TEXT,
+    lens TEXT
 );
 CREATE INDEX IF NOT EXISTS photos_by_time ON photos (sort_time DESC, sha256 DESC);
 CREATE INDEX IF NOT EXISTS photos_by_profile ON photos (profile, sort_time DESC);
@@ -224,14 +226,22 @@ ALTER TABLE photos ADD COLUMN latitude REAL;
 ALTER TABLE photos ADD COLUMN longitude REAL;
 """
 
-_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
-             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
-             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
-             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
-             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9,
-             6: _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9,
-             7: _FROM_7 + _FROM_8 + _FROM_9,
-             8: _FROM_8 + _FROM_9, 9: _FROM_9}
+# Format 11 stores the camera and lens strings once for the Cameras rail.
+_FROM_10 = """
+ALTER TABLE photos ADD COLUMN camera TEXT;
+ALTER TABLE photos ADD COLUMN lens TEXT;
+"""
+
+_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8
+                + _FROM_9 + _FROM_10,
+             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
+             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
+             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
+             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
+             6: _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
+             7: _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
+             8: _FROM_8 + _FROM_9 + _FROM_10,
+             9: _FROM_9 + _FROM_10, 10: _FROM_10}
 
 
 class Database:

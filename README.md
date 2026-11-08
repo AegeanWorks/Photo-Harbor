@@ -170,6 +170,10 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   once at ingest and lists **Places** in the sidebar as coarse one-decimal coordinates with
   counts (for example `37.0° N, 23.7° E`). Clicking one narrows the gallery to photos from that
   area; **Details** shows the exact stored point. No map tiles or network lookup are needed.
+- **Cameras.** When EXIF names the camera, Harbor stores the make/model and lens once. The
+  **Cameras** rail lists each camera with a count and clicking it narrows the gallery to that
+  camera; **Details** shows the camera and lens too. This needs Pillow for the EXIF read, works
+  fully offline, and composes with the other filters.
 - **Archive without moving files.** Open a photo or select several and press **Archive** to hide
   them from the timeline. The **Archive** rail view shows only your hidden photos, with
   **Unarchive** to bring them back. Archiving is private to each person, never moves, copies or
@@ -217,7 +221,7 @@ and exit 1; usage errors exit 2.
 | `POST /api/upload` | raw file body; headers `X-Name` (may be percent-encoded), optional `X-Sha256`, `X-Taken`, `X-Modified`, `X-Profile` (owner only). `{status: stored\|duplicate, answer: yes}` |
 | `GET /api/has?sha256=…[&name=…&report=1]` | `{present, answer: yes\|no}` after re-hashing the PC's copy |
 | `POST /api/sync/done` | JSON `{started_at}`: records a finished sync |
-| `GET /api/status`, `GET /api/outline` `[?profile=]` | counts, sync state, months and coarse places with photos |
+| `GET /api/status`, `GET /api/outline` `[?profile=]` | counts, sync state, months, coarse places and cameras with photos |
 | `GET /api/android` | served APK availability, version, version code, size, SHA-256 and install page |
 | `GET /api/storage` `[?profile=]` | file/byte totals, photo/video split, shared count, per-person shares and the ten largest files |
 | `GET /api/backup` | owner: configured target, last attempt, copied/unchanged bytes and any error |
@@ -226,7 +230,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&tag=ID&place=LAT,LON&order=newest\|oldest\|largest\|smallest]` | gallery page; `place` rounds to one decimal; archived photos are hidden unless `archived=1`; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&tag=ID&place=LAT,LON&camera=NAME&order=newest\|oldest\|largest\|smallest]` | gallery page; `place` rounds to one decimal; `camera` is the stored EXIF make/model; archived photos are hidden unless `archived=1`; non-owners always get their own |
 | `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
@@ -310,6 +314,7 @@ photo-harbor/
     ├── library_fixture.py    <- a throwaway library for tests
     ├── test_albums.py        <- personal albums, favorites and format 5 migration
     ├── test_archive.py       <- per-person archive and format 7 migration
+    ├── test_cameras.py       <- camera EXIF, camera filter and format 10 migration
     ├── test_dates.py         <- inclusive date-range narrowing
     ├── test_details.py       <- file facts and optional EXIF details
     ├── test_downloads.py     <- ZIP names, tokens and expiry
@@ -333,7 +338,7 @@ photo-harbor/
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 10; an older catalog is upgraded in place after a copy
+`config.json`, `catalog.sqlite3` (format 11; an older catalog is upgraded in place after a copy
 to `catalog.sqlite3.v<N>.bak`), `incoming\`, `thumbs\` and `trash\`.
 
 ## 🚀 Performance

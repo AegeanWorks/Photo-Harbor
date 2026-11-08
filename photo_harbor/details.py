@@ -67,6 +67,27 @@ def _camera(make, model) -> Optional[str]:
     return make or model
 
 
+def read_camera(path: Path) -> tuple:
+    """``(camera, lens)`` from EXIF, or ``(None, None)`` without Pillow or readable tags."""
+    Image = load_image()
+    if Image is None:
+        return None, None
+    try:
+        # hygiene: allow Pillow's Image.open reads binary image data, not text
+        with Image.open(path) as image:
+            exif = image.getexif()
+            try:
+                exif_ifd = exif.get_ifd(EXIF_IFD)
+            except Exception:  # hygiene: allow a malformed EXIF IFD point
+                exif_ifd = {}
+
+            def tag(number):
+                return exif_ifd[number] if number in exif_ifd else exif.get(number)
+            return _camera(tag(MAKE), tag(MODEL)), _text(tag(LENS))
+    except Exception:  # hygiene: allow Pillow raises many types for unreadable formats
+        return None, None
+
+
 def read_details(record: PhotoRecord, path: Path) -> dict:
     """File facts always; width, height and EXIF fields when Pillow can read them."""
     facts = {

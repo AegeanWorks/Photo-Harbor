@@ -49,6 +49,7 @@ def _valid_day(value: str) -> bool:
         return False
     return True
 MAX_QUERY = 100
+MAX_CAMERA = 80
 LOW_DISK_BYTES = 20 * 1024 ** 3     # warn under 20 GB free...
 LOW_DISK_SHARE = 0.10               # ...or under 10 % of the drive, whichever is larger
 PROFILE_ID = re.compile(r"^[a-z0-9-]{1,40}$")
@@ -103,6 +104,7 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     album = request.arg("album") or None
     tag = request.arg("tag") or None
     place = request.arg("place") or None
+    camera = request.arg("camera").strip()[:MAX_CAMERA] or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
     day = request.arg("day").strip() or None
@@ -150,8 +152,8 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
         place = (round(latitude, 1), round(longitude, 1))
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album, tag=tag,
-                       place=place, start=start, end=end, day=day, archived=archived,
-                       order=order)
+                       place=place, camera=camera, start=start, end=end, day=day,
+                       archived=archived, order=order)
 
 
 class LibraryApi:
@@ -221,6 +223,7 @@ class LibraryApi:
             "total": outline.total, "archived": outline.archived,
             "places": [{"lat": lat, "lon": lon, "count": count,
                         "key": f"{lat},{lon}"} for lat, lon, count in outline.places],
+            "cameras": [{"name": name, "count": count} for name, count in outline.cameras],
         })
 
     def _disk(self) -> dict:

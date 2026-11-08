@@ -6,7 +6,7 @@ const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
   scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
-    start: null, end: null, day: null, archived: false, order: "newest" },
+    camera: null, start: null, end: null, day: null, archived: false, order: "newest" },
   query: "",
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
@@ -204,6 +204,7 @@ function filterParams() {
   if (state.scope.album) params.set("album", String(state.scope.album));
   if (state.scope.tag) params.set("tag", String(state.scope.tag));
   if (state.scope.place) params.set("place", state.scope.place);
+  if (state.scope.camera) params.set("camera", state.scope.camera);
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
   if (state.scope.day) params.set("day", state.scope.day);
@@ -285,6 +286,7 @@ function scopeTitle() {
   if (album) base = album.name;
   else if (state.scope.tag) base = currentTag()?.name || "Tag";
   else if (state.scope.place) base = `Near ${placeLabel(state.scope.place)}`;
+  else if (state.scope.camera) base = `Shot with ${state.scope.camera}`;
   else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
@@ -296,7 +298,8 @@ function scopeTitle() {
 
 function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
-    || state.scope.end || state.scope.day || state.scope.place || state.query);
+    || state.scope.end || state.scope.day || state.scope.place || state.scope.camera
+    || state.query);
   const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
     || state.scope.tag || state.scope.archived);
   const shown = state.photos.length;
@@ -329,9 +332,11 @@ function renderScope() {
           ? "Nothing archived. Open a photo and choose Archive to hide it from the timeline."
           : state.scope.place
             ? "No photos with a location here."
-            : state.scope.day
-              ? "No photos from this day in other years."
-              : narrowed
+            : state.scope.camera
+              ? "No photos from this camera."
+              : state.scope.day
+                ? "No photos from this day in other years."
+                : narrowed
               ? "No photo matches. Try another month or search."
               : "Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.";
     $("empty-action").hidden = narrowed;
@@ -339,7 +344,8 @@ function renderScope() {
 }
 
 function markScope() {
-  const active = state.scope.album || state.scope.tag || state.scope.place ? null
+  const active = state.scope.album || state.scope.tag || state.scope.place
+    || state.scope.camera ? null
     : state.scope.archived ? "archive"
       : state.scope.day ? "memories"
         : state.scope.favorite ? "favorite"
@@ -356,6 +362,9 @@ function markScope() {
   for (const item of document.querySelectorAll("[data-place]")) {
     item.setAttribute("aria-pressed", String(item.dataset.place === state.scope.place));
   }
+  for (const item of document.querySelectorAll("[data-camera]")) {
+    item.setAttribute("aria-pressed", String(item.dataset.camera === state.scope.camera));
+  }
   $("date-filter").setAttribute("aria-pressed",
     String(Boolean(state.scope.start || state.scope.end)));
 }
@@ -363,7 +372,7 @@ function markScope() {
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
   state.scope = { kind, month, favorite: false, album: null, tag: null, place: null,
-    start: null, end: null, day: null, archived: false,
+    camera: null, start: null, end: null, day: null, archived: false,
     order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
@@ -442,6 +451,21 @@ async function loadOutline() {
       placesRail.append(button);
     }
   }
+  const camerasRail = $("rail-cameras");
+  camerasRail.replaceChildren();
+  if (outline.cameras?.length) {
+    camerasRail.append(el("h4", "rail-year", "Cameras"));
+    for (const cameraItem of outline.cameras) {
+      const button = el("button", "rail-item");
+      button.type = "button";
+      button.dataset.camera = cameraItem.name;
+      button.setAttribute("aria-pressed", String(cameraItem.name === state.scope.camera));
+      button.append(el("span", "", cameraItem.name),
+        el("b", "", cameraItem.count.toLocaleString()));
+      button.addEventListener("click", () => selectCamera(cameraItem.name));
+      camerasRail.append(button);
+    }
+  }
   $("rail-videos").textContent = outline.videos.toLocaleString();
   state.favorites = outline.favorites || 0;
   state.visible = outline.total || 0;
@@ -474,7 +498,7 @@ function selectPerson(id) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
   state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-    place: null, start: null, end: null, day: null, archived: false,
+    place: null, camera: null, start: null, end: null, day: null, archived: false,
     order: state.scope.order || "newest" };
   markScope();
   window.scrollTo({ top: 0 });
@@ -516,6 +540,11 @@ function selectArchive() {
 function selectPlace(key) {
   clearPersonScope();
   setScope(null, null, { place: key });
+}
+
+function selectCamera(name) {
+  clearPersonScope();
+  setScope(null, null, { camera: name });
 }
 
 function selectAlbum(id) {
@@ -630,7 +659,8 @@ async function deleteAlbum() {
   try {
     await post(`/api/albums/${album.id}`, { delete: true });
     state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-      place: null, day: null, archived: false, order: state.scope.order || "newest" };
+      place: null, camera: null, day: null, archived: false,
+      order: state.scope.order || "newest" };
     markScope();
     await loadAlbums();
     resetPhotos();
