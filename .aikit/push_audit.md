@@ -255,7 +255,16 @@ audit output and do not extend the numbered target.
 - Finding: none actionable; the committed assets are the approved ones.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 25 - pushes 6-80
+
+- Range: `0b47878` (push 6), `83781ab` (push 7), `6506347` (push 8), plus the last 72
+  pushes.
+- Reviewed: the licensing cleanup and the first reviewed social-preview/project-identity
+  commits; no application code or tests changed.
+- Finding: none actionable; the media and license records are consistent.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 24 (pushes 9-80).
-- Next run: last 75 pushes, adding pushes 6-8.
+- Runs completed: 25 (pushes 6-80).
+- Next run: final band, adding pushes 3-5 and then the original core feature.
