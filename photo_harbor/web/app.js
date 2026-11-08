@@ -5,8 +5,8 @@ const BATCH = 500;
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
-  scope: { kind: null, month: null, favorite: false, album: null, tag: null, start: null,
-    end: null, day: null, archived: false, order: "newest" },
+  scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
+    start: null, end: null, day: null, archived: false, order: "newest" },
   query: "",
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
@@ -203,6 +203,7 @@ function filterParams() {
   if (state.scope.archived) params.set("archived", "1");
   if (state.scope.album) params.set("album", String(state.scope.album));
   if (state.scope.tag) params.set("tag", String(state.scope.tag));
+  if (state.scope.place) params.set("place", state.scope.place);
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
   if (state.scope.day) params.set("day", state.scope.day);
@@ -260,6 +261,13 @@ function currentTag() {
   return state.tags.find((tag) => tag.id === state.scope.tag) || null;
 }
 
+function placeLabel(key) {
+  const [lat, lon] = String(key).split(",").map(Number);
+  const north = lat >= 0 ? "N" : "S";
+  const east = lon >= 0 ? "E" : "W";
+  return `${Math.abs(lat).toFixed(1)}° ${north}, ${Math.abs(lon).toFixed(1)}° ${east}`;
+}
+
 function dateTitle() {
   const start = state.scope.start
     ? dateOnlyFormat.format(new Date(`${state.scope.start}T00:00:00`)) : null;
@@ -276,6 +284,7 @@ function scopeTitle() {
   let base = "All photos";
   if (album) base = album.name;
   else if (state.scope.tag) base = currentTag()?.name || "Tag";
+  else if (state.scope.place) base = `Near ${placeLabel(state.scope.place)}`;
   else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
@@ -287,7 +296,7 @@ function scopeTitle() {
 
 function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
-    || state.scope.end || state.scope.day || state.query);
+    || state.scope.end || state.scope.day || state.scope.place || state.query);
   const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
     || state.scope.tag || state.scope.archived);
   const shown = state.photos.length;
@@ -318,9 +327,11 @@ function renderScope() {
           ? "No favorites yet. Open a photo and press ♡ Favorite."
           : state.scope.archived
           ? "Nothing archived. Open a photo and choose Archive to hide it from the timeline."
-          : state.scope.day
-            ? "No photos from this day in other years."
-            : narrowed
+          : state.scope.place
+            ? "No photos with a location here."
+            : state.scope.day
+              ? "No photos from this day in other years."
+              : narrowed
               ? "No photo matches. Try another month or search."
               : "Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.";
     $("empty-action").hidden = narrowed;
@@ -328,7 +339,7 @@ function renderScope() {
 }
 
 function markScope() {
-  const active = state.scope.album || state.scope.tag ? null
+  const active = state.scope.album || state.scope.tag || state.scope.place ? null
     : state.scope.archived ? "archive"
       : state.scope.day ? "memories"
         : state.scope.favorite ? "favorite"
@@ -342,14 +353,18 @@ function markScope() {
   for (const item of document.querySelectorAll("[data-tag]")) {
     item.setAttribute("aria-pressed", String(Number(item.dataset.tag) === state.scope.tag));
   }
+  for (const item of document.querySelectorAll("[data-place]")) {
+    item.setAttribute("aria-pressed", String(item.dataset.place === state.scope.place));
+  }
   $("date-filter").setAttribute("aria-pressed",
     String(Boolean(state.scope.start || state.scope.end)));
 }
 
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
-  state.scope = { kind, month, favorite: false, album: null, tag: null, start: null,
-    end: null, day: null, archived: false, order: state.scope.order || "newest", ...extra };
+  state.scope = { kind, month, favorite: false, album: null, tag: null, place: null,
+    start: null, end: null, day: null, archived: false,
+    order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
   window.scrollTo({ top: 0 });
@@ -412,6 +427,21 @@ async function loadOutline() {
     }
     years.append(railButton(month, capitalise(monthFormat.format(monthDate(month))), count));
   }
+  const placesRail = $("rail-places");
+  placesRail.replaceChildren();
+  if (outline.places?.length) {
+    placesRail.append(el("h4", "rail-year", "Places"));
+    for (const place of outline.places) {
+      const button = el("button", "rail-item");
+      button.type = "button";
+      button.dataset.place = place.key;
+      button.setAttribute("aria-pressed", String(place.key === state.scope.place));
+      button.append(el("span", "", placeLabel(place.key)),
+        el("b", "", place.count.toLocaleString()));
+      button.addEventListener("click", () => selectPlace(place.key));
+      placesRail.append(button);
+    }
+  }
   $("rail-videos").textContent = outline.videos.toLocaleString();
   state.favorites = outline.favorites || 0;
   state.visible = outline.total || 0;
@@ -444,7 +474,8 @@ function selectPerson(id) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
   state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-    start: null, end: null, day: null, archived: false, order: state.scope.order || "newest" };
+    place: null, start: null, end: null, day: null, archived: false,
+    order: state.scope.order || "newest" };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -480,6 +511,11 @@ function selectArchive() {
   clearPersonScope();
   setScope(null, null, { archived: true });
   loadOutline().catch(handle);
+}
+
+function selectPlace(key) {
+  clearPersonScope();
+  setScope(null, null, { place: key });
 }
 
 function selectAlbum(id) {
@@ -594,7 +630,7 @@ async function deleteAlbum() {
   try {
     await post(`/api/albums/${album.id}`, { delete: true });
     state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-      day: null, archived: false, order: state.scope.order || "newest" };
+      place: null, day: null, archived: false, order: state.scope.order || "newest" };
     markScope();
     await loadAlbums();
     resetPhotos();
@@ -1359,6 +1395,8 @@ function renderDetails(details) {
     ["Size", bytes(details.size)],
     ["Taken", details.taken ? timeFormat.format(parseTime(details.taken)) : "Not recorded"],
     ["Added", details.received ? timeFormat.format(parseTime(details.received)) : null],
+    ["Location", details.latitude !== null && details.longitude !== null
+      ? `${Number(details.latitude).toFixed(4)}, ${Number(details.longitude).toFixed(4)}` : null],
     ["Dimensions", details.width && details.height ? `${details.width} × ${details.height}` : null],
     ["Camera", details.camera],
     ["Lens", details.lens],

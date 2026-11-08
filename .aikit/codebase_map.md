@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `69`
-- **Total Classes**: `130`
-- **Total Top-Level Functions**: `108`
-- **Total Class Methods**: `556`
-- **Total Source Lines**: `9267`
+- **Total Python Modules**: `71`
+- **Total Classes**: `137`
+- **Total Top-Level Functions**: `112`
+- **Total Class Methods**: `573`
+- **Total Source Lines**: `9523`
 
 ---
 
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `283` lines (`14505` bytes)
+**Size**: `296` lines (`15311` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -398,7 +398,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `283` lines (`10037` bytes)
+**Size**: `292` lines (`10380` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -413,7 +413,7 @@
 ### [`photo_harbor/details.py`](photo_harbor/details.py)
 > *File and camera facts for one original, read on demand without touching the catalog.*
 
-**Size**: `110` lines (`3209` bytes)
+**Size**: `112` lines (`3285` bytes)
 
 **Functions:**
 - `def _text(value)`
@@ -478,6 +478,19 @@
 
 **Functions:**
 - `def read_taken(path)` - *``YYYY-MM-DDTHH:MM:SS`` from EXIF DateTimeOriginal, or None without Pillow or a date.*
+
+---
+
+### [`photo_harbor/geo.py`](photo_harbor/geo.py)
+> *The camera's GPS point, read once at ingest for the Places rail.*
+
+**Size**: `60` lines (`1905` bytes)
+
+**Functions:**
+- `def _number(value)`
+- `def _degrees(value)` - *A GPS coordinate written as three rational degrees/minutes/seconds.*
+- `def _point(gps)`
+- `def read_place(path)` - *``(latitude, longitude)`` from EXIF GPS, or None without Pillow or a valid point.*
 
 ---
 
@@ -564,7 +577,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `240` lines (`11455` bytes)
+**Size**: `258` lines (`12378` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -681,7 +694,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `172` lines (`4151` bytes)
+**Size**: `176` lines (`4283` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -794,11 +807,11 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `352` lines (`16291` bytes)
+**Size**: `358` lines (`16605` bytes)
 
 **Classes:**
 - `class PhotoStore`
-  - Method `.__init__(library, catalog, copies, folder_of, now, embedded_date, on_stored)` - *``folder_of`` maps a profile id to that person's folder name in the library.*
+  - Method `.__init__(library, catalog, copies, folder_of, now, embedded_date, embedded_place, on_stored)` - *``folder_of`` maps a profile id to that person's folder name in the library.*
   - Method `.ingest(stream, length, claim)` - *Stream ``length`` bytes (None: until the stream ends) to disk; keep them only when the*
   - Method `.verify(sha256)` - *True only when some catalogued copy exists and its bytes still hash to ``sha256``.*
   - Method `.locate(sha256, profile)` - *``(path, record)`` of ``profile``'s copy, or of any copy when no profile is given.*
@@ -949,7 +962,7 @@
 ### [`tests/library_fixture.py`](tests/library_fixture.py)
 > *A throwaway library for tests: temp folder, database, catalog, journal and store.*
 
-**Size**: `38` lines (`1426` bytes)
+**Size**: `39` lines (`1492` bytes)
 
 **Classes:**
 - `class Library`
@@ -962,7 +975,7 @@
 ---
 
 ### [`tests/test_albums.py`](tests/test_albums.py)
-**Size**: `154` lines (`8019` bytes)
+**Size**: `158` lines (`8317` bytes)
 
 **Classes:**
 - `class AlbumBookTest`
@@ -984,7 +997,7 @@
 ---
 
 ### [`tests/test_archive.py`](tests/test_archive.py)
-**Size**: `83` lines (`4480` bytes)
+**Size**: `86` lines (`4662` bytes)
 
 **Classes:**
 - `class ArchiveBookTest`
@@ -1098,7 +1111,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `857` lines (`48896` bytes)
+**Size**: `874` lines (`49781` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1134,6 +1147,7 @@
   - Method `.test_a_month_day_matches_each_year()`
   - Method `.test_archive_hides_restores_and_stays_out_of_the_timeline()`
   - Method `.test_tags_are_personal_and_filter_the_gallery()`
+  - Method `.test_places_group_and_filter_a_gps_point()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1187,7 +1201,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `622` lines (`27780` bytes)
+**Size**: `634` lines (`28361` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1229,6 +1243,8 @@
   - Method `.test_gallery_archive_is_reachable_and_wired()`
 - `class TagUiTest`
   - Method `.test_gallery_tags_are_reachable_and_wired()`
+- `class PlaceUiTest`
+  - Method `.test_gallery_places_are_reachable_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
@@ -1253,6 +1269,34 @@
 
 **Functions:**
 - `def temp_dir(test_case)`
+
+---
+
+### [`tests/test_places.py`](tests/test_places.py)
+**Size**: `102` lines (`3865` bytes)
+
+**Classes:**
+- `class _Exif`
+  - Method `.__init__(gps)`
+  - Method `.get_ifd(number)`
+- `class _Image`
+  - Method `.__init__(gps)`
+  - Method `.__enter__()`
+  - Method `.__exit__(*args)`
+  - Method `.getexif()`
+- `class _ImageModule`
+  - Method `.__init__(gps)`
+  - Method `.open(path)`
+- `class GeoTest`
+  - Method `.test_degrees_minutes_seconds_and_south_west_are_signed()`
+  - Method `.test_missing_or_out_of_range_gps_is_none()`
+- `class PlaceFilterTest`
+  - Method `.setUp()`
+  - Method `._add(data, name, latitude, longitude)`
+  - Method `.test_a_coarse_point_filters_and_lists_places()`
+  - Method `.test_archived_photos_leave_places()`
+- `class PlaceMigrationTest`
+  - Method `.test_a_format_9_catalog_gains_the_gps_columns()`
 
 ---
 
@@ -1419,7 +1463,7 @@
 ---
 
 ### [`tests/test_tags.py`](tests/test_tags.py)
-**Size**: `94` lines (`4852` bytes)
+**Size**: `97` lines (`5034` bytes)
 
 **Classes:**
 - `class TagBookTest`
@@ -1436,7 +1480,7 @@
 ---
 
 ### [`tests/test_trash.py`](tests/test_trash.py)
-**Size**: `107` lines (`5259` bytes)
+**Size**: `109` lines (`5408` bytes)
 
 **Classes:**
 - `class TrashBookTest`

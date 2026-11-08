@@ -5,41 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794133018.9331684,
+    "updated_at": 1794133704.0360792,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-final",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/1] Final run 27 (pushes 1-2): audit the original core, fix full-disk upload handling, verify 217 tests and 4/4 gates, publish, and close the retrospective at the beginning",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794113624.9501793,
-      "timestamp_str": "2026-11-08 07:53:44",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The expanding window has reached the first historical pushes; Run 27 must close the objective at push 1",
-        "benefits": "The initial ingest/account feature set is verified against today's tree and a disk-full upload can no longer 500",
-        "risks": "contract: upload error status on write failure; dependency: stdlib only; concurrency: unchanged; state: temp file cleanup unchanged",
-        "mitigation": "Failing-first injected full-disk test, keep the pre-flight capacity check, run the full suite and gates, record ADR-043 and the final audit status"
-      },
-      "plan_digest": "fbf9b45a49c78d8805956b57ce6be8ab7b754c155f1a6d33faf81f7a1a2d1da7"
-    },
-    {
-      "task_id": "push-audit-final",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[1/1] Run 27 (pushes 1-80): full-disk upload now returns 507 with no partial file; 217 tests; 4/4 gates; checklists: passed; ADR-043; audit reached push 1",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794113889.4223478,
-      "timestamp_str": "2026-11-08 07:58:09",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-final",
       "phase": "completed",
@@ -260,6 +231,28 @@
       "status": "in_progress",
       "timestamp": 1794133018.9331684,
       "timestamp_str": "2026-11-08 13:16:58",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-gap-2",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[3/3] Places: format 10 GPS columns, EXIF GPS at ingest, outline place buckets, place=LAT,LON filter, rail and Details UI, tests and docs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133698.3409176,
+      "timestamp_str": "2026-11-08 13:28:18",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-gap-2",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/3] Places done: 245 tests OK; 4/4 gates; GPS/privacy/migration covered; checklists: passed; UI review next; then remaining gap assessment",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133704.0360792,
+      "timestamp_str": "2026-11-08 13:28:24",
       "agent": "opencode:deepseek"
     }
   ]

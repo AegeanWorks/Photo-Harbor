@@ -94,6 +94,8 @@ class TrashMigrationTest(unittest.TestCase):
         old = Database(path)
         old.conn.executescript("DROP TABLE trash;"
                                "ALTER TABLE albums DROP COLUMN cover_sha;"
+                               "ALTER TABLE photos DROP COLUMN latitude;"
+                               "ALTER TABLE photos DROP COLUMN longitude;"
                                "PRAGMA user_version=5;")
         old.close()
         db = Database(path)

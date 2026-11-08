@@ -75,6 +75,8 @@ def read_details(record: PhotoRecord, path: Path) -> dict:
         "size": record.size,
         "taken": record.taken_at,
         "received": record.received_at,
+        "latitude": record.latitude,
+        "longitude": record.longitude,
         "width": None,
         "height": None,
         "camera": None,

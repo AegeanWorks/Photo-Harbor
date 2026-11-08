@@ -17,14 +17,14 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Shared albums / public sharing | No | Low: home-network privacy is the product promise; public links add auth and abuse surface | Not now |
 | Scrubbable bar / virtual scroll | Paginated day grid with lazy images | Medium: current scale is measured at 50k photos (12-33 ms pages) | Later |
 | RAW / 360 / LivePhoto / MotionPhoto | HEIC via optional Pillow; no RAW/360/pairing | Low-medium: needs decoders or paired-file model | Not now |
-| Metadata view (EXIF, map) | EXIF facts; no GPS/map | Medium: GPS extraction is easy, an offline map is not (tiles/CDN or a large asset) | Later, without a map first |
+| Metadata view (EXIF, map) | EXIF facts; GPS point and Places rail, no map | Medium: GPS extraction and coarse place grouping are local; map tiles would be a network dependency | **Places implemented**, map later |
 | Search by metadata/objects/faces/CLIP | File-name search + date/person/album/kind filters | Low for ML (RAM/CPU/extra services); tags/metadata search is worthwhile | Search metadata later |
 | Admin/user management | Owner manages people, passwords and keys | - | Keep |
 | OAuth / API keys | Profile keys and browser sessions | Low for a home LAN | Not now |
 | User-defined storage structure | Fixed readable `<Person>/<YYYY>/<YYYY-MM>` layout | Low: the plain layout is a deliberate feature | Not now |
 | Archive | Yes: per-person hidden state, rail view, single/bulk restore | - | **Implemented now** |
 | Favorites | Yes | - | Keep |
-| Global Map | No | Medium: needs GPS plus a map surface | Later |
+| Global Map | Coarse Places list; no map surface | Medium: needs an offline tile story; GPS is now stored | Later |
 | Partner sharing | No | Low: per-person folders already cover the household use case | Not now |
 | Facial recognition/clustering | No | Low here: ML worker, model downloads and training data | Not now |
 | Memories (x years ago) | No | High: one filter over existing dates, high user value | **Implemented now** |
@@ -56,9 +56,15 @@ counts, and the viewer plus selection bar apply or remove them. Creating the sam
 case-insensitive and idempotent. Tags stay private, never move files, and the marks disappear
 with the person's last copy; archived photos leave the rail count.
 
+## Implemented in this pass: Places
+
+Format 10 stores `latitude`/`longitude` from EXIF GPS at ingest (optional Pillow). The outline
+returns coarse one-decimal buckets, the rail lists **Places** with counts, and
+`GET /api/photos?place=LAT,LON` narrows the gallery. The Details panel shows the exact point.
+No map tiles, reverse geocoding or network lookup are involved; archived photos leave the list.
+
 ## Next candidates
 
-1. **Places** - extract GPS during details and group by a coarse coordinate bucket; add a map
-   only when an offline tile story exists.
-2. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
-3. **Metadata search** - expose camera/lens/date filters once EXIF is parsed into columns.
+1. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
+2. **Metadata search** - expose camera/lens filters once EXIF is parsed into columns.
+3. **Global map** - only with an offline tile story that preserves the home-network promise.

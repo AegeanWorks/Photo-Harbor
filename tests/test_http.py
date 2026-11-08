@@ -479,6 +479,23 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", f"/api/photos?tag={her_tag}", key=False, headers=as_her)
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["hers.jpg"])
 
+    def test_places_group_and_filter_a_gps_point(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET latitude = ?, longitude = ? WHERE sha256 = ?",
+                (37.04, 23.72, one))
+        _, body = self.call("GET", "/api/outline")
+        self.assertEqual(json.loads(body)["places"],
+                         [{"lat": 37.0, "lon": 23.7, "count": 1, "key": "37.0,23.7"}])
+        _, body = self.call("GET", "/api/photos?place=37.04,23.72")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+        for bad in ("abc", "91,0", "0,181", "37.0"):
+            response, _ = self.call("GET", f"/api/photos?place={bad}")
+            self.assertEqual(response.status, 400, bad)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

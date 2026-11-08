@@ -71,7 +71,10 @@ class ArchiveMigrationTest(unittest.TestCase):
             " received_at, sort_time, profile) VALUES (?, 'main/2026/2026-01/a.jpg', 3, 'a.jpg',"
             " 'image/jpeg', NULL, '2026-01-02T00:00:00', '2026-01-02T00:00:00', 'main')",
             (sha(b"a"),))
-        old.conn.executescript("DROP TABLE archived; PRAGMA user_version=7;")
+        old.conn.executescript("DROP TABLE archived;"
+                               "ALTER TABLE photos DROP COLUMN latitude;"
+                               "ALTER TABLE photos DROP COLUMN longitude;"
+                               "PRAGMA user_version=7;")
         old.close()
         db = Database(path)
         self.addCleanup(db.close)

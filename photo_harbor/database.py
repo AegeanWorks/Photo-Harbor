@@ -6,12 +6,12 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 9
+SCHEMA_VERSION = 10
 OWNER_PROFILE = "main"
 # SQLite INTEGER is signed 64-bit; a larger Python int cannot be bound as a parameter.
 MAX_ROW_ID = 2 ** 63 - 1
 
-# Format 9, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 10, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
 _COLLECTIONS = """
@@ -92,7 +92,9 @@ CREATE TABLE IF NOT EXISTS photos (
     taken_at TEXT,
     received_at TEXT NOT NULL,
     sort_time TEXT NOT NULL,
-    profile TEXT NOT NULL DEFAULT 'main'
+    profile TEXT NOT NULL DEFAULT 'main',
+    latitude REAL,
+    longitude REAL
 );
 CREATE INDEX IF NOT EXISTS photos_by_time ON photos (sort_time DESC, sha256 DESC);
 CREATE INDEX IF NOT EXISTS photos_by_profile ON photos (profile, sort_time DESC);
@@ -216,13 +218,20 @@ _FROM_7 = _ARCHIVE
 # Format 9 adds personal tags; a tag is a named mark on any photo the person can see.
 _FROM_8 = _TAGS
 
-_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
-             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
-             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
-             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
-             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8,
-             6: _FROM_6 + _FROM_7 + _FROM_8,
-             7: _FROM_7 + _FROM_8, 8: _FROM_8}
+# Format 10 stores the camera's GPS point, when the file has one, for the Places rail.
+_FROM_9 = """
+ALTER TABLE photos ADD COLUMN latitude REAL;
+ALTER TABLE photos ADD COLUMN longitude REAL;
+"""
+
+_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
+             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
+             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
+             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9,
+             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9,
+             6: _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9,
+             7: _FROM_7 + _FROM_8 + _FROM_9,
+             8: _FROM_8 + _FROM_9, 9: _FROM_9}
 
 
 class Database:

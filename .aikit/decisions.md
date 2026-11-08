@@ -872,3 +872,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Tags never move, copy or rewrite a file and compose with the other filters.
   A tag with only archived photos stays listed with a zero count, so it can be reused or
   cleaned up. Cross-person tag ids are rejected before any write.
+
+### ADR-050: Places are coarse stored GPS points, not a map
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Immich's map is valuable, but map tiles need a network provider or a large
+  offline asset, which conflicts with the home-network promise. The camera's GPS point is
+  already inside many originals and is cheap to read once.
+- **Decision**: Add format 10 with nullable `latitude`/`longitude` on `photos`, read from EXIF
+  GPS at ingest (Pillow optional). `GET /api/outline` groups visible photos into one-decimal
+  coordinate buckets (top 100); `GET /api/photos?place=LAT,LON` filters one bucket; the rail
+  lists **Places** and Details shows the exact point. Archived photos leave place counts.
+- **Consequences**: Users get a local, offline place browse without reverse geocoding or tiles.
+  Names like "Athens" are deliberately not invented from coordinates; a future map can render
+  the stored points without re-reading originals.

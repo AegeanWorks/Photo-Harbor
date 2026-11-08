@@ -103,6 +103,8 @@ class CollectionMigrationTest(unittest.TestCase):
             " 'image/jpeg', NULL, '2026-01-02T00:00:00', '2026-01-02T00:00:00', 'main')",
             (sha(b"a"),))
         old.conn.executescript("DROP TABLE album_photos; DROP TABLE favorites; DROP TABLE albums;"
+                               "ALTER TABLE photos DROP COLUMN latitude;"
+                               "ALTER TABLE photos DROP COLUMN longitude;"
                                "PRAGMA user_version=4;")
         old.close()
         db = Database(path)
@@ -120,6 +122,8 @@ class CollectionMigrationTest(unittest.TestCase):
         path = lib.root / "v6.sqlite3"
         old = Database(path)
         old.conn.executescript("ALTER TABLE albums DROP COLUMN cover_sha;"
+                               "ALTER TABLE photos DROP COLUMN latitude;"
+                               "ALTER TABLE photos DROP COLUMN longitude;"
                                "PRAGMA user_version=6;")
         old.close()
         db = Database(path)

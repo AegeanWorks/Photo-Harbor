@@ -25,6 +25,7 @@ PRIVATE = (("Cache-Control", "private, must-revalidate, max-age=60"),
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 DATE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
 DAY = re.compile(r"^\d{2}-\d{2}$")
+PLACE = re.compile(r"^(-?\d{1,3}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)$")
 
 
 def _valid_date(value: str) -> bool:
@@ -101,6 +102,7 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     archived = request.arg("archived") == "1"
     album = request.arg("album") or None
     tag = request.arg("tag") or None
+    place = request.arg("place") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
     day = request.arg("day").strip() or None
@@ -135,9 +137,21 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
             raise HarborError(f"no tag {tag}", "it was deleted or belongs to someone else",
                               "reload the gallery and try again", status=404)
         tag = int(tag)
+    if place is not None:
+        match = PLACE.match(place)
+        if match is None:
+            raise HarborError(f"{place!r} is not a place", "places are written LAT,LON",
+                              "use ?place=37.0,23.7")
+        latitude, longitude = (float(value) for value in match.groups())
+        if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            raise HarborError("that place is outside the world",
+                              "latitude is -90 to 90 and longitude is -180 to 180",
+                              "use ?place=37.0,23.7")
+        place = (round(latitude, 1), round(longitude, 1))
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album, tag=tag,
-                       start=start, end=end, day=day, archived=archived, order=order)
+                       place=place, start=start, end=end, day=day, archived=archived,
+                       order=order)
 
 
 class LibraryApi:
@@ -201,9 +215,13 @@ class LibraryApi:
     def outline(self, request: Request) -> Reply:
         """Months with photos, newest first, for the browser sidebar."""
         outline = self._catalog.outline(_visible_profile(request), viewer=request.profile)
-        return json_reply({"months": [{"month": m, "count": n} for m, n in outline.months],
-                           "videos": outline.videos, "favorites": outline.favorites,
-                           "total": outline.total, "archived": outline.archived})
+        return json_reply({
+            "months": [{"month": m, "count": n} for m, n in outline.months],
+            "videos": outline.videos, "favorites": outline.favorites,
+            "total": outline.total, "archived": outline.archived,
+            "places": [{"lat": lat, "lon": lon, "count": count,
+                        "key": f"{lat},{lon}"} for lat, lon, count in outline.places],
+        })
 
     def _disk(self) -> dict:
         usage = shutil.disk_usage(self._store.root)

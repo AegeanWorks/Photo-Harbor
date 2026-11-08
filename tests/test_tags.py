@@ -82,7 +82,10 @@ class TagMigrationTest(unittest.TestCase):
         lib = Library(self)
         path = lib.root / "v8.sqlite3"
         old = Database(path)
-        old.conn.executescript("DROP TABLE photo_tags; DROP TABLE tags; PRAGMA user_version=8;")
+        old.conn.executescript("DROP TABLE photo_tags; DROP TABLE tags;"
+                               "ALTER TABLE photos DROP COLUMN latitude;"
+                               "ALTER TABLE photos DROP COLUMN longitude;"
+                               "PRAGMA user_version=8;")
         old.close()
         db = Database(path)
         self.addCleanup(db.close)

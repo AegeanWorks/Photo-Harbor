@@ -299,6 +299,18 @@ class TagUiTest(unittest.TestCase):
         self.assertIn("toggleTagMenu", script)
 
 
+class PlaceUiTest(unittest.TestCase):
+    def test_gallery_places_are_reachable_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('id="rail-places"', page)
+        self.assertIn('params.set("place", state.scope.place)', script)
+        self.assertIn("placeLabel", script)
+        self.assertIn("selectPlace", script)
+        self.assertIn("data-place", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

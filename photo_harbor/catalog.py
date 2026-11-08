@@ -7,7 +7,8 @@ from .database import Database, MAX_ROW_ID
 from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRecord,
                       StorageFile, StorageReport)
 
-_COLUMNS = "sha256, rel_path, size, original_name, media_type, taken_at, received_at, profile"
+_COLUMNS = ("sha256, rel_path, size, original_name, media_type, taken_at, received_at,"
+            " profile, latitude, longitude")
 _ORDERS = {
     "newest": "{owner}.sort_time DESC, {owner}.sha256 DESC",
     "oldest": "{owner}.sort_time ASC, {owner}.sha256 ASC",
@@ -86,6 +87,10 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
         clauses.append("EXISTS (SELECT 1 FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id"
                        " WHERE pt.tag_id = ? AND t.profile = ? AND pt.sha256 = p.sha256)")
         params.extend((narrow.tag, narrow.viewer))
+    if narrow.place is not None:
+        clauses.append("p.latitude IS NOT NULL AND p.longitude IS NOT NULL"
+                       " AND ROUND(p.latitude, 1) = ? AND ROUND(p.longitude, 1) = ?")
+        params.extend(narrow.place)
     return (" WHERE " + " AND ".join(clauses) if clauses else ""), params
 
 
@@ -106,10 +111,11 @@ class Catalog:
             self._db.conn.execute("SAVEPOINT add_photo")
             try:
                 self._db.conn.execute(
-                    f"INSERT INTO photos ({_COLUMNS}, sort_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    f"INSERT INTO photos ({_COLUMNS}, sort_time)"
+                    " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     (record.sha256, record.rel_path, record.size, record.original_name,
                      record.media_type, record.taken_at, record.received_at, record.profile,
-                     record.sort_time),
+                     record.latitude, record.longitude, record.sort_time),
                 )
                 self._db.conn.execute(
                     "INSERT INTO copies (profile, sha256, rel_path, original_name, added_at,"
@@ -229,8 +235,15 @@ class Catalog:
                 " WHERE f.profile = ? AND NOT EXISTS (SELECT 1 FROM archived a"
                 " WHERE a.profile = ? AND a.sha256 = p.sha256)",
                 (viewer, viewer)).fetchone()[0]
+            place_where = f"{where} AND p.latitude IS NOT NULL AND p.longitude IS NOT NULL"
+            places = self._db.conn.execute(
+                f"SELECT ROUND(p.latitude, 1) AS lat, ROUND(p.longitude, 1) AS lon, COUNT(*)"
+                f" FROM {table}{place_where}"
+                " GROUP BY lat, lon ORDER BY COUNT(*) DESC, lat, lon LIMIT 100",
+                params).fetchall()
         return Outline(months=tuple((row[0], row[1]) for row in months), videos=videos,
-                       favorites=favorites, total=total, archived=archived)
+                       favorites=favorites, total=total, archived=archived,
+                       places=tuple((row[0], row[1], row[2]) for row in places))
 
     def stats(self, profile: Optional[str] = None) -> LibraryStats:
         table, where, params = _totals_source(profile)

@@ -21,6 +21,7 @@ from .catalog import Catalog
 from .copies import CopyIndex
 from .exif_dates import read_taken
 from .errors import HarborError
+from .geo import read_place
 from .naming import media_type, month_folder, parse_taken, safe_name
 from .records import IngestResult, PhotoRecord, UploadClaim
 
@@ -77,6 +78,7 @@ class PhotoStore:
                  folder_of: Callable[[str], str] = lambda profile: profile,
                  now: Callable[[], datetime] = local_now,
                  embedded_date: Callable[[Path], Optional[str]] = read_taken,
+                 embedded_place: Callable[[Path], Optional[tuple]] = read_place,
                  on_stored: Optional[Callable[[PhotoRecord], None]] = None) -> None:
         """``folder_of`` maps a profile id to that person's folder name in the library."""
         self.root = library
@@ -86,6 +88,7 @@ class PhotoStore:
         self._folder_of = folder_of
         self._now = now
         self._embedded_date = embedded_date
+        self._embedded_place = embedded_place
         self.on_stored = on_stored
         # Held while a file is placed, linked, moved or registered: one change at a time.
         self.lock = threading.RLock()
@@ -231,6 +234,7 @@ class PhotoStore:
                  or parse_taken(claim.modified_at))
         if taken is not None and taken.tzinfo is not None:
             taken = taken.astimezone()
+        place = self._embedded_place(tmp)
         received = self._now()
         with self.lock:
             existing = self._catalog.get(sha256)
@@ -248,6 +252,8 @@ class PhotoStore:
                     media_type=media_type(safe_name(claim.original_name)),
                     taken_at=_stamp(taken) if taken else None, received_at=_stamp(received),
                     profile=claim.profile,
+                    latitude=place[0] if place else None,
+                    longitude=place[1] if place else None,
                 )
                 try:
                     added = self._catalog.add(record)
