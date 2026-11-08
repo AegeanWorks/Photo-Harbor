@@ -23,6 +23,7 @@ PRIVATE = (("Cache-Control", "private, must-revalidate, max-age=60"),
            ("Vary", "Cookie"))
 MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 DATE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
+DAY = re.compile(r"^\d{2}-\d{2}$")
 
 
 def _valid_date(value: str) -> bool:
@@ -31,6 +32,17 @@ def _valid_date(value: str) -> bool:
         return False
     try:
         date.fromisoformat(value)
+    except ValueError:
+        return False
+    return True
+
+
+def _valid_day(value: str) -> bool:
+    """A month-day anniversary; 02-29 is allowed because leap years exist."""
+    if not DAY.match(value):
+        return False
+    try:
+        date(2000, int(value[:2]), int(value[3:]))
     except ValueError:
         return False
     return True
@@ -88,6 +100,7 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
     album = request.arg("album") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
+    day = request.arg("day").strip() or None
     order = request.arg("order") or "newest"
     if order not in ("newest", "oldest", "largest", "smallest"):
         raise HarborError(f"{order!r} is not a sort order",
@@ -103,6 +116,9 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
     if start is not None and end is not None and start > end:
         raise HarborError("the date range is backwards", f"{start} is after {end}",
                           "choose a From date on or before To")
+    if day is not None and not _valid_day(day):
+        raise HarborError(f"{day!r} is not a month-day", "days are written MM-DD",
+                          "use ?day=11-08")
     if kind not in (None, "photo", "video"):
         raise HarborError(f"{kind!r} is not a kind", "kind is photo or video",
                           "use ?kind=video, or leave it out")
@@ -113,7 +129,7 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
         album = int(album)
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album,
-                       start=start, end=end, order=order)
+                       start=start, end=end, day=day, order=order)
 
 
 class LibraryApi:

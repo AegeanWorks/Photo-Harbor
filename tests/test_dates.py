@@ -29,3 +29,11 @@ class DateFilterTest(unittest.TestCase):
     def test_dates_combine_with_the_existing_narrowing(self):
         self.assertEqual(self.names(PhotoFilter(start="2026-05-01", end="2026-05-31",
                                                  query="tenth")), ["may-tenth.jpg"])
+
+    def test_a_month_day_matches_anniversaries(self):
+        self.lib.put(b"old", name="may-old.jpg", taken="2024-05-10T10:00:00")
+        self.lib.put(b"new", name="may-new.jpg", taken="2025-05-10T10:00:00")
+        self.assertEqual(self.names(PhotoFilter(day="05-10")),
+                         ["may-tenth.jpg", "may-new.jpg", "may-old.jpg"])
+        self.lib.put(b"leap", name="leap.jpg", taken="2024-02-29T10:00:00")
+        self.assertEqual(self.names(PhotoFilter(day="02-29")), ["leap.jpg"])

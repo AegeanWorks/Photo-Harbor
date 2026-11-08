@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
 - **Total Classes**: `119`
-- **Total Top-Level Functions**: `103`
-- **Total Class Methods**: `515`
-- **Total Source Lines**: `8558`
+- **Total Top-Level Functions**: `104`
+- **Total Class Methods**: `517`
+- **Total Source Lines**: `8600`
 
 ---
 
@@ -269,7 +269,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `261` lines (`13211` bytes)
+**Size**: `264` lines (`13327` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -539,7 +539,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `213` lines (`10304` bytes)
+**Size**: `229` lines (`10854` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -556,6 +556,7 @@
 
 **Functions:**
 - `def _valid_date(value)` - *Shape plus a real calendar day: 2026-02-30 and 2025-02-29 fail.*
+- `def _valid_day(value)` - *A month-day anniversary; 02-29 is allowed because leap years exist.*
 - `def _not_found(sha256)`
 - `def _displayable(kind)` - *Images and videos show inline; anything else (HTML, SVG with scripts) only downloads.*
 - `def photo_json(record)`
@@ -655,7 +656,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `157` lines (`3657` bytes)
+**Size**: `158` lines (`3730` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -914,7 +915,7 @@
 ---
 
 ### [`tests/test_dates.py`](tests/test_dates.py)
-**Size**: `31` lines (`1444` bytes)
+**Size**: `39` lines (`1945` bytes)
 
 **Classes:**
 - `class DateFilterTest`
@@ -923,6 +924,7 @@
   - Method `.test_an_inclusive_range_selects_days_on_both_ends()`
   - Method `.test_either_end_can_stand_alone()`
   - Method `.test_dates_combine_with_the_existing_narrowing()`
+  - Method `.test_a_month_day_matches_anniversaries()`
 
 ---
 
@@ -1011,7 +1013,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `770` lines (`43560` bytes)
+**Size**: `784` lines (`44386` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1044,6 +1046,7 @@
   - Method `.test_hashes_match_the_filters_for_select_matching()`
   - Method `.test_sort_order_changes_the_page()`
   - Method `.test_a_date_range_narrows_the_gallery()`
+  - Method `.test_a_month_day_matches_each_year()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`

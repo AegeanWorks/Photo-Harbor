@@ -203,6 +203,7 @@ class ServerTest(unittest.TestCase):
         response, body = self.call("GET", "/", key=False)
         self.assertEqual(response.status, 200)
         self.assertIn(b"<html", body)
+        self.assertIn(b'data-scope="memories"', body)
 
     def test_login_sets_a_cookie_that_opens_the_api(self):
         response, _ = self.call("POST", "/api/login", body={"key": self.settings.key}, key=False)
@@ -391,6 +392,19 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(response.status, 400)
         response, _ = self.call("GET", "/api/photos?from=2026-06-01&to=2026-05-01")
         self.assertEqual(response.status, 400)
+
+    def test_a_month_day_matches_each_year(self):
+        for name, taken in (("old.jpg", "2024-05-10T10:00:00"),
+                            ("new.jpg", "2025-05-10T10:00:00"),
+                            ("other.jpg", "2025-05-11T10:00:00")):
+            self.call("POST", "/api/upload", body=name.encode(),
+                      headers={"X-Name": name, "X-Sha256": sha(name.encode()), "X-Taken": taken})
+        _, body = self.call("GET", "/api/photos?day=05-10")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]],
+                         ["new.jpg", "old.jpg"])
+        for bad in ("05-32", "02-30", "5-1", "13-01"):
+            response, _ = self.call("GET", f"/api/photos?day={bad}")
+            self.assertEqual(response.status, 400, bad)
 
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")

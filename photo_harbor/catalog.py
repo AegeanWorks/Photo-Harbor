@@ -54,6 +54,9 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
     if narrow.end:
         clauses.append(f"substr({owner}.sort_time, 1, 10) <= ?")
         params.append(narrow.end)
+    if narrow.day:
+        clauses.append(f"substr({owner}.sort_time, 6, 5) = ?")
+        params.append(narrow.day)
     for term in narrow.query.split() if narrow.query else ():
         escaped = term.replace("!", "!!").replace("%", "!%").replace("_", "!_")
         clauses.append(f"{owner}.original_name LIKE ? ESCAPE '!'")

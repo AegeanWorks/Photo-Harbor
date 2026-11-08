@@ -158,6 +158,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Exact date windows.** **Dates** in the gallery takes a From and To day; both ends are
   included, either can be left empty, and the range combines with person, album, favorites,
   kind and name search. **Show everything** removes it.
+- **On this day.** The **On this day** button shows photos taken on today's month and day in
+  every year, newest first. It combines with the selected person, sort order and search; an empty
+  result says so instead of falling back to the whole library.
 - **Order the gallery.** **Sort** offers Newest (the default), Oldest, Largest and Smallest.
   The choice stays when a date window is applied and stacks with the other filters.
 - **A safe Trash.** **Move to trash** from the viewer or a selection. It removes only your
@@ -209,7 +212,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
 | `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |

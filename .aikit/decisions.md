@@ -826,3 +826,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A partial grant asks for the missing permission instead of silently
   skipping videos; a background job records "Photo access is missing" and is visible in the
   app. Test and Sync remain green on the emulator.
+
+### ADR-047: Memories are a month-day gallery filter
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: An Immich comparison (`.aikit/immich_gap.md`) ranked Memories as the highest
+  value/lowest cost missing feature. The gallery already stores local sort times and filters by
+  date, so a separate memories table or job would duplicate state.
+- **Decision**: Add `day=MM-DD` to `PhotoFilter`, validated with a real calendar (leap day
+  allowed). The gallery's **On this day** button uses the browser's current month/day, composes
+  with person/query/sort filters, and has an explicit empty message. No schema change.
+- **Consequences**: Users get an Immich-style anniversary view with one indexed substring
+  predicate. A separate memories image generation/selection feature remains future work.
+  Tags, Archive, Places and near-duplicate review are recorded as the next candidates.
