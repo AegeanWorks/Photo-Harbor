@@ -30,7 +30,18 @@ Push numbers are the `update by push` entries in `git reflog show origin/master`
 - Fix: NFC-normalize before casefolding in the used-name key; two-record regression. ADR-036.
 - Verification: 211 tests OK; project check 4/4 gates.
 
+## Run 3 - pushes 72-80
+
+- Range: `c73fa38` (push 72), `e42534a` (push 73), `cb28579` (push 74), plus the last 6 pushes.
+- Reviewed: reforge state, UI metadata, transient-log ignore, naive future cursor rejection,
+  preview-warmer retry, plus the previous runs.
+- Finding: a cursor recorded in the future before wave 1 was still returned by `sync/start`,
+  stalling the phone until its clock caught up.
+- Fix: compare cursor and PC clock in one timezone frame; ignore a cursor over the 10-minute
+  slack and rescan once. Regression covers aware and naive future cursors. ADR-037.
+- Verification: 212 tests OK; project check 4/4 gates.
+
 ## Status
 
-- Runs completed: 2 (pushes 75-80).
-- Next run: last 9 pushes, adding pushes 72-74.
+- Runs completed: 3 (pushes 72-80).
+- Next run: last 12 pushes, adding pushes 69-71.

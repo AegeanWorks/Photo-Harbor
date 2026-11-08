@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
 - **Total Classes**: `117`
-- **Total Top-Level Functions**: `101`
-- **Total Class Methods**: `504`
-- **Total Source Lines**: `8341`
+- **Total Top-Level Functions**: `102`
+- **Total Class Methods**: `505`
+- **Total Source Lines**: `8371`
 
 ---
 
@@ -793,7 +793,7 @@
 ### [`photo_harbor/sync_api.py`](photo_harbor/sync_api.py)
 > *The endpoints the iPhone Shortcut calls: start, upload, done, and the cleanup's "has" check.*
 
-**Size**: `109` lines (`5477` bytes)
+**Size**: `122` lines (`5977` bytes)
 
 **Classes:**
 - `class SyncApi`
@@ -805,6 +805,7 @@
 
 **Functions:**
 - `def _stamp(moment)`
+- `def _comparable(moment, now)` - *Put a stored or phone timestamp and the PC clock into one timezone frame.*
 - `def _target_profile(request, book)` - *A person's own profile; the owner may upload for anyone with ``X-Profile``.*
 
 ---
@@ -1092,7 +1093,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `488` lines (`20667` bytes)
+**Size**: `505` lines (`21629` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1135,6 +1136,7 @@
   - Method `.test_sync_done_rejects_a_future_started_at()`
   - Method `.test_sync_done_rejects_a_naive_future_started_at()`
   - Method `.test_sync_done_rejects_future_when_clocks_mix_naive_and_aware()`
+  - Method `.test_start_ignores_a_future_cursor_left_by_an_old_clock()`
   - Method `.test_media_and_thumb_vary_by_cookie()`
   - Method `.test_warmer_survives_a_catalog_failure()`
   - Method `.test_warmer_retries_backlog_after_a_transient_failure()`

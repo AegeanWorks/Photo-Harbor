@@ -5,23 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794108743.7944033,
+    "updated_at": 1794109019.1562395,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-hardening-31",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[2/6] Failing-first tests proved red for all four gaps, then MAX_ROW_ID bounds (album, trash, paging offset, catalog defence) and whole-body JSON reading (_read_body across chunk boundaries) landed; targeted unit and HTTP tests green",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093336.328247,
-      "timestamp_str": "2026-11-08 02:15:36",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-hardening-31",
       "phase": "implementation",
@@ -253,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794108743.7944033,
       "timestamp_str": "2026-11-08 06:32:23",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[4/6] Run 3 (pushes 72-80): future sync cursor from an old clock skew is ignored and rescanned; 212 tests; 4/4 gates; checklists: passed; ADR-037 and audit log updated",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794109019.1562395,
+      "timestamp_str": "2026-11-08 06:36:59",
       "agent": "opencode:deepseek"
     }
   ]

@@ -324,6 +324,23 @@ class PasswordHashTest(unittest.TestCase):
             api.done(req)
         self.assertEqual(ctx.exception.status, 400)
 
+    def test_start_ignores_a_future_cursor_left_by_an_old_clock(self):
+        import json
+        from datetime import datetime, timezone
+        from photo_harbor.journal import SYNC_DONE
+        from photo_harbor.messages import Request
+        from photo_harbor.records import Identity
+        from photo_harbor.sync_api import FIRST_SYNC_SINCE, SyncApi
+        from tests.library_fixture import Library
+        lib = Library(self)
+        now = datetime(2026, 5, 1, 12, 0, 0, tzinfo=timezone.utc)
+        for cursor in ("2999-01-01T00:00:00+00:00", "2999-01-01T00:00:00"):
+            lib.journal.record("2026-05-01T12:00:00+00:00", SYNC_DONE, None, cursor)
+            api = SyncApi(lib.store, lib.journal, None, now=lambda: now)
+            reply = api.start(Request("POST", "/api/sync/start",
+                                      identity=Identity("main", True)))
+            self.assertEqual(json.loads(reply.body)["since"], FIRST_SYNC_SINCE, cursor)
+
     def test_media_and_thumb_vary_by_cookie(self):
         import io
         from photo_harbor.albums import AlbumBook

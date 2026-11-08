@@ -97,7 +97,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Only what is new is sent.** `POST /api/sync/start` returns the time of the last finished
   sync (minus 10 minutes of clock slack). The Shortcut asks `GET /api/has` before each upload,
   so photos already on the PC are only hashed, never re-sent. The sync is marked done only if
-  every upload succeeded.
+  every upload succeeded. A cursor left in the future by an old clock skew is ignored, so the
+  next sync rescans once instead of waiting for the calendar.
 - **Every byte is proven.** The phone sends the SHA-256 of each file with it. The PC streams the
   upload to a temporary file, hashes it, and keeps it only if the hashes match. Then it fsyncs
   the file and moves it into `<Person>/YYYY/YYYY-MM/` under its original name. A name clash with different

@@ -21,6 +21,16 @@ def _stamp(moment: datetime) -> str:
     return moment.isoformat(timespec="seconds")
 
 
+def _comparable(moment, now: datetime) -> tuple:
+    """Put a stored or phone timestamp and the PC clock into one timezone frame."""
+    if moment is not None and (moment.tzinfo is None) != (now.tzinfo is None):
+        if moment.tzinfo is None:
+            moment = moment.replace(tzinfo=now.tzinfo)
+        else:
+            now = now.replace(tzinfo=moment.tzinfo)
+    return moment, now
+
+
 def _target_profile(request: Request, book: ProfileBook) -> str:
     """A person's own profile; the owner may upload for anyone with ``X-Profile``."""
     asked = request.header("x-profile").strip()
@@ -46,7 +56,14 @@ class SyncApi:
 
     def start(self, request: Request) -> Reply:
         """Tell the phone which photos to send: those created after the last finished sync."""
-        last = parse_taken(self._journal.last_sync(request.profile))
+        now = self._now()
+        last, now = _comparable(parse_taken(self._journal.last_sync(request.profile)), now)
+        if last is not None:
+            try:
+                if last > now + CLOCK_SLACK:
+                    last = None  # an old clock skew left a cursor in the future: rescan once
+            except TypeError:
+                last = None
         since = _stamp(last - CLOCK_SLACK) if last else FIRST_SYNC_SINCE
         return json_reply({"since": since, "started_at": _stamp(self._now())})
 
@@ -91,11 +108,7 @@ class SyncApi:
                               "`done` needs the started_at value that `start` returned",
                               "send {\"started_at\": <value from start>} as JSON")
         now = self._now()
-        if (moment.tzinfo is None) != (now.tzinfo is None):
-            if moment.tzinfo is None:
-                moment = moment.replace(tzinfo=now.tzinfo)
-            else:
-                now = now.replace(tzinfo=moment.tzinfo)
+        moment, now = _comparable(moment, now)
         try:
             too_far = moment > now + timedelta(minutes=5)
         except TypeError:

@@ -690,3 +690,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   entry name keeps its original characters; only the used-name key is normalized.
 - **Consequences**: Case and normalization variants now receive the existing SHA-8 prefix.
   The delivered ZIP is safe on case- and normalization-insensitive filesystems.
+
+### ADR-037: A future sync cursor is ignored, not replayed
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Wave 1 (push 74) rejected a new `sync/done` whose `started_at` was in the future,
+  but a cursor recorded before that fix can still sit in the future. `sync/start` would return
+  that future time minus clock slack, so a phone filtering photos after the cursor finds none
+  until its clock catches up.
+- **Decision**: `SyncApi.start` normalizes the stored cursor and the PC clock into one timezone
+  frame and ignores a cursor more than `CLOCK_SLACK` in the future, returning
+  `FIRST_SYNC_SINCE`. `SyncApi.done` uses the same `_comparable` helper.
+- **Consequences**: An old skew causes one full rescan instead of a stalled sync. A cursor
+  inside the ten-minute slack is still honoured; a naive and an aware cursor compare safely.
