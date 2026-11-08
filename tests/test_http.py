@@ -646,6 +646,16 @@ class ServerTest(unittest.TestCase):
         self.assertEqual((item["name"], item["count"]), ("Keepers", 1))
         self.assertTrue(item["cover"].startswith("/thumb/"))
 
+    def test_tags_overview_has_name_and_count(self):
+        self.upload(b"one", name="one.jpg")
+        _, body = self.call("POST", "/api/tags", body={"name": "Keepers"})
+        tag = json.loads(body)["id"]
+        self.call("POST", "/api/photo-tags",
+                  body={"tag": tag, "sha256": sha(b"one"), "member": True})
+        _, body = self.call("GET", "/api/tags")
+        self.assertEqual(json.loads(body)["tags"][0]["name"], "Keepers")
+        self.assertEqual(json.loads(body)["tags"][0]["count"], 1)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

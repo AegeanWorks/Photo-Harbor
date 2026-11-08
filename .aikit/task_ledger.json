@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-albums-overview",
+    "task_id": "immich-tags-overview",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794146341.1842427,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794146728.784955,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794146503.109145
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-scrubber",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Timeline scrubber: year/month selects and older/newer jumps over outline months, static/HTTP tests; [2/2] gates, Chromium review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143867.6581578,
-      "timestamp_str": "2026-11-08 16:17:47",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The outline already has every month and count; a compact jump control makes large libraries navigable without adding virtual scrolling or state",
-        "benefits": "Fast year/month jumps from the gallery, no schema or backend change, works with the existing month scope",
-        "risks": "contract: new Photos controls and outline state; dependency: browser only; concurrency: read-only; state: no new storage",
-        "mitigation": "Keep the controls derived from outline months, test the static wiring and outline ordering, review with two different years, gate and publish"
-      },
-      "plan_digest": "bdc9c8efa9ec6f503bc014eabf9f51ae5ae71261b70662faa6fc43db73b82978"
-    },
-    {
-      "task_id": "immich-scrubber",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Timeline scrubber: Year/Month selects, Newer/Older jumps, outline month sync, static/HTTP tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794144027.111157,
-      "timestamp_str": "2026-11-08 16:20:27",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-scrubber",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Scrubber done: 286 tests OK; 4/4 gates; month order/counts covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794144027.9211278,
-      "timestamp_str": "2026-11-08 16:20:27",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-scrubber",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794146503.1091468,
       "timestamp_str": "2026-11-08 17:01:43",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-tags-overview",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Tags overview: read-only tag cards and counts from /api/tags, click opens tag scope, static/HTTP tests; [2/2] gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794146623.4331558,
+      "timestamp_str": "2026-11-08 17:03:43",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Tags are only in the rail; a card overview is the remaining read-only organization surface and needs no new endpoint",
+        "benefits": "A clear tag index with counts that opens the existing tag filter",
+        "risks": "contract: new Tags tab; dependency: browser only; concurrency: read-only; state: none",
+        "mitigation": "Reuse the tested tags response, keep creation in Photos, add static/HTTP coverage, gate and review"
+      },
+      "plan_digest": "76650a2179b3ce027c5bc29f4ca012857ee93f5803397fdccd717366ded20e46"
+    },
+    {
+      "task_id": "immich-tags-overview",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Tags overview: cards with names/counts from /api/tags, click opens tag scope, static/HTTP tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794146728.2126377,
+      "timestamp_str": "2026-11-08 17:05:28",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-tags-overview",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Tags overview done: 293 tests OK; 4/4 gates; name/count covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794146728.784955,
+      "timestamp_str": "2026-11-08 17:05:28",
       "agent": "opencode:deepseek"
     }
   ]

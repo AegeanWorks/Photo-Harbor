@@ -823,6 +823,31 @@ async function loadTags() {
   markScope();
   renderScope();
   renderViewerCollections();
+  return listing;
+}
+
+async function loadTagOverview() {
+  const listing = await loadTags();
+  $("tags-status").textContent = `${listing.tags.length.toLocaleString()} tags`;
+  const grid = $("tags-grid");
+  grid.replaceChildren();
+  if (listing.tags.length === 0) {
+    grid.append(el("p", "hint", "No tags yet. Add one from Photos."));
+    return;
+  }
+  for (const tag of listing.tags) {
+    const card = el("button", "tag-card");
+    card.type = "button";
+    const copy = el("span", "tag-copy");
+    copy.append(el("span", "tag-name", tag.name),
+      el("span", "tag-count", items(tag.count)));
+    card.append(el("span", "tag-mark", "#"), copy);
+    card.addEventListener("click", () => {
+      selectTag(tag.id);
+      show("photos");
+    });
+    grid.append(card);
+  }
 }
 
 async function newTag() {
@@ -2429,13 +2454,14 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "folders", "explore", "albums", "sync", "setup",
-    "similar", "map", "trash"]) {
+  for (const name of ["photos", "folders", "explore", "albums", "tags", "sync",
+    "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "folders") loadFolders().catch(handle);
   if (view === "explore") loadExplore().catch(handle);
   if (view === "albums") loadAlbumOverview().catch(handle);
+  if (view === "tags") loadTagOverview().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

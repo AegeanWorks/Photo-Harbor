@@ -461,6 +461,20 @@ class AlbumsUiTest(unittest.TestCase):
         self.assertIn("album.cover", script)
 
 
+class TagsOverviewUiTest(unittest.TestCase):
+    def test_tags_overview_is_wired_to_counts(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="tags"', 'id="view-tags"',
+                        'id="tags-grid"', 'id="tags-status"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/tags", script)
+        self.assertIn("loadTagOverview", script)
+        self.assertIn("selectTag", script)
+        self.assertIn("tag.count", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

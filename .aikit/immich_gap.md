@@ -29,7 +29,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Partner sharing | No | Low: per-person folders already cover the household use case | Not now |
 | Facial recognition/clustering | No | Low here: ML worker, model downloads and training data | Not now |
 | Memories (x years ago) | No | High: one filter over existing dates, high user value | **Implemented now** |
-| Tags | Yes: per-person tags, rail filter, viewer/selection apply | - | **Implemented now** |
+| Tags | Yes: per-person tags, rail filter, overview tab, viewer/selection apply | - | **Implemented now** |
 | Folder view | Read-only Folders tab over the real person/year/month paths | - | **Implemented now** |
 | Offline support | PWA shell only; Android has local queue state | Medium: offline write queue is a large state machine | Not now |
 | Read-only gallery | No separate role | Medium: could reuse a share token, but conflicts with private profiles | Later |
@@ -100,6 +100,12 @@ world outline. Markers use the same `/api/outline` data as the Places rail, scal
 counts, and a clickable list opens a place's gallery view. No tiles, CDN, reverse geocoding or
 network lookup are used; the map is read-only and respects the signed-in person's visible pairs.
 
+## Implemented in this pass: Tags overview
+
+The **Tags** tab reads the existing `/api/tags` response and renders one card per tag with its
+name and visible count; clicking a card opens the existing tag scope. Creation/editing stays in
+Photos. It is read-only and adds no endpoint, schema or state.
+
 ## Implemented in this pass: Albums overview
 
 The **Albums** tab fetches the existing `/api/albums` response and renders each album's cover,
@@ -141,15 +147,15 @@ camera/lens facts. Archived photos leave both counts; no ML, network or file rew
 ## Decision summary
 
 Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review and
-comparison, sidecars, an offline map, a read-only Folders tab, Explore statistics, an Albums
-overview, a year/month timeline scrubber and a virtualized day grid**. All fourteen reuse local
-data, avoid ML services and network dependencies, and never move or rewrite originals. Archive
-and Tags add only private per-person marks; Places stores the camera's point once; Cameras stores
-the EXIF make/model and lens once; Similar uses an optional perceptual hash cache and a read-only
-overlay; sidecars are generated in memory; the map is an embedded SVG outline; Folders mirrors
-the existing disk layout; Explore reads outline counts; Albums reads the existing album list;
-the scrubber reads outline months; the grid windows day sections. They compose with the existing
-person, album, date, kind, name and sort filters.
+comparison, sidecars, an offline map, a read-only Folders tab, Explore statistics, Albums and
+Tags overviews, a year/month timeline scrubber and a virtualized day grid**. All fifteen reuse
+local data, avoid ML services and network dependencies, and never move or rewrite originals.
+Archive and Tags add only private per-person marks; Places stores the camera's point once;
+Cameras stores the EXIF make/model and lens once; Similar uses an optional perceptual hash cache
+and a read-only overlay; sidecars are generated in memory; the map is an embedded SVG outline;
+Folders mirrors the existing disk layout; Explore reads outline counts; Albums/Tags read their
+existing lists; the scrubber reads outline months; the grid windows day sections. They compose
+with the existing person, album, date, kind, name and sort filters.
 
 Deliberately not now:
 

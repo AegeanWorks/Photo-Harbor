@@ -1060,3 +1060,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   editing remain in Photos. No schema or endpoint is added.
 - **Consequences**: The overview cannot drift from the rail because both read the same response.
   Empty albums show a clear placeholder cover.
+
+### ADR-064: Tags overview presents the existing tag response
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Tags are available in the rail and viewers, but there was no count-first index.
+  A second tag model or endpoint would duplicate counts and names.
+- **Decision**: Add a read-only **Tags** tab that calls the existing `/api/tags`, renders a card
+  per tag with its name and visible count, and opens the tag through the existing `selectTag`
+  scope. Creation/editing remains in Photos and no schema or endpoint is added.
+- **Consequences**: The overview cannot drift from the rail; archived photos remain excluded
+  from the count exactly as in the outline.
