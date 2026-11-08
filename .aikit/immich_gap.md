@@ -32,7 +32,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Folder view | Plain folders in Explorer; no web folder tree | Low: duplicate of the filesystem and current filters | Not now |
 | Offline support | PWA shell only; Android has local queue state | Medium: offline write queue is a large state machine | Not now |
 | Read-only gallery | No separate role | Medium: could reuse a share token, but conflicts with private profiles | Later |
-| Duplicates utility | Exact SHA-256 dedupe only | Medium: near-duplicate detection needs perceptual hashes | Later |
+| Duplicates utility | Exact SHA-256 dedupe plus read-only dHash Similar review | - | **Implemented now** |
 | XMP sidecars | No | Medium: useful for interoperability; file mutation risk | Later |
 | Editing / transcoding / casting / monitoring | No | Low for this lightweight server | Not now |
 
@@ -63,6 +63,14 @@ returns coarse one-decimal buckets, the rail lists **Places** with counts, and
 `GET /api/photos?place=LAT,LON` narrows the gallery. The Details panel shows the exact point.
 No map tiles, reverse geocoding or network lookup are involved; archived photos leave the list.
 
+## Implemented in this pass: Similar review
+
+Format 12 adds a `photo_hashes` cache. **Similar** is a separate tab: **Scan library** computes
+an optional Pillow difference hash for visible photos in batches, unreadable files are marked
+`skip`, and groups share one exact 64-bit hash. The view is read-only: each photo links to its
+original and there is no delete action. This catches re-encoded or resized copies that SHA-256
+dedupe misses, without perceptual-distance clustering or automatic deletion.
+
 ## Implemented in this pass: Cameras
 
 Format 11 stores `camera` and `lens` from EXIF once at ingest (Pillow optional). The outline
@@ -72,17 +80,15 @@ facts. Archived photos leave the camera count; no ML, network or file rewrite is
 
 ## Decision summary
 
-Implemented in this pass: **Memories, Archive, Tags, Places and Cameras**. All five reuse local
-data, avoid ML services and network dependencies, and never move or rewrite originals. Archive
-and Tags add only private per-person marks; Places stores the camera's point once; Cameras stores
-the EXIF make/model and lens once. They compose with the existing person, album, date, kind, name
-and sort filters.
+Implemented in this pass: **Memories, Archive, Tags, Places, Cameras and Similar review**. All
+six reuse local data, avoid ML services and network dependencies, and never move or rewrite
+originals. Archive and Tags add only private per-person marks; Places stores the camera's point
+once; Cameras stores the EXIF make/model and lens once; Similar uses an optional perceptual hash
+cache and is read-only. They compose with the existing person, album, date, kind, name and sort
+filters.
 
 Deliberately not now:
 
-- **Near-duplicate utility** - requires perceptual hashing, backfilling existing photos and a
-  false-positive review flow; a wrong cluster could lead to deleting a keeper. Revisit with a
-  read-only similarity list before any deletion action.
 - **Global map** - needs an offline tile story; the Places rail already exposes the stored
   coordinates without sending them anywhere.
 - **Sharing, OAuth, RAW/360/LivePhoto, storage templates, transcoding and offline write queues**

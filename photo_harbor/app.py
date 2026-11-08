@@ -30,6 +30,7 @@ from .profiles_api import ProfilesApi
 from .router import Router
 from .scan import LibraryScanner, ScanSchedule
 from .setup_api import SetupApi
+from .similar_api import SimilarApi
 from .store import PhotoStore, local_now
 from .sync_api import SyncApi
 from .tags import TagBook
@@ -107,6 +108,7 @@ class HarborApp:
                        AlbumsApi(self.albums, catalog),
                        ArchiveApi(self.archive, catalog),
                        TagApi(self.tags, catalog),
+                       SimilarApi(catalog, self.store),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),
                        BackupApi(lambda: self.backup),
@@ -178,7 +180,7 @@ class HarborApp:
                      headers=NO_CACHE, file=path)
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
-                  albums: AlbumsApi, archive: ArchiveApi, tags: TagApi,
+                  albums: AlbumsApi, archive: ArchiveApi, tags: TagApi, similar: SimilarApi,
                   downloads: DownloadsApi, trash: TrashApi, backup: BackupApi,
                   setup: SetupApi) -> None:
         add = self.router.add
@@ -221,6 +223,8 @@ class HarborApp:
         add("POST", "/api/tags", tags.create)
         add("POST", "/api/tags/", tags.update)
         add("POST", "/api/photo-tags", tags.membership)
+        add("GET", "/api/similar", similar.listing)
+        add("POST", "/api/similar/scan", similar.scan)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/trash", trash.listing)

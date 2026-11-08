@@ -509,6 +509,23 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/photos?camera=Acme%20Cam%201")
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
 
+    def test_similar_review_groups_hashes_without_deleting(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        one, two = sha(b"one"), sha(b"two")
+        with self.app.db.lock:
+            self.app.db.conn.executemany(
+                "INSERT INTO photo_hashes (sha256, dhash) VALUES (?, ?)",
+                [(one, "aaaaaaaaaaaaaaaa"), (two, "aaaaaaaaaaaaaaaa")])
+        _, body = self.call("GET", "/api/similar")
+        listing = json.loads(body)
+        self.assertEqual(listing["status"]["indexed"], 2)
+        self.assertEqual(listing["groups"][0]["count"], 2)
+        self.assertEqual({photo["name"] for photo in listing["groups"][0]["photos"]},
+                         {"one.jpg", "two.jpg"})
+        response, _ = self.call("POST", "/api/similar/scan", body={"limit": 0})
+        self.assertEqual(response.status, 400)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

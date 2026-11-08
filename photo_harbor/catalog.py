@@ -212,6 +212,69 @@ class Catalog:
                 (*params, limit)).fetchall()
         return [row[0] for row in rows]
 
+    def similar_status(self, profile: Optional[str] = None, viewer: str = "main") -> dict:
+        """How many visible photos have a perceptual hash, a skip or no entry yet."""
+        narrow = PhotoFilter(profile=profile, viewer=viewer)
+        table, _, owner = _source(narrow)
+        where, params = _where(narrow, owner)
+        with self._db.lock:
+            row = self._db.conn.execute(
+                f"SELECT COUNT(*),"
+                " COALESCE(SUM(CASE WHEN ph.sha256 IS NULL THEN 1 ELSE 0 END), 0),"
+                " COALESCE(SUM(CASE WHEN ph.dhash = 'skip' THEN 1 ELSE 0 END), 0)"
+                f" FROM {table} LEFT JOIN photo_hashes ph ON ph.sha256 = p.sha256{where}",
+                params).fetchone()
+        total, missing, skipped = row
+        return {"total": total, "missing": missing, "skipped": skipped,
+                "indexed": total - missing - skipped}
+
+    def missing_hashes(self, profile: Optional[str] = None, viewer: str = "main",
+                       limit: int = 100) -> list:
+        """Visible photo hashes that have no perceptual-hash row yet, newest first."""
+        if limit < 0:
+            raise ValueError("limit must be >= 0")
+        narrow = PhotoFilter(profile=profile, viewer=viewer)
+        table, _, owner = _source(narrow)
+        where, params = _where(narrow, owner)
+        order = _ORDERS["newest"].format(owner=owner)
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                f"SELECT p.sha256 FROM {table}"
+                f" LEFT JOIN photo_hashes ph ON ph.sha256 = p.sha256{where}"
+                " AND ph.sha256 IS NULL"
+                f" ORDER BY {order} LIMIT ?", (*params, limit)).fetchall()
+        return [row[0] for row in rows]
+
+    def set_hash(self, sha256: str, dhash: str) -> None:
+        """Cache one perceptual hash or the ``skip`` marker for an unreadable file."""
+        with self._db.lock:
+            self._db.conn.execute(
+                "INSERT INTO photo_hashes (sha256, dhash) VALUES (?, ?)"
+                " ON CONFLICT(sha256) DO UPDATE SET dhash = excluded.dhash",
+                (sha256, dhash))
+
+    def similar_groups(self, profile: Optional[str] = None, viewer: str = "main",
+                       limit: int = 200) -> list:
+        """Read-only groups of visible photos sharing one exact perceptual hash."""
+        narrow = PhotoFilter(profile=profile, viewer=viewer)
+        table, columns, owner = _source(narrow)
+        where, params = _where(narrow, owner)
+        order = _ORDERS["newest"].format(owner=owner)
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                f"SELECT {columns}, ph.dhash FROM {table}"
+                f" JOIN photo_hashes ph ON ph.sha256 = p.sha256{where}"
+                " AND ph.dhash <> 'skip'"
+                f" ORDER BY {order}", params).fetchall()
+        grouped = {}
+        for row in rows:
+            values = dict(row)
+            dhash = values.pop("dhash")
+            grouped.setdefault(dhash, []).append(_to_record(values))
+        groups = [(dhash, records) for dhash, records in grouped.items() if len(records) > 1]
+        groups.sort(key=lambda item: (-len(item[1]), item[0]))
+        return groups[:limit]
+
     def outline(self, profile: Optional[str] = None, viewer: str = "main") -> Outline:
         """Months and video count, for one profile or (None) everyone, plus the viewer's
         favorites. Archived photos are hidden from the timeline."""

@@ -42,6 +42,7 @@
         <button role="tab" data-view="photos" aria-selected="true">Photos</button>
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
+        <button role="tab" data-view="similar" aria-selected="false">Similar</button>
         <button role="tab" data-view="trash" aria-selected="false">Trash</button>
       </nav>
       <label class="search">
@@ -277,6 +278,16 @@
           </ol>
           <p class="hint">Only photos the PC has just re-hashed and found intact are deleted. They stay in Recently Deleted for 30 days. With iCloud Photos on, deleting also removes them from iCloud.</p>
         </article>
+      </section>
+
+      <section id="view-similar" class="view narrow" hidden>
+        <div class="scope">
+          <h1>Similar photos</h1>
+          <span id="similar-status" aria-live="polite"></span>
+          <button class="primary" id="similar-scan" type="button">Scan library</button>
+        </div>
+        <p class="hint">Groups share an exact perceptual hash. This is a review only: nothing is deleted here. Open a photo to compare it in full size.</p>
+        <div id="similar-groups" class="similar-groups"></div>
       </section>
 
       <section id="view-trash" class="view narrow" hidden>

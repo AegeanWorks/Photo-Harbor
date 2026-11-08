@@ -1,56 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-metadata",
+    "task_id": "immich-similar",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794135003.9326415,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794138196.6416392,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794135762.9009392
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "android-download-ui",
-      "phase": "delivery",
-      "phase_num": 5,
-      "description": "[5/5] UTF-8 javac fix for 1.2.1/4; emulator installed, Test reported 'Connected: 3 photos', Sync reported 'Done: 3 sent, 1 already', forced background job showed the result without mojibake; 218 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794127593.534552,
-      "timestamp_str": "2026-11-08 11:46:33",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "android-download-ui",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'android-download-ui' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794127880.0961814,
-      "timestamp_str": "2026-11-08 11:51:20",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "android-media-permissions",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/3] Plan: require images+videos or Android 14 selected-photo access, request every missing permission, refuse sync when incomplete, rebuild 1.3/5, verify Test/Sync on the emulator, UI evidence and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794128597.322781,
-      "timestamp_str": "2026-11-08 12:03:17",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The app checked only image permission; a denied video permission let sync report Done while omitting videos, and Android 14 selected-photo access was declared but never accepted",
-        "benefits": "A partial grant is detected and completed; background failures are visible; the APK download card advances to 1.3",
-        "risks": "contract: permission gate and version 1.3/5; dependency: existing Android SDK; concurrency: unchanged; state: no new storage",
-        "mitigation": "Check both collections up front, request missing permissions including visual selected, defensive SecurityException sentinel, rebuild/install, run 219 tests and gates, repeat UI evidence"
-      },
-      "plan_digest": "5e145856505e42fb66127a2323afe2657bd6b25e8fd18b060906ccbb4e709c93"
-    },
     {
       "task_id": "android-media-permissions",
       "phase": "verification",
@@ -253,6 +213,46 @@
       "status": "completed",
       "timestamp": 1794135762.9009411,
       "timestamp_str": "2026-11-08 14:02:42",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-similar",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Read-only Similar review: perceptual dHash column, on-demand scan, exact-hash groups, tests; [2/2] Similar tab UI, docs, gates, review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794137913.217667,
+      "timestamp_str": "2026-11-08 14:38:33",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The near-duplicate gap is the remaining safe Immich feature: a read-only review needs perceptual hashes but no automatic deletion",
+        "benefits": "Users can find re-encoded or resized copies that exact SHA-256 dedupe misses, inspect them side by side, and decide manually",
+        "risks": "contract: new dhash column and similar endpoints; dependency: optional Pillow; concurrency: scan writes under the database lock; state: format 12 and on-demand index",
+        "mitigation": "Keep the review read-only with no delete action, skip unreadable files once, test grouping/privacy/migration and HTTP, run 4/4 gates, review the tab in Chromium"
+      },
+      "plan_digest": "58b65362dd5324ae69d62317a0af20c315534b63a9e33b1e3a80ba9c70c7fb99"
+    },
+    {
+      "task_id": "immich-similar",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Similar backend: format 12 photo_hashes, dHash, batch scan, exact-hash groups, read-only API/tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794138196.20007,
+      "timestamp_str": "2026-11-08 14:43:16",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-similar",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Similar backend done: 261 tests OK; 4/4 gates; migration/privacy/scan covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794138196.6416392,
+      "timestamp_str": "2026-11-08 14:43:16",
       "agent": "opencode:deepseek"
     }
   ]

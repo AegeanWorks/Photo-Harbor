@@ -322,6 +322,21 @@ class CameraUiTest(unittest.TestCase):
         self.assertIn("data-camera", script)
 
 
+class SimilarUiTest(unittest.TestCase):
+    def test_similar_review_is_read_only_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="similar"', 'id="view-similar"',
+                        'id="similar-scan"', 'id="similar-groups"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/similar", script)
+        self.assertIn("/api/similar/scan", script)
+        self.assertIn("loadSimilar", script)
+        self.assertIn("scanSimilar", script)
+        self.assertNotIn("deleteSimilar", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

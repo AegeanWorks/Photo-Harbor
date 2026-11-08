@@ -900,3 +900,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   full camera/lens facts.
 - **Consequences**: A camera filter works offline and composes with every existing filter. An
   EXIF-less photo simply has no camera entry; no model inference or network lookup is claimed.
+
+### ADR-052: Similar review groups exact perceptual hashes and never deletes
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Near-duplicate detection is the last high-value Immich gap, but automatic
+  clustering and deletion can destroy a keeper. Existing photos also need hashing, which must
+  not make every upload or server start expensive.
+- **Decision**: Add format 12 with a `photo_hashes(sha256, dhash)` cache. **Similar** is a
+  separate read-only tab: **Scan library** computes a 64-bit Pillow difference hash in bounded
+  batches, stores `skip` for unreadable files and links each grouped photo to its original with
+  no delete action. Groups require an exact hash match; archived photos are excluded.
+- **Consequences**: Re-encoded and resized copies with the same perceptual hash are reviewable
+  without SHA-256 equality, and nothing is deleted automatically. Crops or edits that change
+  the hash need a future Hamming-distance pass; that can build on the same cache without a
+  migration of originals.

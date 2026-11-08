@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `72`
-- **Total Classes**: `144`
-- **Total Top-Level Functions**: `113`
-- **Total Class Methods**: `591`
-- **Total Source Lines**: `9716`
+- **Total Python Modules**: `75`
+- **Total Classes**: `150`
+- **Total Top-Level Functions**: `115`
+- **Total Class Methods**: `612`
+- **Total Source Lines**: `10025`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `238` lines (`11789` bytes)
+**Size**: `242` lines (`12009` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -144,7 +144,7 @@
   - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
-  - Method `._register(sync, library, people, albums, archive, tags, downloads, trash, backup, setup)`
+  - Method `._register(sync, library, people, albums, archive, tags, similar, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `306` lines (`15848` bytes)
+**Size**: `369` lines (`19074` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -306,6 +306,10 @@
   - Method `.copies_of(profile, sha256s)` - *The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query.*
   - Method `.page(offset, limit, narrow)` - *Records in the requested order, newest first by default (taken time, then received).*
   - Method `.hashes(narrow, limit)` - *Every matching hash in the same order as the gallery, capped by ``limit``.*
+  - Method `.similar_status(profile, viewer)` - *How many visible photos have a perceptual hash, a skip or no entry yet.*
+  - Method `.missing_hashes(profile, viewer, limit)` - *Visible photo hashes that have no perceptual-hash row yet, newest first.*
+  - Method `.set_hash(sha256, dhash)` - *Cache one perceptual hash or the ``skip`` marker for an unreadable file.*
+  - Method `.similar_groups(profile, viewer, limit)` - *Read-only groups of visible photos sharing one exact perceptual hash.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
@@ -398,7 +402,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `302` lines (`10732` bytes)
+**Size**: `314` lines (`11121` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -641,6 +645,17 @@
 
 ---
 
+### [`photo_harbor/phash.py`](photo_harbor/phash.py)
+> *A small perceptual difference hash for the read-only Similar review.*
+
+**Size**: `37` lines (`1248` bytes)
+
+**Functions:**
+- `def hash_pixels(pixels)` - *A 64-bit difference hash as 16 hex digits, or None for the wrong pixel count.*
+- `def read_dhash(path)` - *Perceptual hash from the original, or None without Pillow or a readable image.*
+
+---
+
 ### [`photo_harbor/pillow_support.py`](photo_harbor/pillow_support.py)
 > *Optional Pillow loading, with HEIC support when pillow-heif is installed.*
 
@@ -802,6 +817,21 @@
 
 **Functions:**
 - `def lan_address()` - *The PC's address on the home network; connecting a UDP socket sends no packet.*
+
+---
+
+### [`photo_harbor/similar_api.py`](photo_harbor/similar_api.py)
+> *Read-only Similar review: perceptual hashes, no automatic deletion.*
+
+**Size**: `59` lines (`2469` bytes)
+
+**Classes:**
+- `class SimilarApi`
+  - Method `.__init__(catalog, store, dhash)`
+  - Method `._profile(request)`
+  - Method `._status(request)`
+  - Method `.listing(request)`
+  - Method `.scan(request)`
 
 ---
 
@@ -1141,7 +1171,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `887` lines (`50443` bytes)
+**Size**: `904` lines (`51326` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1179,6 +1209,7 @@
   - Method `.test_tags_are_personal_and_filter_the_gallery()`
   - Method `.test_places_group_and_filter_a_gps_point()`
   - Method `.test_camera_metadata_groups_and_filters()`
+  - Method `.test_similar_review_groups_hashes_without_deleting()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1232,7 +1263,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `645` lines (`28905` bytes)
+**Size**: `660` lines (`29649` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1278,6 +1309,8 @@
   - Method `.test_gallery_places_are_reachable_and_wired()`
 - `class CameraUiTest`
   - Method `.test_gallery_cameras_are_reachable_and_wired()`
+- `class SimilarUiTest`
+  - Method `.test_similar_review_is_read_only_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
@@ -1423,6 +1456,27 @@
   - Method `.test_search_combines_with_other_narrowing()`
   - Method `.test_words_past_the_eighth_still_narrow()`
   - Method `.test_like_wildcards_are_literal()`
+
+---
+
+### [`tests/test_similar.py`](tests/test_similar.py)
+**Size**: `102` lines (`5062` bytes)
+
+**Classes:**
+- `class HashTest`
+  - Method `.test_a_gradient_becomes_a_hex_difference_hash()`
+- `class SimilarCatalogTest`
+  - Method `.setUp()`
+  - Method `.test_status_and_groups_are_read_only()`
+  - Method `.test_archiving_removes_a_photo_from_the_review()`
+  - Method `.test_another_person_sees_only_their_copies()`
+- `class SimilarApiTest`
+  - Method `.setUp()`
+  - Method `._request(method, path, body)`
+  - Method `.test_scan_indexes_visible_photos_and_listing_groups_them()`
+  - Method `.test_unreadable_files_are_skipped_once()`
+- `class SimilarMigrationTest`
+  - Method `.test_a_format_11_catalog_gains_the_hash_cache()`
 
 ---
 

@@ -6,12 +6,12 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 11
+SCHEMA_VERSION = 12
 OWNER_PROFILE = "main"
 # SQLite INTEGER is signed 64-bit; a larger Python int cannot be bound as a parameter.
 MAX_ROW_ID = 2 ** 63 - 1
 
-# Format 11, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 12, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
 _COLLECTIONS = """
@@ -82,7 +82,14 @@ CREATE TABLE IF NOT EXISTS photo_tags (
 CREATE INDEX IF NOT EXISTS photo_tags_by_sha ON photo_tags (sha256);
 """
 
-_SCHEMA = _COLLECTIONS + _TRASH + _ARCHIVE + _TAGS + """
+_SIMILAR = """
+CREATE TABLE IF NOT EXISTS photo_hashes (
+    sha256 TEXT PRIMARY KEY,
+    dhash TEXT NOT NULL
+);
+"""
+
+_SCHEMA = _COLLECTIONS + _TRASH + _ARCHIVE + _TAGS + _SIMILAR + """
 CREATE TABLE IF NOT EXISTS photos (
     sha256 TEXT PRIMARY KEY,
     rel_path TEXT NOT NULL UNIQUE,
@@ -232,16 +239,21 @@ ALTER TABLE photos ADD COLUMN camera TEXT;
 ALTER TABLE photos ADD COLUMN lens TEXT;
 """
 
+# Format 12 adds the optional perceptual hash cache for the read-only Similar review.
+_FROM_11 = _SIMILAR
+
 _UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8
-                + _FROM_9 + _FROM_10,
-             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
-             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
-             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
-             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
-             6: _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
-             7: _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10,
-             8: _FROM_8 + _FROM_9 + _FROM_10,
-             9: _FROM_9 + _FROM_10, 10: _FROM_10}
+                + _FROM_9 + _FROM_10 + _FROM_11,
+             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9
+                + _FROM_10 + _FROM_11,
+             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10 + _FROM_11,
+             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10 + _FROM_11,
+             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10 + _FROM_11,
+             6: _FROM_6 + _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10 + _FROM_11,
+             7: _FROM_7 + _FROM_8 + _FROM_9 + _FROM_10 + _FROM_11,
+             8: _FROM_8 + _FROM_9 + _FROM_10 + _FROM_11,
+             9: _FROM_9 + _FROM_10 + _FROM_11,
+             10: _FROM_10 + _FROM_11, 11: _FROM_11}
 
 
 class Database:

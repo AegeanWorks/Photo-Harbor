@@ -393,6 +393,13 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 }
 .select-albums[hidden] { display: none; }
 .select-albums .ghost { text-align: left; }
+.similar-groups { display: grid; gap: 14px; margin-top: 14px; }
+.similar-group h2 { font: 600 18px/1.3 var(--serif); margin: 0 0 10px; }
+.similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+.similar-photo { display: flex; flex-direction: column; gap: 5px; min-width: 0; color: inherit; text-decoration: none; }
+.similar-photo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; background: var(--wash); }
+.similar-photo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+
 .tile.selected { outline: 3px solid var(--accent); outline-offset: -3px; }
 .tile.selected::after {
   content: "✓"; position: absolute; right: 6px; top: 6px; width: 24px; height: 24px;
