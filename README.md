@@ -196,10 +196,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   demand and lists connected groups whose hashes differ by at most 8 bits. **Scan library**
   hashes up to 10,000 photos per press; **Build groups** (started automatically after a scan)
   recomputes the SQLite group cache in the background while the tab polls. Opening the tab then
-  only reads cached groups instead of comparing every hash again. It is a review only: every
-  photo opens in full size and there is no delete action. Unreadable files and videos are marked
-  skipped so they are not retried forever. It needs Pillow for the hash and never changes an
-  original.
+  only reads cached groups instead of comparing every hash again. **Compare side by side** opens
+  a read-only overlay; photos also open in full size and nothing is deleted. Unreadable files
+  and videos are skipped once. It needs Pillow for the hash and never changes an original.
 - **Archive without moving files.** Open a photo or select several and press **Archive** to hide
   them from the timeline. The **Archive** rail view shows only your hidden photos, with
   **Unarchive** to bring them back. Archiving is private to each person, never moves, copies or

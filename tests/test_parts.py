@@ -329,7 +329,9 @@ class SimilarUiTest(unittest.TestCase):
         script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
         for element in ('data-view="similar"', 'id="view-similar"',
                         'id="similar-scan"', 'id="similar-build"',
-                        'id="similar-groups"', 'id="similar-threshold"'):
+                        'id="similar-groups"', 'id="similar-threshold"',
+                        'id="similar-compare"', 'id="compare-stage"',
+                        'id="compare-close"'):
             self.assertIn(element, page)
         self.assertIn("/api/similar", script)
         self.assertIn("/api/similar/scan", script)
@@ -337,6 +339,9 @@ class SimilarUiTest(unittest.TestCase):
         self.assertIn("loadSimilar", script)
         self.assertIn("scanSimilar", script)
         self.assertIn("startSimilarBuild", script)
+        self.assertIn("openCompare", script)
+        self.assertIn("closeCompare", script)
+        self.assertIn("Compare side by side", script)
         self.assertIn("data.threshold", script)
         self.assertIn("data.building", script)
         self.assertNotIn("deleteSimilar", script)

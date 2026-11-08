@@ -16,7 +16,7 @@ const state = {
   months: [],
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
-  viewerReturnFocus: null, similarTimer: null,
+  viewerReturnFocus: null, compareReturnFocus: null, similarTimer: null,
 };
 
 function personName(id) {
@@ -1219,7 +1219,13 @@ async function loadSimilar() {
   }
   for (const group of data.groups) {
     const card = el("article", "card similar-group");
-    card.append(el("h2", "", `${group.count.toLocaleString()} similar photos`));
+    const head = el("div", "similar-group-head");
+    head.append(el("h2", "", `${group.count.toLocaleString()} similar photos`));
+    const compare = el("button", "ghost", "Compare side by side");
+    compare.type = "button";
+    compare.addEventListener("click", () => openCompare(group));
+    head.append(compare);
+    card.append(head);
     const grid = el("div", "similar-grid");
     for (const photo of group.photos) {
       const link = el("a", "similar-photo");
@@ -1268,6 +1274,36 @@ async function scanSimilar() {
     button.disabled = false;
     button.textContent = label;
   }
+}
+
+function openCompare(group) {
+  state.compareReturnFocus = document.activeElement;
+  const stage = $("compare-stage");
+  stage.replaceChildren();
+  for (const photo of group.photos) {
+    const figure = el("figure", "compare-item");
+    const img = el("img");
+    img.src = photo.media;
+    img.alt = photo.name;
+    img.loading = "eager";
+    const caption = el("figcaption");
+    caption.append(el("b", "", photo.name),
+      el("span", "", parseTime(photo.time) ? timeFormat.format(parseTime(photo.time)) : ""));
+    figure.append(img, caption);
+    stage.append(figure);
+  }
+  $("similar-compare").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("compare-close").focus();
+}
+
+function closeCompare() {
+  const target = state.compareReturnFocus;
+  state.compareReturnFocus = null;
+  $("similar-compare").hidden = true;
+  $("compare-stage").replaceChildren();
+  document.body.style.overflow = "";
+  if (target && target.isConnected) target.focus();
 }
 
 async function startSimilarBuild() {
@@ -2272,6 +2308,7 @@ function show(view) {
   if (view !== "similar") {
     clearTimeout(state.similarTimer);
     state.similarTimer = null;
+    if (!$("similar-compare").hidden) closeCompare();
   }
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
@@ -2294,6 +2331,7 @@ function show(view) {
 }
 
 function wireShell() {
+  $("compare-close").addEventListener("click", closeCompare);
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.addEventListener("click", () => show(tab.dataset.view));
   }
@@ -2332,6 +2370,10 @@ function wireShell() {
   });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || state.viewing >= 0) return;
+    if (!$("similar-compare").hidden) {
+      closeCompare();
+      return;
+    }
     hideDatePanel();
     hideSelectAlbums();
     hideSelectTags();

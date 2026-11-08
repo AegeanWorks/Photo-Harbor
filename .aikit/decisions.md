@@ -1025,3 +1025,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: DOM size and rendering work stay bounded for large libraries. Exact
   placeholder heights depend on the existing fixed tile aspect and gap; a style change to tile
   sizing must update the layout constants.
+
+### ADR-061: Similar comparison is a read-only overlay, not a new gallery context
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Similar groups already return the media URLs and metadata needed to inspect
+  candidates, but opening each original in a separate tab makes comparison awkward. Deleting or
+  selecting from a comparison would expand the risk surface.
+- **Decision**: Add a **Compare side by side** group action that opens a fixed read-only overlay
+  with the group's full media, names and dates; Close and Escape restore focus. The overlay uses
+  no new endpoint and contains no delete, selection or mutation controls.
+- **Consequences**: Re-encoded/resized candidates can be compared directly without leaving
+  Harbor or changing files. The overlay is intentionally single-purpose; gallery actions remain
+  in the normal viewer.

@@ -547,6 +547,8 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(listing["groups"][0]["count"], 2)
         self.assertEqual({photo["name"] for photo in listing["groups"][0]["photos"]},
                          {"one.jpg", "two.jpg"})
+        self.assertTrue(all(photo["media"].startswith("/media/")
+                            for photo in listing["groups"][0]["photos"]))
         response, _ = self.call("POST", "/api/similar/scan", body={"limit": 0})
         self.assertEqual(response.status, 400)
 

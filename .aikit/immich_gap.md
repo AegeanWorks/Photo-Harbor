@@ -99,6 +99,13 @@ world outline. Markers use the same `/api/outline` data as the Places rail, scal
 counts, and a clickable list opens a place's gallery view. No tiles, CDN, reverse geocoding or
 network lookup are used; the map is read-only and respects the signed-in person's visible pairs.
 
+## Implemented in this pass: Similar comparison
+
+Each cached Similar group has a **Compare side by side** action. It opens a read-only overlay
+with the group's full media URLs, names and dates, plus a Close button and Escape support. No
+delete, selection or mutation action exists in the overlay; it reuses the group response already
+tested by the Similar API.
+
 ## Implemented in this pass: Similar review
 
 Format 12 adds a `photo_hashes` cache. **Similar** is a separate tab: **Scan library** computes
@@ -119,15 +126,15 @@ camera/lens facts. Archived photos leave both counts; no ML, network or file rew
 
 ## Decision summary
 
-Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review, sidecars,
-an offline map, a read-only Folders tab, a year/month timeline scrubber and a virtualized day
-grid**. All eleven reuse local data, avoid ML services and network dependencies, and never move
-or rewrite originals. Archive and Tags add only private per-person marks; Places stores the
-camera's point once; Cameras stores the EXIF make/model and lens once; Similar uses an optional
-perceptual hash cache and is read-only; sidecars are generated in memory; the map is an embedded
-SVG outline; Folders mirrors the existing disk layout; the scrubber reads outline months; the
-grid windows day sections. They compose with the existing person, album, date, kind, name and
-sort filters.
+Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review and
+comparison, sidecars, an offline map, a read-only Folders tab, a year/month timeline scrubber and
+a virtualized day grid**. All twelve reuse local data, avoid ML services and network
+dependencies, and never move or rewrite originals. Archive and Tags add only private per-person
+marks; Places stores the camera's point once; Cameras stores the EXIF make/model and lens once;
+Similar uses an optional perceptual hash cache and a read-only overlay; sidecars are generated in
+memory; the map is an embedded SVG outline; Folders mirrors the existing disk layout; the
+scrubber reads outline months; the grid windows day sections. They compose with the existing
+person, album, date, kind, name and sort filters.
 
 Deliberately not now:
 
