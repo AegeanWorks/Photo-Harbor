@@ -3,24 +3,15 @@
   "active_task": {
     "task_id": "immich-folders",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794143575.9844449,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794143723.3921957
   },
   "checkpoints": [
-    {
-      "task_id": "immich-similar-cache",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-similar-cache' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794141154.3457732,
-      "timestamp_str": "2026-11-08 15:32:34",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-map",
       "phase": "phase 2",
@@ -259,6 +250,16 @@
       "status": "in_progress",
       "timestamp": 1794143575.9844449,
       "timestamp_str": "2026-11-08 16:12:55",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-folders",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'immich-folders' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794143723.3921976,
+      "timestamp_str": "2026-11-08 16:15:23",
       "agent": "opencode:deepseek"
     }
   ]
