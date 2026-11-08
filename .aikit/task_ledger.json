@@ -3,31 +3,15 @@
   "active_task": {
     "task_id": "atomic-temp-unique",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794164175.9863927,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794164213.5868766
   },
   "checkpoints": [
-    {
-      "task_id": "place-bucket-agreement",
-      "phase": "phase 1",
-      "phase_num": 1,
-      "description": "[1/2] Plan: make ?place=LAT,LON round like the outline so a pasted exact coordinate opens the photos the Places rail lists",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794159003.255647,
-      "timestamp_str": "2026-11-08 20:30:03",
-      "agent": "commandcode:vscode",
-      "impact_assessment": {
-        "why": "The outline buckets with SQLite ROUND but the request was rounded with Python round(); they disagree on .x5, so a listed place could open an empty view.",
-        "benefits": "One rounding rule for both directions; pasted GPS coordinates work; no schema or endpoint change.",
-        "risks": "contract: ?place accepts raw values (validated before the query); dependency: none; concurrency: none; state: none.",
-        "mitigation": "failing-first HTTP test, SQL ROUND on both sides, keep shape and range validation, ADR-075, gates."
-      }
-    },
     {
       "task_id": "place-bucket-agreement",
       "phase": "phase 4",
@@ -265,6 +249,16 @@
       "status": "in_progress",
       "timestamp": 1794164175.9863927,
       "timestamp_str": "2026-11-08 21:56:15",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "atomic-temp-unique",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'atomic-temp-unique' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794164213.5868783,
+      "timestamp_str": "2026-11-08 21:56:53",
       "agent": "commandcode:vscode"
     }
   ]
