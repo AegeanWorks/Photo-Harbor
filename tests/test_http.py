@@ -772,6 +772,28 @@ class ServerTest(unittest.TestCase):
                             headers={"X-Harbor-Key": ayse["key"]})
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["hers.jpg"])
 
+    def test_integrity_status_is_owner_only_and_reads_the_journal(self):
+        _, body = self.call("GET", "/api/integrity")
+        self.assertEqual(json.loads(body), {"last": None, "damaged": []})
+        self.upload(b"one", name="one.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.executemany(
+                "INSERT INTO events (at, kind, sha256, detail, profile) VALUES (?, ?, ?, ?, ?)",
+                [("2026-05-01T10:00:00", "checked", None, "3 checked, 0 damaged", None),
+                 ("2026-05-02T10:00:00", "damaged", one,
+                  "Main/2026/2026-05/one.jpg", "main")])
+        _, body = self.call("GET", "/api/integrity")
+        report = json.loads(body)
+        self.assertEqual(report["last"], {"at": "2026-05-01T10:00:00",
+                                          "checked": 3, "damaged": 0})
+        self.assertEqual(report["damaged"], [{"path": "Main/2026/2026-05/one.jpg",
+                                              "at": "2026-05-02T10:00:00", "sha256": one}])
+        ayse = self.add_person()
+        response, _ = self.call("GET", "/api/integrity", key=False,
+                                headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual(response.status, 403)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

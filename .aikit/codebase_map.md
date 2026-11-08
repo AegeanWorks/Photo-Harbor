@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `173`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `689`
-- **Total Source Lines**: `11326`
+- **Total Class Methods**: `694`
+- **Total Source Lines**: `11394`
 
 ---
 
@@ -144,7 +144,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `253` lines (`12572` bytes)
+**Size**: `254` lines (`12628` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -576,7 +576,7 @@
 ### [`photo_harbor/journal.py`](photo_harbor/journal.py)
 > *What the phone did and when: uploads, finished syncs and photos the PC lacked at cleanup.*
 
-**Size**: `79` lines (`3725` bytes)
+**Size**: `108` lines (`5015` bytes)
 
 **Classes:**
 - `class SyncJournal`
@@ -587,6 +587,8 @@
   - Method `.recent(limit, profile)` - *Newest journal events, for everyone or one person; old profile-less events are main.*
   - Method `.counts_since(since, profile)`
   - Method `.missing(limit, profile)` - *Photos a phone holds that the PC still lacks, newest report first; one person's*
+  - Method `.last_check()` - *The latest full file check summary, or None before the first real check.*
+  - Method `.damaged(limit)` - *Latest damage per path for files still catalogued, newest first.*
 
 ---
 
@@ -612,7 +614,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `286` lines (`14172` bytes)
+**Size**: `295` lines (`14696` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -620,6 +622,7 @@
   - Method `.status(request)`
   - Method `.hashes(request)` - *Every matching hash for Select matching, in the gallery's order.*
   - Method `.storage(request)` - *Counts, bytes, per-person shares and the largest files the caller may see.*
+  - Method `.integrity(request)` - *The latest full file check and recent damage; owner only and read-only.*
   - Method `.photos(request)`
   - Method `.outline(request)` - *Months with photos, newest first, for the browser sidebar.*
   - Method `._disk()`
@@ -1268,7 +1271,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1159` lines (`65258` bytes)
+**Size**: `1181` lines (`66525` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1322,6 +1325,7 @@
   - Method `.test_format_filter_lists_one_media_type()`
   - Method `.test_missing_metadata_filter_narrows_to_gaps()`
   - Method `.test_missing_metadata_filter_respects_person_scope()`
+  - Method `.test_integrity_status_is_owner_only_and_reads_the_journal()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1389,7 +1393,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `874` lines (`40675` bytes)
+**Size**: `881` lines (`41086` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1465,6 +1469,7 @@
   - Method `.test_health_overview_is_read_only_and_aggregates_apis()`
   - Method `.test_health_coverage_rows_open_missing_filters()`
   - Method `.test_health_format_rows_open_format_filters()`
+  - Method `.test_health_integrity_panel_reads_the_check_journal()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

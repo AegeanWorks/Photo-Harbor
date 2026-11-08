@@ -1158,3 +1158,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   values are capped and validated as MIME types. No schema or endpoint is added.
 - **Consequences**: The format split is actionable and composes with person, date, kind, name
   and sort filters; unknown or malformed values are rejected with a 400.
+### ADR-073: Health reports the latest file check from the journal
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The Harbor window can re-read every original, but the web Health tab cannot show
+  whether that check ran or found damage; the journal already records checked/damaged events.
+- **Decision**: Add GET /api/integrity (owner only) returning the latest real check summary
+  and the latest damage per catalogued path. Health renders an **Integrity** panel. It is
+  read-only and adds no schema or trigger.
+- **Consequences**: Owners can see trust state from the browser; non-owners never call the
+  endpoint. Starting a check stays in the Harbor window, where long-running work and logging
+  already live.

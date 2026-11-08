@@ -16,7 +16,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Albums | Personal albums, favorites and a cover/count overview tab | - | Keep |
 | Explore / statistics | Read-only overview of years, places, cameras, lenses and counts | - | **Implemented now** |
 | Activity / audit log | Read-only recent journal events with person labels | - | **Implemented now** |
-| Storage / health | Read-only storage, disk, backup, trash, formats and metadata coverage; gaps open their photos | - | **Implemented now** |
+| Storage / health | Read-only storage, disk, backup, trash, formats, integrity and metadata coverage; gaps open their photos | - | **Implemented now** |
 | Shared albums / public sharing | No | Low: home-network privacy is the product promise; public links add auth and abuse surface | Not now |
 | Scrubbable bar / virtual scroll | Year/month scrubber plus windowed day sections with placeholder heights | - | **Implemented now** |
 | RAW / 360 / LivePhoto / MotionPhoto | HEIC via optional Pillow; no RAW/360/pairing | Low-medium: needs decoders or paired-file model | Not now |
@@ -104,10 +104,18 @@ network lookup are used; the map is read-only and respects the signed-in person'
 
 ## Implemented in this pass: Health overview
 
-The **Health** tab aggregates the existing `/api/status`, `/api/storage`, `/api/backup` and
-`/api/trash` responses into read-only cards and panels for photos, bytes, free disk, trash,
-missing reports, backup and previews. The owner sees backup details; other people see an
-owner-only message and never call the owner-only endpoint. No schema or new endpoint is added.
+The **Health** tab aggregates the existing `/api/status`, `/api/storage`, `/api/backup`,
+`/api/integrity` and `/api/trash` responses into read-only cards and panels for photos, bytes,
+free disk, trash, missing reports, backup, integrity and previews. The owner sees backup and
+integrity details; other people see owner-only messages and never call those endpoints. No
+schema or new endpoint is added.
+
+## Implemented in this pass: Integrity check status
+
+`GET /api/integrity` (owner only) reads the latest real `checked` event and the latest `damaged`
+event per catalogued path. The **Health** tab shows the last check time, checked/damaged counts
+and up to ten damaged paths. It is read-only; starting a full re-read stays in the Harbor
+window, where long-running work and logging already live. No schema or trigger is added.
 
 ## Implemented in this pass: Metadata coverage
 
@@ -187,17 +195,17 @@ camera/lens facts. Archived photos leave both counts; no ML, network or file rew
 
 Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review and
 comparison, sidecars, an offline map, a read-only Folders tab, Explore statistics, Albums/Tags/
-People overviews, Activity, Health, metadata coverage, storage formats, a year/month timeline
-scrubber and a virtualized day grid**.
-All twenty reuse local data, avoid ML services and network dependencies, and never move or
+People overviews, Activity, Health, metadata coverage, storage formats, integrity status, a
+year/month timeline scrubber and a virtualized day grid**.
+All twenty-one reuse local data, avoid ML services and network dependencies, and never move or
 rewrite originals. Archive and Tags add only private per-person marks; Places stores the camera's
 point once; Cameras stores the EXIF make/model and lens once; Similar uses an optional perceptual
 hash cache and a read-only overlay; sidecars are generated in memory; the map is an embedded SVG
 outline; Folders mirrors the existing disk layout; Explore reads outline counts; Albums/Tags/
 People read their existing lists; Activity reads the journal; Health reads status/storage/
-backup/trash, formats and metadata-gap filters; the scrubber reads outline months; the grid
-windows day sections. They compose with the existing person, album, date, kind, name and sort
-filters.
+backup/trash, formats and metadata-gap filters plus the integrity journal; the scrubber reads
+outline months; the grid windows day sections. They compose with the existing person, album,
+date, kind, name and sort filters.
 
 Deliberately not now:
 

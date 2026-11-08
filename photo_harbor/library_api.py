@@ -223,6 +223,15 @@ class LibraryApi:
             "disk": self._disk(),
         })
 
+    def integrity(self, request: Request) -> Reply:
+        """The latest full file check and recent damage; owner only and read-only."""
+        if not request.owner:
+            raise HarborError("only the main profile can see the file check",
+                              "file checks cover the whole library",
+                              "ask the main profile to open Health", status=403)
+        return json_reply({"last": self._journal.last_check(),
+                           "damaged": self._journal.damaged()})
+
     def photos(self, request: Request) -> Reply:
         try:
             offset = max(int(request.arg("offset", "0")), 0)

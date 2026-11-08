@@ -550,6 +550,13 @@ class HealthUiTest(unittest.TestCase):
                      "Click a format to see those files."):
             self.assertIn(text, script)
 
+    def test_health_integrity_panel_reads_the_check_journal(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for text in ('state.owner ? api("/api/integrity")', "integrity.last",
+                     '"Integrity"', "No damaged files reported.", "Check all files"):
+            self.assertIn(text, script)
+
 
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):

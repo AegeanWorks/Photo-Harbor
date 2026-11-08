@@ -915,7 +915,8 @@ function healthPanel(title) {
 async function loadHealth() {
   const jobs = [api("/api/status"), api("/api/storage"), api("/api/trash")];
   jobs.push(state.owner ? api("/api/backup") : Promise.resolve(null));
-  const [status, storage, trash, backup] = await Promise.all(jobs);
+  jobs.push(state.owner ? api("/api/integrity") : Promise.resolve(null));
+  const [status, storage, trash, backup, integrity] = await Promise.all(jobs);
   const trashBytes = trash.items.reduce((sum, item) => sum + item.size, 0);
   const cards = [
     ["Photos", status.count.toLocaleString()],
@@ -1006,6 +1007,26 @@ async function loadHealth() {
     if (backup.error) backupPanel.append(el("p", "hint health-warning", backup.error));
   }
   panels.append(backupPanel);
+  const integrityPanel = healthPanel("Integrity");
+  if (integrity === null) {
+    integrityPanel.append(el("p", "hint", "Only the main profile can see the file check."));
+  } else if (!integrity.last) {
+    integrityPanel.append(el("p", "hint", "No full file check yet. Run Check all files in the Harbor window."));
+  } else {
+    integrityPanel.append(
+      healthRow("Last check", ago(integrity.last.at)),
+      healthRow("Checked", integrity.last.checked.toLocaleString()),
+      healthRow("Damaged", integrity.last.damaged.toLocaleString(), integrity.last.damaged > 0));
+    if (integrity.damaged.length === 0) {
+      integrityPanel.append(el("p", "hint", "No damaged files reported."));
+    } else {
+      for (const item of integrity.damaged.slice(0, 10)) {
+        integrityPanel.append(healthRow(item.path, ago(item.at), true));
+      }
+    }
+    integrityPanel.append(el("p", "hint", "Run Check all files in the Harbor window to re-read originals."));
+  }
+  panels.append(integrityPanel);
   const trashPanel = healthPanel("Trash");
   trashPanel.append(healthRow("Items", trash.items.length.toLocaleString()),
     healthRow("Bytes", bytes(trashBytes)));

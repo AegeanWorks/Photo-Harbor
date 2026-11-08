@@ -1,56 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-format-filter",
+    "task_id": "immich-integrity-health",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794151899.694339,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794152478.6764052,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794152131.5140777
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-missing-filter",
-      "phase": "phase 1",
-      "phase_num": 1,
-      "description": "[1/3] Plan: add missing=date|place|camera|lens gallery filter and turn Health coverage rows into links to those photos; test backend/UI; review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794149875.0599103,
-      "timestamp_str": "2026-11-08 17:57:55",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The coverage panel exposes gaps but cannot show which photos cause them; existing filter plumbing can make each gap actionable without new state or schema.",
-        "benefits": "One query parameter, no schema change; Health gaps open the exact gallery subset; reuses privacy/filter rules.",
-        "risks": "Filter naming drift across API/UI; empty-state confusion; README limit.",
-        "mitigation": "validate the field at the API boundary; reuse PhotoFilter._where; add HTTP/static tests; keep the panel read-only."
-      }
-    },
-    {
-      "task_id": "immich-missing-filter",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/3] Missing filter done: 305 tests OK; 4/4 gates; all four fields and person scope covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794150105.9952812,
-      "timestamp_str": "2026-11-08 18:01:45",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-missing-filter",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Missing filter: PhotoFilter/API missing=date|place|camera|lens, Health rows open Photos, CSS + HTTP/static tests, README/gap/ADR-069",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794150106.0341866,
-      "timestamp_str": "2026-11-08 18:01:46",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-missing-filter",
       "phase": "completed",
@@ -255,6 +215,45 @@
       "status": "completed",
       "timestamp": 1794152131.5140798,
       "timestamp_str": "2026-11-08 18:35:31",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-integrity-health",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/3] Plan: expose the latest full file check and damaged paths from the journal in an owner-only Health panel; test HTTP/static; review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794152317.2161715,
+      "timestamp_str": "2026-11-08 18:38:37",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The Harbor window can re-read every original, but the web Health tab cannot show whether that check ran or found damage.",
+        "benefits": "Read-only visibility into library integrity from the existing journal; no schema, no scan trigger, owner-only scope.",
+        "risks": "Stale damage events after repair; owner-only endpoint; panel clutter.",
+        "mitigation": "filter damage to catalogued hashes, show the latest check summary, keep the panel read-only and bounded, add HTTP/static tests."
+      }
+    },
+    {
+      "task_id": "immich-integrity-health",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Integrity: journal last_check/damaged queries, owner-only /api/integrity, Health panel, HTTP/static tests, README/gap/ADR-073",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794152428.804288,
+      "timestamp_str": "2026-11-08 18:40:28",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-integrity-health",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/3] Integrity done: 313 tests OK; 4/4 gates; owner-only and damaged-path queries covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794152478.6764052,
+      "timestamp_str": "2026-11-08 18:41:18",
       "agent": "opencode:deepseek"
     }
   ]
