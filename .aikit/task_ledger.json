@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "head-semantics",
+    "task_id": "shrink-close-connection",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794161580.3405497,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794163262.3865244,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794161601.1349905
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-integrity-health",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/3] Integrity done: 315 tests OK; 4/4 gates; owner-only, damaged-path and app.js ordering pinned; checklists: passed; UI reviewed (strikes 1, fix 775c503)",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794154043.4123948,
-      "timestamp_str": "2026-11-08 19:07:23",
-      "agent": "commandcode:vscode",
-      "continued_from": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-integrity-health",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-integrity-health' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794154084.580435,
-      "timestamp_str": "2026-11-08 19:08:04",
-      "agent": "commandcode:vscode"
-    },
     {
       "task_id": "docs-api-table-coverage",
       "phase": "phase 1",
@@ -260,6 +237,34 @@
       "status": "completed",
       "timestamp": 1794161601.1349921,
       "timestamp_str": "2026-11-08 21:13:21",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "shrink-close-connection",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: close the connection when a file shrinks after stat(), so a promised Content-Length cannot leave a keep-alive client hanging",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794163208.350598,
+      "timestamp_str": "2026-11-08 21:40:08",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "A file replaced or truncated between stat() and open() sent fewer bytes than the Content-Length promised, with no frame terminator; the client blocked until the socket timeout.",
+        "benefits": "A truncated transfer ends with a clean EOF the client reports as IncompleteRead; no hung connections.",
+        "risks": "contract: none, only the already-broken short-send path; dependency: none; concurrency: none; state: none.",
+        "mitigation": "deterministic test that shrinks the file right after stat(), verified failing without the fix, gates."
+      }
+    },
+    {
+      "task_id": "shrink-close-connection",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Short send closes: 327 tests OK; 4/4 gates; without the fix the client hung to a timeout, with it gets IncompleteRead; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794163262.3865244,
+      "timestamp_str": "2026-11-08 21:41:02",
       "agent": "commandcode:vscode"
     }
   ]

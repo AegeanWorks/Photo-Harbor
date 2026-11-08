@@ -153,6 +153,10 @@ class HarborHandler(BaseHTTPRequestHandler):
                 while remaining > 0:
                     block = handle.read(min(COPY_CHUNK, remaining))
                     if not block:
+                        # The file shrank after stat(). The promised Content-Length can no
+                        # longer be delivered, so the frame has no marker: end the connection
+                        # instead of letting a keep-alive client read into the next response.
+                        self.close_connection = True
                         break
                     self.wfile.write(block)
                     remaining -= len(block)

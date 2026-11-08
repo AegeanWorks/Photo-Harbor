@@ -11,6 +11,7 @@ import time
 import unittest
 import zipfile
 from pathlib import Path
+from unittest.mock import patch
 
 from photo_harbor.app import HarborApp
 from photo_harbor.autostart import Autostart
@@ -97,6 +98,36 @@ class ServerTest(unittest.TestCase):
             body = response.read()
             self.assertEqual(response.status, 200)
             self.assertIn(b'"count"', body)
+
+    def test_a_file_that_shrinks_mid_send_closes_the_connection(self):
+        # Headers promise the size taken at stat(); if the file shrinks afterwards the frame
+        # has no terminator, so the connection must close instead of being reused.
+        data = b"w" * 8192
+        self.upload(data, name="big.jpg")
+        digest = sha(data)
+        path = self.app.store.locate(digest, None)[0]
+        real_stat = Path.stat
+
+        def shrink_after_stat(self_path, *args, **kwargs):
+            info = real_stat(self_path, *args, **kwargs)
+            if self_path == path and getattr(info, "st_size", 0) == len(data):
+                with open(path, "r+b") as handle:
+                    handle.truncate(1024)
+            return info
+
+        connection = http.client.HTTPConnection(
+            "127.0.0.1", self.server.server_address[1], timeout=5)
+        self.addCleanup(connection.close)
+        with patch.object(Path, "stat", shrink_after_stat):
+            connection.request("GET", f"/media/{digest}",
+                               headers={"X-Harbor-Key": self.settings.key,
+                                        "Connection": "keep-alive"})
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.getheader("Content-Length"), str(len(data)))
+            with self.assertRaises(http.client.IncompleteRead):
+                response.read()
+            self.assertIsNone(response.getheader("Connection"))
 
     def test_head_on_a_one_time_download_does_not_consume_the_token(self):
         # A download link works once. Probing it with HEAD must not spend that single use.

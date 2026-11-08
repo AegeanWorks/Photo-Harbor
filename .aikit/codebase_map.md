@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `708`
-- **Total Source Lines**: `11600`
+- **Total Class Methods**: `709`
+- **Total Source Lines**: `11635`
 
 ---
 
@@ -530,7 +530,7 @@
 ### [`photo_harbor/http_server.py`](photo_harbor/http_server.py)
 > *The socket side: turns HTTP into a Request, runs the matched endpoint and sends its Reply.*
 
-**Size**: `193` lines (`8632` bytes)
+**Size**: `197` lines (`8964` bytes)
 
 **Classes:**
 - `class HarborHandler` - *Built per connection by ThreadingHTTPServer; ``router`` and ``guard`` come from the server.*
@@ -1272,7 +1272,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1301` lines (`73005` bytes)
+**Size**: `1332` lines (`74540` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1287,6 +1287,7 @@
   - Method `.call(method, path, body, headers, key)`
   - Method `.upload(data, name, digest)`
   - Method `.test_keep_alive_serves_two_requests_on_one_connection()`
+  - Method `.test_a_file_that_shrinks_mid_send_closes_the_connection()`
   - Method `.test_head_on_a_one_time_download_does_not_consume_the_token()`
   - Method `.test_head_on_an_original_sends_no_body_bytes()`
   - Method `.test_head_reports_the_same_headers_as_get_without_a_body()`
