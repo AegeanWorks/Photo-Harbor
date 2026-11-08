@@ -46,6 +46,7 @@
         <button role="tab" data-view="tags" aria-selected="false">Tags</button>
         <button role="tab" data-view="people" aria-selected="false">People</button>
         <button role="tab" data-view="activity" aria-selected="false">Activity</button>
+        <button role="tab" data-view="health" aria-selected="false">Health</button>
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
         <button role="tab" data-view="similar" aria-selected="false">Similar</button>
@@ -222,6 +223,16 @@
         </div>
         <p class="hint">Read-only recent journal events: uploads, syncs, scans and missing reports.</p>
         <ul id="activity-list" class="activity-list"></ul>
+      </section>
+
+      <section id="view-health" class="view narrow" hidden>
+        <div class="scope">
+          <h1>Health</h1>
+          <span id="health-status" aria-live="polite"></span>
+        </div>
+        <p class="hint">Read-only storage and server health from the existing status, storage, backup and trash endpoints.</p>
+        <div id="health-cards" class="explore-cards"></div>
+        <div id="health-panels" class="explore-sections"></div>
       </section>
 
       <section id="view-sync" class="view narrow" hidden>

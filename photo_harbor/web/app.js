@@ -852,6 +852,96 @@ async function loadTagOverview() {
   }
 }
 
+function healthRow(label, value, warning = false) {
+  const row = el("div", "health-row");
+  row.append(el("span", "", label), el("b", warning ? "health-warning" : "", String(value)));
+  return row;
+}
+
+function healthPanel(title) {
+  const panel = el("article", "card explore-panel");
+  panel.append(el("h2", "", title));
+  return panel;
+}
+
+async function loadHealth() {
+  const jobs = [api("/api/status"), api("/api/storage"), api("/api/trash")];
+  jobs.push(state.owner ? api("/api/backup") : Promise.resolve(null));
+  const [status, storage, trash, backup] = await Promise.all(jobs);
+  const trashBytes = trash.items.reduce((sum, item) => sum + item.size, 0);
+  const cards = [
+    ["Photos", status.count.toLocaleString()],
+    ["Library size", bytes(status.bytes)],
+    ["Free disk", bytes(status.disk.free)],
+    ["Trash", trash.items.length.toLocaleString()],
+    ["Missing", status.missing.length.toLocaleString()],
+    ["Backup", backup === null ? "Owner only" : backup.configured ? "On" : "Off"],
+  ];
+  const cardsBox = $("health-cards");
+  cardsBox.replaceChildren();
+  for (const [label, value] of cards) {
+    const card = el("div", "explore-card");
+    card.append(el("span", "", label), el("b", "", value));
+    cardsBox.append(card);
+  }
+  $("health-status").textContent =
+    `${status.count.toLocaleString()} photos · ${bytes(status.bytes)}`
+    + ` · ${trash.items.length.toLocaleString()} in trash`;
+  const panels = $("health-panels");
+  panels.replaceChildren();
+  const library = healthPanel("Library");
+  library.append(
+    healthRow("Photos", storage.photos.toLocaleString()),
+    healthRow("Videos", storage.videos.toLocaleString()),
+    healthRow("Shared", storage.shared.toLocaleString()),
+    healthRow("People", storage.people.length.toLocaleString()));
+  for (const person of storage.people) {
+    library.append(healthRow(`${personName(person.profile)} share`,
+      `${items(person.count)} · ${bytes(person.bytes)}`));
+  }
+  panels.append(library);
+  const disk = healthPanel("Disk");
+  disk.append(healthRow("Free", bytes(status.disk.free), status.disk.low),
+    healthRow("Total", bytes(status.disk.total)));
+  if (status.disk.low) disk.append(el("p", "hint health-warning", "Free space is below the safe threshold."));
+  panels.append(disk);
+  const backupPanel = healthPanel("Backup");
+  if (backup === null) {
+    backupPanel.append(el("p", "hint", "Only the main profile can see the backup."));
+  } else if (!backup.configured) {
+    backupPanel.append(el("p", "hint", "No backup target configured."));
+  } else {
+    backupPanel.append(healthRow("Target", backup.target),
+      healthRow("Last attempt", ago(backup.last_at)),
+      healthRow("Copied", items(backup.copied)),
+      healthRow("Unchanged", items(backup.unchanged)),
+      healthRow("Bytes copied", bytes(backup.bytes)));
+    if (backup.error) backupPanel.append(el("p", "hint health-warning", backup.error));
+  }
+  panels.append(backupPanel);
+  const trashPanel = healthPanel("Trash");
+  trashPanel.append(healthRow("Items", trash.items.length.toLocaleString()),
+    healthRow("Bytes", bytes(trashBytes)));
+  trashPanel.append(el("p", "hint", "Manage Trash from its own tab."));
+  panels.append(trashPanel);
+  const missingPanel = healthPanel("Missing reports");
+  if (status.missing.length === 0) {
+    missingPanel.append(el("p", "hint", "Nothing missing. Every checked photo is on the PC."));
+  } else {
+    for (const entry of status.missing.slice(0, 10)) {
+      missingPanel.append(healthRow(
+        entry.name || `${entry.sha256.slice(0, 12)}…`, ago(entry.reported_at)));
+    }
+  }
+  panels.append(missingPanel);
+  const previews = healthPanel("Previews");
+  previews.append(healthRow("Thumbnails", status.previews ? "On" : "Off"));
+  if (!status.previews) {
+    previews.append(el("p", "hint", "Install Pillow and pillow-heif for HEIC thumbnails."));
+  }
+  panels.append(previews);
+}
+
 const ACTIVITY_LABELS = {
   stored: "Stored",
   duplicate: "Already present",
@@ -2519,7 +2609,7 @@ function show(view) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
   for (const name of ["photos", "folders", "explore", "albums", "tags", "people",
-    "activity", "sync", "setup", "similar", "map", "trash"]) {
+    "activity", "health", "sync", "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "folders") loadFolders().catch(handle);
@@ -2528,6 +2618,7 @@ function show(view) {
   if (view === "tags") loadTagOverview().catch(handle);
   if (view === "people") loadPeopleOverview().catch(handle);
   if (view === "activity") loadActivity().catch(handle);
+  if (view === "health") loadHealth().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

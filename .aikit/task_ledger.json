@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-activity",
+    "task_id": "immich-health",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794147983.0237315,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794148700.3835025,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794148139.6910954
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-explore",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Explore view: read-only cards and year/place/camera/lens statistics from the existing outline, with links into the gallery; [2/2] tests, gates, Chromium review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794145802.7625558,
-      "timestamp_str": "2026-11-08 16:50:02",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The outline already aggregates the dimensions users care about; an Explore view makes them legible without new storage or endpoints",
-        "benefits": "A single read-only overview of years, places, cameras, lenses, favorites and archive counts",
-        "risks": "contract: new Explore tab and UI aggregation; dependency: browser only; concurrency: read-only; state: none",
-        "mitigation": "Derive every number from the tested outline response, add static and HTTP coverage, review with the existing multi-year library, gate and publish"
-      },
-      "plan_digest": "d82f340a0694a01255d1aab37d8a9f3536450def66371ba01b13e19609e909b7"
-    },
-    {
-      "task_id": "immich-explore",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Explore: read-only cards/year bars/place-camera-lens lists derived from outline, links into gallery, static/HTTP tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794145934.4594824,
-      "timestamp_str": "2026-11-08 16:52:14",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-explore",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Explore done: 289 tests OK; 4/4 gates; outline fields covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794145935.3237138,
-      "timestamp_str": "2026-11-08 16:52:15",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-explore",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794148139.6910975,
       "timestamp_str": "2026-11-08 17:28:59",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-health",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Storage/Health overview: aggregate status, storage, backup and trash into read-only cards/panels; [2/2] static/HTTP tests, gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794148532.821215,
+      "timestamp_str": "2026-11-08 17:35:32",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Health data exists across several endpoints; a single read-only overview makes disk, backup, trash and sync state legible without new storage",
+        "benefits": "One dashboard for storage, disk, backup, trash, missing reports and previews, composed from tested APIs",
+        "risks": "contract: new Health tab; dependency: browser only; concurrency: read-only parallel fetches; state: none",
+        "mitigation": "Call only existing endpoints, hide owner-only backup from non-owners gracefully, add static/HTTP coverage, gate and review"
+      },
+      "plan_digest": "2a8e2d3c5a2552bfe79e3479ad439471db1f101ae446885a69de97bfa6bff32e"
+    },
+    {
+      "task_id": "immich-health",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Health: cards/panels aggregating status, storage, backup and trash, owner-only backup handling, static/HTTP tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794148699.3312716,
+      "timestamp_str": "2026-11-08 17:38:19",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-health",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Health done: 301 tests OK; 4/4 gates; API source permissions covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794148700.3835025,
+      "timestamp_str": "2026-11-08 17:38:20",
       "agent": "opencode:deepseek"
     }
   ]

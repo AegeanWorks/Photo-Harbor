@@ -504,6 +504,22 @@ class ActivityUiTest(unittest.TestCase):
         self.assertNotIn("deleteActivity", script)
 
 
+class HealthUiTest(unittest.TestCase):
+    def test_health_overview_is_read_only_and_aggregates_apis(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="health"', 'id="view-health"',
+                        'id="health-cards"', 'id="health-panels"',
+                        'id="health-status"'):
+            self.assertIn(element, page)
+        for endpoint in ("/api/status", "/api/storage", "/api/backup", "/api/trash"):
+            self.assertIn(endpoint, script)
+        self.assertIn("loadHealth", script)
+        self.assertIn("healthPanel", script)
+        self.assertNotIn("emptyTrash", script.split("async function loadHealth")[1].split("const ACTIVITY_LABELS")[0])
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

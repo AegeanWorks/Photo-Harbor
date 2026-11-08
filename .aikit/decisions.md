@@ -1093,3 +1093,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   time, detail and person. It is read-only and adds no schema.
 - **Consequences**: Users can inspect recent household/library activity without a new source of
   truth. History is intentionally bounded and not exported or editable.
+
+### ADR-067: Health composes the existing status, storage, backup and trash APIs
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Health information was split across four tested endpoints, with no single
+  read-only view; new aggregate SQL would duplicate their semantics and permission rules.
+- **Decision**: Add a **Health** tab that fetches `/api/status`, `/api/storage`, `/api/trash` and,
+  for the owner only, `/api/backup`, then renders cards and panels. It contains no destructive
+  actions; Trash management stays in its own tab. No schema or endpoint is added.
+- **Consequences**: The overview cannot drift from the source endpoints and inherits their
+  owner/self permissions. Non-owners never call the owner-only backup endpoint.

@@ -683,6 +683,22 @@ class ServerTest(unittest.TestCase):
         response, _ = self.call("GET", "/api/activity?limit=0")
         self.assertEqual(response.status, 400)
 
+    def test_health_overview_sources_are_ready(self):
+        self.upload(b"one", name="one.jpg")
+        for path in ("/api/status", "/api/storage", "/api/backup", "/api/trash"):
+            response, _ = self.call("GET", path)
+            self.assertEqual(response.status, 200, path)
+        _, body = self.call("GET", "/api/status")
+        status = json.loads(body)
+        self.assertEqual(status["count"], 1)
+        self.assertIn("disk", status)
+        _, body = self.call("GET", "/api/storage")
+        self.assertIn("photos", json.loads(body))
+        _, body = self.call("GET", "/api/backup")
+        self.assertFalse(json.loads(body)["configured"])
+        _, body = self.call("GET", "/api/trash")
+        self.assertEqual(json.loads(body)["items"], [])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

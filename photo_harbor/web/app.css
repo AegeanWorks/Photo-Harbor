@@ -424,6 +424,11 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .explore-link { grid-template-columns: 1fr auto; border: 0; border-bottom: 1px solid var(--line); background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
 .explore-link:hover, .explore-link:focus-visible { color: var(--accent); }
 
+.health-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.health-row:last-child { border-bottom: 0; }
+.health-row b { font: 600 13px/1.4 var(--mono); text-align: right; }
+.health-warning { color: var(--danger); font-weight: 600; }
+
 .activity-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 6px; }
 .activity-item { display: grid; grid-template-columns: 110px 130px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding: 9px 12px; border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); font-size: 13px; }
 .activity-when { color: var(--muted); font: 12px/1.4 var(--mono); }
