@@ -139,7 +139,17 @@ audit output and do not extend the numbered target.
   bytes, and delete/empty remove only the caller's entry.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 13 - pushes 42-80
+
+- Range: `228e4ed` (push 42), `aa48a33` (push 43), `713f456` (push 44), plus the last 36
+  pushes.
+- Reviewed: the inclusive date window, real-calendar validation, date/sort stacking and the
+  stable newest/oldest/largest/smallest orders in the page and hash endpoints.
+- Finding: none actionable. Both ends are included, an impossible day is a 400, and every order
+  has a SHA tiebreaker used by both endpoints.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 12 (pushes 45-80).
-- Next run: last 39 pushes, adding pushes 42-44.
+- Runs completed: 13 (pushes 42-80).
+- Next run: last 42 pushes, adding pushes 39-41.

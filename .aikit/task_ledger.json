@@ -5,23 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794111682.95056,
+    "updated_at": 1794111809.0592103,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-reject-atomic",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[2/4] Failing-first tests showed Renamed folder/person and a served vanished ZIP; then password/owner-key validation moved before create/rename and Downloads.take drops a missing file; targeted tests green",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794106525.2828014,
-      "timestamp_str": "2026-11-08 05:55:25",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-reject-atomic",
       "phase": "verification",
@@ -247,6 +236,17 @@
       "status": "in_progress",
       "timestamp": 1794111682.95056,
       "timestamp_str": "2026-11-08 07:21:22",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[4/6] Run 13 (pushes 42-80): inclusive date windows and stable sort orders reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111809.0592103,
+      "timestamp_str": "2026-11-08 07:23:29",
       "agent": "opencode:deepseek"
     }
   ]
