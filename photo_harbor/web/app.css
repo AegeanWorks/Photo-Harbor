@@ -400,6 +400,14 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .similar-photo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; background: var(--wash); }
 .similar-photo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
 
+.folders-tree { display: grid; gap: 14px; margin-top: 14px; }
+.folder-person h2 { font: 600 21px/1.3 var(--serif); margin: 0 0 4px; }
+.folder-person h3 { font: 600 15px/1.3 var(--mono); color: var(--muted); margin: 14px 0 7px; }
+.folder-months { display: flex; flex-wrap: wrap; gap: 7px; }
+.folder-month { display: inline-flex; align-items: baseline; gap: 7px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: inherit; cursor: pointer; font: inherit; }
+.folder-month:hover, .folder-month:focus-visible { border-color: var(--accent); color: var(--accent); }
+.folder-month b { font: 600 12px/1 var(--mono); opacity: .7; }
+
 .map-wrap { display: grid; gap: 14px; margin-top: 14px; }
 .photo-map { width: 100%; height: auto; display: block; border-radius: 18px; background: var(--surface-2); }
 .map-ocean { fill: #dce9e8; }

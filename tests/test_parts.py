@@ -384,6 +384,19 @@ class LensUiTest(unittest.TestCase):
         self.assertIn("outline.lenses", script)
 
 
+class FolderUiTest(unittest.TestCase):
+    def test_read_only_folders_view_is_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="folders"', 'id="view-folders"',
+                        'id="folders-tree"', 'id="folders-status"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/folders", script)
+        self.assertIn("loadFolders", script)
+        self.assertIn("openFolder", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

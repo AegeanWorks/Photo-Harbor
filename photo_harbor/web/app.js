@@ -1173,6 +1173,56 @@ async function loadMap() {
   }
 }
 
+async function loadFolders() {
+  const data = await api("/api/folders");
+  const box = $("folders-tree");
+  box.replaceChildren();
+  let months = 0;
+  for (const folder of data.folders) {
+    months += folder.months.length;
+    const card = el("article", "card folder-person");
+    card.append(el("h2", "", `${folder.name} · ${folder.folder || folder.profile}`));
+    const years = new Map();
+    for (const month of folder.months) {
+      const year = month.month.slice(0, 4);
+      if (!years.has(year)) years.set(year, []);
+      years.get(year).push(month);
+    }
+    for (const [year, entries] of years) {
+      card.append(el("h3", "", year));
+      const row = el("div", "folder-months");
+      for (const month of entries) {
+        const button = el("button", "folder-month");
+        button.type = "button";
+        button.title = month.path;
+        button.append(
+          el("span", "", capitalise(monthYearFormat.format(monthDate(month.month)))),
+          el("b", "", month.count.toLocaleString()));
+        button.addEventListener("click", () => openFolder(folder.profile, month.month));
+        row.append(button);
+      }
+      card.append(row);
+    }
+    box.append(card);
+  }
+  $("folders-status").textContent = data.folders.length
+    ? `${data.folders.length.toLocaleString()} people · ${months.toLocaleString()} months`
+    : "No folders yet";
+  if (data.folders.length === 0) {
+    box.append(el("p", "hint", "No folders have photos yet."));
+  }
+}
+
+function openFolder(profileId, month) {
+  state.profile = profileId;
+  for (const item of document.querySelectorAll("[data-person]")) {
+    item.setAttribute("aria-pressed", String(item.dataset.person === profileId));
+  }
+  setScope(null, month);
+  loadOutline().catch(handle);
+  show("photos");
+}
+
 async function createAlbumForSelection() {
   const name = prompt("Name for the new album:");
   if (!name) return;
@@ -2064,9 +2114,10 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "sync", "setup", "similar", "map", "trash"]) {
+  for (const name of ["photos", "folders", "sync", "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
+  if (view === "folders") loadFolders().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

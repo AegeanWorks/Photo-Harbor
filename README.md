@@ -174,6 +174,10 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   once. The **Cameras** and **Lenses** rails list each value with a count; clicking one narrows
   the gallery, and **Details** shows both too. This needs Pillow for the EXIF read, works fully
   offline, and composes with the other filters.
+- **Read-only folders.** The **Folders** tab mirrors the plain
+  `<Person>/<YYYY>/<YYYY-MM>` layout with real paths and counts. Click a month to open its
+  photos in the gallery; the owner sees every person, while anyone else sees only their own
+  folder. This is a view of the existing disk layout, not a second storage model.
 - **Read-only sidecars.** Select photos and choose **Sidecars… → JSON sidecars** or **XMP
   sidecars** to download a ZIP of metadata. The viewer's **Sidecar** button exports JSON for the
   current photo. Sidecars include the viewer's tags, the stored GPS point, camera, lens and file
@@ -254,6 +258,7 @@ and exit 1; usage errors exit 2.
 | `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
 | `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | read-only cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200 photos per call; build starts the background group rebuild |
 | `POST /api/sidecar` | `{sha256 \| sha256s, format: json\|xmp}` returns a ZIP of read-only metadata sidecars |
+| `GET /api/folders` | read-only person/year/month folder tree with counts and real paths, limited to the signed-in viewer |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
@@ -301,6 +306,7 @@ photo-harbor/
 │   ├── downloads_api.py      <- prepare and serve a selection or album download
 │   ├── errors.py             <- the Error/Why/Fix triad
 │   ├── exif_dates.py         <- capture date from EXIF, when Pillow is installed
+│   ├── folders_api.py        <- read-only person/year/month folder tree
 │   ├── geo.py                <- GPS point from EXIF, when Pillow is installed
 │   ├── http_server.py        <- HTTP handling, byte ranges, security headers
 │   ├── importer.py           <- copy photos in from a folder on disk, skip-list of imported files
@@ -341,6 +347,7 @@ photo-harbor/
     ├── test_downloads.py     <- ZIP names, tokens and expiry
     ├── test_http.py          <- the server over a real socket
     ├── test_naming.py
+    ├── test_folder_view.py   <- read-only folder tree and visibility
     ├── test_folders.py
     ├── test_hashes.py        <- Select matching across the same filters
     ├── test_lenses.py        <- lens filtering and rail counts

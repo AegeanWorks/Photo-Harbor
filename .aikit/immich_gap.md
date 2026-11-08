@@ -29,7 +29,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Facial recognition/clustering | No | Low here: ML worker, model downloads and training data | Not now |
 | Memories (x years ago) | No | High: one filter over existing dates, high user value | **Implemented now** |
 | Tags | Yes: per-person tags, rail filter, viewer/selection apply | - | **Implemented now** |
-| Folder view | Plain folders in Explorer; no web folder tree | Low: duplicate of the filesystem and current filters | Not now |
+| Folder view | Read-only Folders tab over the real person/year/month paths | - | **Implemented now** |
 | Offline support | PWA shell only; Android has local queue state | Medium: offline write queue is a large state machine | Not now |
 | Read-only gallery | No separate role | Medium: could reuse a share token, but conflicts with private profiles | Later |
 | Duplicates utility | Exact SHA-256 dedupe plus read-only dHash Similar review | - | **Implemented now** |
@@ -71,6 +71,13 @@ tags, stored GPS point, camera, lens and file facts. The selection bar offers bo
 viewer's **Sidecar** button exports JSON. Originals are never modified and no sidecar is written
 back to the library folders.
 
+## Implemented in this pass: Folders
+
+The **Folders** tab calls `/api/folders` and renders the real `<Person>/<YYYY>/<YYYY-MM>`
+paths with month counts. Owner sees every person; non-owners see only themselves. Clicking a
+month opens the gallery with that person and month selected. Archived photos are absent, and no
+folder or file is created, moved or renamed.
+
 ## Implemented in this pass: Offline map
 
 The **Map** tab projects the stored one-decimal Places onto an embedded equirectangular SVG
@@ -98,13 +105,13 @@ camera/lens facts. Archived photos leave both counts; no ML, network or file rew
 
 ## Decision summary
 
-Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review, sidecars
-and an offline map**. All eight reuse local data, avoid ML services and network dependencies,
-and never move or rewrite originals. Archive and Tags add only private per-person marks; Places
-stores the camera's point once; Cameras stores the EXIF make/model and lens once; Similar uses
-an optional perceptual hash cache and is read-only; sidecars are generated in memory; the map is
-an embedded SVG outline. They compose with the existing person, album, date, kind, name and sort
-filters.
+Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review, sidecars,
+an offline map and a read-only Folders tab**. All nine reuse local data, avoid ML services and
+network dependencies, and never move or rewrite originals. Archive and Tags add only private
+per-person marks; Places stores the camera's point once; Cameras stores the EXIF make/model and
+lens once; Similar uses an optional perceptual hash cache and is read-only; sidecars are
+generated in memory; the map is an embedded SVG outline; Folders mirrors the existing disk
+layout. They compose with the existing person, album, date, kind, name and sort filters.
 
 Deliberately not now:
 

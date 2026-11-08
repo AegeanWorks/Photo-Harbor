@@ -592,6 +592,20 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/photos?lens=35%20mm")
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
 
+    def test_folder_tree_follows_people_visibility(self):
+        ayse = self.add_person()
+        self.upload(b"mine", name="mine.jpg")
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={"X-Harbor-Key": ayse["key"], "X-Name": "hers.jpg",
+                           "X-Sha256": sha(b"hers")})
+        _, body = self.call("GET", "/api/folders")
+        folders = json.loads(body)["folders"]
+        self.assertEqual({folder["name"] for folder in folders}, {"Main", "Ayşe"})
+        self.assertTrue(all(month["path"] for folder in folders for month in folder["months"]))
+        _, body = self.call("GET", "/api/folders", key=False,
+                            headers={"X-Harbor-Key": ayse["key"]})
+        self.assertEqual([folder["name"] for folder in json.loads(body)["folders"]], ["Ayşe"])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

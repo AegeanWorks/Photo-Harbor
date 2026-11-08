@@ -983,3 +983,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   filter; archived photos leave the count and non-owners only see their own copies.
 - **Consequences**: Lens search is a read-only local filter with no new writes. Empty EXIF lens
   values simply do not appear; no lens equivalence or model inference is claimed.
+
+### ADR-058: Folders mirror the existing disk layout read-only
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The plain `<Person>/<YYYY>/<YYYY-MM>` folders are a product feature, but the web
+  UI exposed them only indirectly through person/month filters. Rebuilding the filesystem in a
+  second storage model would risk divergence.
+- **Decision**: Add `GET /api/folders`, computed from `Catalog.outline` and the real profile
+  folder names; each month includes its actual path and count. The **Folders** tab renders the
+  tree and opens the gallery by person/month. It is read-only, excludes archived photos and
+  limits non-owners to their own folder. No schema, file or folder changes.
+- **Consequences**: Users can browse the real library layout and jump into a month without a
+  second source of truth. Renames and future layout changes automatically flow through the
+  profile and copy data.

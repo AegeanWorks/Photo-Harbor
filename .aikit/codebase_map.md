@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `79`
-- **Total Classes**: `157`
+- **Total Python Modules**: `81`
+- **Total Classes**: `160`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `645`
-- **Total Source Lines**: `10672`
+- **Total Class Methods**: `654`
+- **Total Source Lines**: `10776`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `246` lines (`12226` bytes)
+**Size**: `249` lines (`12394` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -144,7 +144,7 @@
   - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
-  - Method `._register(sync, library, people, albums, archive, tags, similar, sidecar, downloads, trash, backup, setup)`
+  - Method `._register(sync, library, people, albums, archive, tags, similar, sidecar, folders, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -484,6 +484,18 @@
 
 **Functions:**
 - `def read_taken(path)` - *``YYYY-MM-DDTHH:MM:SS`` from EXIF DateTimeOriginal, or None without Pillow or a date.*
+
+---
+
+### [`photo_harbor/folders_api.py`](photo_harbor/folders_api.py)
+> *Read-only folder tree from the per-person year/month library layout.*
+
+**Size**: `30` lines (`1139` bytes)
+
+**Classes:**
+- `class FoldersApi`
+  - Method `.__init__(profiles, catalog)`
+  - Method `.listing(request)`
 
 ---
 
@@ -1165,6 +1177,19 @@
 
 ---
 
+### [`tests/test_folder_view.py`](tests/test_folder_view.py)
+**Size**: `44` lines (`2174` bytes)
+
+**Classes:**
+- `class FoldersApiTest`
+  - Method `.setUp()`
+  - Method `._request(profile, owner)`
+  - Method `.test_owner_sees_both_people_with_real_paths()`
+  - Method `.test_another_person_sees_only_their_folder()`
+  - Method `.test_archived_photos_leave_the_folder_tree()`
+
+---
+
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
@@ -1213,7 +1238,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `970` lines (`54797` bytes)
+**Size**: `984` lines (`55635` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1255,6 +1280,7 @@
   - Method `.test_similar_review_groups_hashes_without_deleting()`
   - Method `.test_sidecar_export_is_a_read_only_zip()`
   - Method `.test_lens_metadata_groups_and_filters()`
+  - Method `.test_folder_tree_follows_people_visibility()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1321,7 +1347,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `707` lines (`32003` bytes)
+**Size**: `720` lines (`32638` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1375,6 +1401,8 @@
   - Method `.test_sidecar_export_is_reachable_for_selection_and_viewer()`
 - `class LensUiTest`
   - Method `.test_gallery_lenses_are_reachable_and_wired()`
+- `class FolderUiTest`
+  - Method `.test_read_only_folders_view_is_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

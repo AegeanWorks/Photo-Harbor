@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "quality-http-flake",
+    "task_id": "immich-folders",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794143257.9926898,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794143575.9844449,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794143274.085411
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-similar-cache",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Similar cache: radius-8 cached group tables, background Build groups worker, build API and UI polling, migration/tests; [2/2] gates, UI review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794140756.506158,
-      "timestamp_str": "2026-11-08 15:25:56",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "Radius-8 grouping is too slow at page load, so the groups must be precomputed and only read by the Similar tab",
-        "benefits": "Responsive Similar page at radius 8 for large libraries, with background progress and no automatic deletion",
-        "risks": "contract: new build endpoint and table cache; dependency: stdlib threads; concurrency: background writer under the database lock; state: format 13 and a rebuild that can be interrupted by shutdown",
-        "mitigation": "Keep the page read-only, compute outside the read lock and swap the cache in one savepoint, poll status, test migration/privacy/build, run 4/4 gates and Chromium review"
-      },
-      "plan_digest": "1461a8433f1c930a85ab056391853cddf2849b4d4bb35915acc6640c7180425b"
-    },
-    {
-      "task_id": "immich-similar-cache",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Similar cache: format 13 group tables, background radius-8 rebuild worker, build API, UI polling and build button, tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794140838.458789,
-      "timestamp_str": "2026-11-08 15:27:18",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-similar-cache",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Similar cache done: 265 tests OK; 4/4 gates; 20k cached groups load in 0.76 s; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794140839.0958047,
-      "timestamp_str": "2026-11-08 15:27:19",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-similar-cache",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794143274.0854135,
       "timestamp_str": "2026-11-08 16:07:54",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-folders",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Read-only Folders view: /api/folders tree from per-person year/month copies, Folders tab and month navigation, tests; [2/2] gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794143407.1259565,
+      "timestamp_str": "2026-11-08 16:10:07",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The plain per-person year/month folders are a deliberate feature; exposing them read-only makes the layout browsable without duplicating the filesystem",
+        "benefits": "A testable folder tree with real person/month paths and one-click gallery navigation, no schema or file changes",
+        "risks": "contract: new folders endpoint and tab; dependency: stdlib only; concurrency: read-only; state: none",
+        "mitigation": "Reuse catalog.outline for counts, enforce owner/non-owner visibility, add unit/HTTP/static tests, gate and review"
+      },
+      "plan_digest": "a3ce9e5957dbffa7aef186deac45b8f14e6fcc0e444fb1fb8118b6bf78d9ea43"
+    },
+    {
+      "task_id": "immich-folders",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Folders: /api/folders real person/year/month tree, Folders tab and month navigation, unit/HTTP/static tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794143575.2424448,
+      "timestamp_str": "2026-11-08 16:12:55",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-folders",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Folders done: 284 tests OK; 4/4 gates; owner/non-owner and archive visibility covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794143575.9844449,
+      "timestamp_str": "2026-11-08 16:12:55",
       "agent": "opencode:deepseek"
     }
   ]
