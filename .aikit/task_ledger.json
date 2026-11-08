@@ -5,23 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794110461.0302472,
+    "updated_at": 1794110909.278954,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-thumb-cache",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[2/4] Failing-first prune, stored_hashes and startup tests went red, then Thumbnailer.prune, Catalog.stored_hashes and HarborApp startup wiring landed; targeted tests green",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093751.7045963,
-      "timestamp_str": "2026-11-08 02:22:31",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-thumb-cache",
       "phase": "verification",
@@ -253,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794110461.0302472,
       "timestamp_str": "2026-11-08 07:01:01",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[3/6] Run 7 (pushes 60-80): Android share fallback and scheduled-job evidence reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed; clean run recorded",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794110909.278954,
+      "timestamp_str": "2026-11-08 07:08:29",
       "agent": "opencode:deepseek"
     }
   ]

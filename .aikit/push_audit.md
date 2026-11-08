@@ -7,6 +7,8 @@ gates. A run with a finding ends in a fix commit and a publish; a clean run reco
 found nothing.
 
 Push numbers are the `update by push` entries in `git reflog show origin/master`, oldest first.
+The audit end is push 80 (`63077b4`), the tip when this audit began; fix commits after it are the
+audit output and do not extend the numbered target.
 
 ## Run 1 - pushes 78-80
 
@@ -75,7 +77,17 @@ Push numbers are the `update by push` entries in `git reflog show origin/master`
 - Verification: 215 tests OK; project check 4/4 gates; install page re-reviewed in Chromium with
   metadata rendered and no CSP/console errors.
 
+## Run 7 - pushes 60-80
+
+- Range: `3835304` (push 60), `6265014` (push 61), `a102c75` (push 62), plus the last 18 pushes.
+- Reviewed: Android share fallback for an intent data URI, manifest/share-sheet wiring, the
+  emulator verification notes and the scheduled `SyncJobService` path.
+- Finding: none actionable. The fallback only adds a missing URI; an unreadable or size-less
+  provider is still skipped by the existing size guard, and proving a change needs the emulator.
+  The Python tree has no defect attributable to this batch.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 6 (pushes 63-80).
-- Next run: last 21 pushes, adding pushes 60-62.
+- Runs completed: 7 (pushes 60-80).
+- Next run: last 24 pushes, adding pushes 57-59.
