@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "integrity-repair-clears-damage",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794157255.6409605,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794157442.2174785
   },
   "checkpoints": [
-    {
-      "task_id": "immich-format-breakdown",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/3] Formats done: 308 tests OK on rerun (one transient Windows HTTP abort); 4/4 gates; library/person formats covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794151023.2305038,
-      "timestamp_str": "2026-11-08 18:17:03",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-format-breakdown",
       "phase": "completed",
@@ -255,6 +245,16 @@
       "status": "in_progress",
       "timestamp": 1794157255.6409605,
       "timestamp_str": "2026-11-08 20:00:55",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "integrity-repair-clears-damage",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'integrity-repair-clears-damage' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794157442.2174807,
+      "timestamp_str": "2026-11-08 20:04:02",
       "agent": "commandcode:vscode"
     }
   ]
