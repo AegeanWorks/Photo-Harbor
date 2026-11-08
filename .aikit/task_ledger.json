@@ -3,24 +3,15 @@
   "active_task": {
     "task_id": "integrity-disk-repair",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794160387.0153656,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794160413.4956362
   },
   "checkpoints": [
-    {
-      "task_id": "immich-format-filter",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-format-filter' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794152131.5140798,
-      "timestamp_str": "2026-11-08 18:35:31",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-integrity-health",
       "phase": "phase 1",
@@ -260,6 +251,16 @@
       "status": "in_progress",
       "timestamp": 1794160387.0153656,
       "timestamp_str": "2026-11-08 20:53:07",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "integrity-disk-repair",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'integrity-disk-repair' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794160413.4956386,
+      "timestamp_str": "2026-11-08 20:53:33",
       "agent": "commandcode:vscode"
     }
   ]
