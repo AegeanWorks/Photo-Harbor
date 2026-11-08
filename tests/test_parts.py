@@ -447,6 +447,20 @@ class ExploreUiTest(unittest.TestCase):
         self.assertIn("/api/outline", script)
 
 
+class AlbumsUiTest(unittest.TestCase):
+    def test_albums_overview_is_wired_to_covers_and_counts(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="albums"', 'id="view-albums"',
+                        'id="albums-grid"', 'id="albums-status"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/albums", script)
+        self.assertIn("loadAlbumOverview", script)
+        self.assertIn("selectAlbum", script)
+        self.assertIn("album.cover", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

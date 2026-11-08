@@ -42,6 +42,7 @@
         <button role="tab" data-view="photos" aria-selected="true">Photos</button>
         <button role="tab" data-view="folders" aria-selected="false">Folders</button>
         <button role="tab" data-view="explore" aria-selected="false">Explore</button>
+        <button role="tab" data-view="albums" aria-selected="false">Albums</button>
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
         <button role="tab" data-view="similar" aria-selected="false">Similar</button>
@@ -182,6 +183,15 @@
         <p class="hint">Read-only statistics from the current outline. Click a place, camera or lens to open its gallery view.</p>
         <div id="explore-cards" class="explore-cards"></div>
         <div id="explore-sections" class="explore-sections"></div>
+      </section>
+
+      <section id="view-albums" class="view narrow" hidden>
+        <div class="scope">
+          <h1>Albums</h1>
+          <span id="albums-status" aria-live="polite"></span>
+        </div>
+        <p class="hint">Read-only covers and counts. Open an album from Photos to add or remove its photos.</p>
+        <div id="albums-grid" class="albums-grid"></div>
       </section>
 
       <section id="view-sync" class="view narrow" hidden>

@@ -760,6 +760,40 @@ async function loadAlbums() {
   }
   renderScope();
   renderViewerCollections();
+  return listing;
+}
+
+async function loadAlbumOverview() {
+  const listing = await loadAlbums();
+  $("albums-status").textContent =
+    `${listing.albums.length.toLocaleString()} albums · ${listing.favorites.toLocaleString()} favorites`;
+  const grid = $("albums-grid");
+  grid.replaceChildren();
+  if (listing.albums.length === 0) {
+    grid.append(el("p", "hint", "No albums yet. Select photos and use Add to album…."));
+    return;
+  }
+  for (const album of listing.albums) {
+    const card = el("button", "album-card");
+    card.type = "button";
+    if (album.cover) {
+      const img = el("img");
+      img.src = album.cover;
+      img.alt = "";
+      img.loading = "lazy";
+      img.onerror = () => img.replaceWith(el("div", "album-cover-empty", "No cover"));
+      card.append(img);
+    } else {
+      card.append(el("div", "album-cover-empty", "No photos yet"));
+    }
+    card.append(el("span", "album-name", album.name),
+      el("span", "album-count", items(album.count)));
+    card.addEventListener("click", () => {
+      selectAlbum(album.id);
+      show("photos");
+    });
+    grid.append(card);
+  }
 }
 
 function selectTag(id) {
@@ -2395,11 +2429,13 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "folders", "explore", "sync", "setup", "similar", "map", "trash"]) {
+  for (const name of ["photos", "folders", "explore", "albums", "sync", "setup",
+    "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "folders") loadFolders().catch(handle);
   if (view === "explore") loadExplore().catch(handle);
+  if (view === "albums") loadAlbumOverview().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

@@ -1049,3 +1049,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   No new endpoint, schema or state is added.
 - **Consequences**: Users get a compact overview with no extra source of truth. The numbers can
   never drift from the gallery outline; archived photos remain excluded as elsewhere.
+
+### ADR-063: Albums overview presents the existing album response
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Albums are managed in the rail and viewer, but there was no cover-first index.
+  A second album model or endpoint would duplicate counts and covers.
+- **Decision**: Add an **Albums** tab that calls the existing `/api/albums`, renders cover, name
+  and count cards, and opens the album through the existing `selectAlbum` scope. Creation and
+  editing remain in Photos. No schema or endpoint is added.
+- **Consequences**: The overview cannot drift from the rail because both read the same response.
+  Empty albums show a clear placeholder cover.

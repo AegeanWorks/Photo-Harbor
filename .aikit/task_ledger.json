@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-explore",
+    "task_id": "immich-albums-overview",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794145935.3237138,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794146341.1842427,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794146074.9479814
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-folders",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Read-only Folders view: /api/folders tree from per-person year/month copies, Folders tab and month navigation, tests; [2/2] gates, Chromium review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143407.1259565,
-      "timestamp_str": "2026-11-08 16:10:07",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The plain per-person year/month folders are a deliberate feature; exposing them read-only makes the layout browsable without duplicating the filesystem",
-        "benefits": "A testable folder tree with real person/month paths and one-click gallery navigation, no schema or file changes",
-        "risks": "contract: new folders endpoint and tab; dependency: stdlib only; concurrency: read-only; state: none",
-        "mitigation": "Reuse catalog.outline for counts, enforce owner/non-owner visibility, add unit/HTTP/static tests, gate and review"
-      },
-      "plan_digest": "a3ce9e5957dbffa7aef186deac45b8f14e6fcc0e444fb1fb8118b6bf78d9ea43"
-    },
-    {
-      "task_id": "immich-folders",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Folders: /api/folders real person/year/month tree, Folders tab and month navigation, unit/HTTP/static tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143575.2424448,
-      "timestamp_str": "2026-11-08 16:12:55",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-folders",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Folders done: 284 tests OK; 4/4 gates; owner/non-owner and archive visibility covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143575.9844449,
-      "timestamp_str": "2026-11-08 16:12:55",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-folders",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794146074.9479828,
       "timestamp_str": "2026-11-08 16:54:34",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-albums-overview",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Albums overview: read-only cover/count cards from /api/albums opening each album, static tests; [2/2] gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794146198.3883958,
+      "timestamp_str": "2026-11-08 16:56:38",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Albums are only in the rail; a cover overview is the remaining low-risk organization surface and needs no new API",
+        "benefits": "A visual album index with covers and counts that opens the existing album scope",
+        "risks": "contract: new Albums tab; dependency: browser only; concurrency: read-only; state: none",
+        "mitigation": "Reuse the tested albums response, keep creation in the existing rail, add static/HTTP coverage, gate and review"
+      },
+      "plan_digest": "00bf305699bbabe2b215c7bf4d7d650e0f21c21656e352eb6a88aa32fb00ff7e"
+    },
+    {
+      "task_id": "immich-albums-overview",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Albums overview: cover/count cards from /api/albums, click opens album, static/HTTP tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794146339.615964,
+      "timestamp_str": "2026-11-08 16:58:59",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-albums-overview",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Albums overview done: 291 tests OK; 4/4 gates; cover/count covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794146341.1842427,
+      "timestamp_str": "2026-11-08 16:59:01",
       "agent": "opencode:deepseek"
     }
   ]

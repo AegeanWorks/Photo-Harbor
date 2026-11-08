@@ -424,6 +424,14 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .explore-link { grid-template-columns: 1fr auto; border: 0; border-bottom: 1px solid var(--line); background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
 .explore-link:hover, .explore-link:focus-visible { color: var(--accent); }
 
+.albums-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 14px; }
+.album-card { display: flex; flex-direction: column; gap: 8px; padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.album-card img, .album-cover-empty { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; background: var(--surface-2); box-shadow: var(--shadow); }
+.album-cover-empty { display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.album-card:hover img, .album-card:focus-visible img { outline: 3px solid var(--accent); outline-offset: 2px; }
+.album-name { font: 600 16px/1.3 var(--serif); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.album-count { color: var(--muted); font-size: 13px; margin-top: -4px; }
+
 .folders-tree { display: grid; gap: 14px; margin-top: 14px; }
 .folder-person h2 { font: 600 21px/1.3 var(--serif); margin: 0 0 4px; }
 .folder-person h3 { font: 600 15px/1.3 var(--mono); color: var(--muted); margin: 14px 0 7px; }

@@ -635,6 +635,17 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(outline["lenses"], [{"name": "35 mm", "count": 1}])
         self.assertEqual(len(outline["places"]), 1)
 
+    def test_albums_overview_has_cover_and_count(self):
+        self.upload(b"one", name="one.jpg")
+        _, body = self.call("POST", "/api/albums", body={"name": "Keepers"})
+        album = json.loads(body)["id"]
+        self.call("POST", "/api/album-photos",
+                  body={"album": album, "sha256": sha(b"one"), "member": True})
+        _, body = self.call("GET", "/api/albums")
+        item = json.loads(body)["albums"][0]
+        self.assertEqual((item["name"], item["count"]), ("Keepers", 1))
+        self.assertTrue(item["cover"].startswith("/thumb/"))
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})
