@@ -19,6 +19,21 @@ class DownloadsTest(unittest.TestCase):
         self.one = self.photo(b"one", "one.jpg")
         self.two = self.photo(b"two", "two.jpg")
 
+    def test_startup_keeps_a_fresh_archive_and_drops_a_stale_one(self):
+        import os
+        import time
+        from photo_harbor.downloads import STALE_SECONDS
+        cache = self.root / "downloads"
+        fresh = cache / "fresh.zip"
+        old = cache / "old.zip"
+        fresh.write_bytes(b"zip")
+        old.write_bytes(b"zip")
+        stamp = time.time() - STALE_SECONDS - 60
+        os.utime(old, (stamp, stamp))
+        Downloads(self.root, clock=lambda: self.now)
+        self.assertTrue(fresh.exists())
+        self.assertFalse(old.exists())
+
     def photo(self, data: bytes, name: str):
         path = self.root / name
         path.write_bytes(data)

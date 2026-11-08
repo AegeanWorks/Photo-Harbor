@@ -632,3 +632,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   their preview bytes at the next start. Startup scans the two-level cache directory once, which
   is proportional to the number of previews, and a missing cache directory simply has nothing
   to do.
+
+### ADR-033: Startup cleanup only removes stale buffers
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `PhotoStore.__init__` deleted every `.tmp_upload_*` in `.harbor/incoming` and
+  `Downloads.clean` deleted every `.zip` in `.harbor/downloads`. A CLI import constructs a
+  second `HarborApp` against the same library while the server runs, so its startup cleanup
+  could delete the server's in-progress upload or a prepared download that still had a live
+  token. The paths are per-library, not per-process.
+- **Decision**: Cleanup is age-based: upload buffers older than six hours and download archives
+  older than one hour may be removed, while younger files are presumed to belong to a running
+  Harbor process and are left alone. A failed unlink is skipped and retried at the next start.
+  Download tokens still live only in memory, so `clean` clears them as before.
+- **Consequences**: Starting an import or a second Harbor window can no longer break an upload
+  or download already in flight. An abandoned buffer can linger for up to its threshold instead
+  of being removed immediately; it is still cleaned on a later start.

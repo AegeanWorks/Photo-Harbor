@@ -10,6 +10,7 @@ import re
 import shutil
 import sqlite3
 import threading
+import time
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -26,6 +27,7 @@ from .records import IngestResult, PhotoRecord, UploadClaim
 CHUNK = 4 << 20
 MIN_FREE_BYTES = 10 * 1024 * 1024
 MAX_UPLOAD_BYTES = 16 * 1024 ** 3
+STALE_TEMP_SECONDS = 6 * 3600
 SHA256_HEX = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -88,8 +90,13 @@ class PhotoStore:
         # Held while a file is placed, linked, moved or registered: one change at a time.
         self.lock = threading.RLock()
         self._incoming.mkdir(parents=True, exist_ok=True)
+        cutoff = time.time() - STALE_TEMP_SECONDS
         for stale in self._incoming.glob(".tmp_upload_*"):
-            stale.unlink(missing_ok=True)
+            try:
+                if stale.stat().st_mtime < cutoff:
+                    stale.unlink(missing_ok=True)
+            except OSError:
+                continue
 
     def ingest(self, stream: BinaryIO, length: Optional[int], claim: UploadClaim) -> IngestResult:
         """Stream ``length`` bytes (None: until the stream ends) to disk; keep them only when the

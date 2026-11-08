@@ -1,60 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "harbor-thumb-cache",
+    "task_id": "harbor-stale-buffers",
     "last_phase": "verification",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794093751.7536287,
+    "updated_at": 1794106289.8281453,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": [],
-    "completed_at": 1794093758.057844
+    "completed_at": 1794106297.2828352
   },
   "checkpoints": [
-    {
-      "task_id": "backup-status",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/4] DailyBackup.run_once/status immutable snapshot; Runner attaches it; owner-only GET /api/backup; 2 unit tests and HTTP configured/unconfigured/privacy test; stop() safe before start",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793380458.2393112,
-      "timestamp_str": "2026-10-30 20:14:18",
-      "agent": "opencode:backup"
-    },
-    {
-      "task_id": "backup-status",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[3/4] Sync Backup panel shows target, last attempt, copied bytes or error; non-owners hide; browser dogfood saw the target and '1 copied last time', 0 JS errors",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793380459.0134273,
-      "timestamp_str": "2026-10-30 20:14:19",
-      "agent": "opencode:backup"
-    },
-    {
-      "task_id": "backup-status",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[4/4] README second-copy/API/tree; ADR-029; 154 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1793380459.7244904,
-      "timestamp_str": "2026-10-30 20:14:19",
-      "agent": "opencode:backup"
-    },
-    {
-      "task_id": "backup-status",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'backup-status' completed successfully.",
-      "status": "completed",
-      "timestamp": 1793380502.0692782,
-      "timestamp_str": "2026-10-30 20:15:02",
-      "agent": "opencode:backup"
-    },
     {
       "task_id": "reforge:run-2",
       "phase": "reforge stage 3",
@@ -253,6 +210,56 @@
       "status": "completed",
       "timestamp": 1794093758.0578463,
       "timestamp_str": "2026-11-08 02:22:38",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-stale-buffers",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/4] Plan: make startup temp cleanup age-based so a running Harbor's fresh upload buffer or prepared ZIP is never deleted by a CLI import/second instance; failing-first tests, README/ADR-033",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794106099.024236,
+      "timestamp_str": "2026-11-08 05:48:19",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "PhotoStore.__init__ unlinks every .tmp_upload_* in .harbor/incoming and Downloads.clean unlinks every .zip in .harbor/downloads. A CLI import constructs a second HarborApp against the same library while the server is running, so its startup cleanup can delete the server's in-progress upload or a prepared download that has a live token",
+        "benefits": "Starting a CLI command or a second Harbor window no longer breaks an upload or download already in flight; only abandoned buffers older than the cleanup threshold are removed",
+        "risks": "contract: cleanup timing changes, not the paths or API; dependency: stdlib only; concurrency: age check narrows the cross-process window without pretending to lock across processes; state: stale files may live up to the threshold instead of being deleted immediately",
+        "mitigation": "Use a six-hour age gate for uploads and a one-hour gate for downloads (their tokens expire in 15 minutes), test fresh versus stale buffers, keep unlink failures non-fatal, run the full suite and 4/4 gates, and record ADR-033"
+      },
+      "plan_digest": "4504a3d9d59c097e93815776d34738c31bde6f218e0d70fa7a81d5d342e2bad9"
+    },
+    {
+      "task_id": "harbor-stale-buffers",
+      "phase": "implementation",
+      "phase_num": 3,
+      "description": "[2/4] Failing-first fresh/stale buffer tests went red, then six-hour upload and one-hour download age gates landed; active writers and fresh tokens survive startup, old crash leftovers are still cleaned",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794106288.9807923,
+      "timestamp_str": "2026-11-08 05:51:28",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-stale-buffers",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[3/4] README concurrency notes and tree, ADR-033, refreshed map; 207 tests OK; project check 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794106289.8281453,
+      "timestamp_str": "2026-11-08 05:51:29",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-stale-buffers",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'harbor-stale-buffers' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794106297.282837,
+      "timestamp_str": "2026-11-08 05:51:37",
       "agent": "opencode:deepseek"
     }
   ]

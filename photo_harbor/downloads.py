@@ -15,6 +15,7 @@ from .records import PhotoRecord
 MAX_BYTES = 8 * 1024 ** 3
 RESERVE_BYTES = 1 * 1024 ** 3
 TTL_SECONDS = 15 * 60
+STALE_SECONDS = 3600
 
 
 def _entry_name(record: PhotoRecord, used: set) -> str:
@@ -47,13 +48,16 @@ class Downloads:
         self.clean()
 
     def clean(self) -> None:
-        """Startup cleanup: no token survives a restart, so no archive should either."""
+        """Startup cleanup: no token survives a restart, so an abandoned archive older than an
+        hour should not either. A younger one may belong to a Harbor process still serving it."""
         with self._lock:
+            cutoff = time.time() - STALE_SECONDS
             for path in self._dir.glob("*.zip"):
                 try:
-                    path.unlink()
-                except OSError:  # hygiene: allow locked temp archive must not abort startup cleanup
-                    pass
+                    if path.stat().st_mtime < cutoff:
+                        path.unlink()
+                except OSError:
+                    continue
             self._tokens.clear()
 
     def prepare(self, entries: list, name: str, profile: str) -> dict:

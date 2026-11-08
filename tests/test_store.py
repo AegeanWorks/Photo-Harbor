@@ -135,6 +135,24 @@ class CatalogAndJournalTest(unittest.TestCase):
         self.assertEqual(self.lib.catalog.stored_hashes(), {two.sha256})
 
 
+class StaleBufferTest(unittest.TestCase):
+    def test_startup_keeps_a_fresh_upload_buffer_and_drops_an_old_one(self):
+        import os
+        import time
+        from photo_harbor.store import PhotoStore, STALE_TEMP_SECONDS
+        lib = Library(self)
+        incoming = lib.root / ".harbor" / "incoming"
+        fresh = incoming / ".tmp_upload_fresh"
+        old = incoming / ".tmp_upload_old"
+        fresh.write_bytes(b"fresh")
+        old.write_bytes(b"old")
+        stamp = time.time() - STALE_TEMP_SECONDS - 60
+        os.utime(old, (stamp, stamp))
+        PhotoStore(lib.root, lib.catalog, lib.copies)
+        self.assertTrue(fresh.exists())
+        self.assertFalse(old.exists())
+
+
 class SearchEscapingTest(unittest.TestCase):
     def test_wildcards_in_a_search_are_literal(self):
         from photo_harbor.records import PhotoFilter

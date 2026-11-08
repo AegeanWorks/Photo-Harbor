@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
-- **Total Classes**: `116`
+- **Total Classes**: `117`
 - **Total Top-Level Functions**: `100`
-- **Total Class Methods**: `498`
-- **Total Source Lines**: `8229`
+- **Total Class Methods**: `500`
+- **Total Source Lines**: `8273`
 
 ---
 
@@ -400,12 +400,12 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `122` lines (`4934` bytes)
+**Size**: `126` lines (`5101` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
   - Method `.__init__(state_dir, clock)`
-  - Method `.clean()` - *Startup cleanup: no token survives a restart, so no archive should either.*
+  - Method `.clean()` - *Startup cleanup: no token survives a restart, so an abandoned archive older than an*
   - Method `.prepare(entries, name, profile)` - *Write ``[(PhotoRecord, path), ...]`` to a new ZIP and return its token details.*
   - Method `.take(token, profile)` - *The ``(path, name, bytes)`` for this person's live token, removing it.*
   - Method `._expire_locked()`
@@ -762,7 +762,7 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `339` lines (`15704` bytes)
+**Size**: `346` lines (`15925` bytes)
 
 **Classes:**
 - `class PhotoStore`
@@ -936,11 +936,12 @@
 ---
 
 ### [`tests/test_downloads.py`](tests/test_downloads.py)
-**Size**: `105` lines (`4709` bytes)
+**Size**: `120` lines (`5270` bytes)
 
 **Classes:**
 - `class DownloadsTest`
   - Method `.setUp()`
+  - Method `.test_startup_keeps_a_fresh_archive_and_drops_a_stale_one()`
   - Method `.photo(data, name)`
   - Method `.test_a_selection_becomes_one_zip_with_original_names()`
   - Method `.test_a_third_collision_still_gets_a_unique_name()`
@@ -1259,7 +1260,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `214` lines (`9828` bytes)
+**Size**: `232` lines (`10521` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1286,6 +1287,8 @@
   - Method `.test_an_unknown_catalog_version_is_refused_untouched()`
   - Method `.test_corrupt_row_is_not_reported_as_duplicate()`
   - Method `.test_stored_hashes_are_the_live_catalog()`
+- `class StaleBufferTest`
+  - Method `.test_startup_keeps_a_fresh_upload_buffer_and_drops_an_old_one()`
 - `class SearchEscapingTest`
   - Method `.test_wildcards_in_a_search_are_literal()`
 - `class EmbeddedDateTest`

@@ -101,7 +101,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   upload to a temporary file, hashes it, and keeps it only if the hashes match. Then it fsyncs
   the file and moves it into `<Person>/YYYY/YYYY-MM/` under its original name. A name clash with different
   bytes gets a hash suffix; identical bytes are stored once. A name another Harbor process takes
-  at the same moment is never overwritten: the photo moves to the next free name instead.
+  at the same moment is never overwritten: the photo moves to the next free name instead. A
+  start-up cleanup removes only upload buffers abandoned for over six hours, so starting an
+  import cannot delete an upload a running server is still writing.
 - **Deletion only after a fresh check.** *Harbor Cleanup* asks `GET /api/has` for each phone photo
   older than 30 days. The PC answers `yes` only after re-hashing its own copy. Only those photos
   are deleted, and iOS asks once to confirm. A `no` uploads the photo instead and appears under
@@ -137,7 +139,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   **Download album**. Harbor packs the originals into one ZIP without recompressing them; the
   link works once, for 15 minutes, and only for the person who prepared it. A selection download
   takes up to 500 photos; an album can be larger. Downloads are capped at 8 GB and need that
-  much free space plus a 1 GB reserve.
+  much free space plus a 1 GB reserve. A prepared archive abandoned by a crash is cleaned at a
+  later start once it is an hour old.
 - **Know where the space went.** **Sync → Storage** shows the file and byte total, the
   photo/video split, how many photos are shared (stored once but counted in each person's
   share), each person's share, and the ten largest files. A person sees only their own share;
@@ -239,7 +242,7 @@ photo-harbor/
 │   ├── control_panel.py      <- the Harbor window (tkinter)
 │   ├── database.py           <- SQLite file and its format version
 │   ├── details.py            <- file facts and optional EXIF for the Details panel
-│   ├── downloads.py          <- one-off stored ZIPs, size limits and expiring tokens
+│   ├── downloads.py          <- one-off stored ZIPs, size limits, tokens and stale cleanup
 │   ├── downloads_api.py      <- prepare and serve a selection or album download
 │   ├── errors.py             <- the Error/Why/Fix triad
 │   ├── exif_dates.py         <- capture date from EXIF, when Pillow is installed
@@ -259,7 +262,7 @@ photo-harbor/
 │   ├── scan.py               <- keeping up with File Explorer; weekly file check
 │   ├── selection.py          <- bulk hash parsing and all-or-nothing validation
 │   ├── setup_api.py          <- address and key for the Setup tab
-│   ├── store.py              <- hash-verified ingest and re-verification
+│   ├── store.py              <- hash-verified ingest, re-verification, stale upload cleanup
 │   ├── sync_api.py           <- the endpoints the Shortcuts call
 │   ├── thumbs.py             <- optional Pillow previews, background warmer, cache pruning
 │   ├── trash.py              <- move a copy aside, restore through ingest, delete forever
