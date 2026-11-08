@@ -5,30 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794111591.8618803,
+    "updated_at": 1794111682.95056,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-reject-atomic",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/4] Plan: validate profile password/key before any rename or insert, and answer 404 when a prepared ZIP vanished; failing-first HTTP/unit tests plus README/ADR-034",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794106375.527254,
-      "timestamp_str": "2026-11-08 05:52:55",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "ProfilesApi.update renames the person and their folder before validating a new password, and before the owner-key refusal, so a 400/403 request still renames them. ProfilesApi.create inserts the person before rejecting a bad password. Downloads.take returns a token for a ZIP that was deleted underneath it, which then fails with a 500 while serving",
-        "benefits": "A rejected write leaves no half-applied state; a vanished archive becomes a clear 404 and the token is dropped",
-        "risks": "contract: validation order and one missing-file response change; dependency: stdlib only; concurrency: still no cross-process transaction, but no new partial state from validation; state: no schema change",
-        "mitigation": "Pre-validate password and owner-key rules before applying, keep the existing error messages, test that names/folders/profiles are unchanged after 400/403, test take() on a vanished ZIP, run the full suite and 4/4 gates, record ADR-034"
-      },
-      "plan_digest": "e87733d5b269223bfb81aea901e318b023c47d8368db477494f461dcdc105ee8"
-    },
     {
       "task_id": "harbor-reject-atomic",
       "phase": "implementation",
@@ -254,6 +236,17 @@
       "status": "in_progress",
       "timestamp": 1794111591.8618803,
       "timestamp_str": "2026-11-08 07:19:51",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[3/6] Run 12 (pushes 45-80): trash move/restore/delete and shared copies reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111682.95056,
+      "timestamp_str": "2026-11-08 07:21:22",
       "agent": "opencode:deepseek"
     }
   ]

@@ -129,7 +129,17 @@ audit output and do not extend the numbered target.
   the same filters/order and bulk writes stay at 500 per request.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 12 - pushes 45-80
+
+- Range: `dc62cb2` (push 45), `104c819` (push 46), `61a53b5` (push 47), plus the last 33
+  pushes.
+- Reviewed: move/restore/delete/empty, shared-photo hard links, hash-verified restore, trash id
+  validation and the format-6 migration.
+- Finding: none actionable. A shared photo keeps the other person's link, restore re-ingests the
+  bytes, and delete/empty remove only the caller's entry.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 11 (pushes 48-80).
-- Next run: last 36 pushes, adding pushes 45-47.
+- Runs completed: 12 (pushes 45-80).
+- Next run: last 39 pushes, adding pushes 42-44.
