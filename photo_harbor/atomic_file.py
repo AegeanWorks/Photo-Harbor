@@ -2,6 +2,7 @@
 placement that never overwrites a name another writer already holds."""
 
 import os
+import secrets
 import shutil
 import time
 from pathlib import Path
@@ -12,7 +13,9 @@ REPLACE_TRIES = 5
 def write_atomic(path: Path, data: bytes, keep_backup: bool = False) -> None:
     """Replace ``path`` with ``data`` so a power cut leaves the old or the new file, never half."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_name(f".tmp_{path.name}.{os.getpid()}")
+    # The name is unique per call, not just per process: two threads writing one path would
+    # otherwise share a temp file, and the first os.replace() would take the other's bytes.
+    tmp = path.with_name(f".tmp_{path.name}.{os.getpid()}.{secrets.token_hex(4)}")
     with open(tmp, "wb") as handle:
         handle.write(data)
         handle.flush()

@@ -1,38 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "folder-name-disk-check",
+    "task_id": "atomic-temp-unique",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794163858.642684,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794164175.9863927,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794163886.1089926
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "integrity-repair-clears-damage",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Repair clears damage: 317 tests OK; 4/4 gates; new HTTP test fails on the old query and passes now; check summary kept historical and relabelled; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794157255.6409605,
-      "timestamp_str": "2026-11-08 20:00:55",
-      "agent": "commandcode:vscode"
-    },
-    {
-      "task_id": "integrity-repair-clears-damage",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'integrity-repair-clears-damage' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794157442.2174807,
-      "timestamp_str": "2026-11-08 20:04:02",
-      "agent": "commandcode:vscode"
-    },
     {
       "task_id": "place-bucket-agreement",
       "phase": "phase 1",
@@ -259,6 +237,34 @@
       "status": "completed",
       "timestamp": 1794163886.108994,
       "timestamp_str": "2026-11-08 21:51:26",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "atomic-temp-unique",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: give each write_atomic call its own temp file so two writers on one path cannot steal each other's bytes",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794164170.3857198,
+      "timestamp_str": "2026-11-08 21:56:10",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "The temp name used only the pid, so concurrent writes to one path shared a temp file; the first replace took the other's bytes and the loser raised FileNotFoundError.",
+        "benefits": "Every atomic write owns its temp file; concurrent writes both land; no stray temps.",
+        "risks": "contract: none, temp names only; dependency: none; concurrency: exactly the case being fixed; state: none.",
+        "mitigation": "probe that reproduced the error before the fix, a deterministic test on temp names, ADR-078, gates."
+      }
+    },
+    {
+      "task_id": "atomic-temp-unique",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Unique temp files: 330 tests OK; 4/4 gates; two-thread probe went from 1 error to 0 with no leftover temps; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794164175.9863927,
+      "timestamp_str": "2026-11-08 21:56:15",
       "agent": "commandcode:vscode"
     }
   ]

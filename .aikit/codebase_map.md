@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `712`
-- **Total Source Lines**: `11671`
+- **Total Class Methods**: `713`
+- **Total Source Lines**: `11696`
 
 ---
 
@@ -192,7 +192,7 @@
 ### [`photo_harbor/atomic_file.py`](photo_harbor/atomic_file.py)
 > *Crash-safe file placement: temp file, fsync, atomic replace, directory fsync, and exclusive*
 
-**Size**: `81` lines (`2721` bytes)
+**Size**: `84` lines (`2943` bytes)
 
 **Functions:**
 - `def write_atomic(path, data, keep_backup)` - *Replace ``path`` with ``data`` so a power cut leaves the old or the new file, never half.*
@@ -1406,7 +1406,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `928` lines (`43852` bytes)
+**Size**: `950` lines (`44799` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1419,6 +1419,7 @@
   - Method `.test_a_json_body_split_over_chunks_is_read_whole()`
   - Method `.test_a_chunked_json_body_over_the_cap_is_refused()`
 - `class AtomicPlacementTest`
+  - Method `.test_concurrent_writes_to_one_path_do_not_share_a_temp_file()`
   - Method `.test_placing_a_new_name_refuses_an_existing_file()`
   - Method `.test_placing_moves_the_bytes_and_removes_the_source()`
   - Method `.test_a_copy_fallback_also_refuses_an_existing_file()`

@@ -1222,3 +1222,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A rename onto a leftover folder picks `Name (2)` and succeeds; a new person
   gets a fresh empty folder instead of inheriting untracked files the scanner would adopt.
   Deleting a folder on disk frees its name for reuse.
+### ADR-078: Each atomic write gets its own temporary file
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `write_atomic` built its temp name from the target and the process id only, so
+  two callers writing one path in the same process shared a temp file. The first `os.replace`
+  consumed it and the second raised `FileNotFoundError` after the winner's bytes were already
+  durable. No current call site writes one path from two threads - previews are serialized by
+  `Thumbnailer._lock` - so the fault was latent, but the primitive is shared by config,
+  previews, the panel and the guide file.
+- **Decision**: Append a per-call random suffix to the temp name, so every write owns its
+  temporary file regardless of caller.
+- **Consequences**: Concurrent writes to one path each land atomically with no lost or
+  mismatched bytes and no stray temp files; the crash-safety guarantee is unchanged.

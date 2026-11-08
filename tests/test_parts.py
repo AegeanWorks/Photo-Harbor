@@ -1,10 +1,12 @@
 import io
 import json
+import os
 import re
 import shutil
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from photo_harbor.auth import is_home_network
 from photo_harbor.backup import DailyBackup, mirror, verify
@@ -67,6 +69,26 @@ class BodyReaderTest(unittest.TestCase):
 
 
 class AtomicPlacementTest(unittest.TestCase):
+    def test_concurrent_writes_to_one_path_do_not_share_a_temp_file(self):
+        # Two writers that pick the same temp name break each other: the first os.replace()
+        # takes the second's temp file, and the loser raises FileNotFoundError after the
+        # winner's bytes are already durable.
+        from photo_harbor.atomic_file import write_atomic
+        root = temp_dir(self)
+        target = root / "state.json"
+        seen = []
+        real_replace = os.replace
+
+        def record_replace(src, dst):
+            seen.append(src.name)
+            return real_replace(src, dst)
+
+        with patch("photo_harbor.atomic_file.os.replace", side_effect=record_replace):
+            for payload in (b"a" * 100, b"b" * 100):
+                write_atomic(target, payload)
+        self.assertEqual(len(seen), 2)
+        self.assertNotEqual(seen[0], seen[1], "each write needs its own temp file")
+
     def test_placing_a_new_name_refuses_an_existing_file(self):
         from photo_harbor.atomic_file import place_exclusive
         root = temp_dir(self)
