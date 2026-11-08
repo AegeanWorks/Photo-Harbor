@@ -268,6 +268,30 @@ class ThumbnailerTest(unittest.TestCase):
         self.assertFalse((cache / gone[:2] / f"{gone}.jpg").exists())
 
 
+class AndroidVersionTest(unittest.TestCase):
+    def test_android_page_loads_its_script_from_a_csp_allowed_file(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "android" / "index.html").read_text(
+            encoding="utf-8")
+        self.assertNotIn("<script>", page)
+        self.assertNotIn("<style>", page)
+        self.assertIn('src="/android/meta.js"', page)
+        self.assertIn('href="/android/style.css"', page)
+        self.assertTrue((root / "photo_harbor" / "web" / "android" / "meta.js").is_file())
+        self.assertTrue((root / "photo_harbor" / "web" / "android" / "style.css").is_file())
+
+    def test_android_version_constants_match_the_build(self):
+        import re
+        root = Path(__file__).resolve().parents[1]
+        build = (root / "android" / "build.py").read_text(encoding="utf-8")
+        activity = (root / "android" / "src" / "works" / "aegean" / "harbor"
+                    / "MainActivity.java").read_text(encoding="utf-8")
+        self.assertEqual(re.search(r'VERSION\s*=\s*"([^"]+)"', build).group(1),
+                         re.search(r'VERSION_NAME\s*=\s*"([^"]+)"', activity).group(1))
+        self.assertEqual(int(re.search(r"VERSION_CODE\s*=\s*(\d+)", build).group(1)),
+                         int(re.search(r"VERSION_CODE\s*=\s*(\d+)", activity).group(1)))
+
+
 class PasswordHashTest(unittest.TestCase):
     def test_malformed_stored_hash_returns_false_not_500(self):
         from photo_harbor.accounts import password_matches

@@ -62,7 +62,20 @@ Push numbers are the `update by push` entries in `git reflog show origin/master`
   The code path was already harmless (registration failure is caught).
 - Verification: 213 tests OK; project check 4/4 gates.
 
+## Run 6 - pushes 63-80
+
+- Range: `96e8409` (push 63), `911924d` (push 64), `cae2307` (push 65), plus the last 15 pushes.
+- Reviewed: Android APK metadata sidecar, install page, public metadata route, update check,
+  plus the previous runs.
+- Finding: the install page's inline metadata script and inline stylesheet were blocked by the
+  CSP (`script-src 'self'`, `style-src 'self'`), so version/checksum stayed hidden and the page
+  was unstyled. Android version constants can also drift between build and app.
+- Fix: external `/android/meta.js` and `/android/style.css`, routes and static tests; a guard
+  test pins the two version declarations together. ADR-040.
+- Verification: 215 tests OK; project check 4/4 gates; install page re-reviewed in Chromium with
+  metadata rendered and no CSP/console errors.
+
 ## Status
 
-- Runs completed: 5 (pushes 66-80).
-- Next run: last 18 pushes, adding pushes 63-65.
+- Runs completed: 6 (pushes 63-80).
+- Next run: last 21 pushes, adding pushes 60-62.

@@ -133,6 +133,22 @@ class HarborApp:
         return Reply(200, content_type="application/json; charset=utf-8",
                      headers=NO_CACHE, file=path)
 
+    def android_script(self, request: Request) -> Reply:
+        path = self.android_dir / "meta.js"
+        if not path.is_file():
+            raise HarborError("the Android page script is missing", str(path),
+                              "restore photo_harbor/web/android/meta.js", status=404)
+        return Reply(200, content_type="text/javascript; charset=utf-8",
+                     headers=NO_CACHE, file=path)
+
+    def android_style(self, request: Request) -> Reply:
+        path = self.android_dir / "style.css"
+        if not path.is_file():
+            raise HarborError("the Android page stylesheet is missing", str(path),
+                              "restore photo_harbor/web/android/style.css", status=404)
+        return Reply(200, content_type="text/css; charset=utf-8",
+                     headers=NO_CACHE, file=path)
+
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
                   albums: AlbumsApi, downloads: DownloadsApi, trash: TrashApi,
                   backup: BackupApi, setup: SetupApi) -> None:
@@ -144,6 +160,8 @@ class HarborApp:
         self.router.add_exact("GET", "/android/", self.android_page, public=True)
         add("GET", "/android/Harbor.apk", self.android_apk, public=True)
         add("GET", "/android/Harbor.apk.json", self.android_apk_info, public=True)
+        add("GET", "/android/meta.js", self.android_script, public=True)
+        add("GET", "/android/style.css", self.android_style, public=True)
         add("POST", "/api/login", self.guard.login, public=True)
         add("GET", "/api/people", self.guard.people, public=True)
         add("POST", "/api/logout", self.guard.logout, public=True)

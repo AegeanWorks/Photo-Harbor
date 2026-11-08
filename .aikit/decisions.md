@@ -727,3 +727,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   an installed app. The service worker registration stays harmless where the browser refuses it.
 - **Consequences**: The README no longer promises an install that a phone browser rejects. The
   gallery itself and the Android client are unchanged.
+
+### ADR-040: The Android install page uses CSP-allowed external assets
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Every HTML reply carries `script-src 'self'` and `style-src 'self'`. The Android
+  install page embedded both its metadata fetch and its whole stylesheet inline, so the browser
+  blocked them: the version, size and checksum never replaced the fallback text, and the page
+  rendered unstyled. The tests only checked the JSON endpoint.
+- **Decision**: Move the fetch to `photo_harbor/web/android/meta.js` and the CSS to
+  `style.css`, serve both from public `/android/...` routes with the right content type and
+  `no-cache`, and reference them with normal `src`/`href` attributes. Regressions assert the
+  page has no inline script or style, both files exist, and both routes serve them. The Android
+  version constants in `build.py` and `MainActivity.java` are pinned together by a test so the
+  update check cannot silently compare stale numbers.
+- **Consequences**: The install page shows its build metadata and styling under the existing
+  CSP. Two public static routes are added; missing assets answer 404 with the usual triad.

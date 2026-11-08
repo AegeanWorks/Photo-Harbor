@@ -1,37 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-retrospective",
-    "last_phase": "delivery",
-    "active_phase": 5,
+    "task_id": "push-audit-band-2",
+    "last_phase": "planning",
+    "active_phase": 2,
     "status": "in_progress",
-    "updated_at": 1794109758.1880236,
+    "updated_at": 1794110245.3928628,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "impact_assessment": {
+      "why": "The retrospective audit must continue backward to the beginning; band 1 covered runs 1-5 (newest 3 to 15 pushes), band 2 adds pushes 60-65 down to 45-47",
+      "benefits": "Every older batch is checked against the current tree with attributed fixes and a pushed audit record",
+      "risks": "contract: none expected beyond the found defect; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+      "mitigation": "Review each batch's diff, probe current code, failing-first test any fix, keep M<=6 runs per band, run full suite and 4/4 gates, publish each fix"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-hardening-31",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[5/6] Full suite 202 tests OK; project check 4/4 gates (test, hygiene, guidelines, secrets); ADR IDs consecutive; map fresh; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093343.4094858,
-      "timestamp_str": "2026-11-08 02:15:43",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "harbor-hardening-31",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'harbor-hardening-31' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794093350.9842327,
-      "timestamp_str": "2026-11-08 02:15:50",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-thumb-cache",
       "phase": "planning",
@@ -254,6 +239,34 @@
       "timestamp": 1794109758.1880236,
       "timestamp_str": "2026-11-08 06:49:18",
       "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-audit-retrospective' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794110244.905861,
+      "timestamp_str": "2026-11-08 06:57:24",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Audit band 2: runs 6-11, expanding the newest-push window from 18 to 33 pushes; each run reviews three older pushes, fixes any current defect, verifies and publishes",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794110245.3928628,
+      "timestamp_str": "2026-11-08 06:57:25",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The retrospective audit must continue backward to the beginning; band 1 covered runs 1-5 (newest 3 to 15 pushes), band 2 adds pushes 60-65 down to 45-47",
+        "benefits": "Every older batch is checked against the current tree with attributed fixes and a pushed audit record",
+        "risks": "contract: none expected beyond the found defect; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+        "mitigation": "Review each batch's diff, probe current code, failing-first test any fix, keep M<=6 runs per band, run full suite and 4/4 gates, publish each fix"
+      },
+      "plan_digest": "f17cf6893a1176dd45f10bdfd3e9f39f283d494d0c12148bbbfd061d0576e9de"
     }
   ]
 }

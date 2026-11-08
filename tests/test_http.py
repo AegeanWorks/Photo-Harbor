@@ -153,6 +153,10 @@ class ServerTest(unittest.TestCase):
     def test_android_page_and_apk_are_public(self):
         (self.android_dir / "index.html").write_text("<html>Harbor for Android</html>",
                                                       encoding="utf-8")
+        (self.android_dir / "meta.js").write_text("document.title = 'Harbor';",
+                                                   encoding="utf-8")
+        (self.android_dir / "style.css").write_text("body { color: #123; }",
+                                                     encoding="utf-8")
         (self.android_dir / "Harbor.apk").write_bytes(b"fake apk")
         (self.android_dir / "Harbor.apk.json").write_text(
             json.dumps({"version": "1.0", "versionCode": 1, "size": 8,
@@ -160,6 +164,14 @@ class ServerTest(unittest.TestCase):
             encoding="utf-8")
         response, body = self.call("GET", "/android/", key=False)
         self.assertEqual((response.status, b"Harbor for Android" in body), (200, True))
+        response, body = self.call("GET", "/android/meta.js", key=False)
+        self.assertEqual((response.status, response.getheader("Content-Type")),
+                         (200, "text/javascript; charset=utf-8"))
+        self.assertEqual(body, b"document.title = 'Harbor';")
+        response, body = self.call("GET", "/android/style.css", key=False)
+        self.assertEqual((response.status, response.getheader("Content-Type")),
+                         (200, "text/css; charset=utf-8"))
+        self.assertEqual(body, b"body { color: #123; }")
         response, body = self.call("GET", "/android/Harbor.apk", key=False)
         self.assertEqual(response.status, 200)
         self.assertEqual(response.getheader("Content-Type"),
