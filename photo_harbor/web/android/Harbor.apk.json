@@ -1,7 +1,7 @@
 {
-  "version": "1.2",
-  "versionCode": 3,
+  "version": "1.2.1",
+  "versionCode": 4,
   "size": 57814,
-  "sha256": "f5cee17dd64dd0de36f0aeb316beb2f3b5c17754914ac6bdcfcabe71932f0ed7",
-  "built_at": "2026-11-08T08:24:35+00:00"
+  "sha256": "5d9f003d98d9ecfb28b0266b14bd8bec5303a82a988b842723153eba39be33ba",
+  "built_at": "2026-11-08T08:36:08+00:00"
 }

@@ -15,9 +15,9 @@ Requirements on the build PC:
 python android/build.py
 ```
 
-The script compiles the Java sources, links resources with `aapt2`, dexes with `d8`, aligns with
-`zipalign`, signs with the debug key in `~/.harbor-android/debug.keystore` (created on first
-build), verifies the signature, and writes:
+The script compiles the Java sources as UTF-8, links resources with `aapt2`, dexes with `d8`,
+aligns with `zipalign`, signs with the debug key in `~/.harbor-android/debug.keystore` (created
+on first build), verifies the signature, and writes:
 
 ```text
 photo_harbor/web/android/Harbor.apk

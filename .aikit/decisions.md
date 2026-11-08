@@ -799,3 +799,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   a missing/malformed APK is a clear message instead of a broken link. The app reports its last
   background run and can open the gallery. Version constants, manifest and sidecar remain
   pinned by the existing integrity test.
+
+### ADR-045: Android sources compile as UTF-8
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The first 1.2 build showed the background status separator as `Â·` on the
+  emulator. `javac` had used the Windows platform encoding for UTF-8 source text, so `·` (and
+  other labels) were transcoded twice.
+- **Decision**: Pass `-encoding UTF-8` to `javac` and move the APK to 1.2.1/4. Rebuild,
+  signature-verify, install on the Android 14 emulator and recheck the background status.
+- **Consequences**: Device text renders correctly; the version bump prompts existing 1.2
+  installs to update. The sidecar and integrity test track the new build.

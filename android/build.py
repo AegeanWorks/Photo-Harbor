@@ -17,8 +17,8 @@ BUILD = ROOT / "build"
 OUTPUT = PROJECT / "photo_harbor" / "web" / "android" / "Harbor.apk"
 KEYSTORE = Path.home() / ".harbor-android" / "debug.keystore"
 STOREPASS = "android"
-VERSION = "1.2"
-VERSION_CODE = 3
+VERSION = "1.2.1"
+VERSION_CODE = 4
 
 
 def find_sdk() -> Path:
@@ -87,8 +87,8 @@ def main() -> int:
          "--manifest", ROOT / "AndroidManifest.xml", res_zip], env)
 
     sources = [str(path) for path in (ROOT / "src").rglob("*.java")]
-    run([java_bin / "javac", "-source", "8", "-target", "8", "-classpath", android_jar,
-         "-d", classes, *sources], env)
+    run([java_bin / "javac", "-encoding", "UTF-8", "-source", "8", "-target", "8",
+         "-classpath", android_jar, "-d", classes, *sources], env)
     class_files = [str(path) for path in classes.rglob("*.class")]
     run([d8, "--lib", android_jar, "--min-api", "26", "--output", dex, *class_files], env)
 

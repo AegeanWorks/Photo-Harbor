@@ -2,26 +2,15 @@
   "version": 1,
   "active_task": {
     "task_id": "android-download-ui",
-    "last_phase": "verification",
-    "active_phase": 4,
+    "last_phase": "delivery",
+    "active_phase": 5,
     "status": "in_progress",
-    "updated_at": 1794126457.1482537,
+    "updated_at": 1794127593.534552,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-4",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[5/6] Run 19 (pushes 24-80): albums/favorites and migration reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112828.7304401,
-      "timestamp_str": "2026-11-08 07:40:28",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-4",
       "phase": "verification",
@@ -253,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794126457.1482537,
       "timestamp_str": "2026-11-08 11:27:37",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "android-download-ui",
+      "phase": "delivery",
+      "phase_num": 5,
+      "description": "[5/5] UTF-8 javac fix for 1.2.1/4; emulator installed, Test reported 'Connected: 3 photos', Sync reported 'Done: 3 sent, 1 already', forced background job showed the result without mojibake; 218 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794127593.534552,
+      "timestamp_str": "2026-11-08 11:46:33",
       "agent": "opencode:deepseek"
     }
   ]

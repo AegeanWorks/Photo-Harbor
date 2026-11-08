@@ -19,7 +19,7 @@
 ### [`android/build.py`](android/build.py)
 > *Build a signed debug APK with the Android SDK tools; no Gradle or runtime libraries.*
 
-**Size**: `129` lines (`5069` bytes)
+**Size**: `129` lines (`5093` bytes)
 
 **Functions:**
 - `def find_sdk()`
