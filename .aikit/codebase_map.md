@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
-- **Total Classes**: `173`
+- **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `696`
-- **Total Source Lines**: `11408`
+- **Total Class Methods**: `697`
+- **Total Source Lines**: `11430`
 
 ---
 
@@ -1393,7 +1393,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `895` lines (`41934` bytes)
+**Size**: `917` lines (`43086` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1491,6 +1491,8 @@
   - Method `.test_warmer_retries_backlog_after_a_transient_failure()`
   - Method `.test_too_long_password_names_the_maximum()`
   - Method `.test_details_corrupt_exif_returns_file_facts()`
+- `class ReadmeApiTest`
+  - Method `.test_every_registered_route_is_in_the_http_api_table()`
 - `class DamagedConfigTest`
   - Method `.test_both_copies_damaged_is_a_clear_error()`
 

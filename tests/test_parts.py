@@ -1,5 +1,6 @@
 import io
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -881,6 +882,27 @@ class PasswordHashTest(unittest.TestCase):
                 facts = read_details(record_for(path, "x.jpg"), path)
             self.assertEqual(facts["name"], "x.jpg")
             self.assertIsNone(facts["width"])
+
+
+class ReadmeApiTest(unittest.TestCase):
+    def test_every_registered_route_is_in_the_http_api_table(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "photo_harbor" / "app.py").read_text(encoding="utf-8")
+        readme = (root / "README.md").read_text(encoding="utf-8")
+        table = readme.split("### HTTP API", 1)[1].split("\n## ", 1)[0]
+        documented = set()
+        for cell in table.split("|")[1:]:
+            for line in cell.splitlines():
+                for match in re.finditer(r"`(GET|POST)\s+([^`\s?]+)", line):
+                    path = re.sub(r"<[^>]*>", "", match.group(2)).rstrip("/")
+                    documented.add((match.group(1), path))
+        routes = set()
+        for method, path in re.findall(r'add(?:_exact)?\("(\w+)",\s*"([^"]+)"', source):
+            if path.startswith(("/api", "/media", "/thumb")):
+                routes.add((method, path.rstrip("/")))
+        undocumented = sorted(routes - documented)
+        self.assertEqual([], [f"{m} {p}" for m, p in undocumented],
+                         "every route the server registers belongs in the README table")
 
 
 class DamagedConfigTest(unittest.TestCase):

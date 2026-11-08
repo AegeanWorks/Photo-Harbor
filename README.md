@@ -109,9 +109,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   upload to a temporary file, hashes it, and keeps it only if the hashes match. Then it fsyncs
   the file and moves it into `<Person>/YYYY/YYYY-MM/` under its original name. A name clash with different
   bytes gets a hash suffix; identical bytes are stored once. A name another Harbor process takes
-  at the same moment is never overwritten: the photo moves to the next free name instead. A
-  start-up cleanup removes only upload buffers abandoned for over six hours, so starting an
-  import cannot delete an upload a running server is still writing.
+  at the same moment is never overwritten: the photo moves to the next free name instead. Start-up
+  cleanup removes only upload buffers abandoned for over six hours, so an import cannot delete an
+  upload a running server is still writing.
 - **Deletion only after a fresh check.** *Harbor Cleanup* asks `GET /api/has` for each phone photo
   older than 30 days. The PC answers `yes` only after re-hashing its own copy. Only those photos
   are deleted, and iOS asks once to confirm. A `no` uploads the photo instead and appears under
@@ -148,9 +148,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   link works once, for 15 minutes, and only for the person who prepared it. A selection download
   takes up to 500 photos; an album can be larger. Downloads are capped at 8 GB and need that
   much free space plus a 1 GB reserve. A prepared archive abandoned by a crash is cleaned at a
-  later start once it is an hour old; if one vanishes, its link answers 404. Entry names are
-  unique even when two files differ only by letter case or Unicode normalization form, which
-  Windows and macOS treat as one name.
+  later start once it is an hour old; if one vanishes, its link answers 404. Entry names stay
+  unique when two files differ only by case or Unicode form, which Windows and macOS treat as
+  one name.
 - **Know where the space went.** **Sync → Storage** shows the file and byte total, the
   photo/video split, how many photos are shared (stored once but counted in each person's
   share), each person's share, and the ten largest files. A person sees only their own share;
@@ -160,27 +160,26 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   kind and name search. **Show everything** removes it.
 - **On this day.** The **On this day** button shows photos taken on today's month and day in
   every year, newest first. It combines with the selected person, sort order and search; an empty
-  result says so instead of falling back to the whole library.
+  result says so instead of showing the whole library.
 - **Tags for quick views.** Each person can create tags and put them on one photo or a whole
-  selection; the sidebar lists **Tags** with counts, and clicking one narrows the gallery to it.
+  selection; the sidebar lists **Tags** with counts, and clicking one narrows the gallery.
   Tags are private to the person who made them, never move or copy a file, and disappear from
   the list with the photo's last copy. Open **Add tag…** in the viewer to add or remove a tag,
   or **Add tag…** in the selection bar for a batch.
 - **Places from the camera's GPS.** When an original carries EXIF GPS, Harbor stores the point
   once at ingest and lists **Places** in the sidebar as coarse one-decimal coordinates with
-  counts (for example `37.0° N, 23.7° E`). Clicking one narrows the gallery to photos from that
-  area; **Details** shows the exact stored point. No map tiles or network lookup are needed.
+  counts (for example `37.0° N, 23.7° E`). Clicking one narrows the gallery to that area;
+  **Details** shows the exact stored point. No map tiles or network lookup are needed.
 - **Cameras and lenses.** When EXIF names the camera, Harbor stores the make/model and lens
   once. The **Cameras** and **Lenses** rails list each value with a count; clicking one narrows
-  the gallery, and **Details** shows both too. This needs Pillow, works offline, and composes
-  with other filters.
+  the gallery, and **Details** shows both. This needs Pillow, works offline, and composes with
+  other filters.
 - **Virtual day grid.** Only nearby day sections exist; placeholder heights keep the scrollbar
   stable. This bounds a 50,000-photo gallery while selection, favorites, viewer indices and the
   sentinel use the in-memory list.
 - **Jump through the timeline.** A scrubber above the gallery offers **Year** and **Month**
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
-  It jumps directly to a month without loading the whole library, and the sidebar and scrubber
-  stay in sync.
+  It jumps to a month without loading the whole library, and the sidebar and scrubber stay in sync.
 - **Overview tabs.** Albums, tags and people show counts; **Activity** shows recent events; **Health** shows disk, backup, integrity, trash, formats and metadata gaps you can open.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
 - **Read-only folders.** The **Folders** tab mirrors the real `<Person>/<YYYY>/<YYYY-MM>` paths; click a month to open it. Owners see everyone, others themselves.
@@ -191,7 +190,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Read-only Similar review.** The **Similar** tab indexes optional perceptual hashes on
   demand and lists connected groups whose hashes differ by at most 8 bits. **Scan library**
   hashes up to 10,000 photos per press; **Build groups** (started automatically after a scan)
-  recomputes the SQLite group cache in the background while the tab polls. Opening the tab then
+  recomputes the SQLite group cache in the background while the tab polls, so opening the tab
   only reads cached groups instead of comparing every hash again. **Compare side by side** opens
   a read-only overlay; photos also open in full size and nothing is deleted. Unreadable files
   and videos are skipped once. It needs Pillow for the hash and never changes an original.
@@ -246,6 +245,8 @@ and exit 1; usage errors exit 2.
 | `GET /api/android` | served APK availability, version, version code, size, SHA-256 and install page |
 | `GET /api/storage` `[?profile=]` | file/byte totals, photo/video split, shared count, per-person shares and the ten largest files |
 | `GET /api/backup` | owner: configured target, last attempt, copied/unchanged bytes and any error |
+| `GET /api/integrity` | owner: latest full file check and damage paths |
+| `GET /api/activity` `[?limit=]` | recent events, newest first (max 500) |
 | `GET /api/people`, `POST /api/login`, `POST /api/logout` | public sign-in: names; `{profile, password}` or `{key}` → session cookie |
 | `POST /api/password` | your own password: `{current, new}` (`current` only once one is set) |
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
@@ -254,11 +255,11 @@ and exit 1; usage errors exit 2.
 | `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&tag=ID&place=LAT,LON&camera=NAME&lens=NAME&order=newest\|oldest\|largest\|smallest]` | gallery page; `place` rounds to one decimal; `camera`/`lens` are stored EXIF strings; archived photos are hidden unless `archived=1`; non-owners always get their own |
 | `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
-| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
+| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256 \| sha256s, member}` adds/removes album photos; `{sha256 \| sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `POST /api/archive` | `{sha256 \| sha256s, archived: true\|false}` hides or restores your copies; at most 500 hashes per call |
-| `GET /api/tags`, `POST /api/tags` | your tags with visible counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
+| `GET /api/tags`, `POST /api/tags` | your tags with counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
 | `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
-| `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | read-only cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200 photos per call; build starts the background group rebuild |
+| `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200 per call; build rebuilds in background |
 | `POST /api/sidecar` | `{sha256 \| sha256s, format: json\|xmp}` returns a ZIP of read-only metadata sidecars |
 | `GET /api/folders` | read-only person/year/month folder tree with counts and real paths, limited to the signed-in viewer |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
