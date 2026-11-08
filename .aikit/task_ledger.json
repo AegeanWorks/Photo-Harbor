@@ -1,39 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "docs-photo-filters",
+    "task_id": "integrity-disk-repair",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794159598.709198,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794160387.0153656,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794159624.5634415
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-format-filter",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Format filter: PhotoFilter.media_format, API format=type/subtype validation, clickable Formats rows, HTTP/static tests, gap/ADR-072",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794151853.1918821,
-      "timestamp_str": "2026-11-08 18:30:53",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-format-filter",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/3] Format filter done: 311 tests OK; 4/4 gates; jpeg/png and invalid values covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794151899.694339,
-      "timestamp_str": "2026-11-08 18:31:39",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-format-filter",
       "phase": "completed",
@@ -255,6 +232,34 @@
       "status": "completed",
       "timestamp": 1794159624.5634427,
       "timestamp_str": "2026-11-08 20:40:24",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "integrity-disk-repair",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: also retire damage when a later full check re-reads the file and does not report it again, so a fix done in File Explorer clears the panel",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794160380.3856823,
+      "timestamp_str": "2026-11-08 20:53:00",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "The panel only cleared damage on a re-upload; a file repaired directly on disk stayed listed forever next to a check summary of 0 damaged.",
+        "benefits": "Both real repair paths clear the panel; still-damaged files stay listed; no schema.",
+        "risks": "contract: /api/integrity damaged list is narrower again; dependency: none; concurrency: RLock; state: relies on check writing damaged events before its summary.",
+        "mitigation": "five-case matrix probe, regression test for the still-damaged case, ADR-074 update, gates."
+      }
+    },
+    {
+      "task_id": "integrity-disk-repair",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Disk repair clears: 322 tests OK; 4/4 gates; five-case matrix correct; still-damaged file stays listed; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794160387.0153656,
+      "timestamp_str": "2026-11-08 20:53:07",
       "agent": "commandcode:vscode"
     }
   ]

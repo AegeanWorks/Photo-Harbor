@@ -1177,11 +1177,13 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   yet the Health panel kept calling it damaged for the life of the library, and ADR-073's own
   guidance says a re-send repairs damage.
 - **Decision**: Report damage only while no later `stored` or `duplicate` event exists for that
-  SHA-256. The latest check summary stays the historical result of that check, so its count is
-  labelled "Damaged then" and a cleared list explains that those files were stored again.
+  SHA-256, and while at most one `checked` event follows it. The latest check summary stays the
+  historical result of that check, so its count is labelled "Damaged then" and a cleared list
+  explains that those files were stored again.
 - **Consequences**: The panel reflects outstanding damage rather than old history; repair needs
-  no extra state, because the ingest events already record it. A file damaged after being
-  stored is listed again by the next check.
+  no extra state, because the ingest and check events already record it. A re-send clears
+  damage immediately, and damage repaired on disk clears at the next full check. A file the
+  next check reports again is written as a fresh damage event, so it stays listed.
 ### ADR-075: The place filter rounds both sides in SQLite
 - **Date**: 2026-11-08
 - **Status**: Accepted

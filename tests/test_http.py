@@ -828,6 +828,37 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/integrity")
         self.assertEqual(json.loads(body)["damaged"], [])
 
+    def test_a_later_clean_check_clears_damage_repaired_on_disk(self):
+        # The owner may repair a file in File Explorer; no upload event is recorded, so the
+        # next full check finding nothing damaged is the only evidence the file is fine.
+        self.upload(b"one", name="one.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.executemany(
+                "INSERT INTO events (at, kind, sha256, detail, profile) VALUES (?, ?, ?, ?, ?)",
+                [("2026-05-01T10:00:00", "damaged", one,
+                  "Main/2026/2026-05/one.jpg", "main"),
+                 ("2026-05-01T10:00:00", "checked", None, "1 checked, 1 damaged", None),
+                 ("2026-05-03T10:00:00", "checked", None, "1 checked, 0 damaged", None)])
+        _, body = self.call("GET", "/api/integrity")
+        self.assertEqual(json.loads(body)["damaged"], [])
+
+    def test_damage_a_later_check_also_reports_stays_listed(self):
+        # Each check writes its damaged events before its checked summary. A file still
+        # damaged at the next check must not be cleared by that check's own summary.
+        self.upload(b"one", name="one.jpg")
+        one = sha(b"one")
+        rows = []
+        for stamp in ("2026-05-01T10:00:00", "2026-05-03T10:00:00"):
+            rows.append((stamp, "damaged", one, "Main/2026/2026-05/one.jpg", "main"))
+            rows.append((stamp, "checked", None, "1 checked, 1 damaged", None))
+        with self.app.db.lock:
+            self.app.db.conn.executemany(
+                "INSERT INTO events (at, kind, sha256, detail, profile) VALUES (?, ?, ?, ?, ?)",
+                rows)
+        _, body = self.call("GET", "/api/integrity")
+        self.assertEqual([item["sha256"] for item in json.loads(body)["damaged"]], [one])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

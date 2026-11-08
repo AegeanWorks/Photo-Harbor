@@ -100,8 +100,10 @@ class SyncJournal:
     def damaged(self, limit: int = DAMAGE_LIMIT) -> list:
         """Latest outstanding damage per path, newest first.
 
-        Damage is outstanding only until the photo is stored again: a re-upload or a
-        repaired copy records ``stored``/``duplicate`` after the damage event.
+        A damaged file is cleared by a later ``stored``/``duplicate`` event (the photo was
+        sent again) or by a full check that re-read it and did not report it again. Each
+        check writes its ``damaged`` events before its ``checked`` summary, so a damage
+        event is still outstanding while at most one ``checked`` event follows it.
         """
         with self._db.lock:
             rows = self._db.conn.execute(
@@ -110,6 +112,7 @@ class SyncJournal:
                 " AND d.sha256 IN (SELECT sha256 FROM photos)"
                 " AND NOT EXISTS (SELECT 1 FROM events r WHERE r.sha256 = d.sha256"
                 " AND r.kind IN (?, ?) AND r.id > d.id)"
+                " AND (SELECT COUNT(*) FROM events c WHERE c.kind = ? AND c.id > d.id) <= 1"
                 " GROUP BY d.detail ORDER BY at DESC LIMIT ?",
-                (DAMAGED, STORED, DUPLICATE, limit)).fetchall()
+                (DAMAGED, STORED, DUPLICATE, CHECKED, limit)).fetchall()
         return [{"path": row[0], "at": row[1], "sha256": row[2]} for row in rows]

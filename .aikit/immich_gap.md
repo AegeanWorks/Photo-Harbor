@@ -113,11 +113,11 @@ schema or new endpoint is added.
 ## Implemented in this pass: Integrity check status
 
 `GET /api/integrity` (owner only) reads the latest real `checked` event and the latest
-outstanding `damaged` event per catalogued path; damage stops being listed once a later
-`stored`/`duplicate` event shows the file was written again. The **Health** tab shows the
-last check time, checked/damaged counts and up to ten damaged paths. It is read-only; starting a
-full re-read stays in the Harbor window, where long-running work and logging already live. No
-schema or trigger is added.
+`damaged` event per catalogued path that is still outstanding: a later `stored`/`duplicate`
+event (the photo was sent again) or a later clean `checked` event (the file was repaired on
+disk and re-read) retires it. The **Health** tab shows the last check time, checked/damaged
+counts and up to ten damaged paths. It is read-only; starting a full re-read stays in the
+Harbor window, where long-running work and logging already live. No schema or trigger is added.
 
 ## Implemented in this pass: Metadata coverage
 

@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `701`
-- **Total Source Lines**: `11497`
+- **Total Class Methods**: `703`
+- **Total Source Lines**: `11531`
 
 ---
 
@@ -576,7 +576,7 @@
 ### [`photo_harbor/journal.py`](photo_harbor/journal.py)
 > *What the phone did and when: uploads, finished syncs and photos the PC lacked at cleanup.*
 
-**Size**: `115` lines (`5378` bytes)
+**Size**: `118` lines (`5667` bytes)
 
 **Classes:**
 - `class SyncJournal`
@@ -1271,7 +1271,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1215` lines (`68360` bytes)
+**Size**: `1246` lines (`70155` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1328,6 +1328,8 @@
   - Method `.test_place_filter_buckets_like_the_outline_preview()`
   - Method `.test_integrity_status_is_owner_only_and_reads_the_journal()`
   - Method `.test_integrity_forgets_damage_that_a_later_upload_repaired()`
+  - Method `.test_a_later_clean_check_clears_damage_repaired_on_disk()`
+  - Method `.test_damage_a_later_check_also_reports_stays_listed()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
