@@ -87,7 +87,18 @@ audit output and do not extend the numbered target.
   The Python tree has no defect attributable to this batch.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 8 - pushes 57-80
+
+- Range: `eb04454` (push 57), `cacc760` (push 58), `b5d98d3` (push 59), plus the last 21 pushes.
+- Reviewed: native Android client, manifest/share target, scheduled job service, APK serving and
+  install page, plus the previous runs.
+- Finding: `SyncEngine.share` skipped every item whose provider reports no size; Harbor accepts
+  chunked uploads, so those shares disappeared and were counted as "already on the PC".
+- Fix: chunked upload for unknown sizes, 1.1/2 APK rebuilt and signature-verified, version and
+  sidecar integrity pinned by a test. ADR-041.
+- Verification: 215 tests OK; project check 4/4 gates; APK badging shows versionCode 2/1.1.
+
 ## Status
 
-- Runs completed: 7 (pushes 60-80).
-- Next run: last 24 pushes, adding pushes 57-59.
+- Runs completed: 8 (pushes 57-80).
+- Next run: last 27 pushes, adding pushes 54-56.

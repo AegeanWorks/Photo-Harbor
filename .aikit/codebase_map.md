@@ -10,7 +10,7 @@
 - **Total Classes**: `118`
 - **Total Top-Level Functions**: `103`
 - **Total Class Methods**: `510`
-- **Total Source Lines**: `8448`
+- **Total Source Lines**: `8459`
 
 ---
 
@@ -1096,7 +1096,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `540` lines (`23472` bytes)
+**Size**: `551` lines (`24245` bytes)
 
 **Classes:**
 - `class RangeTest`

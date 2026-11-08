@@ -5,23 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794110909.278954,
+    "updated_at": 1794111142.9906886,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-thumb-cache",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/4] README preview-cache sentence and tree, ADR-032, refreshed codebase map; 205 tests OK; project check 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093751.7536287,
-      "timestamp_str": "2026-11-08 02:22:31",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-thumb-cache",
       "phase": "completed",
@@ -253,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794110909.278954,
       "timestamp_str": "2026-11-08 07:08:29",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[4/6] Run 8 (pushes 57-80): unknown-size Android shares use chunked upload; APK 1.1/2 rebuilt and verified; version and sidecar integrity pinned; 215 tests; 4/4 gates; checklists: passed; ADR-041",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111142.9906886,
+      "timestamp_str": "2026-11-08 07:12:22",
       "agent": "opencode:deepseek"
     }
   ]

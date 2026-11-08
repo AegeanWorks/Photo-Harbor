@@ -743,3 +743,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   update check cannot silently compare stale numbers.
 - **Consequences**: The install page shows its build metadata and styling under the existing
   CSP. Two public static routes are added; missing assets answer 404 with the usual triad.
+
+### ADR-041: Unknown-size Android shares upload chunked
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `SyncEngine.share` skipped any item whose provider did not expose
+  `OpenableColumns.SIZE` or a descriptor length. Many content providers stream fine without a
+  length, and Harbor already accepts a chunked upload and hashes it as it arrives. The skip was
+  misleadingly reported as "already on the PC".
+- **Decision**: Only a genuinely empty item (`size == 0`) is skipped. An unknown size (`-1`) is
+  uploaded with `HttpURLConnection.setChunkedStreamingMode`; a known size keeps the fixed-length
+  path. The Android app, manifest, build metadata and sidecar move to 1.1/2, and a unit test
+  pins those four version sources plus the committed APK's size and SHA-256.
+- **Consequences**: A share from a size-less provider arrives instead of disappearing. Existing
+  1.0 installs see the served 1.1 metadata and offer **Update Harbor**. The APK was rebuilt and
+  signature-verified; the emulator share path was not rerun here.

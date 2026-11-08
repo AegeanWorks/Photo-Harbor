@@ -52,6 +52,7 @@ the downloaded APK.
 Harbor appears in Android's share sheet for images and videos. Select one or more items in
 Gallery (or any app with a share action), choose **Harbor**, and the app uploads them with the
 same hash-first protocol. The first share requires the server and key to be saved in Harbor.
+A provider that does not report a size is uploaded with a chunked body instead of being skipped.
 
 The app uses the same endpoints as the iPhone: `/api/sync/start`, `/api/has`, `/api/upload`,
 `/api/sync/done`. Every upload carries the phone's SHA-256; the PC keeps it only on a match.

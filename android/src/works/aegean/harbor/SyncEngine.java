@@ -91,7 +91,7 @@ public final class SyncEngine {
                 throw new InterruptedException("share stopped");
             }
             Info info = info(resolver, uri);
-            if (info.size <= 0) {
+            if (info.size == 0) {
                 skipped++;
                 continue;
             }
@@ -245,7 +245,13 @@ public final class SyncEngine {
             throws Exception {
         HttpURLConnection connection = open(base + "/api/upload", key, "POST");
         connection.setDoOutput(true);
-        connection.setFixedLengthStreamingMode(size);
+        if (size > 0) {
+            connection.setFixedLengthStreamingMode(size);
+        } else {
+            // A share provider may not report a length; Harbor accepts a chunked body and
+            // hashes the bytes as they arrive.
+            connection.setChunkedStreamingMode(BUFFER);
+        }
         connection.setRequestProperty("X-Name", encode(name));
         connection.setRequestProperty("X-Sha256", digest);
         connection.setRequestProperty("X-Taken", Instant.ofEpochMilli(taken).toString());

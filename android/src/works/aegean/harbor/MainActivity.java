@@ -23,8 +23,8 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
     private static final int ASK_MEDIA = 41;
     private static final int JOB_ID = 1;
-    private static final int VERSION_CODE = 1;
-    private static final String VERSION_NAME = "1.0";
+    private static final int VERSION_CODE = 2;
+    private static final String VERSION_NAME = "1.1";
 
     private EditText server;
     private EditText key;

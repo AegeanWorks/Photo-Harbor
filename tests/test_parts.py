@@ -281,15 +281,26 @@ class AndroidVersionTest(unittest.TestCase):
         self.assertTrue((root / "photo_harbor" / "web" / "android" / "style.css").is_file())
 
     def test_android_version_constants_match_the_build(self):
+        import hashlib
+        import json
         import re
         root = Path(__file__).resolve().parents[1]
         build = (root / "android" / "build.py").read_text(encoding="utf-8")
         activity = (root / "android" / "src" / "works" / "aegean" / "harbor"
                     / "MainActivity.java").read_text(encoding="utf-8")
-        self.assertEqual(re.search(r'VERSION\s*=\s*"([^"]+)"', build).group(1),
-                         re.search(r'VERSION_NAME\s*=\s*"([^"]+)"', activity).group(1))
-        self.assertEqual(int(re.search(r"VERSION_CODE\s*=\s*(\d+)", build).group(1)),
-                         int(re.search(r"VERSION_CODE\s*=\s*(\d+)", activity).group(1)))
+        manifest_text = (root / "android" / "AndroidManifest.xml").read_text(encoding="utf-8")
+        sidecar_path = root / "photo_harbor" / "web" / "android" / "Harbor.apk.json"
+        sidecar = json.loads(sidecar_path.read_text(encoding="utf-8"))
+        version = re.search(r'VERSION\s*=\s*"([^"]+)"', build).group(1)
+        code = re.search(r"VERSION_CODE\s*=\s*(\d+)", build).group(1)
+        self.assertEqual(version, re.search(r'VERSION_NAME\s*=\s*"([^"]+)"', activity).group(1))
+        self.assertEqual(code, re.search(r"VERSION_CODE\s*=\s*(\d+)", activity).group(1))
+        self.assertEqual(version, re.search(r'versionName="([^"]+)"', manifest_text).group(1))
+        self.assertEqual(code, re.search(r'versionCode="(\d+)"', manifest_text).group(1))
+        self.assertEqual((version, code), (sidecar["version"], str(sidecar["versionCode"])))
+        apk = (root / "photo_harbor" / "web" / "android" / "Harbor.apk").read_bytes()
+        self.assertEqual(sidecar["size"], len(apk))
+        self.assertEqual(sidecar["sha256"], hashlib.sha256(apk).hexdigest())
 
 
 class PasswordHashTest(unittest.TestCase):
