@@ -36,6 +36,10 @@ class HarborHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         self._dispatch("GET")
 
+    def do_HEAD(self) -> None:
+        """HEAD asks for a GET's headers without the body; ``_send`` already omits the body."""
+        self._dispatch("GET", head=True)
+
     def do_POST(self) -> None:
         self._dispatch("POST")
 
@@ -47,7 +51,7 @@ class HarborHandler(BaseHTTPRequestHandler):
         if self.server.verbose:
             super().log_error(format, *args)
 
-    def _dispatch(self, method: str) -> None:
+    def _dispatch(self, method: str, head: bool = False) -> None:
         self._body = None
         url = urlsplit(self.path)
         path = unquote(url.path)
@@ -70,7 +74,8 @@ class HarborHandler(BaseHTTPRequestHandler):
                                   "send the X-Harbor-Key header, or sign in on the gallery",
                                   status=401)
             request = dataclasses.replace(request, identity=identity,
-                                          client=self.client_address[0])
+                                          client=self.client_address[0],
+                                          method="HEAD" if head else method)
             reply = route.handler(request, route.param) if route.param else route.handler(request)
         except HarborError as error:
             reply = error_reply(error)
@@ -140,6 +145,8 @@ class HarborHandler(BaseHTTPRequestHandler):
             if span:
                 self.send_header("Content-Range", f"bytes {first}-{last}/{size}")
             self.end_headers()
+            if self.command == "HEAD":
+                return  # headers only; writing here would desync a keep-alive connection
             with open(reply.file, "rb") as handle:
                 handle.seek(first)
                 remaining = last - first + 1

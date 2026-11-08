@@ -1195,3 +1195,17 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   `ROUND(?, 1)` to the parameter as well as the column, so both sides use one rounding rule.
 - **Consequences**: A pasted exact coordinate opens the same photos the Places rail counts.
   Malformed and out-of-range values are still rejected at the API boundary before the query.
+### ADR-076: HEAD is answered like GET with no body, and never spends a download token
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `_send` already branched on `HEAD`, but the handler had no `do_HEAD`, so every
+  HEAD request became a 501. Adding the method exposed two further faults: `_send_file` wrote
+  the file unconditionally, so a HEAD streamed the whole original after announcing a
+  Content-Length with no body and desynced the next keep-alive response; and
+  `/api/download/<token>` spent its single use and deleted the archive on the probe.
+- **Decision**: Answer HEAD through the GET dispatch with the request's method set to `HEAD`.
+  `_send_file` returns after its headers, and the download endpoint takes the token without
+  consuming it or setting `delete_after`.
+- **Consequences**: HEAD reports the same status, Content-Length and Content-Range as GET for
+  the gallery, API JSON, originals, previews and one-time downloads, with no body and no file
+  read. A download link still works exactly once, for the real GET.

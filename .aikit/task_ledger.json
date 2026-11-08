@@ -1,45 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "integrity-disk-repair",
+    "task_id": "head-semantics",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794160387.0153656,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794161580.3405497,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794160413.4956362
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-integrity-health",
-      "phase": "phase 1",
-      "phase_num": 1,
-      "description": "[1/3] Plan: expose the latest full file check and damaged paths from the journal in an owner-only Health panel; test HTTP/static; review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794152317.2161715,
-      "timestamp_str": "2026-11-08 18:38:37",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The Harbor window can re-read every original, but the web Health tab cannot show whether that check ran or found damage.",
-        "benefits": "Read-only visibility into library integrity from the existing journal; no schema, no scan trigger, owner-only scope.",
-        "risks": "Stale damage events after repair; owner-only endpoint; panel clutter.",
-        "mitigation": "filter damage to catalogued hashes, show the latest check summary, keep the panel read-only and bounded, add HTTP/static tests."
-      }
-    },
-    {
-      "task_id": "immich-integrity-health",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/3] Integrity: journal last_check/damaged queries, owner-only /api/integrity, Health panel, HTTP/static tests, README/gap/ADR-073",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794152428.804288,
-      "timestamp_str": "2026-11-08 18:40:28",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-integrity-health",
       "phase": "phase 4",
@@ -261,6 +232,34 @@
       "status": "completed",
       "timestamp": 1794160413.4956386,
       "timestamp_str": "2026-11-08 20:53:33",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "head-semantics",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: answer HEAD like GET without a body, stop _send_file streaming on HEAD, and keep a download token unspent on a HEAD probe",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794161573.7500732,
+      "timestamp_str": "2026-11-08 21:12:53",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "The handler had no do_HEAD so every HEAD was a 501, though _send already branched on it; enabling it exposed a whole-file stream and a burnt one-time download token.",
+        "benefits": "Standards-correct HEAD for gallery, JSON, originals, previews and downloads; no wasted I/O; download links still work once.",
+        "risks": "contract: HEAD now 200 with headers, download token no longer spent by HEAD; dependency: none; concurrency: token read under the existing lock; state: none.",
+        "mitigation": "failing-first tests for each fault, live socket probes for framing and ranges, ADR-076, gates."
+      }
+    },
+    {
+      "task_id": "head-semantics",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] HEAD done: 326 tests OK; 4/4 gates; five paths match GET status+Content-Length with no body; ranges match; download token survives a HEAD; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794161580.3405497,
+      "timestamp_str": "2026-11-08 21:13:00",
       "agent": "commandcode:vscode"
     }
   ]

@@ -98,6 +98,61 @@ class ServerTest(unittest.TestCase):
             self.assertEqual(response.status, 200)
             self.assertIn(b'"count"', body)
 
+    def test_head_on_a_one_time_download_does_not_consume_the_token(self):
+        # A download link works once. Probing it with HEAD must not spend that single use.
+        self.upload(b"one", name="one.jpg")
+        _, body = self.call("POST", "/api/download", {"sha256": sha(b"one")})
+        url = json.loads(body)["url"]
+        response, body = self.call("HEAD", url)
+        self.assertEqual(response.status, 200)
+        self.assertEqual(body, b"")
+        response, body = self.call("GET", url)
+        self.assertEqual(response.status, 200)
+        self.assertTrue(body.startswith(b"PK"))
+
+    def test_head_on_an_original_sends_no_body_bytes(self):
+        # _send_file wrote the file unconditionally, so a HEAD streamed the whole original
+        # after announcing Content-Length with no body - and left those bytes on a
+        # keep-alive connection to corrupt the next response.
+        data = b"z" * 4096
+        self.upload(data, name="big.jpg")
+        digest = sha(data)
+        connection = http.client.HTTPConnection(
+            "127.0.0.1", self.server.server_address[1], timeout=5)
+        self.addCleanup(connection.close)
+        connection.request("HEAD", f"/media/{digest}",
+                           headers={"X-Harbor-Key": self.settings.key,
+                                    "Connection": "keep-alive"})
+        response = connection.getresponse()
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.getheader("Content-Length"), str(len(data)))
+        self.assertEqual(response.read(), b"")
+        connection.request("GET", "/api/status",
+                           headers={"X-Harbor-Key": self.settings.key})
+        response = connection.getresponse()
+        self.assertEqual(response.status, 200)
+        self.assertIn(b'"count"', response.read())
+
+    def test_head_reports_the_same_headers_as_get_without_a_body(self):
+        # _send() already branches on HEAD, so the intent is supported HEAD requests.
+        response, body = self.call("GET", "/api/status")
+        get_length = response.getheader("Content-Length")
+        response, body = self.call("HEAD", "/api/status")
+        self.assertEqual(response.status, 200)
+        self.assertEqual(body, b"")
+        self.assertEqual(response.getheader("Content-Length"), get_length)
+
+    def test_head_on_an_original_sends_headers_without_reading_the_file(self):
+        data = b"x" * 4096
+        self.upload(data, name="big.jpg")
+        digest = sha(data)
+        _, body = self.call("GET", f"/media/{digest}", headers={"Range": "bytes=100-199"})
+        self.assertEqual(body, data[100:200])
+        response, body = self.call("HEAD", f"/media/{digest}")
+        self.assertEqual(response.status, 200)
+        self.assertEqual(body, b"")
+        self.assertEqual(response.getheader("Content-Length"), str(len(data)))
+
     def test_a_full_sync_round(self):
         response, body = self.call("POST", "/api/sync/start", body={})
         start = json.loads(body)

@@ -48,7 +48,8 @@ class DownloadsApi:
         return json_reply(self._downloads.prepare(entries, name, request.profile))
 
     def serve(self, request: Request, token: str) -> Reply:
-        item = self._downloads.take(token, request.profile)
+        head = request.method == "HEAD"
+        item = self._downloads.take(token, request.profile, consume=not head)
         if item is None:
             raise HarborError("that download is gone", "the token expired or was already used",
                               "prepare the download again", status=404)
@@ -57,4 +58,4 @@ class DownloadsApi:
         return Reply(200, content_type="application/zip",
                      headers=(("Content-Disposition", f'attachment; filename="{header}"'),
                               ("Cache-Control", "no-store")),
-                     file=path, delete_after=True)
+                     file=path, delete_after=not head)

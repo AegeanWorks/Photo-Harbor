@@ -110,17 +110,23 @@ class Downloads:
         return {"url": f"/api/download/{token}", "name": name, "count": len(entries),
                 "bytes": total}
 
-    def take(self, token: str, profile: str):
-        """The ``(path, name, bytes)`` for this person's live token, removing it."""
+    def take(self, token: str, profile: str, consume: bool = True):
+        """The ``(path, name, bytes)`` for this person's live token; removes it when consumed.
+
+        ``consume`` is False for a HEAD probe: the link works once, and asking for its headers
+        must not spend that single use or delete the file the real download needs.
+        """
         with self._lock:
             self._expire_locked()
             item = self._tokens.get(token)
             if item is None or item[2] != profile:
                 return None
-            self._tokens.pop(token, None)
+            if consume:
+                self._tokens.pop(token, None)
         path, name, _, expires, total = item
         if expires < self._clock() or not path.is_file():
-            path.unlink(missing_ok=True)
+            if consume:
+                path.unlink(missing_ok=True)
             return None
         return path, name, total
 

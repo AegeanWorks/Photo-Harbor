@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `703`
-- **Total Source Lines**: `11531`
+- **Total Class Methods**: `708`
+- **Total Source Lines**: `11600`
 
 ---
 
@@ -450,14 +450,14 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `132` lines (`5396` bytes)
+**Size**: `138` lines (`5675` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
   - Method `.__init__(state_dir, clock)`
   - Method `.clean()` - *Startup cleanup: no token survives a restart, so an abandoned archive older than an*
   - Method `.prepare(entries, name, profile)` - *Write ``[(PhotoRecord, path), ...]`` to a new ZIP and return its token details.*
-  - Method `.take(token, profile)` - *The ``(path, name, bytes)`` for this person's live token, removing it.*
+  - Method `.take(token, profile, consume)` - *The ``(path, name, bytes)`` for this person's live token; removes it when consumed.*
   - Method `._expire_locked()`
 
 **Functions:**
@@ -469,7 +469,7 @@
 ### [`photo_harbor/downloads_api.py`](photo_harbor/downloads_api.py)
 > *Prepare one ZIP for a selection or album, then serve it once through a short token.*
 
-**Size**: `60` lines (`2798` bytes)
+**Size**: `61` lines (`2860` bytes)
 
 **Classes:**
 - `class DownloadsApi`
@@ -530,15 +530,16 @@
 ### [`photo_harbor/http_server.py`](photo_harbor/http_server.py)
 > *The socket side: turns HTTP into a Request, runs the matched endpoint and sends its Reply.*
 
-**Size**: `186` lines (`8237` bytes)
+**Size**: `193` lines (`8632` bytes)
 
 **Classes:**
 - `class HarborHandler` - *Built per connection by ThreadingHTTPServer; ``router`` and ``guard`` come from the server.*
   - Method `.do_GET()`
+  - Method `.do_HEAD()` - *HEAD asks for a GET's headers without the body; ``_send`` already omits the body.*
   - Method `.do_POST()`
   - Method `.log_request(code, size)`
   - Method `.log_error(format, *args)`
-  - Method `._dispatch(method)`
+  - Method `._dispatch(method, head)`
   - Method `._request(method, path, query)`
   - Method `._send(reply)`
   - Method `._drain()` - *Read a small unread body before closing, so Windows does not reset the reply.*
@@ -1271,7 +1272,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1246` lines (`70155` bytes)
+**Size**: `1301` lines (`73005` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1286,6 +1287,10 @@
   - Method `.call(method, path, body, headers, key)`
   - Method `.upload(data, name, digest)`
   - Method `.test_keep_alive_serves_two_requests_on_one_connection()`
+  - Method `.test_head_on_a_one_time_download_does_not_consume_the_token()`
+  - Method `.test_head_on_an_original_sends_no_body_bytes()`
+  - Method `.test_head_reports_the_same_headers_as_get_without_a_body()`
+  - Method `.test_head_on_an_original_sends_headers_without_reading_the_file()`
   - Method `.test_a_full_sync_round()`
   - Method `.test_has_answers_yes_only_for_verified_photos()`
   - Method `.test_a_mismatched_hash_is_rejected_and_counted()`
