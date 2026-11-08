@@ -20,7 +20,17 @@ Push numbers are the `update by push` entries in `git reflog show origin/master`
   plus existing collision tests. ADR-035.
 - Verification: 210 tests OK; project check 4/4 gates; strict check 4/4 with matching UI evidence.
 
+## Run 2 - pushes 75-80
+
+- Range: `9fcf232` (push 75), `15e35a7` (push 76), `e6b3e5a` (push 77), plus Run 1's pushes.
+- Reviewed: unlimited search terms, real calendar-date rejection, ZIP counter, login-brake
+  resets, sync clock comparison and the push-80 hardening.
+- Finding: ZIP names were case-insensitive but not Unicode-normalization safe; `é` (NFC) and
+  `e` + combining accent (NFD) can merge on macOS.
+- Fix: NFC-normalize before casefolding in the used-name key; two-record regression. ADR-036.
+- Verification: 211 tests OK; project check 4/4 gates.
+
 ## Status
 
-- Runs completed: 1 (pushes 78-80).
-- Next run: last 6 pushes, adding pushes 75-77.
+- Runs completed: 2 (pushes 75-80).
+- Next run: last 9 pushes, adding pushes 72-74.

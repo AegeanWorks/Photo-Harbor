@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
 - **Total Classes**: `117`
-- **Total Top-Level Functions**: `100`
-- **Total Class Methods**: `503`
-- **Total Source Lines**: `8323`
+- **Total Top-Level Functions**: `101`
+- **Total Class Methods**: `504`
+- **Total Source Lines**: `8341`
 
 ---
 
@@ -400,7 +400,7 @@
 ### [`photo_harbor/downloads.py`](photo_harbor/downloads.py)
 > *One-off ZIP archives for a selection or album, with expiring one-time tokens.*
 
-**Size**: `126` lines (`5189` bytes)
+**Size**: `132` lines (`5396` bytes)
 
 **Classes:**
 - `class Downloads` - *Builds stored ZIPs in the library's state directory; tokens live in memory.*
@@ -411,6 +411,7 @@
   - Method `._expire_locked()`
 
 **Functions:**
+- `def _entry_key(name)` - *One key for names a case- or normalization-insensitive filesystem would merge.*
 - `def _entry_name(record, used)`
 
 ---
@@ -936,7 +937,7 @@
 ---
 
 ### [`tests/test_downloads.py`](tests/test_downloads.py)
-**Size**: `137` lines (`6193` bytes)
+**Size**: `149` lines (`6923` bytes)
 
 **Classes:**
 - `class DownloadsTest`
@@ -949,6 +950,7 @@
   - Method `.test_many_collisions_stay_unique_with_a_counter()`
   - Method `.test_duplicate_names_get_a_hash_prefix()`
   - Method `.test_names_that_differ_only_by_case_do_not_collide_on_windows()`
+  - Method `.test_names_that_differ_only_by_unicode_form_do_not_collide()`
   - Method `.test_a_token_expires_and_removes_its_file()`
   - Method `.test_a_token_belongs_to_the_person_who_prepared_it()`
   - Method `.test_an_empty_download_is_refused()`

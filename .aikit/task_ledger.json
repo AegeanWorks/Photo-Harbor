@@ -5,30 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794108501.819336,
+    "updated_at": 1794108743.7944033,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-hardening-31",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Plan: prove and fix four HTTP/file defects - huge numeric ids and offsets must answer 400 not 500; chunked JSON must be read across chunk boundaries; a new photo must never overwrite a rival file placed at the same name; JSON replies must never be browser-cached",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794092553.2501876,
-      "timestamp_str": "2026-11-08 02:02:33",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "A code audit of the request, store and catalog paths found four reproducible robustness/privacy gaps that survive 188 passing tests: SQLite rejects Python ints over 2^63-1 with an uncaught OverflowError after album/trash/offset parsing, Request.json reads only one chunk of a chunked body, ingest moves a temp file over an existing name before the catalog rejects the clash, and per-person JSON replies carry no Cache-Control so a browser may reuse one profile's data after a sign-in switch",
-        "benefits": "Malformed input answers a clear 400 instead of a 500 traceback; chunked JSON clients work; two processes adding a same-named photo cannot destroy the first file; private API data is never cached on disk",
-        "risks": "contract: HTTP errors and store placement order change, existing clients keep working; dependency: stdlib only; concurrency: new exclusive-create path closes a server-vs-CLI race without changing the in-process lock; state: no schema or format change",
-        "mitigation": "Add failing-first unit and HTTP tests, keep every message inside the Error/Why/Fix shape, change only the three bounded modules plus messages, atomic_file and store, run the full 188-test suite and 4/4 project gates before committing, and record the decisions in ADR-031"
-      },
-      "plan_digest": "9ee30fc787ebb114b131ee72591d45959dc69995ec0f996b1632b882d8dc0581"
-    },
     {
       "task_id": "harbor-hardening-31",
       "phase": "implementation",
@@ -260,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794108501.819336,
       "timestamp_str": "2026-11-08 06:28:21",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[3/6] Run 2 (pushes 75-80): Unicode normalization added to ZIP name keys; 211 tests; 4/4 gates; checklists: passed; ADR-036 and audit log updated",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794108743.7944033,
+      "timestamp_str": "2026-11-08 06:32:23",
       "agent": "opencode:deepseek"
     }
   ]

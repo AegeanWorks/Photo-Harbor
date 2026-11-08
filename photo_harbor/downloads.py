@@ -4,6 +4,7 @@ import shutil
 import secrets
 import threading
 import time
+import unicodedata
 import zipfile
 from pathlib import Path
 from typing import Callable
@@ -18,20 +19,25 @@ TTL_SECONDS = 15 * 60
 STALE_SECONDS = 3600
 
 
+def _entry_key(name: str) -> str:
+    """One key for names a case- or normalization-insensitive filesystem would merge."""
+    return unicodedata.normalize("NFC", name).casefold()
+
+
 def _entry_name(record: PhotoRecord, used: set) -> str:
     base = safe_name(record.original_name)
-    if base.casefold() not in used:
-        used.add(base.casefold())
+    if _entry_key(base) not in used:
+        used.add(_entry_key(base))
         return base
     hashed = f"{record.sha256[:8]}-{base}"
-    if hashed.casefold() not in used:
-        used.add(hashed.casefold())
+    if _entry_key(hashed) not in used:
+        used.add(_entry_key(hashed))
         return hashed
     counter = len(used) + 1
     while True:
         name = f"{counter}-{hashed}"
-        if name.casefold() not in used:
-            used.add(name.casefold())
+        if _entry_key(name) not in used:
+            used.add(_entry_key(name))
             return name
         counter += 1
 

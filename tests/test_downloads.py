@@ -103,6 +103,18 @@ class DownloadsTest(unittest.TestCase):
         self.assertEqual(len(names), 2)
         self.assertEqual(len({name.casefold() for name in names}), 2)
 
+    def test_names_that_differ_only_by_unicode_form_do_not_collide(self):
+        composed, composed_path = self.photo(b"composed", "\u00e9.jpg")
+        decomposed, decomposed_path = self.photo(b"decomposed", "e\u0301.jpg")
+        info = self.downloads.prepare([(composed, composed_path),
+                                       (decomposed, decomposed_path)], "Harbor.zip", "main")
+        path, _, _ = self.downloads.take(info["url"].rsplit("/", 1)[-1], "main")
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+        self.assertEqual(len(names), 2)
+        self.assertEqual(len({__import__("unicodedata").normalize("NFC", n).casefold()
+                              for n in names}), 2)
+
     def test_a_token_expires_and_removes_its_file(self):
         info = self.downloads.prepare([self.one], "Harbor.zip", "main")
         token = info["url"].rsplit("/", 1)[-1]

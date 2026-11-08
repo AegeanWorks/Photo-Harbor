@@ -678,3 +678,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   its original case.
 - **Consequences**: A downloaded ZIP keeps every photo on Windows, macOS and Linux. A
   case-only duplicate gains a hash prefix in its entry name; the library file name is unchanged.
+
+### ADR-036: ZIP entry names are Unicode-normalization safe too
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Run 1 made ZIP names unique by casefolding, but `é` in NFC form and `e` plus a
+  combining accent in NFD form are different strings with the same normalized name. macOS
+  filesystems are normalization-insensitive, so extracting such a ZIP can still merge two
+  photos.
+- **Decision**: `_entry_name` compares `unicodedata.normalize("NFC", name).casefold()`. The
+  entry name keeps its original characters; only the used-name key is normalized.
+- **Consequences**: Case and normalization variants now receive the existing SHA-8 prefix.
+  The delivered ZIP is safe on case- and normalization-insensitive filesystems.
