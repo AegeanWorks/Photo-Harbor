@@ -149,7 +149,19 @@ audit output and do not extend the numbered target.
   has a SHA tiebreaker used by both endpoints.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 14 - pushes 39-80
+
+- Range: `49c3510` (push 39), `bf0e9ac` (push 40), `119342b` (push 41), plus the last 39
+  pushes.
+- Reviewed: backup verify by hash, missing source/target handling, mirror failures and the CLI
+  boundary.
+- Finding: an unreadable file in `backup --check` escaped as an `OSError` traceback because the
+  CLI caught only `HarborError`.
+- Fix: catch `OSError` in `main` and print the Error/Why/Fix triad with exit 1; regression covers
+  the CLI. ADR-042.
+- Verification: 216 tests OK; project check 4/4 gates.
+
 ## Status
 
-- Runs completed: 13 (pushes 42-80).
-- Next run: last 42 pushes, adding pushes 39-41.
+- Runs completed: 14 (pushes 39-80).
+- Next run: last 45 pushes, adding pushes 36-38.

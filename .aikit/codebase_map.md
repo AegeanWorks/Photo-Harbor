@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `63`
-- **Total Classes**: `118`
+- **Total Classes**: `119`
 - **Total Top-Level Functions**: `103`
-- **Total Class Methods**: `510`
-- **Total Source Lines**: `8459`
+- **Total Class Methods**: `511`
+- **Total Source Lines**: `8483`
 
 ---
 
@@ -39,7 +39,7 @@
 ### [`photo_harbor/__main__.py`](photo_harbor/__main__.py)
 > *Command line: ``python -m photo_harbor serve | panel | key | profiles | import | backup``.*
 
-**Size**: `143` lines (`6151` bytes)
+**Size**: `148` lines (`6411` bytes)
 
 **Functions:**
 - `def _parser()`
@@ -1096,7 +1096,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `551` lines (`24245` bytes)
+**Size**: `570` lines (`25001` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1137,6 +1137,8 @@
 - `class AndroidVersionTest`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
   - Method `.test_android_version_constants_match_the_build()`
+- `class CliErrorTest`
+  - Method `.test_an_oserror_is_a_clear_failure_not_a_traceback()`
 - `class PasswordHashTest`
   - Method `.test_malformed_stored_hash_returns_false_not_500()`
   - Method `.test_lan_address_falls_back_when_socket_creation_fails()`

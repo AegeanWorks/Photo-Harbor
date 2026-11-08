@@ -303,6 +303,25 @@ class AndroidVersionTest(unittest.TestCase):
         self.assertEqual(sidecar["sha256"], hashlib.sha256(apk).hexdigest())
 
 
+class CliErrorTest(unittest.TestCase):
+    def test_an_oserror_is_a_clear_failure_not_a_traceback(self):
+        import contextlib
+        import io
+        from unittest.mock import patch
+        from photo_harbor.__main__ import main
+        root = temp_dir(self)
+        target = root / "backup"
+        with patch("photo_harbor.backup.verify", side_effect=OSError("locked file")):
+            errors = io.StringIO()
+            with contextlib.redirect_stderr(errors):
+                code = main(["--library", str(root), "backup", "--to", str(target), "--check"])
+        self.assertEqual(code, 1)
+        text = errors.getvalue()
+        self.assertIn("Error:", text)
+        self.assertIn("Why:", text)
+        self.assertNotIn("Traceback", text)
+
+
 class PasswordHashTest(unittest.TestCase):
     def test_malformed_stored_hash_returns_false_not_500(self):
         from photo_harbor.accounts import password_matches

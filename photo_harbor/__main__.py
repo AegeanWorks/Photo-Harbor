@@ -137,6 +137,11 @@ def main(argv=None) -> int:
     except HarborError as error:
         print(error.as_text(), file=sys.stderr)
         return 1
+    except OSError as error:
+        failure = HarborError("the command could not finish", str(error),
+                              "check the folder exists and no other program is using it")
+        print(failure.as_text(), file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":

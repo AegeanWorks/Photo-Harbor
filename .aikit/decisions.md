@@ -758,3 +758,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A share from a size-less provider arrives instead of disappearing. Existing
   1.0 installs see the served 1.1 metadata and offer **Update Harbor**. The APK was rebuilt and
   signature-verified; the emulator share path was not rerun here.
+
+### ADR-042: CLI OSErrors use the Error/Why/Fix triad
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `backup --check` could raise an `OSError` from an unreadable or locked file. The
+  CLI caught only `HarborError`, so the documented triad became a Python traceback and exit 1
+  with no Fix line.
+- **Decision**: `main` catches `OSError` after `HarborError` and prints a HarborError-shaped
+  failure with the offending path and a permission/lock remedy. The exit stays 1; argparse
+  misuse still exits 2.
+- **Consequences**: A backup or import that hits an unreadable file explains how to recover
+  instead of dumping a stack. The original exception text remains in the Why line.

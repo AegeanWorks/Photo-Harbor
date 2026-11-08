@@ -5,33 +5,12 @@
     "last_phase": "verification",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794111809.0592103,
+    "updated_at": 1794112485.0994651,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-reject-atomic",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/4] README profile/download notes, ADR-034, refreshed map; 209 tests OK; project check 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794106525.667833,
-      "timestamp_str": "2026-11-08 05:55:25",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "harbor-reject-atomic",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'harbor-reject-atomic' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794106531.3888257,
-      "timestamp_str": "2026-11-08 05:55:31",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-retrospective",
       "phase": "planning",
@@ -247,6 +226,28 @@
       "status": "in_progress",
       "timestamp": 1794111809.0592103,
       "timestamp_str": "2026-11-08 07:23:29",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[5/6] Run 14 (pushes 39-80): CLI OSError now prints Error/Why/Fix; 216 tests; 4/4 gates; checklists: passed; ADR-043",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111956.581414,
+      "timestamp_str": "2026-11-08 07:25:56",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[5/6] Correction to Run 14: the CLI OSError decision is ADR-042 (the next free ID), not ADR-043; no code change",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794112485.0994651,
+      "timestamp_str": "2026-11-08 07:34:45",
       "agent": "opencode:deepseek"
     }
   ]
