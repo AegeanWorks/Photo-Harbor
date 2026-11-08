@@ -89,10 +89,13 @@ class _CountingThumbs:
 
     def __init__(self):
         self.made = []
+        self.partial = threading.Event()
         self.done = threading.Event()
 
     def preview(self, record, original):
         self.made.append(record.original_name)
+        if len(self.made) >= 2:
+            self.partial.set()
         if len(self.made) >= 3:
             self.done.set()
         return original
@@ -109,6 +112,7 @@ class WarmerTest(unittest.TestCase):
         lib.store.on_stored = warmer.add
         warmer.start()
         self.addCleanup(warmer.stop)
+        self.assertTrue(thumbs.partial.wait(5))
         lib.put(b"new", name="new.jpg")
         self.assertTrue(thumbs.done.wait(5))
         warmer.stop()
