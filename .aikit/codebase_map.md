@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
-- **Total Classes**: `170`
+- **Total Classes**: `171`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `675`
-- **Total Source Lines**: `11062`
+- **Total Class Methods**: `677`
+- **Total Source Lines**: `11116`
 
 ---
 
@@ -306,7 +306,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `412` lines (`21499` bytes)
+**Size**: `430` lines (`22507` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -325,6 +325,7 @@
   - Method `.similar_groups(profile, viewer, limit)` - *Read-only cached groups of visible photos.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
+  - Method `.coverage(profile)` - *How many visible photos lack a date, place, camera or lens, in one pass.*
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
 
 **Functions:**
@@ -608,7 +609,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `264` lines (`12738` bytes)
+**Size**: `271` lines (`13183` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -740,7 +741,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `182` lines (`4515` bytes)
+**Size**: `193` lines (`4759` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -750,6 +751,7 @@
 - `class IngestResult` - *``status`` is ``stored`` for a new file or ``duplicate`` when the bytes were already held.*
 - `class LibraryStats`
 - `class PhotoFilter` - *Gallery narrowing: ``month`` is ``YYYY-MM``, ``start``/``end`` are inclusive*
+- `class MetadataCoverage` - *How many visible photos carry each metadata axis, and how many lack it.*
 - `class Outline` - *What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the*
 - `class Album` - *One person's named collection; ``cover`` is the newest member's SHA-256, if any.*
 - `class Tag` - *One person's label; ``count`` is how many visible photos carry it.*
@@ -1262,7 +1264,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1077` lines (`60541` bytes)
+**Size**: `1091` lines (`61304` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1312,6 +1314,7 @@
   - Method `.test_people_overview_has_counts_folders_and_last_sync()`
   - Method `.test_activity_journal_is_recent_and_private()`
   - Method `.test_health_overview_sources_are_ready()`
+  - Method `.test_status_reports_metadata_coverage()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1378,7 +1381,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `843` lines (`38966` bytes)
+**Size**: `847` lines (`39194` bytes)
 
 **Classes:**
 - `class RangeTest`

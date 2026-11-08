@@ -86,6 +86,17 @@ class PhotoFilter:
 
 
 @dataclass(frozen=True)
+class MetadataCoverage:
+    """How many visible photos carry each metadata axis, and how many lack it."""
+
+    total: int
+    missing_dates: int
+    missing_places: int
+    missing_cameras: int
+    missing_lenses: int
+
+
+@dataclass(frozen=True)
 class Outline:
     """What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the
     viewer's favorites. ``total`` counts the timeline; ``archived`` counts what the viewer hid."""

@@ -900,6 +900,24 @@ async function loadHealth() {
       `${items(person.count)} · ${bytes(person.bytes)}`));
   }
   panels.append(library);
+  const coveragePanel = healthPanel("Metadata coverage");
+  const coverage = status.coverage;
+  for (const [label, missing] of [
+    ["Missing dates", coverage.missing_dates],
+    ["Missing places", coverage.missing_places],
+    ["Missing cameras", coverage.missing_cameras],
+    ["Missing lenses", coverage.missing_lenses],
+  ]) {
+    coveragePanel.append(healthRow(label,
+      `${missing.toLocaleString()} of ${coverage.total.toLocaleString()}`, missing > 0));
+  }
+  if (coverage.missing_dates > 0) {
+    coveragePanel.append(el("p", "hint", "Photos without an embedded date are dated by arrival time."));
+  }
+  if (coverage.missing_places + coverage.missing_cameras + coverage.missing_lenses > 0) {
+    coveragePanel.append(el("p", "hint", "Places, cameras and lenses are read from EXIF when a photo is stored."));
+  }
+  panels.append(coveragePanel);
   const disk = healthPanel("Disk");
   disk.append(healthRow("Free", bytes(status.disk.free), status.disk.low),
     healthRow("Total", bytes(status.disk.total)));

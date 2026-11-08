@@ -1104,3 +1104,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   actions; Trash management stays in its own tab. No schema or endpoint is added.
 - **Consequences**: The overview cannot drift from the source endpoints and inherits their
   owner/self permissions. Non-owners never call the owner-only backup endpoint.
+### ADR-068: Health reports metadata coverage from one aggregate query
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Photos missing dates, places, cameras or lenses were invisible, although the
+  photos table already stores those fields and Health is the natural place to surface gaps.
+- **Decision**: Extend GET /api/status with a coverage object computed by a single
+  aggregate pass over the visible photos (or one person\'s copies), counting rows whose
+  	aken_at, coordinates, camera or lens are absent. Render four warning-aware rows in the
+  Health tab. No schema change and no new endpoint are added.
+- **Consequences**: Gaps are actionable beside storage and backup health. Counts follow the
+  same owner-all/self-only scope as the status endpoint; archived photos remain counted because
+  they are still stored. Photos without an embedded date keep the arrival-time fallback.

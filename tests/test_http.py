@@ -699,6 +699,20 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/trash")
         self.assertEqual(json.loads(body)["items"], [])
 
+    def test_status_reports_metadata_coverage(self):
+        self.call("POST", "/api/upload", body=b"bare",
+                  headers={"X-Name": "bare.jpg", "X-Sha256": sha(b"bare")})
+        self.upload(b"full", name="full.jpg")
+        full = sha(b"full")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET camera = ?, lens = ?, latitude = ?, longitude = ?"
+                " WHERE sha256 = ?", ("Acme Cam 1", "35 mm", 37.04, 23.72, full))
+        _, body = self.call("GET", "/api/status")
+        coverage = json.loads(body)["coverage"]
+        self.assertEqual(coverage, {"total": 2, "missing_dates": 1, "missing_places": 1,
+                                    "missing_cameras": 1, "missing_lenses": 1})
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

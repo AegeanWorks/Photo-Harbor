@@ -181,13 +181,13 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps directly to a month without loading the whole library, and the sidebar and scrubber
   stay in sync.
-- **Overview tabs.** Albums, tags and people show counts and times; **Activity** shows recent events; **Health** shows storage, disk, backup and trash.
+- **Overview tabs.** Albums, tags and people show counts; **Activity** shows recent events; **Health** shows disk, backup, trash and metadata coverage.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
 - **Read-only folders.** The **Folders** tab mirrors the real `<Person>/<YYYY>/<YYYY-MM>` paths; click a month to open it. Owners see everyone, others themselves.
 - **Read-only sidecars.** Select photos and choose **Sidecars… → JSON** or **XMP** for a metadata
   ZIP; the viewer's **Sidecar** exports JSON. Tags, GPS, camera and lens are included; originals
   are never rewritten.
-- **Offline photo map.** Embedded SVG world outline with Places markers; clicking one opens its gallery. No tiles or network lookups.
+- **Offline photo map.** Embedded SVG world outline with Places markers; click one to open its gallery. No tiles or network.
 - **Read-only Similar review.** The **Similar** tab indexes optional perceptual hashes on
   demand and lists connected groups whose hashes differ by at most 8 bits. **Scan library**
   hashes up to 10,000 photos per press; **Build groups** (started automatically after a scan)

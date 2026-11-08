@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-health",
+    "task_id": "immich-coverage",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794148700.3835025,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794149450.2067356,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794148935.6910124
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-albums-overview",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Albums overview: read-only cover/count cards from /api/albums opening each album, static tests; [2/2] gates, Chromium review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794146198.3883958,
-      "timestamp_str": "2026-11-08 16:56:38",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "Albums are only in the rail; a cover overview is the remaining low-risk organization surface and needs no new API",
-        "benefits": "A visual album index with covers and counts that opens the existing album scope",
-        "risks": "contract: new Albums tab; dependency: browser only; concurrency: read-only; state: none",
-        "mitigation": "Reuse the tested albums response, keep creation in the existing rail, add static/HTTP coverage, gate and review"
-      },
-      "plan_digest": "00bf305699bbabe2b215c7bf4d7d650e0f21c21656e352eb6a88aa32fb00ff7e"
-    },
-    {
-      "task_id": "immich-albums-overview",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Albums overview: cover/count cards from /api/albums, click opens album, static/HTTP tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794146339.615964,
-      "timestamp_str": "2026-11-08 16:58:59",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-albums-overview",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Albums overview done: 291 tests OK; 4/4 gates; cover/count covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794146341.1842427,
-      "timestamp_str": "2026-11-08 16:59:01",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-albums-overview",
       "phase": "completed",
@@ -260,6 +219,45 @@
       "status": "completed",
       "timestamp": 1794148935.6910148,
       "timestamp_str": "2026-11-08 17:42:15",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-coverage",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/5] Plan: add metadata coverage panel to Health using one aggregate catalog query; test unit+HTTP+static; verify UI; publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794149134.3352368,
+      "timestamp_str": "2026-11-08 17:45:34",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Photos lacking dates/places/cameras/lenses are invisible today; a coverage panel turns existing metadata gaps into actionable library health without new sources of truth.",
+        "benefits": "One query, no schema change; surfaces curation gaps beside existing Health cards.",
+        "risks": "Aggregate query cost on large libraries; UI clutter; README size near limit.",
+        "mitigation": "Single indexed GROUP BY pass with LIMIT-free scalar subqueries; place panel in Health; trim README if needed."
+      }
+    },
+    {
+      "task_id": "immich-coverage",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/5] Metadata coverage: Catalog.coverage aggregate, /api/status coverage object, Health panel with four missing-metadata rows, HTTP/static tests and README note",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794149443.5484178,
+      "timestamp_str": "2026-11-08 17:50:43",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-coverage",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[3/5] Coverage done: 302 tests OK; 4/4 gates; all four missing axes covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794149450.2067356,
+      "timestamp_str": "2026-11-08 17:50:50",
       "agent": "opencode:deepseek"
     }
   ]

@@ -173,12 +173,19 @@ class LibraryApi:
     def status(self, request: Request) -> Reply:
         profile = _visible_profile(request)
         stats = self._catalog.stats(profile)
+        coverage = self._catalog.coverage(profile)
         day_ago = (self._now() - timedelta(days=1)).isoformat(timespec="seconds")
         return json_reply({"count": stats.count, "bytes": stats.total_bytes,
                            "last_received": stats.last_received,
                            "last_sync": self._journal.last_sync(profile),
                            "last_day": self._journal.counts_since(day_ago, profile),
                            "missing": self._journal.missing(profile=profile),
+                           "coverage": {
+                               "total": coverage.total,
+                               "missing_dates": coverage.missing_dates,
+                               "missing_places": coverage.missing_places,
+                               "missing_cameras": coverage.missing_cameras,
+                               "missing_lenses": coverage.missing_lenses},
                            "disk": self._disk(),
                            "previews": self._thumbs.enabled})
 

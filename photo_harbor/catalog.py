@@ -5,8 +5,8 @@ from typing import Optional
 
 from .database import Database, MAX_ROW_ID
 from .phash import hash_components
-from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRecord,
-                      StorageFile, StorageReport)
+from .records import (LibraryStats, MetadataCoverage, Outline, PersonStorage, PhotoFilter,
+                      PhotoRecord, StorageFile, StorageReport)
 
 _COLUMNS = ("sha256, rel_path, size, original_name, media_type, taken_at, received_at,"
             " profile, latitude, longitude, camera, lens")
@@ -371,6 +371,24 @@ class Catalog:
                 params,
             ).fetchone()
         return LibraryStats(count=row[0], total_bytes=row[1], last_received=row[2])
+
+    def coverage(self, profile: Optional[str] = None) -> MetadataCoverage:
+        """How many visible photos lack a date, place, camera or lens, in one pass."""
+        if profile:
+            table = "copies c JOIN photos p ON p.sha256 = c.sha256"
+            where, params = " WHERE c.profile = ?", [profile]
+        else:
+            table, where, params = "photos p", "", []
+        with self._db.lock:
+            row = self._db.conn.execute(
+                "SELECT COUNT(*),"
+                " COALESCE(SUM(CASE WHEN p.taken_at IS NULL THEN 1 ELSE 0 END), 0),"
+                " COALESCE(SUM(CASE WHEN p.latitude IS NULL OR p.longitude IS NULL"
+                " THEN 1 ELSE 0 END), 0),"
+                " COALESCE(SUM(CASE WHEN p.camera IS NULL OR p.camera = '' THEN 1 ELSE 0 END), 0),"
+                " COALESCE(SUM(CASE WHEN p.lens IS NULL OR p.lens = '' THEN 1 ELSE 0 END), 0)"
+                f" FROM {table}{where}", params).fetchone()
+        return MetadataCoverage(*row)
 
     def storage(self, profile: Optional[str] = None) -> StorageReport:
         """Disk use and the ten largest files; one person's share or the whole library."""
