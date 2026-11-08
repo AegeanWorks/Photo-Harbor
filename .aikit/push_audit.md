@@ -191,7 +191,15 @@ audit output and do not extend the numbered target.
   soft to file facts when Pillow or EXIF is unavailable.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 18 - pushes 27-80
+
+- Range: `491347b` (push 27), `4a89872` (push 28), `02a4d50` (push 29), plus the last 51
+  pushes.
+- Reviewed: album task close, the committed UI contract and the no-findings reforge run.
+- Finding: none; no code or contract change beyond the already-validated `.aikit/ui.json`.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 17 (pushes 30-80).
-- Next run: last 54 pushes, adding pushes 27-29.
+- Runs completed: 18 (pushes 27-80).
+- Next run: last 57 pushes, adding pushes 24-26.
