@@ -3,24 +3,15 @@
   "active_task": {
     "task_id": "immich-health",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794148700.3835025,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794148935.6910124
   },
   "checkpoints": [
-    {
-      "task_id": "immich-explore",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-explore' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794146074.9479828,
-      "timestamp_str": "2026-11-08 16:54:34",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-albums-overview",
       "phase": "phase 2",
@@ -259,6 +250,16 @@
       "status": "in_progress",
       "timestamp": 1794148700.3835025,
       "timestamp_str": "2026-11-08 17:38:20",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-health",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'immich-health' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794148935.6910148,
+      "timestamp_str": "2026-11-08 17:42:15",
       "agent": "opencode:deepseek"
     }
   ]
