@@ -1038,3 +1038,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Re-encoded/resized candidates can be compared directly without leaving
   Harbor or changing files. The overlay is intentionally single-purpose; gallery actions remain
   in the normal viewer.
+
+### ADR-062: Explore is a presentation of outline counts
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The outline already returns months, places, cameras, lenses, favorites and
+  archive totals; a separate statistics endpoint or stored aggregates would duplicate them.
+- **Decision**: Add a read-only **Explore** tab that fetches `/api/outline` and derives cards,
+  year bars and place/camera/lens lists in the browser. Rows open their existing gallery filters.
+  No new endpoint, schema or state is added.
+- **Consequences**: Users get a compact overview with no extra source of truth. The numbers can
+  never drift from the gallery outline; archived photos remain excluded as elsewhere.

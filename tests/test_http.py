@@ -619,6 +619,22 @@ class ServerTest(unittest.TestCase):
                          [{"month": "2026-01", "count": 2},
                           {"month": "2025-12", "count": 1}])
 
+    def test_explore_outline_has_every_statistic_section(self):
+        self.upload(b"one", name="one.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET camera = ?, lens = ?, latitude = ?, longitude = ?"
+                " WHERE sha256 = ?", ("Acme Cam 1", "35 mm", 37.04, 23.72, one))
+        _, body = self.call("GET", "/api/outline")
+        outline = json.loads(body)
+        for key in ("total", "months", "favorites", "videos", "archived",
+                    "places", "cameras", "lenses"):
+            self.assertIn(key, outline)
+        self.assertEqual(outline["cameras"], [{"name": "Acme Cam 1", "count": 1}])
+        self.assertEqual(outline["lenses"], [{"name": "35 mm", "count": 1}])
+        self.assertEqual(len(outline["places"]), 1)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

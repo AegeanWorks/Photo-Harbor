@@ -1414,6 +1414,88 @@ function openFolder(profileId, month) {
   show("photos");
 }
 
+function explorePanel(title) {
+  const panel = el("article", "card explore-panel");
+  panel.append(el("h2", "", title));
+  return panel;
+}
+
+function exploreList(title, items, label, count, action) {
+  const panel = explorePanel(title);
+  if (!items || items.length === 0) {
+    panel.append(el("p", "hint", "None yet."));
+    return panel;
+  }
+  for (const item of items) {
+    const button = el("button", "explore-row explore-link");
+    button.type = "button";
+    button.append(el("span", "", label(item)),
+      el("b", "", count(item).toLocaleString()));
+    button.addEventListener("click", () => {
+      action(item);
+      show("photos");
+    });
+    panel.append(button);
+  }
+  return panel;
+}
+
+async function loadExplore() {
+  const query = state.profile ? `?profile=${encodeURIComponent(state.profile)}` : "";
+  const outline = await api(`/api/outline${query}`);
+  const months = outline.months || [];
+  const years = new Map();
+  for (const month of months) {
+    const year = month.month.slice(0, 4);
+    years.set(year, (years.get(year) || 0) + month.count);
+  }
+  const cards = [
+    ["Photos", outline.total],
+    ["Favorites", outline.favorites],
+    ["Videos", outline.videos],
+    ["Archived", outline.archived],
+    ["Years", years.size],
+    ["Months", months.length],
+    ["Places", outline.places?.length || 0],
+    ["Cameras", outline.cameras?.length || 0],
+    ["Lenses", outline.lenses?.length || 0],
+  ];
+  const cardsBox = $("explore-cards");
+  cardsBox.replaceChildren();
+  for (const [label, value] of cards) {
+    const card = el("div", "explore-card");
+    card.append(el("span", "", label), el("b", "", Number(value || 0).toLocaleString()));
+    cardsBox.append(card);
+  }
+  $("explore-status").textContent =
+    `${Number(outline.total || 0).toLocaleString()} photos · ${months.length.toLocaleString()} months`
+    + ` · ${years.size.toLocaleString()} years`;
+  const sections = $("explore-sections");
+  sections.replaceChildren();
+  const yearPanel = explorePanel("Years");
+  if (years.size === 0) {
+    yearPanel.append(el("p", "hint", "No dated photos yet."));
+  } else {
+    const largest = Math.max(...years.values(), 1);
+    for (const [year, count] of years) {
+      const row = el("div", "explore-row");
+      const track = el("div", "explore-track");
+      const fill = el("i", "explore-fill");
+      fill.style.width = `${Math.max(2, (count / largest) * 100)}%`;
+      track.append(fill);
+      row.append(el("span", "", year), el("b", "", count.toLocaleString()), track);
+      yearPanel.append(row);
+    }
+  }
+  sections.append(yearPanel);
+  sections.append(exploreList("Places", outline.places, (item) => placeLabel(item.key),
+    (item) => item.count, (item) => selectPlace(item.key)));
+  sections.append(exploreList("Cameras", outline.cameras, (item) => item.name,
+    (item) => item.count, (item) => selectCamera(item.name)));
+  sections.append(exploreList("Lenses", outline.lenses, (item) => item.name,
+    (item) => item.count, (item) => selectLens(item.name)));
+}
+
 async function createAlbumForSelection() {
   const name = prompt("Name for the new album:");
   if (!name) return;
@@ -2313,10 +2395,11 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "folders", "sync", "setup", "similar", "map", "trash"]) {
+  for (const name of ["photos", "folders", "explore", "sync", "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "folders") loadFolders().catch(handle);
+  if (view === "explore") loadExplore().catch(handle);
   if (view === "sync") {
     refreshStatus().catch(handle);
     loadStorage().catch(handle);

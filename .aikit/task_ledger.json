@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-compare",
+    "task_id": "immich-explore",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794145235.0197365,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794145935.3237138,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794145552.4075131
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "quality-http-flake",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Harden HTTP tests against intermittent ConnectionAbortedError with a fresh socket per request and a dedicated keep-alive test; [2/2] repeat suite, gates and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143071.1821601,
-      "timestamp_str": "2026-11-08 16:04:31",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The HTTP suite intermittently aborts a reused keep-alive socket on Windows, making 4/4 gates flaky and obscuring real failures",
-        "benefits": "Reliable test evidence while still covering one explicit keep-alive exchange",
-        "risks": "contract: test harness only; dependency: none; concurrency: fresh sockets avoid stale shared state; state: none",
-        "mitigation": "Use a per-call connection plus Connection: close, add a keep-alive regression test, run the suite repeatedly and publish"
-      },
-      "plan_digest": "167c51672db832a3274bf23bbaee251b424e40ff523590d6cdcfaaa9071e41db"
-    },
-    {
-      "task_id": "quality-http-flake",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] HTTP test harness uses a fresh socket and Connection: close per call; added a dedicated keep-alive two-request test",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143256.8478668,
-      "timestamp_str": "2026-11-08 16:07:36",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "quality-http-flake",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Flake fix verified: 3 consecutive 279-test runs OK; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794143257.9926898,
-      "timestamp_str": "2026-11-08 16:07:37",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "quality-http-flake",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794145552.4075153,
       "timestamp_str": "2026-11-08 16:45:52",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-explore",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Explore view: read-only cards and year/place/camera/lens statistics from the existing outline, with links into the gallery; [2/2] tests, gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794145802.7625558,
+      "timestamp_str": "2026-11-08 16:50:02",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The outline already aggregates the dimensions users care about; an Explore view makes them legible without new storage or endpoints",
+        "benefits": "A single read-only overview of years, places, cameras, lenses, favorites and archive counts",
+        "risks": "contract: new Explore tab and UI aggregation; dependency: browser only; concurrency: read-only; state: none",
+        "mitigation": "Derive every number from the tested outline response, add static and HTTP coverage, review with the existing multi-year library, gate and publish"
+      },
+      "plan_digest": "d82f340a0694a01255d1aab37d8a9f3536450def66371ba01b13e19609e909b7"
+    },
+    {
+      "task_id": "immich-explore",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Explore: read-only cards/year bars/place-camera-lens lists derived from outline, links into gallery, static/HTTP tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794145934.4594824,
+      "timestamp_str": "2026-11-08 16:52:14",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-explore",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Explore done: 289 tests OK; 4/4 gates; outline fields covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794145935.3237138,
+      "timestamp_str": "2026-11-08 16:52:15",
       "agent": "opencode:deepseek"
     }
   ]

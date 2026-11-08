@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `81`
-- **Total Classes**: `162`
+- **Total Classes**: `163`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `657`
-- **Total Source Lines**: `10826`
+- **Total Class Methods**: `659`
+- **Total Source Lines**: `10859`
 
 ---
 
@@ -1238,7 +1238,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `997` lines (`56417` bytes)
+**Size**: `1013` lines (`57252` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1282,6 +1282,7 @@
   - Method `.test_lens_metadata_groups_and_filters()`
   - Method `.test_folder_tree_follows_people_visibility()`
   - Method `.test_timeline_outline_has_months_and_counts()`
+  - Method `.test_explore_outline_has_every_statistic_section()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1348,7 +1349,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `753` lines (`34407` bytes)
+**Size**: `770` lines (`35247` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1408,6 +1409,8 @@
   - Method `.test_timeline_scrubber_is_wired_to_outline_months()`
 - `class VirtualGridUiTest`
   - Method `.test_day_grid_is_windowed_and_keeps_scroll_height()`
+- `class ExploreUiTest`
+  - Method `.test_explore_statistics_are_wired_to_outline()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

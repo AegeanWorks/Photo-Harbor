@@ -41,6 +41,7 @@
       <nav class="tabs" role="tablist">
         <button role="tab" data-view="photos" aria-selected="true">Photos</button>
         <button role="tab" data-view="folders" aria-selected="false">Folders</button>
+        <button role="tab" data-view="explore" aria-selected="false">Explore</button>
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
         <button role="tab" data-view="similar" aria-selected="false">Similar</button>
@@ -171,6 +172,16 @@
         </div>
         <p class="hint">A read-only view of the plain <b>&lt;Person&gt;/&lt;YYYY&gt;/&lt;YYYY-MM&gt;</b> library folders. Click a month to open its photos in the gallery.</p>
         <div id="folders-tree" class="folders-tree"></div>
+      </section>
+
+      <section id="view-explore" class="view narrow" hidden>
+        <div class="scope">
+          <h1>Explore</h1>
+          <span id="explore-status" aria-live="polite"></span>
+        </div>
+        <p class="hint">Read-only statistics from the current outline. Click a place, camera or lens to open its gallery view.</p>
+        <div id="explore-cards" class="explore-cards"></div>
+        <div id="explore-sections" class="explore-sections"></div>
       </section>
 
       <section id="view-sync" class="view narrow" hidden>
