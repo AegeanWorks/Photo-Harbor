@@ -3,25 +3,15 @@
   "active_task": {
     "task_id": "immich-similar-distance",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794139287.7945516,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794139437.6778507
   },
   "checkpoints": [
-    {
-      "task_id": "immich-gap",
-      "phase": "delivery",
-      "phase_num": 5,
-      "description": "[3/3] On this day published: day=MM-DD across years, rail button, composable filters, explicit empty; gap matrix ranks Tags/Archive/Places/near-duplicates next; 221 tests; 4/4 gates; strict pass",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794130785.9583113,
-      "timestamp_str": "2026-11-08 12:39:45",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-gap",
       "phase": "completed",
@@ -253,6 +243,16 @@
       "status": "in_progress",
       "timestamp": 1794139287.7945516,
       "timestamp_str": "2026-11-08 15:01:27",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-similar-distance",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'immich-similar-distance' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794139437.677853,
+      "timestamp_str": "2026-11-08 15:03:57",
       "agent": "opencode:deepseek"
     }
   ]
