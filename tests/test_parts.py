@@ -397,6 +397,21 @@ class FolderUiTest(unittest.TestCase):
         self.assertIn("openFolder", script)
 
 
+class ScrubberUiTest(unittest.TestCase):
+    def test_timeline_scrubber_is_wired_to_outline_months(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('id="timeline-scrubber"', 'id="scrubber-year"',
+                        'id="scrubber-month"', 'id="scrubber-newer"',
+                        'id="scrubber-older"', 'id="scrubber-current"'):
+            self.assertIn(element, page)
+        self.assertIn("renderScrubber", script)
+        self.assertIn("jumpToMonth", script)
+        self.assertIn("stepScrubber", script)
+        self.assertIn("state.months", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

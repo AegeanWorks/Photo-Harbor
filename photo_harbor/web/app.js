@@ -9,6 +9,7 @@ const state = {
     camera: null, lens: null, start: null, end: null, day: null, archived: false,
     order: "newest" },
   query: "",
+  months: [],
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
   viewerReturnFocus: null, similarTimer: null,
@@ -384,6 +385,7 @@ function setScope(kind, month, extra = {}) {
     order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
+  renderScrubber();
   window.scrollTo({ top: 0 });
   resetPhotos();
 }
@@ -489,6 +491,7 @@ async function loadOutline() {
       lensesRail.append(button);
     }
   }
+  state.months = outline.months || [];
   $("rail-videos").textContent = outline.videos.toLocaleString();
   state.favorites = outline.favorites || 0;
   state.visible = outline.total || 0;
@@ -498,7 +501,44 @@ async function loadOutline() {
   $("rail-archived").textContent = state.archived.toLocaleString();
   document.querySelector('[data-scope="video"]').hidden = outline.videos === 0;
   markScope();
+  renderScrubber();
   renderScope();
+}
+
+function renderScrubber() {
+  const bar = $("timeline-scrubber");
+  if (state.months.length === 0) {
+    bar.hidden = true;
+    return;
+  }
+  bar.hidden = false;
+  const selected = state.months.find((month) => month.month === state.scope.month)
+    || state.months[0];
+  const currentYear = selected.month.slice(0, 4);
+  const years = [...new Set(state.months.map((month) => month.month.slice(0, 4)))];
+  $("scrubber-year").replaceChildren(...years.map((year) =>
+    new Option(year, year, false, year === currentYear)));
+  const months = state.months.filter((month) => month.month.startsWith(`${currentYear}-`));
+  $("scrubber-month").replaceChildren(...months.map((month) =>
+    new Option(`${capitalise(monthFormat.format(monthDate(month.month)))} · ${month.count}`,
+      month.month, false, month.month === selected.month)));
+  $("scrubber-current").textContent =
+    `${capitalise(monthYearFormat.format(monthDate(selected.month)))} · ${items(selected.count)}`;
+  const index = state.months.findIndex((month) => month.month === selected.month);
+  $("scrubber-newer").disabled = index <= 0;
+  $("scrubber-older").disabled = index < 0 || index >= state.months.length - 1;
+}
+
+function jumpToMonth(month) {
+  if (!month) return;
+  setScope(null, month);
+}
+
+function stepScrubber(delta) {
+  const current = state.scope.month || state.months[0]?.month;
+  const index = state.months.findIndex((month) => month.month === current);
+  const target = state.months[index + delta];
+  if (target) jumpToMonth(target.month);
 }
 
 // ---------- people ----------
@@ -1438,6 +1478,13 @@ function wireBrowser() {
   $("date-filter").addEventListener("click", toggleDatePanel);
   $("date-apply").addEventListener("click", applyDates);
   $("date-clear").addEventListener("click", clearDates);
+  $("scrubber-year").addEventListener("change", (event) => {
+    const target = state.months.find((month) => month.month.startsWith(`${event.target.value}-`));
+    if (target) jumpToMonth(target.month);
+  });
+  $("scrubber-month").addEventListener("change", (event) => jumpToMonth(event.target.value));
+  $("scrubber-newer").addEventListener("click", () => stepScrubber(-1));
+  $("scrubber-older").addEventListener("click", () => stepScrubber(1));
   $("sort-order").addEventListener("change", (event) => {
     state.scope = { ...state.scope, order: event.target.value };
     window.scrollTo({ top: 0 });

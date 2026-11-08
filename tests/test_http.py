@@ -606,6 +606,17 @@ class ServerTest(unittest.TestCase):
                             headers={"X-Harbor-Key": ayse["key"]})
         self.assertEqual([folder["name"] for folder in json.loads(body)["folders"]], ["Ayşe"])
 
+    def test_timeline_outline_has_months_and_counts(self):
+        for name, taken in (("dec.jpg", "2025-12-01T10:00:00"),
+                            ("jan1.jpg", "2026-01-02T10:00:00"),
+                            ("jan2.jpg", "2026-01-03T10:00:00")):
+            self.call("POST", "/api/upload", body=name.encode(),
+                      headers={"X-Name": name, "X-Sha256": sha(name.encode()), "X-Taken": taken})
+        _, body = self.call("GET", "/api/outline")
+        self.assertEqual(json.loads(body)["months"],
+                         [{"month": "2026-01", "count": 2},
+                          {"month": "2025-12", "count": 1}])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

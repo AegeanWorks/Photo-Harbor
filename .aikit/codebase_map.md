@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `81`
-- **Total Classes**: `160`
+- **Total Classes**: `161`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `654`
-- **Total Source Lines**: `10776`
+- **Total Class Methods**: `656`
+- **Total Source Lines**: `10802`
 
 ---
 
@@ -1238,7 +1238,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `984` lines (`55635` bytes)
+**Size**: `995` lines (`56278` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1281,6 +1281,7 @@
   - Method `.test_sidecar_export_is_a_read_only_zip()`
   - Method `.test_lens_metadata_groups_and_filters()`
   - Method `.test_folder_tree_follows_people_visibility()`
+  - Method `.test_timeline_outline_has_months_and_counts()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1347,7 +1348,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `720` lines (`32638` bytes)
+**Size**: `735` lines (`33416` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1403,6 +1404,8 @@
   - Method `.test_gallery_lenses_are_reachable_and_wired()`
 - `class FolderUiTest`
   - Method `.test_read_only_folders_view_is_wired()`
+- `class ScrubberUiTest`
+  - Method `.test_timeline_scrubber_is_wired_to_outline_months()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

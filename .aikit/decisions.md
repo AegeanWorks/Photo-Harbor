@@ -997,3 +997,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Users can browse the real library layout and jump into a month without a
   second source of truth. Renames and future layout changes automatically flow through the
   profile and copy data.
+
+### ADR-059: The timeline scrubber reads outline months, not new state
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The outline already carries every month and count; a separate timeline index
+  would duplicate data and risk drifting from the rail. Full virtual scrolling is a larger
+  rendering change than the navigation value justifies now.
+- **Decision**: Add a Year/Month select pair plus **Newer/Older** buttons to the Photos view.
+  They derive from `state.months`, jump through the existing month scope, and stay synchronized
+  with the rail. No endpoint, schema or stored state is added.
+- **Consequences**: Large libraries can be navigated by year and month without loading every
+  page. The day grid remains paginated with lazy images; true virtual scrolling stays future
+  work.

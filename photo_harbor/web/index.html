@@ -114,6 +114,14 @@
             <button class="ghost" id="select-mode" type="button" aria-pressed="false">Select</button>
             <button class="ghost" id="scope-clear" hidden>Show everything</button>
           </div>
+          <div class="scrubber" id="timeline-scrubber" hidden>
+            <span class="scrubber-label">Jump</span>
+            <label>Year <select id="scrubber-year" aria-label="Jump to year"></select></label>
+            <label>Month <select id="scrubber-month" aria-label="Jump to month"></select></label>
+            <button class="ghost" id="scrubber-newer" type="button" aria-label="Jump to a newer month">‹ Newer</button>
+            <button class="ghost" id="scrubber-older" type="button" aria-label="Jump to an older month">Older ›</button>
+            <span class="hint" id="scrubber-current"></span>
+          </div>
           <div class="date-panel" id="date-panel" hidden>
             <label>From <input type="date" id="date-from"></label>
             <label>To <input type="date" id="date-to"></label>
