@@ -200,8 +200,8 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   **Unarchive** to bring them back. Archiving is private to each person, never moves, copies or
   deletes a file, and leaves the bytes counted in Storage. Archived photos disappear from month
   counts, favorites, search results and **On this day** until restored.
-- **Order the gallery.** **Sort** offers Newest (the default), Oldest, Largest and Smallest.
-  The choice stays when a date window is applied and stacks with the other filters.
+- **Order the gallery.** **Sort** offers Newest (the default), Recently added, Oldest, Largest
+  and Smallest. Recently added uses arrival time; the choice stacks with other filters.
 - **A safe Trash.** **Move to trash** from the viewer or a selection. It removes only your
   copy: a shared photo stays for the other person. The **Trash** tab restores it through the
   normal hash-verified path, or deletes it forever; **Empty trash** clears the whole tab. Trashed

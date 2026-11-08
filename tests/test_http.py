@@ -383,6 +383,17 @@ class ServerTest(unittest.TestCase):
         _, body = self.call("GET", "/api/photos?order=largest")
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]],
                          ["c.jpg", "b.jpg", "a.jpg"])
+        with self.app.db.lock:
+            for name, stamp in (("a.jpg", "2026-05-03T10:00:00"),
+                                ("b.jpg", "2026-05-01T10:00:00"),
+                                ("c.jpg", "2026-05-02T10:00:00")):
+                self.app.db.conn.execute(
+                    "UPDATE photos SET received_at = ? WHERE original_name = ?", (stamp, name))
+                self.app.db.conn.execute(
+                    "UPDATE copies SET added_at = ? WHERE original_name = ?", (stamp, name))
+        _, body = self.call("GET", "/api/photos?order=recent")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]],
+                         ["a.jpg", "c.jpg", "b.jpg"])
         response, _ = self.call("GET", "/api/photos?order=sideways")
         self.assertEqual(response.status, 400)
 

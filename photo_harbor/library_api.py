@@ -112,10 +112,10 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     end = request.arg("to").strip() or None
     day = request.arg("day").strip() or None
     order = request.arg("order") or "newest"
-    if order not in ("newest", "oldest", "largest", "smallest"):
+    if order not in ("newest", "recent", "oldest", "largest", "smallest"):
         raise HarborError(f"{order!r} is not a sort order",
-                          "order is newest, oldest, largest or smallest",
-                          "use ?order=oldest, or leave it out")
+                          "order is newest, recent, oldest, largest or smallest",
+                          "use ?order=recent, or leave it out")
     if month is not None and not MONTH.match(month):
         raise HarborError(f"{month!r} is not a month", "months are written YYYY-MM",
                           "use ?month=2026-10")

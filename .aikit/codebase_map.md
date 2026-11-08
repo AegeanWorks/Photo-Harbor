@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
-- **Total Classes**: `171`
-- **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `680`
-- **Total Source Lines**: `11176`
+- **Total Classes**: `172`
+- **Total Top-Level Functions**: `126`
+- **Total Class Methods**: `684`
+- **Total Source Lines**: `11228`
 
 ---
 
@@ -306,7 +306,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `440` lines (`23013` bytes)
+**Size**: `447` lines (`23284` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -329,6 +329,7 @@
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
 
 **Functions:**
+- `def _order_sql(order, owner)` - *A gallery order; recent uses the owner's receipt time, or the copy's add time.*
 - `def _to_record(row)`
 - `def _source(narrow)` - *``(FROM clause, columns, alias of the owner side)``. One person's view reads their own*
 - `def _where(narrow, owner)`
@@ -609,7 +610,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `276` lines (`13506` bytes)
+**Size**: `276` lines (`13524` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -1264,7 +1265,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1125` lines (`63339` bytes)
+**Size**: `1136` lines (`64033` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1383,7 +1384,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `856` lines (`39718` bytes)
+**Size**: `865` lines (`40196` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1441,6 +1442,8 @@
   - Method `.test_read_only_folders_view_is_wired()`
 - `class ScrubberUiTest`
   - Method `.test_timeline_scrubber_is_wired_to_outline_months()`
+- `class SortUiTest`
+  - Method `.test_recently_added_sort_is_offered_and_sent()`
 - `class VirtualGridUiTest`
   - Method `.test_day_grid_is_windowed_and_keeps_scroll_height()`
 - `class ExploreUiTest`
@@ -1646,13 +1649,16 @@
 ---
 
 ### [`tests/test_sort.py`](tests/test_sort.py)
-**Size**: `26` lines (`1135` bytes)
+**Size**: `51` lines (`2523` bytes)
 
 **Classes:**
 - `class SortOrderTest`
   - Method `.setUp()`
   - Method `.names(order)`
+  - Method `.set_times(name, received, added)`
   - Method `.test_each_order_is_stable_and_complete()`
+  - Method `.test_recently_added_uses_received_time_for_the_library()`
+  - Method `.test_recently_added_uses_copy_time_for_a_person()`
   - Method `.test_an_unknown_order_falls_back_to_newest()`
 
 ---

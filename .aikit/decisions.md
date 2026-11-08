@@ -1128,3 +1128,13 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Every gap is actionable from Health. The filter composes with person,
   album, tag, date, kind, name and sort filters; counts and results follow the same archived
   and owner/self rules as the rest of the gallery.
+### ADR-070: Recently added sorts by receipt time, not capture time
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The gallery orders by capture time, so photos imported later from older events are
+  buried; both photos.received_at and copies.added_at already record arrival.
+- **Decision**: Add order=recent to GET /api/photos (and the hash endpoint through the same
+  helper), using photos.received_at for the shared library and copies.added_at for one
+  person\'s view. The Sort menu offers **Recently added**. No schema or stored preference is added.
+- **Consequences**: New arrivals are easy to find without changing capture dates or moving files.
+  The order composes with every filter and falls back to newest for unknown values.

@@ -12,10 +12,17 @@ _COLUMNS = ("sha256, rel_path, size, original_name, media_type, taken_at, receiv
             " profile, latitude, longitude, camera, lens")
 _ORDERS = {
     "newest": "{owner}.sort_time DESC, {owner}.sha256 DESC",
+    "recent": "{recent} DESC, {owner}.sha256 DESC",
     "oldest": "{owner}.sort_time ASC, {owner}.sha256 ASC",
     "largest": "{owner}.size DESC, {owner}.sort_time DESC, {owner}.sha256 DESC",
     "smallest": "{owner}.size ASC, {owner}.sort_time ASC, {owner}.sha256 ASC",
 }
+
+
+def _order_sql(order: str, owner: str) -> str:
+    """A gallery order; recent uses the owner's receipt time, or the copy's add time."""
+    recent = "c.added_at" if owner == "c" else "p.received_at"
+    return _ORDERS.get(order, _ORDERS["newest"]).format(owner=owner, recent=recent)
 
 
 def _to_record(row: sqlite3.Row) -> PhotoRecord:
@@ -200,7 +207,7 @@ class Catalog:
             raise ValueError(f"offset is outside the database range, got {offset!r}")
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
-        order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
+        order = _order_sql(narrow.order, owner)
         favorite = ("EXISTS (SELECT 1 FROM favorites f"
                     " WHERE f.profile = ? AND f.sha256 = p.sha256) AS favorite")
         with self._db.lock:
@@ -219,7 +226,7 @@ class Catalog:
             raise ValueError(f"limit is outside the database range, got {limit!r}")
         table, _, owner = _source(narrow)
         where, params = _where(narrow, owner)
-        order = _ORDERS.get(narrow.order, _ORDERS["newest"]).format(owner=owner)
+        order = _order_sql(narrow.order, owner)
         with self._db.lock:
             rows = self._db.conn.execute(
                 f"SELECT p.sha256 FROM {table}{where} ORDER BY {order} LIMIT ?",

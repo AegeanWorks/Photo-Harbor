@@ -417,6 +417,15 @@ class ScrubberUiTest(unittest.TestCase):
         self.assertIn("state.months", script)
 
 
+class SortUiTest(unittest.TestCase):
+    def test_recently_added_sort_is_offered_and_sent(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        self.assertIn('<option value="recent">Recently added</option>', page)
+        self.assertIn('params.set("order", state.scope.order)', script)
+
+
 class VirtualGridUiTest(unittest.TestCase):
     def test_day_grid_is_windowed_and_keeps_scroll_height(self):
         root = Path(__file__).resolve().parents[1]
