@@ -1,13 +1,16 @@
 package works.aegean.harbor;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 
@@ -46,6 +49,9 @@ public final class SyncEngine {
             if (wifiOnly && !onWifi(context)) {
                 return "Waiting for Wi-Fi. Nothing was sent.";
             }
+            if (!hasMediaAccess(context)) {
+                return "Photo access is missing. Open Harbor and allow photos and videos.";
+            }
             JSONObject start = new JSONObject(postJson(base + "/api/sync/start", key, "{}"));
             String since = start.getString("since");
             String startedAt = start.getString("started_at");
@@ -56,6 +62,9 @@ public final class SyncEngine {
                     base, key, sinceMillis, progress);
             int[] videos = syncCollection(context, MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
                     base, key, sinceMillis, progress);
+            if (images[0] < 0 || videos[0] < 0) {
+                return "Photo access is missing. Open Harbor and allow photos and videos.";
+            }
             int sent = images[0] + videos[0];
             int skipped = images[1] + videos[1];
 
@@ -168,8 +177,14 @@ public final class SyncEngine {
         ContentResolver resolver = context.getContentResolver();
         String[] projection = {"_id", "_display_name", "date_added", "datetaken", "_size"};
         long sinceSeconds = Math.max(sinceMillis / 1000, 0);
-        Cursor cursor = resolver.query(collection, projection, "date_added >= ?",
-                new String[]{String.valueOf(sinceSeconds)}, "date_added ASC");
+        Cursor cursor;
+        try {
+            cursor = resolver.query(collection, projection, "date_added >= ?",
+                    new String[]{String.valueOf(sinceSeconds)}, "date_added ASC");
+        } catch (SecurityException denied) {
+            // Android 13/14 may grant one collection and deny the other; the caller reports it.
+            return new int[]{-1, -1};
+        }
         if (cursor == null) {
             return new int[]{0, 0};
         }
@@ -315,6 +330,24 @@ public final class SyncEngine {
             }
             return out.toByteArray();
         }
+    }
+
+    static boolean hasMediaAccess(Context context) {
+        if (Build.VERSION.SDK_INT >= 33) {
+            boolean images = context.checkSelfPermission(Manifest.permission.READ_MEDIA_IMAGES)
+                    == PackageManager.PERMISSION_GRANTED;
+            boolean videos = context.checkSelfPermission(Manifest.permission.READ_MEDIA_VIDEO)
+                    == PackageManager.PERMISSION_GRANTED;
+            if (images && videos) {
+                return true;
+            }
+            return Build.VERSION.SDK_INT >= 34
+                    && context.checkSelfPermission(
+                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED)
+                    == PackageManager.PERMISSION_GRANTED;
+        }
+        return context.checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     private static boolean onWifi(Context context) {

@@ -290,6 +290,16 @@ class AndroidVersionTest(unittest.TestCase):
         self.assertTrue((root / "photo_harbor" / "web" / "android" / "meta.js").is_file())
         self.assertTrue((root / "photo_harbor" / "web" / "android" / "style.css").is_file())
 
+    def test_android_requests_partial_media_access(self):
+        root = Path(__file__).resolve().parents[1]
+        activity = (root / "android" / "src" / "works" / "aegean" / "harbor"
+                    / "MainActivity.java").read_text(encoding="utf-8")
+        engine = (root / "android" / "src" / "works" / "aegean" / "harbor"
+                  / "SyncEngine.java").read_text(encoding="utf-8")
+        self.assertIn("READ_MEDIA_VISUAL_USER_SELECTED", activity)
+        self.assertIn("hasMediaAccess", engine)
+        self.assertIn("READ_MEDIA_VISUAL_USER_SELECTED", engine)
+
     def test_android_version_constants_match_the_build(self):
         import hashlib
         import json

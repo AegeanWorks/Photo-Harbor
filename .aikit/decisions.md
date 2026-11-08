@@ -810,3 +810,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   signature-verify, install on the Android 14 emulator and recheck the background status.
 - **Consequences**: Device text renders correctly; the version bump prompts existing 1.2
   installs to update. The sidecar and integrity test track the new build.
+
+### ADR-046: Android handles partial and split media permissions
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `startSync` checked only `READ_MEDIA_IMAGES`. A user who granted images but
+  denied videos entered sync, and MediaStore returned an empty video cursor, so the app reported
+  "Done" while silently omitting videos. Android 14 also offers selected-photo access through
+  `READ_MEDIA_VISUAL_USER_SELECTED`, which the app declared but never accepted.
+- **Decision**: `SyncEngine.hasMediaAccess` requires images *and* videos, or the Android 14
+  selected-photo permission on API 34+. `MainActivity` requests every missing permission,
+  including selected access, and rechecks after the result. `SyncEngine.sync` refuses to start
+  when access is incomplete, and `syncCollection` still catches `SecurityException` as a
+  defensive sentinel. The app moves to 1.3/5, is rebuilt and installed on the emulator.
+- **Consequences**: A partial grant asks for the missing permission instead of silently
+  skipping videos; a background job records "Photo access is missing" and is visible in the
+  app. Test and Sync remain green on the emulator.

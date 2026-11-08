@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `119`
 - **Total Top-Level Functions**: `103`
-- **Total Class Methods**: `514`
-- **Total Source Lines**: `8548`
+- **Total Class Methods**: `515`
+- **Total Source Lines**: `8558`
 
 ---
 
@@ -19,7 +19,7 @@
 ### [`android/build.py`](android/build.py)
 > *Build a signed debug APK with the Android SDK tools; no Gradle or runtime libraries.*
 
-**Size**: `129` lines (`5093` bytes)
+**Size**: `129` lines (`5091` bytes)
 
 **Functions:**
 - `def find_sdk()`
@@ -1097,7 +1097,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `580` lines (`25543` bytes)
+**Size**: `590` lines (`26123` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1138,6 +1138,7 @@
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
+  - Method `.test_android_requests_partial_media_access()`
   - Method `.test_android_version_constants_match_the_build()`
 - `class CliErrorTest`
   - Method `.test_an_oserror_is_a_clear_failure_not_a_traceback()`

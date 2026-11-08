@@ -41,6 +41,8 @@ key. The keystore is deliberately outside the repository.
    6 hours) is optional.
 6. **Open photo gallery** opens this server in the phone's browser. After a background run, the
    result appears under the buttons when the app is opened again.
+7. On Android 13/14, allow photos and videos, or the **Selected photos** option; the app syncs
+   the collection it can read and reports when one is still denied.
 
 ## Updates
 

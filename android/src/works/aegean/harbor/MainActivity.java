@@ -23,8 +23,8 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
     private static final int ASK_MEDIA = 41;
     private static final int JOB_ID = 1;
-    private static final int VERSION_CODE = 4;
-    private static final String VERSION_NAME = "1.2.1";
+    private static final int VERSION_CODE = 5;
+    private static final String VERSION_NAME = "1.3";
 
     private EditText server;
     private EditText key;
@@ -295,19 +295,38 @@ public class MainActivity extends Activity {
     }
 
     private void startSync() {
-        String permission = Build.VERSION.SDK_INT >= 33
-                ? Manifest.permission.READ_MEDIA_IMAGES
-                : Manifest.permission.READ_EXTERNAL_STORAGE;
-        if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-            if (Build.VERSION.SDK_INT >= 33) {
-                requestPermissions(new String[]{Manifest.permission.READ_MEDIA_IMAGES,
-                        Manifest.permission.READ_MEDIA_VIDEO}, ASK_MEDIA);
-            } else {
-                requestPermissions(new String[]{permission}, ASK_MEDIA);
-            }
+        if (!hasMediaAccess()) {
+            requestMediaPermissions();
             return;
         }
         runSync();
+    }
+
+    private String[] mediaPermissions() {
+        if (Build.VERSION.SDK_INT >= 34) {
+            return new String[]{Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO,
+                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED};
+        }
+        if (Build.VERSION.SDK_INT >= 33) {
+            return new String[]{Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.READ_MEDIA_VIDEO};
+        }
+        return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
+    }
+
+    private boolean hasMediaAccess() {
+        return SyncEngine.hasMediaAccess(this);
+    }
+
+    private void requestMediaPermissions() {
+        java.util.ArrayList<String> missing = new java.util.ArrayList<>();
+        for (String permission : mediaPermissions()) {
+            if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+                missing.add(permission);
+            }
+        }
+        requestPermissions(missing.toArray(new String[0]), ASK_MEDIA);
     }
 
     @Override
@@ -317,11 +336,9 @@ public class MainActivity extends Activity {
         if (requestCode != ASK_MEDIA) {
             return;
         }
-        for (int result : results) {
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                status.setText("Photo access is needed to send new photos.");
-                return;
-            }
+        if (!hasMediaAccess()) {
+            status.setText("Photo access is needed to send new photos.");
+            return;
         }
         runSync();
     }
