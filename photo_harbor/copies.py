@@ -51,10 +51,13 @@ class CopyIndex:
             try:
                 self._db.conn.execute("DELETE FROM copies WHERE profile = ? AND sha256 = ?",
                                       (profile, sha256))
+                self._db.conn.execute("DELETE FROM archived WHERE profile = ? AND sha256 = ?",
+                                      (profile, sha256))
                 left = self._db.conn.execute(
                     "SELECT rel_path, profile FROM copies WHERE sha256 = ? ORDER BY added_at"
                     " LIMIT 1", (sha256,)).fetchone()
                 if left is None:
+                    self._db.conn.execute("DELETE FROM archived WHERE sha256 = ?", (sha256,))
                     self._db.conn.execute("DELETE FROM photos WHERE sha256 = ?", (sha256,))
                 else:
                     self._db.conn.execute(

@@ -6,10 +6,11 @@ const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
   scope: { kind: null, month: null, favorite: false, album: null, start: null, end: null,
-    day: null, order: "newest" },
+    day: null, archived: false, order: "newest" },
   query: "",
-  generation: 0, total: 0, profile: null, people: [], me: null, owner: false,
-  favorites: 0, albums: [], selecting: false, selected: new Set(), viewerReturnFocus: null,
+  generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
+  owner: false, favorites: 0, albums: [], selecting: false, selected: new Set(),
+  viewerReturnFocus: null,
 };
 
 function personName(id) {
@@ -199,6 +200,7 @@ function filterParams() {
   if (state.scope.kind) params.set("kind", state.scope.kind);
   if (state.scope.month) params.set("month", state.scope.month);
   if (state.scope.favorite) params.set("favorite", "1");
+  if (state.scope.archived) params.set("archived", "1");
   if (state.scope.album) params.set("album", String(state.scope.album));
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
@@ -268,6 +270,7 @@ function scopeTitle() {
   const album = currentAlbum();
   let base = "All photos";
   if (album) base = album.name;
+  else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
   else if (state.scope.month) base = capitalise(monthYearFormat.format(monthDate(state.scope.month)));
@@ -279,15 +282,17 @@ function scopeTitle() {
 function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
     || state.scope.end || state.scope.day || state.query);
-  const narrowed = Boolean(extra || state.scope.favorite || state.scope.album);
+  const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
+    || state.scope.archived);
   const shown = state.photos.length;
   const title = state.query ? `${scopeTitle()} · “${state.query}”` : scopeTitle();
   $("scope-title").textContent = state.profile ? `${personName(state.profile)} · ${title}` : title;
   if (extra) $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
   else if (state.scope.album) $("scope-count").textContent = (currentAlbum()?.count ?? shown).toLocaleString();
+  else if (state.scope.archived) $("scope-count").textContent = state.archived.toLocaleString();
   else if (state.scope.favorite) $("scope-count").textContent = state.favorites.toLocaleString();
-  else if (!narrowed && !state.profile) $("scope-count").textContent = state.total.toLocaleString();
-  else if (!narrowed) $("scope-count").textContent = (state.people.find((p) => p.id === state.profile)?.count ?? shown).toLocaleString();
+  else if (!narrowed && !state.profile) $("scope-count").textContent = state.visible.toLocaleString();
+  else if (!narrowed) $("scope-count").textContent = state.visible.toLocaleString();
   else $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
   $("scope-clear").hidden = !narrowed;
   $("sort-order").value = state.scope.order || "newest";
@@ -302,20 +307,23 @@ function renderScope() {
       ? "This album is empty. Open a photo and choose Add to album."
       : state.scope.favorite
         ? "No favorites yet. Open a photo and press ♡ Favorite."
-        : state.scope.day
-          ? "No photos from this day in other years."
-          : narrowed
-            ? "No photo matches. Try another month or search."
-            : "Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.";
+        : state.scope.archived
+          ? "Nothing archived. Open a photo and choose Archive to hide it from the timeline."
+          : state.scope.day
+            ? "No photos from this day in other years."
+            : narrowed
+              ? "No photo matches. Try another month or search."
+              : "Once the iPhone Shortcut runs on your home Wi-Fi, photos appear here, newest first. You can also drop files here or use Upload.";
     $("empty-action").hidden = narrowed;
   }
 }
 
 function markScope() {
   const active = state.scope.album ? null
-    : state.scope.day ? "memories"
-      : state.scope.favorite ? "favorite"
-        : state.scope.month || state.scope.kind || "all";
+    : state.scope.archived ? "archive"
+      : state.scope.day ? "memories"
+        : state.scope.favorite ? "favorite"
+          : state.scope.month || state.scope.kind || "all";
   for (const item of document.querySelectorAll(".rail-item[data-scope]")) {
     item.setAttribute("aria-pressed", String(item.dataset.scope === active));
   }
@@ -329,7 +337,7 @@ function markScope() {
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
   state.scope = { kind, month, favorite: false, album: null, start: null, end: null,
-    day: null, order: state.scope.order || "newest", ...extra };
+    day: null, archived: false, order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
   window.scrollTo({ top: 0 });
@@ -394,9 +402,14 @@ async function loadOutline() {
   }
   $("rail-videos").textContent = outline.videos.toLocaleString();
   state.favorites = outline.favorites || 0;
+  state.visible = outline.total || 0;
+  state.archived = outline.archived || 0;
+  $("rail-all").textContent = state.visible.toLocaleString();
   $("rail-favorites").textContent = state.favorites.toLocaleString();
+  $("rail-archived").textContent = state.archived.toLocaleString();
   document.querySelector('[data-scope="video"]').hidden = outline.videos === 0;
   markScope();
+  renderScope();
 }
 
 // ---------- people ----------
@@ -419,7 +432,7 @@ function selectPerson(id) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
   state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null,
-    day: null, order: state.scope.order || "newest" };
+    day: null, archived: false, order: state.scope.order || "newest" };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -449,6 +462,12 @@ function todayMonthDay() {
 
 function selectMemories() {
   setScope(null, null, { day: todayMonthDay() });
+}
+
+function selectArchive() {
+  clearPersonScope();
+  setScope(null, null, { archived: true });
+  loadOutline().catch(handle);
 }
 
 function selectAlbum(id) {
@@ -522,7 +541,7 @@ async function deleteAlbum() {
   try {
     await post(`/api/albums/${album.id}`, { delete: true });
     state.scope = { kind: null, month: null, favorite: false, album: null, day: null,
-      order: state.scope.order || "newest" };
+      archived: false, order: state.scope.order || "newest" };
     markScope();
     await loadAlbums();
     resetPhotos();
@@ -584,8 +603,9 @@ function hideSelectAlbums() {
 function renderSelection() {
   const count = state.selected.size;
   $("select-count").textContent = `${count.toLocaleString()} selected`;
+  $("select-archive").textContent = state.scope.archived ? "Unarchive" : "Archive";
   for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-trash",
-    "select-album", "select-clear"]) {
+    "select-album", "select-archive", "select-clear"]) {
     $(id).disabled = count === 0;
   }
   if (count === 0) hideSelectAlbums();
@@ -638,6 +658,27 @@ async function bulkFavorite(favorite) {
       setSelecting(false);
       resetPhotos();
     }
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function bulkArchive(archived) {
+  const sha256s = [...state.selected];
+  if (sha256s.length === 0) return;
+  try {
+    let changed = 0;
+    for (const batch of batches(sha256s)) {
+      changed += (await post("/api/archive", { sha256s: batch, archived })).changed;
+    }
+    const leaving = archived !== Boolean(state.scope.archived);
+    await loadOutline();
+    if (leaving) {
+      setSelecting(false);
+      closeViewer();
+      resetPhotos();
+    }
+    toast(`${items(changed)} ${archived ? "archived" : "restored"}`);
   } catch (error) {
     handle(error);
   }
@@ -935,6 +976,8 @@ function wireBrowser() {
   document.querySelector('[data-scope="video"]').addEventListener("click", () => setScope("video", null));
   document.querySelector('[data-scope="favorite"]').addEventListener("click", selectFavorites);
   document.querySelector('[data-scope="memories"]').addEventListener("click", selectMemories);
+  document.querySelector('[data-scope="archive"]').addEventListener("click", selectArchive);
+  $("select-archive").addEventListener("click", () => bulkArchive(!state.scope.archived));
   $("album-new").addEventListener("click", newAlbum);
   $("album-rename").addEventListener("click", renameAlbum);
   $("album-delete").addEventListener("click", deleteAlbum);
@@ -1173,6 +1216,7 @@ function renderViewerCollections() {
   $("viewer-album-add").hidden = !photo || state.albums.length === 0;
   $("viewer-album-remove").hidden = !photo || !state.scope.album;
   $("viewer-cover").hidden = !photo || !state.scope.album;
+  $("viewer-archive").textContent = state.scope.archived ? "Unarchive" : "Archive";
   $("viewer-albums").hidden = true;
   $("viewer-albums").replaceChildren();
 }
@@ -1243,6 +1287,24 @@ async function toggleFavorite() {
       resetPhotos();
     }
     toast(photo.favorite ? "Added to Favorites" : "Removed from Favorites");
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function toggleArchiveCurrent() {
+  const photo = state.photos[state.viewing];
+  if (!photo) return;
+  const archived = !state.scope.archived;
+  try {
+    await post("/api/archive", { sha256: photo.sha256, archived });
+    const leaving = archived !== Boolean(state.scope.archived);
+    await loadOutline();
+    if (leaving) {
+      closeViewer();
+      resetPhotos();
+    }
+    toast(archived ? "Moved to Archive" : "Restored from Archive");
   } catch (error) {
     handle(error);
   }
@@ -1332,6 +1394,7 @@ function wireViewer() {
   $("viewer-album-add").addEventListener("click", toggleAlbumMenu);
   $("viewer-album-remove").addEventListener("click", removeFromAlbum);
   $("viewer-cover").addEventListener("click", setAlbumCover);
+  $("viewer-archive").addEventListener("click", toggleArchiveCurrent);
   $("viewer-info").addEventListener("click", toggleDetails);
   $("viewer-trash").addEventListener("click", trashCurrent);
   document.addEventListener("keydown", (event) => {
@@ -1378,7 +1441,6 @@ async function refreshStatus() {
   const gb = (n) => (n / 1024 ** 3).toFixed(n < 10 * 1024 ** 3 ? 1 : 0);
   $("disk-banner").hidden = !s.disk.low;
   $("disk-banner").textContent = `Only ${gb(s.disk.free)} GB of ${gb(s.disk.total)} GB left on the photo drive. Free some space or move the library to a bigger drive (Harbor window → Choose…).`;
-  $("rail-all").textContent = s.count.toLocaleString();
   $("s-count").textContent = s.count.toLocaleString();
   $("s-bytes").textContent = bytes(s.bytes);
   $("s-sync").textContent = ago(s.last_sync);

@@ -406,6 +406,36 @@ class ServerTest(unittest.TestCase):
             response, _ = self.call("GET", f"/api/photos?day={bad}")
             self.assertEqual(response.status, 400, bad)
 
+    def test_archive_hides_restores_and_stays_out_of_the_timeline(self):
+        for name in ("one.jpg", "two.jpg"):
+            self.upload(name.encode(), name=name)
+        one, two = sha(b"one.jpg"), sha(b"two.jpg")
+        response, body = self.call("POST", "/api/archive",
+                                   body={"sha256s": [one], "archived": True})
+        self.assertEqual((response.status, json.loads(body)["changed"]), (200, 1))
+        _, body = self.call("GET", "/api/photos")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["two.jpg"])
+        _, body = self.call("GET", "/api/photos?archived=1")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+        _, body = self.call("GET", "/api/outline")
+        outline = json.loads(body)
+        self.assertEqual((outline["total"], outline["archived"]), (1, 1))
+        self.assertEqual(outline["months"], [{"month": "2026-05", "count": 1}])
+        response, _ = self.call("POST", "/api/archive",
+                                body={"sha256s": [two, "f" * 64], "archived": True})
+        self.assertEqual(response.status, 404)
+        _, body = self.call("GET", "/api/photos?archived=1")
+        self.assertEqual(len(json.loads(body)["photos"]), 1)
+        response, _ = self.call("POST", "/api/archive",
+                                body={"sha256s": [one], "archived": "yes"})
+        self.assertEqual(response.status, 400)
+        response, body = self.call("POST", "/api/archive",
+                                   body={"sha256": one, "archived": False})
+        self.assertEqual((response.status, json.loads(body)["changed"]), (200, 1))
+        _, body = self.call("GET", "/api/photos")
+        self.assertEqual({p["name"] for p in json.loads(body)["photos"]},
+                         {"one.jpg", "two.jpg"})
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

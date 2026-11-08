@@ -839,3 +839,19 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Users get an Immich-style anniversary view with one indexed substring
   predicate. A separate memories image generation/selection feature remains future work.
   Tags, Archive, Places and near-duplicate review are recorded as the next candidates.
+
+### ADR-048: Archive is per-person hidden state, not a folder
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The Immich comparison ranked Archive as the next cheap, high-value gap. A move
+  to a separate folder would break the readable `<Person>/<YYYY>/<YYYY-MM>` layout, complicate
+  deduplication and could hide shared copies from other people.
+- **Decision**: Add format 8 with an `archived(profile, sha256, archived_at)` table and a
+  private mark per person. `PhotoFilter.archived` hides marks by default and shows only them
+  when true; `POST /api/archive` archives or restores a validated single hash or batch. The
+  rail **Archive** view, viewer and selection bar call it. `CopyIndex.forget` drops the leaving
+  person's mark (and every mark when the last copy goes); a new format-7 catalog gains the table
+  through `.v7.bak`-backed migration. Files never move.
+- **Consequences**: Timeline, month counts, video/favorite counts and `On this day` hide
+  archived photos while Storage and the catalog keep counting the bytes. Each person's archive
+  is private; the owner archiving a shared photo does not hide it from the other person.

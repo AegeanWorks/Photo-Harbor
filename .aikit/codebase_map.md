@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `63`
-- **Total Classes**: `119`
+- **Total Python Modules**: `66`
+- **Total Classes**: `124`
 - **Total Top-Level Functions**: `104`
-- **Total Class Methods**: `517`
-- **Total Source Lines**: `8600`
+- **Total Class Methods**: `531`
+- **Total Source Lines**: `8829`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `223` lines (`11120` bytes)
+**Size**: `228` lines (`11369` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -144,11 +144,36 @@
   - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
-  - Method `._register(sync, library, people, albums, downloads, trash, backup, setup)`
+  - Method `._register(sync, library, people, albums, archive, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
 - `def static_file(request, name)`
+
+---
+
+### [`photo_harbor/archive.py`](photo_harbor/archive.py)
+> *Per-person archive: hide a photo from the timeline without moving or copying it.*
+
+**Size**: `34` lines (`1349` bytes)
+
+**Classes:**
+- `class ArchiveBook`
+  - Method `.__init__(db, now)`
+  - Method `.set(profile, sha256, archived)`
+  - Method `.set_many(profile, sha256s, archived)` - *Archive or restore several photos in one lock; returns how many rows changed.*
+
+---
+
+### [`photo_harbor/archive_api.py`](photo_harbor/archive_api.py)
+> *Endpoint for the per-person archive: hide or restore a validated batch.*
+
+**Size**: `23` lines (`952` bytes)
+
+**Classes:**
+- `class ArchiveApi`
+  - Method `.__init__(archive, catalog)`
+  - Method `.update(request)`
 
 ---
 
@@ -269,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `264` lines (`13327` bytes)
+**Size**: `279` lines (`14239` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -357,7 +382,7 @@
 ### [`photo_harbor/copies.py`](photo_harbor/copies.py)
 > *Whose folder holds which photo. One file can sit in several people's folders (hard links).*
 
-**Size**: `68` lines (`3294` bytes)
+**Size**: `71` lines (`3540` bytes)
 
 **Classes:**
 - `class CopyIndex`
@@ -373,7 +398,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `247` lines (`8918` bytes)
+**Size**: `262` lines (`9384` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -539,7 +564,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `229` lines (`10854` bytes)
+**Size**: `231` lines (`11000` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -656,7 +681,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `158` lines (`3730` bytes)
+**Size**: `162` lines (`3946` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -914,6 +939,22 @@
 
 ---
 
+### [`tests/test_archive.py`](tests/test_archive.py)
+**Size**: `83` lines (`4480` bytes)
+
+**Classes:**
+- `class ArchiveBookTest`
+  - Method `.setUp()`
+  - Method `.test_archiving_hides_from_the_timeline_and_shows_in_the_archive()`
+  - Method `.test_archiving_is_private_to_the_viewer()`
+  - Method `.test_unarchiving_brings_the_photo_back()`
+  - Method `.test_a_batch_changes_each_row_once()`
+  - Method `.test_forgetting_a_copy_drops_its_archive_mark()`
+- `class ArchiveMigrationTest`
+  - Method `.test_a_format_7_catalog_gains_the_archive_table()`
+
+---
+
 ### [`tests/test_dates.py`](tests/test_dates.py)
 **Size**: `39` lines (`1945` bytes)
 
@@ -1013,7 +1054,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `784` lines (`44386` bytes)
+**Size**: `814` lines (`46231` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1047,6 +1088,7 @@
   - Method `.test_sort_order_changes_the_page()`
   - Method `.test_a_date_range_narrows_the_gallery()`
   - Method `.test_a_month_day_matches_each_year()`
+  - Method `.test_archive_hides_restores_and_stays_out_of_the_timeline()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1100,7 +1142,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `590` lines (`26123` bytes)
+**Size**: `605` lines (`26888` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1138,6 +1180,8 @@
 - `class ThumbnailerTest`
   - Method `.test_without_pillow_previews_are_off()`
   - Method `.test_prune_removes_only_previews_of_photos_that_are_gone()`
+- `class ArchiveUiTest`
+  - Method `.test_gallery_archive_is_reachable_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

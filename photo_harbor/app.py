@@ -8,6 +8,8 @@ from typing import Callable, Optional
 from .accounts import ITERATIONS, LoginBrake, Passwords, Sessions
 from .albums import AlbumBook
 from .albums_api import AlbumsApi
+from .archive import ArchiveBook
+from .archive_api import ArchiveApi
 from .auth import KeyGuard
 from .autostart import Autostart
 from .backup_api import BackupApi
@@ -67,6 +69,7 @@ class HarborApp:
         catalog = Catalog(self.db)
         journal = SyncJournal(self.db)
         self.albums = AlbumBook(self.db, now)
+        self.archive = ArchiveBook(self.db, now)
         self.downloads = Downloads(settings.state_dir)
         self.profiles = ProfileBook(self.db, settings.key)
         self.copies = CopyIndex(self.db)
@@ -98,6 +101,7 @@ class HarborApp:
                        ProfilesApi(self.profiles, catalog, journal, self.passwords,
                                    self.sessions, self.layout, brake=self.brake),
                        AlbumsApi(self.albums, catalog),
+                       ArchiveApi(self.archive, catalog),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),
                        BackupApi(lambda: self.backup),
@@ -169,8 +173,8 @@ class HarborApp:
                      headers=NO_CACHE, file=path)
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
-                  albums: AlbumsApi, downloads: DownloadsApi, trash: TrashApi,
-                  backup: BackupApi, setup: SetupApi) -> None:
+                  albums: AlbumsApi, archive: ArchiveApi, downloads: DownloadsApi,
+                  trash: TrashApi, backup: BackupApi, setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -206,6 +210,7 @@ class HarborApp:
         add("POST", "/api/albums/", albums.update)
         add("POST", "/api/album-photos", albums.membership)
         add("POST", "/api/favorite", albums.favorite)
+        add("POST", "/api/archive", archive.update)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/trash", trash.listing)

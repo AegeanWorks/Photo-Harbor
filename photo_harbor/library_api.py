@@ -97,6 +97,7 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
     kind = request.arg("kind") or None
     query = request.arg("q").strip()[:MAX_QUERY] or None
     favorite = request.arg("favorite") == "1"
+    archived = request.arg("archived") == "1"
     album = request.arg("album") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
@@ -129,7 +130,7 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
         album = int(album)
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album,
-                       start=start, end=end, day=day, order=order)
+                       start=start, end=end, day=day, archived=archived, order=order)
 
 
 class LibraryApi:
@@ -192,7 +193,8 @@ class LibraryApi:
         """Months with photos, newest first, for the browser sidebar."""
         outline = self._catalog.outline(_visible_profile(request), viewer=request.profile)
         return json_reply({"months": [{"month": m, "count": n} for m, n in outline.months],
-                           "videos": outline.videos, "favorites": outline.favorites})
+                           "videos": outline.videos, "favorites": outline.favorites,
+                           "total": outline.total, "archived": outline.archived})
 
     def _disk(self) -> dict:
         usage = shutil.disk_usage(self._store.root)

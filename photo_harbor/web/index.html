@@ -81,6 +81,7 @@
           <button class="rail-item" data-scope="video" aria-pressed="false"><span>Videos</span><b id="rail-videos"></b></button>
           <button class="rail-item" data-scope="favorite" aria-pressed="false"><span>Favorites</span><b id="rail-favorites">0</b></button>
           <button class="rail-item" data-scope="memories" aria-pressed="false"><span>On this day</span></button>
+          <button class="rail-item" data-scope="archive" aria-pressed="false"><span>Archive</span><b id="rail-archived">0</b></button>
           <div id="rail-albums" class="rail-years"></div>
           <button class="rail-add" id="album-new" type="button">+ New album</button>
           <div id="rail-years" class="rail-years"></div>
@@ -117,6 +118,7 @@
             <button class="ghost" id="select-matching" type="button">Select matching</button>
             <button class="ghost" id="select-favorite" type="button">♥ Favorite</button>
             <button class="ghost" id="select-unfavorite" type="button">♡ Unfavorite</button>
+            <button class="ghost" id="select-archive" type="button">Archive</button>
             <button class="ghost" id="select-download" type="button">Download</button>
             <button class="ghost" id="select-trash" type="button">Move to trash</button>
             <div class="select-album-wrap">
@@ -294,6 +296,7 @@
       <button class="ghost" id="viewer-album-remove" type="button" hidden>Remove from album</button>
       <button class="ghost" id="viewer-cover" type="button" hidden>Use as cover</button>
       <button class="ghost" id="viewer-info" type="button" aria-expanded="false" aria-keyshortcuts="I">Details</button>
+      <button class="ghost" id="viewer-archive" type="button">Archive</button>
       <button class="ghost" id="viewer-trash" type="button">Move to trash</button>
       <a id="viewer-download" class="ghost" download>Download original</a>
     </footer>

@@ -59,8 +59,9 @@ class PhotoFilter:
     ``YYYY-MM-DD`` dates, ``day`` is a ``MM-DD`` anniversary filter, ``query`` is
     whitespace-separated words that must all match the file name, ``kind`` is ``photo`` or
     ``video``. ``viewer`` is whose favorites and albums are read; ``favorite`` and ``album``
-    narrow to that viewer's marks. ``order`` is newest, oldest, largest or smallest. None means
-    no narrowing on that axis."""
+    narrow to that viewer's marks. ``archived`` shows only the viewer's archived photos; false
+    hides them. ``order`` is newest, oldest, largest or smallest. None means no narrowing on
+    that axis."""
 
     month: Optional[str] = None
     query: Optional[str] = None
@@ -72,17 +73,20 @@ class PhotoFilter:
     start: Optional[str] = None
     end: Optional[str] = None
     day: Optional[str] = None
+    archived: bool = False
     order: str = "newest"
 
 
 @dataclass(frozen=True)
 class Outline:
     """What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the
-    viewer's favorites."""
+    viewer's favorites. ``total`` counts the timeline; ``archived`` counts what the viewer hid."""
 
     months: tuple
     videos: int
     favorites: int = 0
+    total: int = 0
+    archived: int = 0
 
 
 @dataclass(frozen=True)

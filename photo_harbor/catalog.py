@@ -57,6 +57,13 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
     if narrow.day:
         clauses.append(f"substr({owner}.sort_time, 6, 5) = ?")
         params.append(narrow.day)
+    if narrow.archived:
+        clauses.append("EXISTS (SELECT 1 FROM archived ar"
+                       " WHERE ar.profile = ? AND ar.sha256 = p.sha256)")
+    else:
+        clauses.append("NOT EXISTS (SELECT 1 FROM archived ar"
+                       " WHERE ar.profile = ? AND ar.sha256 = p.sha256)")
+    params.append(narrow.viewer)
     for term in narrow.query.split() if narrow.query else ():
         escaped = term.replace("!", "!!").replace("%", "!%").replace("_", "!_")
         clauses.append(f"{owner}.original_name LIKE ? ESCAPE '!'")
@@ -193,25 +200,33 @@ class Catalog:
 
     def outline(self, profile: Optional[str] = None, viewer: str = "main") -> Outline:
         """Months and video count, for one profile or (None) everyone, plus the viewer's
-        favorites."""
-        # One person's totals come from their copies alone; no join needed.
-        table, where, params = _totals_source(profile)
-        alias = "c" if profile else "p"
+        favorites. Archived photos are hidden from the timeline."""
+        narrow = PhotoFilter(profile=profile, viewer=viewer)
+        hidden = PhotoFilter(profile=profile, viewer=viewer, archived=True)
+        table, _, owner = _source(narrow)
+        where, params = _where(narrow, owner)
+        hidden_where, hidden_params = _where(hidden, owner)
         video = "c.is_video = 1" if profile else "p.media_type LIKE 'video/%'"
+        video_where = f"{where} AND" if where else " WHERE"
         with self._db.lock:
             months = self._db.conn.execute(
-                f"SELECT substr({alias}.sort_time, 1, 7) AS month, COUNT(*) FROM {table}{where}"
+                f"SELECT substr({owner}.sort_time, 1, 7) AS month, COUNT(*) FROM {table}{where}"
                 " GROUP BY month ORDER BY month DESC", params
             ).fetchall()
-            video_where = f"{where} AND" if where else " WHERE"
             videos = self._db.conn.execute(
                 f"SELECT COUNT(*) FROM {table}{video_where} {video}", params
             ).fetchone()[0]
+            total = self._db.conn.execute(
+                f"SELECT COUNT(*) FROM {table}{where}", params).fetchone()[0]
+            archived = self._db.conn.execute(
+                f"SELECT COUNT(*) FROM {table}{hidden_where}", hidden_params).fetchone()[0]
             favorites = self._db.conn.execute(
                 "SELECT COUNT(*) FROM favorites f JOIN photos p ON p.sha256 = f.sha256"
-                " WHERE f.profile = ?", (viewer,)).fetchone()[0]
+                " WHERE f.profile = ? AND NOT EXISTS (SELECT 1 FROM archived a"
+                " WHERE a.profile = ? AND a.sha256 = p.sha256)",
+                (viewer, viewer)).fetchone()[0]
         return Outline(months=tuple((row[0], row[1]) for row in months), videos=videos,
-                       favorites=favorites)
+                       favorites=favorites, total=total, archived=archived)
 
     def stats(self, profile: Optional[str] = None) -> LibraryStats:
         table, where, params = _totals_source(profile)

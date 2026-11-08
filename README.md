@@ -161,6 +161,11 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **On this day.** The **On this day** button shows photos taken on today's month and day in
   every year, newest first. It combines with the selected person, sort order and search; an empty
   result says so instead of falling back to the whole library.
+- **Archive without moving files.** Open a photo or select several and press **Archive** to hide
+  them from the timeline. The **Archive** rail view shows only your hidden photos, with
+  **Unarchive** to bring them back. Archiving is private to each person, never moves, copies or
+  deletes a file, and leaves the bytes counted in Storage. Archived photos disappear from month
+  counts, favorites, search results and **On this day** until restored.
 - **Order the gallery.** **Sort** offers Newest (the default), Oldest, Largest and Smallest.
   The choice stays when a date window is applied and stacks with the other filters.
 - **A safe Trash.** **Move to trash** from the viewer or a selection. It removes only your
@@ -212,10 +217,11 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; archived photos are hidden unless `archived=1`; non-owners always get their own |
 | `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
+| `POST /api/archive` | `{sha256 \| sha256s, archived: true\|false}` hides or restores your copies; at most 500 hashes per call |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
@@ -246,6 +252,8 @@ photo-harbor/
 │   ├── accounts.py           <- password hashes, sessions, wrong-password brake
 │   ├── albums.py             <- personal albums and favorites; no files move
 │   ├── albums_api.py         <- albums and favorites; single or up to 500 hashes per call
+│   ├── archive.py            <- per-person hidden photos; no files move
+│   ├── archive_api.py        <- archive or restore a single photo or up to 500 hashes
 │   ├── auth.py               <- home-network check; who is asking (key or session); sign-in
 │   ├── autostart.py          <- start with Windows (per-user Run key)
 │   ├── backup.py             <- mirror to a second drive, daily thread
@@ -287,6 +295,7 @@ photo-harbor/
     ├── __init__.py
     ├── library_fixture.py    <- a throwaway library for tests
     ├── test_albums.py        <- personal albums, favorites and format 5 migration
+    ├── test_archive.py       <- per-person archive and format 7 migration
     ├── test_dates.py         <- inclusive date-range narrowing
     ├── test_details.py       <- file facts and optional EXIF details
     ├── test_downloads.py     <- ZIP names, tokens and expiry
@@ -308,7 +317,7 @@ photo-harbor/
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 7; an older catalog is upgraded in place after a copy
+`config.json`, `catalog.sqlite3` (format 8; an older catalog is upgraded in place after a copy
 to `catalog.sqlite3.v<N>.bak`), `incoming\`, `thumbs\` and `trash\`.
 
 ## 🚀 Performance

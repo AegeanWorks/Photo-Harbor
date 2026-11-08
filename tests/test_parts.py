@@ -268,6 +268,21 @@ class ThumbnailerTest(unittest.TestCase):
         self.assertFalse((cache / gone[:2] / f"{gone}.jpg").exists())
 
 
+class ArchiveUiTest(unittest.TestCase):
+    def test_gallery_archive_is_reachable_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-scope="archive"', 'id="rail-archived"',
+                        'id="viewer-archive"', 'id="select-archive"'):
+            self.assertIn(element, page)
+        self.assertIn('params.set("archived", "1")', script)
+        self.assertIn("/api/archive", script)
+        self.assertIn("selectArchive", script)
+        self.assertIn("bulkArchive", script)
+        self.assertIn("toggleArchiveCurrent", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

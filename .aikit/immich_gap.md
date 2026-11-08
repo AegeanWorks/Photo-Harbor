@@ -22,7 +22,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Admin/user management | Owner manages people, passwords and keys | - | Keep |
 | OAuth / API keys | Profile keys and browser sessions | Low for a home LAN | Not now |
 | User-defined storage structure | Fixed readable `<Person>/<YYYY>/<YYYY-MM>` layout | Low: the plain layout is a deliberate feature | Not now |
-| Archive | No | High: simple per-person hidden state, no files move | Next |
+| Archive | Yes: per-person hidden state, rail view, single/bulk restore | - | **Implemented now** |
 | Favorites | Yes | - | Keep |
 | Global Map | No | Medium: needs GPS plus a map surface | Later |
 | Partner sharing | No | Low: per-person folders already cover the household use case | Not now |
@@ -36,17 +36,21 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | XMP sidecars | No | Medium: useful for interoperability; file mutation risk | Later |
 | Editing / transcoding / casting / monitoring | No | Low for this lightweight server | Not now |
 
-## Implemented in this pass: Memories
+## Implemented in this pass: Memories and Archive
 
-`GET /api/photos?day=MM-DD` now matches the month/day across every year, with a real calendar
-check that still permits `02-29`. The gallery's **On this day** rail button uses the browser's
-current month/day, composes with person/query/sort filters and shows an explicit empty message.
-This is the cheapest high-value Immich feature: no new storage, no ML and no file movement.
+`GET /api/photos?day=MM-DD` matches the month/day across every year, with a real calendar check
+that still permits `02-29`. The gallery's **On this day** rail button uses the browser's current
+month/day, composes with person/query/sort filters and shows an explicit empty message.
+
+Archive adds per-person hidden state (`archived` table, `archived=1` filter, `POST /api/archive`).
+The rail **Archive** view lists only the viewer's hidden photos; the viewer and selection bars
+archive or restore single photos and batches. Files never move, copies stay intact, and Storage
+still counts them. Month counts, favorites and the timeline hide archived photos. This is the
+second cheap high-value Immich feature: no ML and no file movement.
 
 ## Next candidates
 
 1. **Tags** - per-person tags with a viewer tag picker and a `tag=` gallery filter.
-2. **Archive** - per-person hidden state, with an Archived filter and restore.
-3. **Places** - extract GPS during details and group by a coarse coordinate bucket; add a map
+2. **Places** - extract GPS during details and group by a coarse coordinate bucket; add a map
    only when an offline tile story exists.
-4. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
+3. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
