@@ -3,24 +3,15 @@
   "active_task": {
     "task_id": "immich-people-overview",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794147126.9932642,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794147725.3531117
   },
   "checkpoints": [
-    {
-      "task_id": "immich-virtual-grid",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-virtual-grid' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794144891.717824,
-      "timestamp_str": "2026-11-08 16:34:51",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-compare",
       "phase": "phase 2",
@@ -259,6 +250,16 @@
       "status": "in_progress",
       "timestamp": 1794147126.9932642,
       "timestamp_str": "2026-11-08 17:12:06",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-people-overview",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'immich-people-overview' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794147725.3531144,
+      "timestamp_str": "2026-11-08 17:22:05",
       "agent": "opencode:deepseek"
     }
   ]
