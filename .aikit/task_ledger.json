@@ -1,38 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "place-bucket-agreement",
+    "task_id": "docs-photo-filters",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794159009.4988654,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794159598.709198,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794159056.078801
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-reject-drain",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/3] Drain done: 309 tests OK; 4/4 gates; 128 KiB rejected-upload reply covered; hygiene allow documented; checklists: passed; no UI change",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794151564.5032272,
-      "timestamp_str": "2026-11-08 18:26:04",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "harbor-reject-drain",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'harbor-reject-drain' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794151638.8586295,
-      "timestamp_str": "2026-11-08 18:27:18",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-format-filter",
       "phase": "phase 1",
@@ -255,6 +233,34 @@
       "status": "completed",
       "timestamp": 1794159056.078803,
       "timestamp_str": "2026-11-08 20:30:56",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "docs-photo-filters",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: document the format= and missing= filters the photos row omitted, and extend ReadmeApiTest to cover every _narrowing parameter",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794159582.963655,
+      "timestamp_str": "2026-11-08 20:39:42",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "Two filters shipped and are documented in feature bullets, but the photos API row never listed them, so an integrator cannot find them.",
+        "benefits": "Complete filter reference; a test stops a future filter from landing undocumented; no runtime change.",
+        "risks": "contract: none, docs and tests only; dependency: none; concurrency: none; state: README sits at its size cap.",
+        "mitigation": "compact table prose while keeping every contract detail, verify the guard fails without the fix, run all four gates."
+      }
+    },
+    {
+      "task_id": "docs-photo-filters",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Filters documented: 320 tests OK; 4/4 gates; new guard fails without the rows and passes with them; all 16 filters now listed; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794159598.709198,
+      "timestamp_str": "2026-11-08 20:39:58",
       "agent": "commandcode:vscode"
     }
   ]

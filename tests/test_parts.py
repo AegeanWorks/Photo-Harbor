@@ -905,6 +905,16 @@ class ReadmeApiTest(unittest.TestCase):
         self.assertEqual([], [f"{m} {p}" for m, p in undocumented],
                          "every route the server registers belongs in the README table")
 
+    def test_every_photo_filter_is_in_the_photos_row(self):
+        root = Path(__file__).resolve().parents[1]
+        source = (root / "photo_harbor" / "library_api.py").read_text(encoding="utf-8")
+        readme = (root / "README.md").read_text(encoding="utf-8")
+        table = readme.split("### HTTP API", 1)[1].split("\n## ", 1)[0]
+        row = next(line for line in table.splitlines() if "/api/photos?" in line)
+        narrowing = source.split("def _narrowing", 1)[1].split("def _", 1)[0]
+        for name in sorted(set(re.findall(r'request\.arg\("([^"]+)"', narrowing))):
+            self.assertIn(f"{name}=", row, f"?{name}= is missing from the README photos row")
+
 
 class DamagedConfigTest(unittest.TestCase):
     def test_both_copies_damaged_is_a_clear_error(self):

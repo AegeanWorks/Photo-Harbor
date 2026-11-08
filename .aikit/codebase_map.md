@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `700`
-- **Total Source Lines**: `11487`
+- **Total Class Methods**: `701`
+- **Total Source Lines**: `11497`
 
 ---
 
@@ -1395,7 +1395,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `918` lines (`43176` bytes)
+**Size**: `928` lines (`43852` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1495,6 +1495,7 @@
   - Method `.test_details_corrupt_exif_returns_file_facts()`
 - `class ReadmeApiTest`
   - Method `.test_every_registered_route_is_in_the_http_api_table()`
+  - Method `.test_every_photo_filter_is_in_the_photos_row()`
 - `class DamagedConfigTest`
   - Method `.test_both_copies_damaged_is_a_clear_error()`
 

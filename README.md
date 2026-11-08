@@ -252,16 +252,16 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&tag=ID&place=LAT,LON&camera=NAME&lens=NAME&order=newest\|oldest\|largest\|smallest]` | gallery page; `place` rounds to one decimal; `camera`/`lens` are stored EXIF strings; archived photos are hidden unless `archived=1`; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&tag=ID&place=LAT,LON&camera=NAME&lens=NAME&format=TYPE&missing=date\|place\|camera\|lens&order=newest\|recent\|oldest\|largest\|smallest]` | gallery page; `place` rounds to one decimal; `camera`/`lens` are stored EXIF strings; archived hidden unless `archived=1`; non-owners get their own |
 | `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
-| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256 \| sha256s, member}` adds/removes album photos; `{sha256 \| sha256s, favorite}` marks favorites; at most 500 hashes per call |
+| `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256 \| sha256s, member}` adds/removes album photos; `{sha256 \| sha256s, favorite}` marks favorites; max 500 hashes per call |
 | `POST /api/archive` | `{sha256 \| sha256s, archived: true\|false}` hides or restores your copies; at most 500 hashes per call |
 | `GET /api/tags`, `POST /api/tags` | your tags with counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
-| `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
-| `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200 per call; build rebuilds in background |
-| `POST /api/sidecar` | `{sha256 \| sha256s, format: json\|xmp}` returns a ZIP of read-only metadata sidecars |
-| `GET /api/folders` | read-only person/year/month folder tree with counts and real paths, limited to the signed-in viewer |
+| `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` a tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
+| `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200; build recomputes the cache |
+| `POST /api/sidecar` | `{sha256 \| sha256s, format: json\|xmp}` returns a ZIP of JSON/XMP sidecars |
+| `GET /api/folders` | read-only person/year/month folder tree with counts and real paths, limited to the viewer |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
