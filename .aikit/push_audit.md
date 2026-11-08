@@ -171,7 +171,17 @@ audit output and do not extend the numbered target.
   copies and flag sharing; trash is excluded from both.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 16 - pushes 33-80
+
+- Range: `2f01b2b` (push 33), `e7764d2` (push 34), `f0133e0` (push 35), plus the last 45
+  pushes.
+- Reviewed: stored ZIPs for a selection or album, one-time tokens, expiry, size/free-space
+  limits, unique entry names, missing-archive 404 and stale-archive cleanup.
+- Finding: none actionable. Tokens are per person and one-time; entry names are case- and
+  normalization-safe; an empty, oversized or vanished selection gives a clear refusal.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 15 (pushes 36-80).
-- Next run: last 48 pushes, adding pushes 33-35.
+- Runs completed: 16 (pushes 33-80).
+- Next run: last 51 pushes, adding pushes 30-32.
