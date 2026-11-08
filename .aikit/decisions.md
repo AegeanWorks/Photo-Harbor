@@ -1010,3 +1010,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Large libraries can be navigated by year and month without loading every
   page. The day grid remains paginated with lazy images; true virtual scrolling stays future
   work.
+
+### ADR-060: The day grid renders only the visible day sections
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Pagination plus lazy images still left every loaded tile in the DOM; scrolling a
+  50k library toward the end would grow the DOM without bound.
+- **Decision**: Keep `state.photos` as the source of truth and turn day groups into metadata
+  with computed placeholder heights. A tall relative `#days` container preserves the scrollbar;
+  only sections within one viewport plus a 1,000/1,200 px buffer exist and are absolutely
+  positioned. A scroll/resize scheduler refreshes the window. Selection, favorites, viewer
+  indices and the sentinel all use the in-memory list, and tile creation still applies current
+  selection/favorite state. No schema or API change.
+- **Consequences**: DOM size and rendering work stay bounded for large libraries. Exact
+  placeholder heights depend on the existing fixed tile aspect and gap; a style change to tile
+  sizing must update the layout constants.

@@ -115,6 +115,8 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 
 /* Photo days */
 .day { margin-top: 18px; }
+.virtual-day { position: absolute; left: 0; right: 0; margin-top: 0; }
+.virtual-day .day-head { height: 42px; box-sizing: border-box; }
 .day-head {
   position: sticky; top: var(--topbar-h, 61px); z-index: 5;
   display: flex; align-items: baseline; gap: 10px; padding: 10px 2px 8px;

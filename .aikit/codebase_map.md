@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `81`
-- **Total Classes**: `161`
+- **Total Classes**: `162`
 - **Total Top-Level Functions**: `125`
-- **Total Class Methods**: `656`
-- **Total Source Lines**: `10802`
+- **Total Class Methods**: `657`
+- **Total Source Lines**: `10815`
 
 ---
 
@@ -1348,7 +1348,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `735` lines (`33416` bytes)
+**Size**: `748` lines (`34146` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1406,6 +1406,8 @@
   - Method `.test_read_only_folders_view_is_wired()`
 - `class ScrubberUiTest`
   - Method `.test_timeline_scrubber_is_wired_to_outline_months()`
+- `class VirtualGridUiTest`
+  - Method `.test_day_grid_is_windowed_and_keeps_scroll_height()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

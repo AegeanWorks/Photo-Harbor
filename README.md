@@ -174,6 +174,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   once. The **Cameras** and **Lenses** rails list each value with a count; clicking one narrows
   the gallery, and **Details** shows both too. This needs Pillow for the EXIF read, works fully
   offline, and composes with the other filters.
+- **Virtual day grid.** Only nearby day sections exist; placeholder heights keep the scrollbar
+  stable. This bounds a 50,000-photo gallery while selection, favorites, viewer indices and the
+  sentinel use the in-memory list.
 - **Jump through the timeline.** A scrubber above the gallery offers **Year** and **Month**
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps directly to a month without loading the whole library, and the sidebar and scrubber

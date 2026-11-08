@@ -15,7 +15,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Multi-user | Per-person profiles, keys, private galleries | - | Keep |
 | Albums | Personal albums and favorites | - | Keep |
 | Shared albums / public sharing | No | Low: home-network privacy is the product promise; public links add auth and abuse surface | Not now |
-| Scrubbable bar / virtual scroll | Year/month scrubber over outline months; paginated day grid stays virtualized by lazy images | Virtual scroll remains later | **Scrubber implemented now** |
+| Scrubbable bar / virtual scroll | Year/month scrubber plus windowed day sections with placeholder heights | - | **Implemented now** |
 | RAW / 360 / LivePhoto / MotionPhoto | HEIC via optional Pillow; no RAW/360/pairing | Low-medium: needs decoders or paired-file model | Not now |
 | Metadata view (EXIF, map) | EXIF facts; GPS point and Places rail, no map | Medium: GPS extraction and coarse place grouping are local; map tiles would be a network dependency | **Places implemented**, map later |
 | Search by metadata/objects/faces/CLIP | File-name, date, person, album, tag, place, camera and lens filters; no ML | Low for ML (RAM/CPU/extra services); local metadata search is worthwhile | **Camera/lens search implemented**, ML later |
@@ -71,6 +71,14 @@ tags, stored GPS point, camera, lens and file facts. The selection bar offers bo
 viewer's **Sidecar** button exports JSON. Originals are never modified and no sidecar is written
 back to the library folders.
 
+## Implemented in this pass: Virtual day grid
+
+The Photos grid now keeps only day sections intersecting the viewport (plus a buffer) in the
+DOM. `state.photos` remains the source of truth; each day has a computed placeholder height and
+windowed sections are positioned absolutely inside a tall `#days` container. Scroll and resize
+refresh the window, while selection, favorites, viewer indices and the sentinel continue to use
+the in-memory list. A 50k synthetic run keeps the tile count bounded.
+
 ## Implemented in this pass: Timeline scrubber
 
 The Photos view now has a **Year/Month** scrubber plus **Newer** and **Older** buttons derived
@@ -112,13 +120,14 @@ camera/lens facts. Archived photos leave both counts; no ML, network or file rew
 ## Decision summary
 
 Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review, sidecars,
-an offline map, a read-only Folders tab and a year/month timeline scrubber**. All ten reuse local
-data, avoid ML services and network dependencies, and never move or rewrite originals. Archive
-and Tags add only private per-person marks; Places stores the camera's point once; Cameras stores
-the EXIF make/model and lens once; Similar uses an optional perceptual hash cache and is
-read-only; sidecars are generated in memory; the map is an embedded SVG outline; Folders mirrors
-the existing disk layout; the scrubber reads outline months. They compose with the existing
-person, album, date, kind, name and sort filters.
+an offline map, a read-only Folders tab, a year/month timeline scrubber and a virtualized day
+grid**. All eleven reuse local data, avoid ML services and network dependencies, and never move
+or rewrite originals. Archive and Tags add only private per-person marks; Places stores the
+camera's point once; Cameras stores the EXIF make/model and lens once; Similar uses an optional
+perceptual hash cache and is read-only; sidecars are generated in memory; the map is an embedded
+SVG outline; Folders mirrors the existing disk layout; the scrubber reads outline months; the
+grid windows day sections. They compose with the existing person, album, date, kind, name and
+sort filters.
 
 Deliberately not now:
 

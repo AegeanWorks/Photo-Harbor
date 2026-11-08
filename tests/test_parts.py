@@ -412,6 +412,19 @@ class ScrubberUiTest(unittest.TestCase):
         self.assertIn("state.months", script)
 
 
+class VirtualGridUiTest(unittest.TestCase):
+    def test_day_grid_is_windowed_and_keeps_scroll_height(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        style = (root / "photo_harbor" / "web" / "app.css").read_text(encoding="utf-8")
+        for symbol in ("dayList", "layoutDays", "renderDay", "unrenderDay",
+                       "renderWindow", "scheduleWindow", "gridTemplateRows"):
+            self.assertIn(symbol, script)
+        self.assertIn("virtual-day", style)
+        self.assertIn("window.addEventListener(\"scroll\", scheduleWindow", script)
+        self.assertIn("window.addEventListener(\"resize\"", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

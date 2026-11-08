@@ -2,9 +2,13 @@
 
 const PAGE = 120;
 const BATCH = 500;
+const TILE_MIN = 150;
+const DAY_HEADER = 42;
+const DAY_GAP = 18;
 const $ = (id) => document.getElementById(id);
 const state = {
-  photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
+  photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(), dayList: [],
+  dayWindowFrame: null,
   scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
     camera: null, lens: null, start: null, end: null, day: null, archived: false,
     order: "newest" },
@@ -175,26 +179,123 @@ function favoriteMark() {
 function dayGroup(date) {
   const key = dayKey(date);
   if (state.dayEls.has(key)) return state.dayEls.get(key);
-  const section = el("section", "day");
-  const head = el("header", "day-head");
-  const count = el("span");
-  head.append(el("h2", "", dayLabel(date)), count);
-  const grid = el("div", "grid");
-  section.append(head, grid);
-  $("days").append(section);
-  const group = { grid, count, n: 0 };
+  const group = { key, photos: [], n: 0, section: null, grid: null, count: null,
+    top: 0, height: 0, rendered: false };
   state.dayEls.set(key, group);
+  state.dayList.push(group);
   return group;
 }
 
+function gridMetrics() {
+  const days = $("days");
+  const width = Math.max(days.clientWidth || days.getBoundingClientRect().width, 1);
+  const gap = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue("--gap")) || 4;
+  const columns = window.innerWidth <= 380 ? 3
+    : Math.max(1, Math.floor((width + gap) / (TILE_MIN + gap)));
+  return { gap, columns, tile: Math.max(1, (width - gap * (columns - 1)) / columns) };
+}
+
+function layoutDays() {
+  const metrics = gridMetrics();
+  let top = 0;
+  for (const group of state.dayList) {
+    const rows = Math.max(1, Math.ceil(group.photos.length / metrics.columns));
+    const gridHeight = group.photos.length
+      ? rows * metrics.tile + (rows - 1) * metrics.gap : 0;
+    group.top = top;
+    group.height = DAY_HEADER + gridHeight + DAY_GAP;
+    top += group.height;
+    if (group.section) {
+      group.section.style.top = `${group.top}px`;
+      group.section.style.height = `${group.height}px`;
+      group.grid.style.height = `${gridHeight}px`;
+      group.grid.style.gridTemplateRows = `repeat(${rows}, ${metrics.tile}px)`;
+    }
+  }
+  const days = $("days");
+  days.style.position = "relative";
+  days.style.height = `${top}px`;
+}
+
+function createDaySection(group) {
+  const section = el("section", "day virtual-day");
+  section.dataset.day = group.key;
+  section.style.top = `${group.top}px`;
+  section.style.height = `${group.height}px`;
+  const head = el("header", "day-head");
+  const count = el("span");
+  const first = group.photos[0]?.photo;
+  head.append(el("h2", "", dayLabel(parseTime(first?.time) || new Date(0))), count);
+  const grid = el("div", "grid");
+  section.append(head, grid);
+  $("days").append(section);
+  group.section = section;
+  group.grid = grid;
+  group.count = count;
+}
+
+function renderDay(group) {
+  if (!group.section) createDaySection(group);
+  group.count.textContent = String(group.photos.length);
+  group.grid.replaceChildren(...group.photos.map((item) => tile(item.photo, item.index)));
+  const metrics = gridMetrics();
+  const rows = Math.max(1, Math.ceil(group.photos.length / metrics.columns));
+  group.grid.style.height = group.photos.length
+    ? `${rows * metrics.tile + (rows - 1) * metrics.gap}px` : "0px";
+  group.grid.style.gridTemplateRows = `repeat(${rows}, ${metrics.tile}px)`;
+  group.rendered = true;
+}
+
+function unrenderDay(group) {
+  if (group.section) group.section.remove();
+  group.section = null;
+  group.grid = null;
+  group.count = null;
+  group.rendered = false;
+}
+
+function renderWindow() {
+  if (state.dayList.length === 0) {
+    $("days").style.height = "0px";
+    return;
+  }
+  const days = $("days");
+  const origin = days.getBoundingClientRect().top + window.scrollY;
+  const top = window.scrollY - 1000;
+  const bottom = window.scrollY + window.innerHeight + 1200;
+  for (const group of state.dayList) {
+    const sectionTop = origin + group.top;
+    const sectionBottom = sectionTop + group.height;
+    const visible = sectionBottom >= top && sectionTop <= bottom;
+    if (visible && !group.rendered) renderDay(group);
+    else if (!visible && group.rendered) unrenderDay(group);
+  }
+}
+
+function scheduleWindow() {
+  if (state.dayWindowFrame !== null) return;
+  state.dayWindowFrame = requestAnimationFrame(() => {
+    state.dayWindowFrame = null;
+    renderWindow();
+  });
+}
+
 function addPhotos(photos) {
+  const touched = new Set();
   for (const photo of photos) {
     const index = state.photos.push(photo) - 1;
     const group = dayGroup(parseTime(photo.time) || new Date(0));
-    group.grid.append(tile(photo, index));
+    group.photos.push({ photo, index });
     group.n += 1;
-    group.count.textContent = String(group.n);
+    touched.add(group);
   }
+  for (const group of touched) {
+    if (group.count) group.count.textContent = String(group.photos.length);
+    if (group.rendered) renderDay(group);
+  }
+  layoutDays();
+  renderWindow();
 }
 
 function filterParams() {
@@ -251,7 +352,13 @@ function resetPhotos() {
   state.photos = [];
   state.next = 0;
   state.dayEls.clear();
+  state.dayList = [];
+  if (state.dayWindowFrame !== null) {
+    cancelAnimationFrame(state.dayWindowFrame);
+    state.dayWindowFrame = null;
+  }
   $("days").replaceChildren();
+  $("days").style.height = "0px";
   return loadMore();
 }
 
@@ -2180,6 +2287,7 @@ function show(view) {
   if (view === "similar") loadSimilar().catch(handle);
   if (view === "map") loadMap().catch(handle);
   if (view === "trash") loadTrash().catch(handle);
+  if (view === "photos") scheduleWindow();
   try { localStorage.setItem("harbor-view", view); } catch (_) { /* private mode */ }
 }
 
@@ -2203,6 +2311,11 @@ function wireShell() {
   new IntersectionObserver((entries) => {
     if (entries.some((entry) => entry.isIntersecting)) loadMore();
   }, { rootMargin: "1200px" }).observe($("sentinel"));
+  window.addEventListener("scroll", scheduleWindow, { passive: true });
+  window.addEventListener("resize", () => {
+    layoutDays();
+    scheduleWindow();
+  });
   const bar = document.querySelector(".topbar");
   new ResizeObserver(() => {
     document.documentElement.style.setProperty("--topbar-h", `${bar.offsetHeight}px`);
