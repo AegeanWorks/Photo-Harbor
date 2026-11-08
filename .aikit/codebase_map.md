@@ -10,7 +10,7 @@
 - **Total Classes**: `162`
 - **Total Top-Level Functions**: `125`
 - **Total Class Methods**: `657`
-- **Total Source Lines**: `10822`
+- **Total Source Lines**: `10826`
 
 ---
 
@@ -1511,7 +1511,7 @@
 ### [`tests/test_scale.py`](tests/test_scale.py)
 > *Starting with Windows, and the pieces that keep large libraries fast.*
 
-**Size**: `172` lines (`6197` bytes)
+**Size**: `176` lines (`6349` bytes)
 
 **Classes:**
 - `class _FakeRunKey`
