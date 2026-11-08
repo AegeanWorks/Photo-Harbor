@@ -1,49 +1,17 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-band-6",
+    "task_id": "push-audit-final",
     "last_phase": "verification",
     "active_phase": 5,
     "status": "completed",
-    "updated_at": 1794113388.4104655,
+    "updated_at": 1794113889.4223478,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": [],
-    "completed_at": 1794113388.7299082
+    "completed_at": 1794113890.0104752
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-3",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[5/6] Correction to Run 14: the CLI OSError decision is ADR-042 (the next free ID), not ADR-043; no code change",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112485.0994651,
-      "timestamp_str": "2026-11-08 07:34:45",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-3",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[6/6] Run 15 (pushes 36-80): storage totals and per-person shares reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112546.8815036,
-      "timestamp_str": "2026-11-08 07:35:46",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-3",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'push-audit-band-3' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794112547.202878,
-      "timestamp_str": "2026-11-08 07:35:47",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-4",
       "phase": "planning",
@@ -247,6 +215,45 @@
       "status": "completed",
       "timestamp": 1794113388.7299106,
       "timestamp_str": "2026-11-08 07:49:48",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-final",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/1] Final run 27 (pushes 1-2): audit the original core, fix full-disk upload handling, verify 217 tests and 4/4 gates, publish, and close the retrospective at the beginning",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794113624.9501793,
+      "timestamp_str": "2026-11-08 07:53:44",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The expanding window has reached the first historical pushes; Run 27 must close the objective at push 1",
+        "benefits": "The initial ingest/account feature set is verified against today's tree and a disk-full upload can no longer 500",
+        "risks": "contract: upload error status on write failure; dependency: stdlib only; concurrency: unchanged; state: temp file cleanup unchanged",
+        "mitigation": "Failing-first injected full-disk test, keep the pre-flight capacity check, run the full suite and gates, record ADR-043 and the final audit status"
+      },
+      "plan_digest": "fbf9b45a49c78d8805956b57ce6be8ab7b754c155f1a6d33faf81f7a1a2d1da7"
+    },
+    {
+      "task_id": "push-audit-final",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[1/1] Run 27 (pushes 1-80): full-disk upload now returns 507 with no partial file; 217 tests; 4/4 gates; checklists: passed; ADR-043; audit reached push 1",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794113889.4223478,
+      "timestamp_str": "2026-11-08 07:58:09",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-final",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-audit-final' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794113890.0104778,
+      "timestamp_str": "2026-11-08 07:58:10",
       "agent": "opencode:deepseek"
     }
   ]

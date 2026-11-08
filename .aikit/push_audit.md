@@ -273,7 +273,18 @@ audit output and do not extend the numbered target.
 - Finding: none actionable; LICENSE, REUSE and README agree.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 27 - pushes 1-80
+
+- Range: `425c1b6` (push 1), `9ead7a1` (push 2), plus the last 78 pushes.
+- Reviewed: the original hash-verified ingest, Shortcut sync, per-person accounts/folders,
+  scanner, backup, gallery and the initial browser surface.
+- Finding: a chunked/unknown-length upload (or a race) could hit `OSError` from `write`, `flush`
+  or `fsync` and become a 500 traceback instead of 507.
+- Fix: map temp open/write/flush/fsync `OSError` to a 507 HarborError; regression injects a
+  full-disk writer. ADR-043.
+- Verification: 217 tests OK; project check 4/4 gates.
+
 ## Status
 
-- Runs completed: 26 (pushes 3-80).
-- Next run: the beginning, pushes 1-2 (original Shortcut sync, accounts, per-person folders).
+- Runs completed: 27 of 27 (pushes 1-80). The window has reached the beginning.
+- The full historical push range is recorded above; all runs ended in a fix or a clean record.

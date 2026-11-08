@@ -770,3 +770,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   misuse still exits 2.
 - **Consequences**: A backup or import that hits an unreadable file explains how to recover
   instead of dumping a stack. The original exception text remains in the Why line.
+
+### ADR-043: A full drive during upload is a clear 507
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `PhotoStore._receive` checked free space before a known-length upload, but a
+  chunked/unknown-length upload or a race could make `write`, `flush` or `fsync` raise
+  `OSError`. That escaped the HTTP handler as a 500 traceback instead of the documented 507.
+- **Decision**: The temp `open`, every block `write`, `flush` and `fsync` map `OSError` to a
+  HarborError with status 507 and the drive remedy; the existing `finally` removes the temp.
+- **Consequences**: A full drive answers 507 with Error/Why/Fix and stores nothing partial.
+  The pre-flight free-space check stays as the fast path for known lengths.

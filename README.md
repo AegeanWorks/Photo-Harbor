@@ -74,7 +74,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   fingerprint compared. Damaged files are listed in the activity log, never deleted; sending the
   photo again (or the next sync) repairs them.
 - **Low disk warning.** Under 20 GB free (or 10 % of the drive) the window and the photo browser
-  say so.
+  say so. An upload that meets a full drive is refused with 507 and leaves no partial file.
 - **Import from this PC.** **Import folder…** in the window, `python -m photo_harbor import
   <folder> --profile <id>`, or **Upload → A whole folder…** in a desktop browser. Subfolders
   are scanned, hidden folders and non-media files skipped, the source is never changed, and

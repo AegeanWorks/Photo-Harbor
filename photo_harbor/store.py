@@ -194,20 +194,26 @@ class PhotoStore:
         digest = hashlib.sha256()
         received = 0
         limit = MAX_UPLOAD_BYTES if length is None else length
-        with open(tmp, "wb") as handle:
-            while received < limit:
-                try:
-                    block = stream.read(min(CHUNK, limit - received))
-                except OSError as exc:
-                    raise HarborError("the upload stopped early", f"the connection failed: {exc}",
-                                      "keep the phone on Wi-Fi; the next sync sends it again") from exc
-                if not block:
-                    break
-                digest.update(block)
-                handle.write(block)
-                received += len(block)
-            handle.flush()
-            os.fsync(handle.fileno())
+        try:
+            with open(tmp, "wb") as handle:
+                while received < limit:
+                    try:
+                        block = stream.read(min(CHUNK, limit - received))
+                    except OSError as exc:
+                        raise HarborError("the upload stopped early", f"the connection failed: {exc}",
+                                          "keep the phone on Wi-Fi; the next sync sends it again") from exc
+                    if not block:
+                        break
+                    digest.update(block)
+                    handle.write(block)
+                    received += len(block)
+                handle.flush()
+                os.fsync(handle.fileno())
+        except OSError as exc:
+            raise HarborError("the upload could not be written",
+                              f"the library drive reported: {exc}",
+                              "free space on the library drive, then sync again",
+                              status=507) from exc
         if length is None and received == limit and stream.read(1):
             raise HarborError("an upload was refused", f"it is larger than {MAX_UPLOAD_BYTES} bytes",
                               "send files smaller than 16 GiB", status=413)

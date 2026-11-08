@@ -44,6 +44,24 @@ class IngestTest(unittest.TestCase):
             self.lib.store.ingest(io.BytesIO(b"abc"), 10, claim)
         self.assertEqual(list((self.lib.root / ".harbor" / "incoming").iterdir()), [])
 
+    def test_a_full_disk_during_upload_is_a_clear_507(self):
+        from unittest.mock import patch
+
+        class FullDisk:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *args):
+                return False
+
+            def write(self, data):
+                raise OSError(28, "No space left on device")
+
+        with patch("builtins.open", return_value=FullDisk()):
+            with self.assertRaises(HarborError) as caught:
+                self.lib.store.ingest(io.BytesIO(b"x"), 1, UploadClaim("full.jpg"))
+        self.assertEqual(caught.exception.status, 507)
+
     def test_a_malformed_hash_is_a_usage_error(self):
         with self.assertRaises(HarborError) as caught:
             self.lib.store.ingest(io.BytesIO(b"x"), 1, UploadClaim("a.jpg", sha256="abc"))

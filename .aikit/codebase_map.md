@@ -9,8 +9,8 @@
 - **Total Python Modules**: `63`
 - **Total Classes**: `119`
 - **Total Top-Level Functions**: `103`
-- **Total Class Methods**: `511`
-- **Total Source Lines**: `8483`
+- **Total Class Methods**: `512`
+- **Total Source Lines**: `8507`
 
 ---
 
@@ -766,7 +766,7 @@
 ### [`photo_harbor/store.py`](photo_harbor/store.py)
 > *Receives originals, proves their bytes against the phone's hash, and re-proves them on request.*
 
-**Size**: `346` lines (`15925` bytes)
+**Size**: `352` lines (`16291` bytes)
 
 **Classes:**
 - `class PhotoStore`
@@ -1276,7 +1276,7 @@
 ---
 
 ### [`tests/test_store.py`](tests/test_store.py)
-**Size**: `232` lines (`10521` bytes)
+**Size**: `250` lines (`11136` bytes)
 
 **Classes:**
 - `class IngestTest`
@@ -1286,6 +1286,7 @@
   - Method `.test_a_name_clash_with_different_bytes_gets_a_hash_suffix()`
   - Method `.test_hash_mismatch_keeps_nothing()`
   - Method `.test_a_short_body_is_refused_and_leaves_no_temp_file()`
+  - Method `.test_a_full_disk_during_upload_is_a_clear_507()`
   - Method `.test_a_malformed_hash_is_a_usage_error()`
   - Method `.test_ensure_copy_returns_false_when_source_vanishes()`
   - Method `.test_copy_fallback_fsyncs_before_replace()`
