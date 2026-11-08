@@ -109,7 +109,17 @@ audit output and do not extend the numbered target.
   boundaries are disabled and the dialog carries `aria-modal`; no current regression found.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 10 - pushes 51-80
+
+- Range: `43fc394` (push 51), `644a5bf` (push 52), `fb1130a` (push 53), plus the last 27
+  pushes.
+- Reviewed: search as a narrowing axis, multi-word matching, escaping, the title/count and
+  "Show everything" reset, plus the previous runs.
+- Finding: none actionable. Scope is preserved, every word is ANDed with the existing filters
+  and the LIKE escape still protects `%` and `_`.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 9 (pushes 54-80).
-- Next run: last 30 pushes, adding pushes 51-53.
+- Runs completed: 10 (pushes 51-80).
+- Next run: last 33 pushes, adding pushes 48-50.

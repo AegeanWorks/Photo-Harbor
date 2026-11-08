@@ -1,56 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-band-2",
-    "last_phase": "verification",
-    "active_phase": 4,
+    "task_id": "push-audit-band-3",
+    "last_phase": "planning",
+    "active_phase": 2,
     "status": "in_progress",
-    "updated_at": 1794111399.7497127,
+    "updated_at": 1794111476.2525144,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "impact_assessment": {
+      "why": "The retrospective audit continues backward; band 3 adds pushes 48-50 through 33-35, including the date, sort, trash, album-cover and select-matching features",
+      "benefits": "Older feature commits are re-validated against the current tree with attributed fixes and a durable audit record",
+      "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+      "mitigation": "Review each batch diff, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-stale-buffers",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/4] Plan: make startup temp cleanup age-based so a running Harbor's fresh upload buffer or prepared ZIP is never deleted by a CLI import/second instance; failing-first tests, README/ADR-033",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794106099.024236,
-      "timestamp_str": "2026-11-08 05:48:19",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "PhotoStore.__init__ unlinks every .tmp_upload_* in .harbor/incoming and Downloads.clean unlinks every .zip in .harbor/downloads. A CLI import constructs a second HarborApp against the same library while the server is running, so its startup cleanup can delete the server's in-progress upload or a prepared download that has a live token",
-        "benefits": "Starting a CLI command or a second Harbor window no longer breaks an upload or download already in flight; only abandoned buffers older than the cleanup threshold are removed",
-        "risks": "contract: cleanup timing changes, not the paths or API; dependency: stdlib only; concurrency: age check narrows the cross-process window without pretending to lock across processes; state: stale files may live up to the threshold instead of being deleted immediately",
-        "mitigation": "Use a six-hour age gate for uploads and a one-hour gate for downloads (their tokens expire in 15 minutes), test fresh versus stale buffers, keep unlink failures non-fatal, run the full suite and 4/4 gates, and record ADR-033"
-      },
-      "plan_digest": "4504a3d9d59c097e93815776d34738c31bde6f218e0d70fa7a81d5d342e2bad9"
-    },
-    {
-      "task_id": "harbor-stale-buffers",
-      "phase": "implementation",
-      "phase_num": 3,
-      "description": "[2/4] Failing-first fresh/stale buffer tests went red, then six-hour upload and one-hour download age gates landed; active writers and fresh tokens survive startup, old crash leftovers are still cleaned",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794106288.9807923,
-      "timestamp_str": "2026-11-08 05:51:28",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "harbor-stale-buffers",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/4] README concurrency notes and tree, ADR-033, refreshed map; 207 tests OK; project check 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794106289.8281453,
-      "timestamp_str": "2026-11-08 05:51:29",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-stale-buffers",
       "phase": "completed",
@@ -255,6 +221,45 @@
       "timestamp": 1794111399.7497127,
       "timestamp_str": "2026-11-08 07:16:39",
       "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[6/6] Run 10 (pushes 51-80): search scope reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed; clean run recorded",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111468.9182055,
+      "timestamp_str": "2026-11-08 07:17:48",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-2",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-audit-band-2' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794111469.2562432,
+      "timestamp_str": "2026-11-08 07:17:49",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Audit band 3: runs 11-16, expanding from the newest 33 to the newest 48 historical pushes (pushes 33-80); review each 3-push batch, fix current defects, verify and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794111476.2525144,
+      "timestamp_str": "2026-11-08 07:17:56",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The retrospective audit continues backward; band 3 adds pushes 48-50 through 33-35, including the date, sort, trash, album-cover and select-matching features",
+        "benefits": "Older feature commits are re-validated against the current tree with attributed fixes and a durable audit record",
+        "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+        "mitigation": "Review each batch diff, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
+      },
+      "plan_digest": "18ad873b4dd14e111b29469a6de5c3c734272d90110392cbbff12cbca9687700"
     }
   ]
 }
