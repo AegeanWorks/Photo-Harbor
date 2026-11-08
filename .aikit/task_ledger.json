@@ -3,31 +3,15 @@
   "active_task": {
     "task_id": "shrink-close-connection",
     "last_phase": "phase 4",
-    "active_phase": 4,
-    "status": "in_progress",
+    "active_phase": 5,
+    "status": "completed",
     "updated_at": 1794163262.3865244,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794163372.7663765
   },
   "checkpoints": [
-    {
-      "task_id": "docs-api-table-coverage",
-      "phase": "phase 1",
-      "phase_num": 1,
-      "description": "[1/2] Plan: document the two routes the README table omits (/api/integrity, /api/activity), add a drift test over registered routes, keep README under the 32,500-char cap",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794155279.6084702,
-      "timestamp_str": "2026-11-08 19:27:59",
-      "agent": "commandcode:vscode",
-      "impact_assessment": {
-        "why": "The HTTP API table is the only reference for integrators; two registered endpoints are absent, so a reader cannot discover them.",
-        "benefits": "Complete API reference; a test stops future routes from landing undocumented; no runtime change.",
-        "risks": "contract: none, docs and tests only; dependency: none; concurrency: none; state: README is 3 chars under its size cap, so new rows need trimming.",
-        "mitigation": "compact the new rows, trim redundant table prose, verify the guard fails without the fix and passes with it, run all four gates."
-      }
-    },
     {
       "task_id": "docs-api-table-coverage",
       "phase": "phase 4",
@@ -265,6 +249,16 @@
       "status": "in_progress",
       "timestamp": 1794163262.3865244,
       "timestamp_str": "2026-11-08 21:41:02",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "shrink-close-connection",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'shrink-close-connection' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794163372.766378,
+      "timestamp_str": "2026-11-08 21:42:52",
       "agent": "commandcode:vscode"
     }
   ]
