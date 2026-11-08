@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `697`
-- **Total Source Lines**: `11430`
+- **Total Class Methods**: `698`
+- **Total Source Lines**: `11455`
 
 ---
 
@@ -576,7 +576,7 @@
 ### [`photo_harbor/journal.py`](photo_harbor/journal.py)
 > *What the phone did and when: uploads, finished syncs and photos the PC lacked at cleanup.*
 
-**Size**: `108` lines (`5015` bytes)
+**Size**: `115` lines (`5378` bytes)
 
 **Classes:**
 - `class SyncJournal`
@@ -588,7 +588,7 @@
   - Method `.counts_since(since, profile)`
   - Method `.missing(limit, profile)` - *Photos a phone holds that the PC still lacks, newest report first; one person's*
   - Method `.last_check()` - *The latest full file check summary, or None before the first real check.*
-  - Method `.damaged(limit)` - *Latest damage per path for files still catalogued, newest first.*
+  - Method `.damaged(limit)` - *Latest outstanding damage per path, newest first.*
 
 ---
 
@@ -1271,7 +1271,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1181` lines (`66525` bytes)
+**Size**: `1198` lines (`67449` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1326,6 +1326,7 @@
   - Method `.test_missing_metadata_filter_narrows_to_gaps()`
   - Method `.test_missing_metadata_filter_respects_person_scope()`
   - Method `.test_integrity_status_is_owner_only_and_reads_the_journal()`
+  - Method `.test_integrity_forgets_damage_that_a_later_upload_repaired()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1393,7 +1394,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `917` lines (`43086` bytes)
+**Size**: `918` lines (`43176` bytes)
 
 **Classes:**
 - `class RangeTest`

@@ -555,7 +555,8 @@ class HealthUiTest(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
         for text in ('state.owner ? api("/api/integrity")', "integrity.last",
-                     '"Integrity"', "No damaged files reported.", "Check all files"):
+                     '"Integrity"', "No damaged files reported.", "Check all files",
+                     '"Damaged then"', "Every damaged file has since been stored again."):
             self.assertIn(text, script)
 
     def test_start_loads_people_before_the_persisted_view(self):

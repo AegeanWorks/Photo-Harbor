@@ -245,7 +245,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/android` | served APK availability, version, version code, size, SHA-256 and install page |
 | `GET /api/storage` `[?profile=]` | file/byte totals, photo/video split, shared count, per-person shares and the ten largest files |
 | `GET /api/backup` | owner: configured target, last attempt, copied/unchanged bytes and any error |
-| `GET /api/integrity` | owner: latest full file check and damage paths |
+| `GET /api/integrity` | owner: latest full check and outstanding damage |
 | `GET /api/activity` `[?limit=]` | recent events, newest first (max 500) |
 | `GET /api/people`, `POST /api/login`, `POST /api/logout` | public sign-in: names; `{profile, password}` or `{key}` → session cookie |
 | `POST /api/password` | your own password: `{current, new}` (`current` only once one is set) |

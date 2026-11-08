@@ -794,6 +794,23 @@ class ServerTest(unittest.TestCase):
                                 headers={"X-Harbor-Key": ayse["key"]})
         self.assertEqual(response.status, 403)
 
+    def test_integrity_forgets_damage_that_a_later_upload_repaired(self):
+        self.upload(b"one", name="one.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.executemany(
+                "INSERT INTO events (at, kind, sha256, detail, profile) VALUES (?, ?, ?, ?, ?)",
+                [("2026-05-02T10:00:00", "damaged", one,
+                  "Main/2026/2026-05/one.jpg", "main")])
+        _, body = self.call("GET", "/api/integrity")
+        self.assertEqual([item["sha256"] for item in json.loads(body)["damaged"]], [one])
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "INSERT INTO events (at, kind, sha256, detail, profile) VALUES (?, ?, ?, ?, ?)",
+                ("2026-05-03T10:00:00", "stored", one, "one.jpg", "main"))
+        _, body = self.call("GET", "/api/integrity")
+        self.assertEqual(json.loads(body)["damaged"], [])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

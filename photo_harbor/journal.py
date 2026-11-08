@@ -12,6 +12,7 @@ SYNC_DONE = "sync_done"
 MISSING = "missing"
 CHECKED = "checked"
 DAMAGED = "damaged"
+DAMAGE_LIMIT = 200
 
 
 class SyncJournal:
@@ -96,13 +97,19 @@ class SyncJournal:
         return {"at": row[0], "checked": int(match.group(1)),
                 "damaged": int(match.group(2))}
 
-    def damaged(self, limit: int = 200) -> list:
-        """Latest damage per path for files still catalogued, newest first."""
+    def damaged(self, limit: int = DAMAGE_LIMIT) -> list:
+        """Latest outstanding damage per path, newest first.
+
+        Damage is outstanding only until the photo is stored again: a re-upload or a
+        repaired copy records ``stored``/``duplicate`` after the damage event.
+        """
         with self._db.lock:
             rows = self._db.conn.execute(
-                "SELECT detail, MAX(at) AS at, sha256 FROM events"
-                " WHERE kind = ? AND detail IS NOT NULL"
-                " AND sha256 IN (SELECT sha256 FROM photos)"
-                " GROUP BY detail ORDER BY at DESC LIMIT ?",
-                (DAMAGED, limit)).fetchall()
+                "SELECT d.detail, MAX(d.at) AS at, d.sha256 FROM events d"
+                " WHERE d.kind = ? AND d.detail IS NOT NULL"
+                " AND d.sha256 IN (SELECT sha256 FROM photos)"
+                " AND NOT EXISTS (SELECT 1 FROM events r WHERE r.sha256 = d.sha256"
+                " AND r.kind IN (?, ?) AND r.id > d.id)"
+                " GROUP BY d.detail ORDER BY at DESC LIMIT ?",
+                (DAMAGED, STORED, DUPLICATE, limit)).fetchall()
         return [{"path": row[0], "at": row[1], "sha256": row[2]} for row in rows]

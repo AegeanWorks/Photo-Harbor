@@ -1021,9 +1021,11 @@ async function loadHealth() {
     integrityPanel.append(
       healthRow("Last check", ago(integrity.last.at)),
       healthRow("Checked", integrity.last.checked.toLocaleString()),
-      healthRow("Damaged", integrity.last.damaged.toLocaleString(), integrity.last.damaged > 0));
+      healthRow("Damaged then", integrity.last.damaged.toLocaleString(), integrity.last.damaged > 0));
     if (integrity.damaged.length === 0) {
-      integrityPanel.append(el("p", "hint", "No damaged files reported."));
+      integrityPanel.append(el("p", "hint", integrity.last.damaged > 0
+        ? "Every damaged file has since been stored again."
+        : "No damaged files reported."));
     } else {
       for (const item of integrity.damaged.slice(0, 10)) {
         integrityPanel.append(healthRow(item.path, ago(item.at), true));

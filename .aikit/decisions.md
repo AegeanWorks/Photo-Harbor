@@ -1169,3 +1169,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Owners can see trust state from the browser; non-owners never call the
   endpoint. Starting a check stays in the Harbor window, where long-running work and logging
   already live.
+### ADR-074: Damage leaves the Integrity panel when the photo is stored again
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: ADR-073 listed the latest damage event per path while the photo was still
+  catalogued. A damaged file that the person sent again (or restored from Trash) was repaired,
+  yet the Health panel kept calling it damaged for the life of the library, and ADR-073's own
+  guidance says a re-send repairs damage.
+- **Decision**: Report damage only while no later `stored` or `duplicate` event exists for that
+  SHA-256. The latest check summary stays the historical result of that check, so its count is
+  labelled "Damaged then" and a cleared list explains that those files were stored again.
+- **Consequences**: The panel reflects outstanding damage rather than old history; repair needs
+  no extra state, because the ingest events already record it. A file damaged after being
+  stored is listed again by the next check.
