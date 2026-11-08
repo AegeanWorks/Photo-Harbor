@@ -163,7 +163,9 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
             raise HarborError("that place is outside the world",
                               "latitude is -90 to 90 and longitude is -180 to 180",
                               "use ?place=37.0,23.7")
-        place = (round(latitude, 1), round(longitude, 1))
+        # Keep the raw point: the catalog rounds both sides in SQLite so a .x5 value
+        # lands in the same bucket the Places rail lists.
+        place = (latitude, longitude)
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album, tag=tag,
                        place=place, camera=camera, lens=lens, missing=missing,

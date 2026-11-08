@@ -96,8 +96,12 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
                        " WHERE pt.tag_id = ? AND t.profile = ? AND pt.sha256 = p.sha256)")
         params.extend((narrow.tag, narrow.viewer))
     if narrow.place is not None:
+        # Round both sides in SQLite: Python's round() rounds halves to even, SQLite's
+        # ROUND rounds them away from zero, so a .x5 coordinate would otherwise land in a
+        # bucket the outline never lists.
         clauses.append("p.latitude IS NOT NULL AND p.longitude IS NOT NULL"
-                       " AND ROUND(p.latitude, 1) = ? AND ROUND(p.longitude, 1) = ?")
+                       " AND ROUND(p.latitude, 1) = ROUND(?, 1)"
+                       " AND ROUND(p.longitude, 1) = ROUND(?, 1)")
         params.extend(narrow.place)
     if narrow.camera:
         clauses.append("p.camera = ?")

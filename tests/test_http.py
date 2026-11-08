@@ -772,6 +772,23 @@ class ServerTest(unittest.TestCase):
                             headers={"X-Harbor-Key": ayse["key"]})
         self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["hers.jpg"])
 
+    def test_place_filter_buckets_like_the_outline_preview(self):
+        self.upload(b"edge", name="edge.jpg")
+        digest = sha(b"edge")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET latitude = ?, longitude = ? WHERE sha256 = ?",
+                (37.25, 23.72, digest))
+        _, body = self.call("GET", "/api/outline")
+        places = json.loads(body)["places"]
+        keys = {place["key"] for place in places}
+        self.assertIn("37.3,23.7", keys)
+        _, body = self.call("GET", "/api/photos?place=37.3,23.7")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["edge.jpg"])
+        # A pasted exact coordinate must land in the same bucket the rail lists.
+        _, body = self.call("GET", "/api/photos?place=37.25,23.72")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["edge.jpg"])
+
     def test_integrity_status_is_owner_only_and_reads_the_journal(self):
         _, body = self.call("GET", "/api/integrity")
         self.assertEqual(json.loads(body), {"last": None, "damaged": []})

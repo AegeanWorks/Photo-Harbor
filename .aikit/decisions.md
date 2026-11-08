@@ -1182,3 +1182,14 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: The panel reflects outstanding damage rather than old history; repair needs
   no extra state, because the ingest events already record it. A file damaged after being
   stored is listed again by the next check.
+### ADR-075: The place filter rounds both sides in SQLite
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The outline buckets places with SQLite `ROUND`, but `?place=LAT,LON` rounded the
+  request with Python's `round()`. The two disagree on exact halves (SQLite rounds away from
+  zero, Python rounds to even), so `?place=37.25,23.72` asked for 37.2 while the rail listed the
+  photo at 37.3 and returned nothing.
+- **Decision**: Keep the validated raw point in `PhotoFilter.place` and let the catalog apply
+  `ROUND(?, 1)` to the parameter as well as the column, so both sides use one rounding rule.
+- **Consequences**: A pasted exact coordinate opens the same photos the Places rail counts.
+  Malformed and out-of-range values are still rejected at the API boundary before the query.

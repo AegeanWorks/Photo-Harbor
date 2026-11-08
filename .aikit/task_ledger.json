@@ -1,44 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "integrity-repair-clears-damage",
+    "task_id": "place-bucket-agreement",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794157255.6409605,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794159009.4988654,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794157442.2174785
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-format-breakdown",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-format-breakdown' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794151187.6500046,
-      "timestamp_str": "2026-11-08 18:19:47",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "harbor-reject-drain",
-      "phase": "phase 1",
-      "phase_num": 1,
-      "description": "[1/3] Plan: drain small unread request bodies before an early rejection reply so Windows does not reset the connection; add a regression test",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794151296.6658583,
-      "timestamp_str": "2026-11-08 18:21:36",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "A rejected upload can close with unread body bytes, intermittently turning a valid 403 into ConnectionAbortedError and flaking the gate.",
-        "benefits": "Deterministic rejection replies on Windows; no API or schema change; protects keep-alive semantics.",
-        "risks": "Draining attacker-controlled bodies; blocking on slow clients; response ordering.",
-        "mitigation": "bound the drain to 1 MiB, keep the socket timeout, close when the body is larger or chunked, and add a large-body 403 regression test."
-      }
-    },
     {
       "task_id": "harbor-reject-drain",
       "phase": "phase 3",
@@ -255,6 +227,34 @@
       "status": "completed",
       "timestamp": 1794157442.2174807,
       "timestamp_str": "2026-11-08 20:04:02",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "place-bucket-agreement",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: make ?place=LAT,LON round like the outline so a pasted exact coordinate opens the photos the Places rail lists",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794159003.255647,
+      "timestamp_str": "2026-11-08 20:30:03",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "The outline buckets with SQLite ROUND but the request was rounded with Python round(); they disagree on .x5, so a listed place could open an empty view.",
+        "benefits": "One rounding rule for both directions; pasted GPS coordinates work; no schema or endpoint change.",
+        "risks": "contract: ?place accepts raw values (validated before the query); dependency: none; concurrency: none; state: none.",
+        "mitigation": "failing-first HTTP test, SQL ROUND on both sides, keep shape and range validation, ADR-075, gates."
+      }
+    },
+    {
+      "task_id": "place-bucket-agreement",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Place buckets agree: 319 tests OK; 4/4 gates; pasted 37.25,23.72 now matches the 37.3,23.7 bucket; reverting either half fails the test; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794159009.4988654,
+      "timestamp_str": "2026-11-08 20:30:09",
       "agent": "commandcode:vscode"
     }
   ]

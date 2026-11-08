@@ -83,6 +83,15 @@ class PlaceFilterTest(unittest.TestCase):
         page = self.lib.catalog.page(0, 10, PhotoFilter(place=(37.0, 23.7), viewer="main"))
         self.assertEqual(page, [])
 
+    def test_a_half_decimal_point_uses_the_same_bucket_as_the_outline(self):
+        # 37.25 is 37.3 to SQLite's ROUND but 37.2 to Python's banker's round. The
+        # outline and the filter must agree, or a listed place opens an empty view.
+        digest = self._add(b"edge", "edge.jpg", 37.25, 23.72)
+        outline = self.lib.catalog.outline(viewer="main")
+        self.assertIn((37.3, 23.7, 1), outline.places)
+        page = self.lib.catalog.page(0, 10, PhotoFilter(place=(37.3, 23.7), viewer="main"))
+        self.assertEqual([record.sha256 for record in page], [digest])
+
 
 class PlaceMigrationTest(unittest.TestCase):
     def test_a_format_9_catalog_gains_the_gps_columns(self):

@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `698`
-- **Total Source Lines**: `11455`
+- **Total Class Methods**: `700`
+- **Total Source Lines**: `11487`
 
 ---
 
@@ -307,7 +307,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `461` lines (`24160` bytes)
+**Size**: `465` lines (`24425` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -614,7 +614,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `295` lines (`14696` bytes)
+**Size**: `297` lines (`14819` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -1271,7 +1271,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1198` lines (`67449` bytes)
+**Size**: `1215` lines (`68360` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1325,6 +1325,7 @@
   - Method `.test_format_filter_lists_one_media_type()`
   - Method `.test_missing_metadata_filter_narrows_to_gaps()`
   - Method `.test_missing_metadata_filter_respects_person_scope()`
+  - Method `.test_place_filter_buckets_like_the_outline_preview()`
   - Method `.test_integrity_status_is_owner_only_and_reads_the_journal()`
   - Method `.test_integrity_forgets_damage_that_a_later_upload_repaired()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
@@ -1503,7 +1504,7 @@
 ---
 
 ### [`tests/test_places.py`](tests/test_places.py)
-**Size**: `104` lines (`4007` bytes)
+**Size**: `113` lines (`4590` bytes)
 
 **Classes:**
 - `class _Exif`
@@ -1525,6 +1526,7 @@
   - Method `._add(data, name, latitude, longitude)`
   - Method `.test_a_coarse_point_filters_and_lists_places()`
   - Method `.test_archived_photos_leave_places()`
+  - Method `.test_a_half_decimal_point_uses_the_same_bucket_as_the_outline()`
 - `class PlaceMigrationTest`
   - Method `.test_a_format_9_catalog_gains_the_gps_columns()`
 
