@@ -84,6 +84,8 @@
           <button class="rail-item" data-scope="archive" aria-pressed="false"><span>Archive</span><b id="rail-archived">0</b></button>
           <div id="rail-albums" class="rail-years"></div>
           <button class="rail-add" id="album-new" type="button">+ New album</button>
+          <div id="rail-tags" class="rail-years"></div>
+          <button class="rail-add" id="tag-new" type="button">+ New tag</button>
           <div id="rail-years" class="rail-years"></div>
         </aside>
         <div class="gallery">
@@ -124,6 +126,10 @@
             <div class="select-album-wrap">
               <button class="ghost" id="select-album" type="button" aria-haspopup="menu" aria-expanded="false">Add to album…</button>
               <div class="select-albums" id="select-albums" role="menu" hidden></div>
+            </div>
+            <div class="select-album-wrap">
+              <button class="ghost" id="select-tag" type="button" aria-haspopup="menu" aria-expanded="false">Add tag…</button>
+              <div class="select-albums" id="select-tags" role="menu" hidden></div>
             </div>
             <button class="ghost" id="select-clear" type="button">Clear</button>
           </div>
@@ -293,6 +299,7 @@
       <span id="viewer-detail"></span>
       <button class="ghost" id="viewer-favorite" type="button" aria-pressed="false" aria-keyshortcuts="F">♡ Favorite</button>
       <button class="ghost" id="viewer-album-add" type="button">Add to album…</button>
+      <button class="ghost" id="viewer-tag-add" type="button" aria-haspopup="menu" aria-expanded="false">Add tag…</button>
       <button class="ghost" id="viewer-album-remove" type="button" hidden>Remove from album</button>
       <button class="ghost" id="viewer-cover" type="button" hidden>Use as cover</button>
       <button class="ghost" id="viewer-info" type="button" aria-expanded="false" aria-keyshortcuts="I">Details</button>
@@ -301,6 +308,7 @@
       <a id="viewer-download" class="ghost" download>Download original</a>
     </footer>
     <div class="viewer-albums" id="viewer-albums" hidden></div>
+    <div class="viewer-albums" id="viewer-tags" hidden></div>
     <div class="viewer-details" id="viewer-details" hidden></div>
   </div>
 

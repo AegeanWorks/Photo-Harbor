@@ -161,6 +161,11 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **On this day.** The **On this day** button shows photos taken on today's month and day in
   every year, newest first. It combines with the selected person, sort order and search; an empty
   result says so instead of falling back to the whole library.
+- **Tags for quick views.** Each person can create tags and put them on one photo or a whole
+  selection; the sidebar lists **Tags** with counts, and clicking one narrows the gallery to it.
+  Tags are private to the person who made them, never move or copy a file, and disappear from
+  the list with the photo's last copy. Open **Add tag…** in the viewer to add or remove a tag,
+  or **Add tag…** in the selection bar for a batch.
 - **Archive without moving files.** Open a photo or select several and press **Archive** to hide
   them from the timeline. The **Archive** rail view shows only your hidden photos, with
   **Unarchive** to bring them back. Archiving is private to each person, never moves, copies or
@@ -217,11 +222,13 @@ and exit 1; usage errors exit 2.
 | `GET /api/setup`, `POST /api/startup` | address and start-with-Windows state; owner: `{enabled}` |
 | `GET /api/profiles` | owner: everyone; others: themselves (with key, folder, counts, last sync) |
 | `POST /api/profiles`, `POST /api/profiles/<id>` | owner: add `{name, password?}`; `{name}` renames (and the folder), `{password}`, `{new_key: true}` |
-| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; archived photos are hidden unless `archived=1`; non-owners always get their own |
+| `GET /api/photos?offset=&limit=[&month=YYYY-MM&from=YYYY-MM-DD&to=YYYY-MM-DD&day=MM-DD&kind=photo\|video&q=name&profile=id&favorite=1&archived=1&album=ID&tag=ID&order=newest\|oldest\|largest\|smallest]` | gallery page; archived photos are hidden unless `archived=1`; non-owners always get their own |
 | `GET /api/photos/hashes?` + the same filters | every matching hash in order, up to 10,000, with a `truncated` flag |
 | `GET /api/albums`, `POST /api/albums`, `POST /api/albums/<id>` | your albums with counts and covers; create `{name}`; rename `{name}`, delete `{delete: true}`, or choose `{cover: sha256}` |
 | `POST /api/album-photos`, `POST /api/favorite` | `{album, sha256, member}` or `{album, sha256s, member}` adds/removes album photos; `{sha256, favorite}` or `{sha256s, favorite}` marks favorites; at most 500 hashes per call |
 | `POST /api/archive` | `{sha256 \| sha256s, archived: true\|false}` hides or restores your copies; at most 500 hashes per call |
+| `GET /api/tags`, `POST /api/tags` | your tags with visible counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
+| `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
@@ -287,6 +294,8 @@ photo-harbor/
 │   ├── setup_api.py          <- address and key for the Setup tab
 │   ├── store.py              <- hash-verified ingest, re-verification, stale upload cleanup
 │   ├── sync_api.py           <- the endpoints the Shortcuts call
+│   ├── tags.py               <- personal tags and their photo marks
+│   ├── tags_api.py           <- list, create, rename, delete and mark tags
 │   ├── thumbs.py             <- optional Pillow previews, background warmer, cache pruning
 │   ├── trash.py              <- move a copy aside, restore through ingest, delete forever
 │   ├── trash_api.py          <- list, move, restore, delete and empty the trash
@@ -309,6 +318,7 @@ photo-harbor/
     ├── test_scale.py
     ├── test_search.py       <- multi-word search inside the active filters
     ├── test_sort.py         <- newest, oldest, largest and smallest order
+    ├── test_tags.py         <- personal tags and format 8 migration
     ├── test_storage.py      <- whole-library and per-person storage totals
     ├── test_store.py
     └── test_trash.py        <- move, restore, delete and format 6 migration
@@ -317,7 +327,7 @@ photo-harbor/
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 8; an older catalog is upgraded in place after a copy
+`config.json`, `catalog.sqlite3` (format 9; an older catalog is upgraded in place after a copy
 to `catalog.sqlite3.v<N>.bak`), `incoming\`, `thumbs\` and `trash\`.
 
 ## 🚀 Performance

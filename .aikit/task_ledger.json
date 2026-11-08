@@ -5,33 +5,12 @@
     "last_phase": "phase 4",
     "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794131975.6882184,
+    "updated_at": 1794133018.9331684,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-6",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[2/2] Run 26 (pushes 3-80): licensing records reviewed; no code change; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794113388.4104655,
-      "timestamp_str": "2026-11-08 07:49:48",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-band-6",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'push-audit-band-6' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794113388.7299106,
-      "timestamp_str": "2026-11-08 07:49:48",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-final",
       "phase": "planning",
@@ -259,6 +238,28 @@
       "status": "in_progress",
       "timestamp": 1794131975.6882184,
       "timestamp_str": "2026-11-08 12:59:35",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-gap-2",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Tags: format 9 tags/photo_tags, tag=ID filter, GET/POST /api/tags, POST /api/photo-tags, rail filter, viewer and selection apply/remove, tests and docs",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133004.3636458,
+      "timestamp_str": "2026-11-08 13:16:44",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-gap-2",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/3] Tags done: 238 tests OK; 4/4 gates; migration and privacy covered; checklists: passed; UI review next; then Places/near-duplicate assessment",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794133018.9331684,
+      "timestamp_str": "2026-11-08 13:16:58",
       "agent": "opencode:deepseek"
     }
   ]

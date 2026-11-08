@@ -436,6 +436,49 @@ class ServerTest(unittest.TestCase):
         self.assertEqual({p["name"] for p in json.loads(body)["photos"]},
                          {"one.jpg", "two.jpg"})
 
+    def test_tags_are_personal_and_filter_the_gallery(self):
+        self.upload(b"one", name="one.jpg")
+        self.upload(b"two", name="two.jpg")
+        one, two = sha(b"one"), sha(b"two")
+        response, body = self.call("POST", "/api/tags", body={"name": "Keepers"})
+        tag = json.loads(body)["id"]
+        self.assertEqual(response.status, 201)
+        response, body = self.call("POST", "/api/photo-tags",
+                                   body={"tag": tag, "sha256s": [one], "member": True})
+        self.assertEqual((response.status, json.loads(body)["changed"]), (200, 1))
+        _, body = self.call("GET", f"/api/photos?tag={tag}")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+        _, body = self.call("GET", f"/api/tags?sha256={one}")
+        listing = json.loads(body)
+        self.assertEqual((listing["tags"][0]["count"], listing["tags"][0]["member"]), (1, True))
+        _, body = self.call("POST", "/api/tags", body={"name": "keepers"})
+        self.assertEqual(json.loads(body)["id"], tag)
+        response, _ = self.call("POST", "/api/photo-tags",
+                                body={"tag": 999, "sha256": one, "member": True})
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("GET", "/api/photos?tag=not-a-number")
+        self.assertEqual(response.status, 400)
+
+        ayse = self.add_person()
+        as_her = {"X-Harbor-Key": ayse["key"]}
+        response, _ = self.call("POST", "/api/photo-tags",
+                                body={"tag": tag, "sha256": sha(b"hers"), "member": True},
+                                key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, _ = self.call("GET", f"/api/photos?tag={tag}", key=False, headers=as_her)
+        self.assertEqual(response.status, 404)
+        response, body = self.call("POST", "/api/tags", body={"name": "Hers"},
+                                   key=False, headers=as_her)
+        her_tag = json.loads(body)["id"]
+        self.call("POST", "/api/upload", body=b"hers", key=False,
+                  headers={**as_her, "X-Name": "hers.jpg", "X-Sha256": sha(b"hers")})
+        response, body = self.call("POST", "/api/photo-tags",
+                                   body={"tag": her_tag, "sha256": sha(b"hers"), "member": True},
+                                   key=False, headers=as_her)
+        self.assertEqual((response.status, json.loads(body)["changed"]), (200, 1))
+        _, body = self.call("GET", f"/api/photos?tag={her_tag}", key=False, headers=as_her)
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["hers.jpg"])
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

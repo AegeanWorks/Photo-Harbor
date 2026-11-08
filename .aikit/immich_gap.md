@@ -28,7 +28,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Partner sharing | No | Low: per-person folders already cover the household use case | Not now |
 | Facial recognition/clustering | No | Low here: ML worker, model downloads and training data | Not now |
 | Memories (x years ago) | No | High: one filter over existing dates, high user value | **Implemented now** |
-| Tags | No | High: core organization, but needs a schema/UI pass | Next |
+| Tags | Yes: per-person tags, rail filter, viewer/selection apply | - | **Implemented now** |
 | Folder view | Plain folders in Explorer; no web folder tree | Low: duplicate of the filesystem and current filters | Not now |
 | Offline support | PWA shell only; Android has local queue state | Medium: offline write queue is a large state machine | Not now |
 | Read-only gallery | No separate role | Medium: could reuse a share token, but conflicts with private profiles | Later |
@@ -48,9 +48,17 @@ archive or restore single photos and batches. Files never move, copies stay inta
 still counts them. Month counts, favorites and the timeline hide archived photos. This is the
 second cheap high-value Immich feature: no ML and no file movement.
 
+## Implemented in this pass: Tags
+
+Format 9 adds per-person `tags` and `photo_tags`. A tag is a named mark on any photo the person
+can see; `GET /api/photos?tag=ID` narrows the gallery, the rail lists **Tags** with visible
+counts, and the viewer plus selection bar apply or remove them. Creating the same name is
+case-insensitive and idempotent. Tags stay private, never move files, and the marks disappear
+with the person's last copy; archived photos leave the rail count.
+
 ## Next candidates
 
-1. **Tags** - per-person tags with a viewer tag picker and a `tag=` gallery filter.
-2. **Places** - extract GPS during details and group by a coarse coordinate bucket; add a map
+1. **Places** - extract GPS during details and group by a coarse coordinate bucket; add a map
    only when an offline tile story exists.
-3. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
+2. **Near-duplicate utility** - perceptual hash with a review/keep flow, not automatic deletion.
+3. **Metadata search** - expose camera/lens/date filters once EXIF is parsed into columns.

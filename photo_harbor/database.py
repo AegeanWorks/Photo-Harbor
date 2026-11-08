@@ -6,12 +6,12 @@ from pathlib import Path
 
 from .errors import HarborError
 
-SCHEMA_VERSION = 8
+SCHEMA_VERSION = 9
 OWNER_PROFILE = "main"
 # SQLite INTEGER is signed 64-bit; a larger Python int cannot be bound as a parameter.
 MAX_ROW_ID = 2 ** 63 - 1
 
-# Format 8, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
+# Format 9, as a new library gets it. ``photos`` holds one row per distinct file (by SHA-256);
 # ``copies`` says whose folder holds it and where, and repeats the photo's date, size and
 # kind so one person's view is read in date order from an index. Paths are relative to the library.
 _COLLECTIONS = """
@@ -65,7 +65,24 @@ CREATE TABLE IF NOT EXISTS archived (
 CREATE INDEX IF NOT EXISTS archived_by_sha ON archived (sha256);
 """
 
-_SCHEMA = _COLLECTIONS + _TRASH + _ARCHIVE + """
+_TAGS = """
+CREATE TABLE IF NOT EXISTS tags (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    profile TEXT NOT NULL,
+    name TEXT NOT NULL COLLATE NOCASE,
+    created_at TEXT NOT NULL,
+    UNIQUE (profile, name)
+);
+CREATE TABLE IF NOT EXISTS photo_tags (
+    tag_id INTEGER NOT NULL,
+    sha256 TEXT NOT NULL,
+    added_at TEXT NOT NULL,
+    PRIMARY KEY (tag_id, sha256)
+);
+CREATE INDEX IF NOT EXISTS photo_tags_by_sha ON photo_tags (sha256);
+"""
+
+_SCHEMA = _COLLECTIONS + _TRASH + _ARCHIVE + _TAGS + """
 CREATE TABLE IF NOT EXISTS photos (
     sha256 TEXT PRIMARY KEY,
     rel_path TEXT NOT NULL UNIQUE,
@@ -196,12 +213,16 @@ _FROM_6 = "ALTER TABLE albums ADD COLUMN cover_sha TEXT;"
 # Format 8 adds a per-person archive; photos stay in place and are hidden from the timeline.
 _FROM_7 = _ARCHIVE
 
-_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7,
-             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7,
-             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7,
-             4: _FROM_4 + _FROM_5 + _FROM_7,
-             5: _FROM_5 + _FROM_6 + _FROM_7,
-             6: _FROM_6 + _FROM_7, 7: _FROM_7}
+# Format 9 adds personal tags; a tag is a named mark on any photo the person can see.
+_FROM_8 = _TAGS
+
+_UPGRADES = {1: _FROM_1 + _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
+             2: _FROM_2 + _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
+             3: _FROM_3 + _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
+             4: _FROM_4 + _FROM_5 + _FROM_7 + _FROM_8,
+             5: _FROM_5 + _FROM_6 + _FROM_7 + _FROM_8,
+             6: _FROM_6 + _FROM_7 + _FROM_8,
+             7: _FROM_7 + _FROM_8, 8: _FROM_8}
 
 
 class Database:

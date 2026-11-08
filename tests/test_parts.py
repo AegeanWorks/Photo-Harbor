@@ -283,6 +283,22 @@ class ArchiveUiTest(unittest.TestCase):
         self.assertIn("toggleArchiveCurrent", script)
 
 
+class TagUiTest(unittest.TestCase):
+    def test_gallery_tags_are_reachable_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('id="rail-tags"', 'id="tag-new"', 'id="select-tag"',
+                        'id="select-tags"', 'id="viewer-tag-add"', 'id="viewer-tags"'):
+            self.assertIn(element, page)
+        self.assertIn('params.set("tag", String(state.scope.tag))', script)
+        self.assertIn("/api/tags", script)
+        self.assertIn("/api/photo-tags", script)
+        self.assertIn("selectTag", script)
+        self.assertIn("bulkTag", script)
+        self.assertIn("toggleTagMenu", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]
@@ -447,6 +463,7 @@ class PasswordHashTest(unittest.TestCase):
         from photo_harbor.library_api import LibraryApi
         from photo_harbor.messages import Request
         from photo_harbor.records import Identity
+        from photo_harbor.tags import TagBook
         from tests.library_fixture import Library
         lib = Library(self)
         rec = lib.put(b"img", name="a.jpg").record
@@ -456,7 +473,7 @@ class PasswordHashTest(unittest.TestCase):
                 return original
 
         api = LibraryApi(lib.store, lib.catalog, lib.journal, _Thumbs(),
-                          AlbumBook(lib.db), now=lambda: None)
+                          AlbumBook(lib.db), TagBook(lib.db), now=lambda: None)
         ident = Identity("main", True)
         for reply in (api.media(Request("GET", f"/media/{rec.sha256}",
                                         identity=ident), rec.sha256),

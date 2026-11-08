@@ -855,3 +855,20 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: Timeline, month counts, video/favorite counts and `On this day` hide
   archived photos while Storage and the catalog keep counting the bytes. Each person's archive
   is private; the owner archiving a shared photo does not hide it from the other person.
+
+### ADR-049: Tags are per-person marks, not folders or file metadata
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The Immich comparison ranks tags as the next core organization gap. Writing
+  tags into EXIF/XMP would mutate originals and break the copy-once guarantee; a single global
+  tag list would break the per-person privacy model.
+- **Decision**: Add format 9 with `tags(profile, name)` and `photo_tags(tag_id, sha256)`.
+  Creating a name is case-insensitive and idempotent per person. `GET /api/photos?tag=ID`
+  narrows the gallery through the existing `PhotoFilter`; `GET/POST /api/tags` and
+  `POST /api/photo-tags` list, create and mark tags. The rail lists only the viewer's tags with
+  visible counts, and the viewer and selection bar add/remove marks. Archived photos leave the
+  count, and `CopyIndex.forget` drops the leaving person's marks or every mark when the last
+  copy goes.
+- **Consequences**: Tags never move, copy or rewrite a file and compose with the other filters.
+  A tag with only archived photos stays listed with a zero count, so it can be reused or
+  cleaned up. Cross-person tag ids are rejected before any write.

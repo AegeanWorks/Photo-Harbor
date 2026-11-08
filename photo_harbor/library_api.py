@@ -14,6 +14,7 @@ from .journal import SyncJournal
 from .messages import Reply, Request, json_reply
 from .records import PhotoFilter, PhotoRecord
 from .store import PhotoStore, local_now, normalise_sha
+from .tags import TagBook
 from .thumbs import Thumbnailer
 
 PAGE_MAX = 200
@@ -92,13 +93,14 @@ def _visible_profile(request: Request):
     return request.profile
 
 
-def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
+def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilter:
     month = request.arg("month") or None
     kind = request.arg("kind") or None
     query = request.arg("q").strip()[:MAX_QUERY] or None
     favorite = request.arg("favorite") == "1"
     archived = request.arg("archived") == "1"
     album = request.arg("album") or None
+    tag = request.arg("tag") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
     day = request.arg("day").strip() or None
@@ -128,20 +130,26 @@ def _narrowing(request: Request, albums: AlbumBook) -> PhotoFilter:
             raise HarborError(f"no album {album}", "it was deleted or belongs to someone else",
                               "reload the gallery and try again", status=404)
         album = int(album)
+    if tag is not None:
+        if not tags.owned(request.profile, tag):
+            raise HarborError(f"no tag {tag}", "it was deleted or belongs to someone else",
+                              "reload the gallery and try again", status=404)
+        tag = int(tag)
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
-                       viewer=request.profile, favorite=favorite, album=album,
+                       viewer=request.profile, favorite=favorite, album=album, tag=tag,
                        start=start, end=end, day=day, archived=archived, order=order)
 
 
 class LibraryApi:
     def __init__(self, store: PhotoStore, catalog: Catalog, journal: SyncJournal,
-                 thumbs: Thumbnailer, albums: AlbumBook,
+                 thumbs: Thumbnailer, albums: AlbumBook, tags: TagBook,
                  now: Callable[[], datetime] = local_now) -> None:
         self._store = store
         self._catalog = catalog
         self._journal = journal
         self._thumbs = thumbs
         self._albums = albums
+        self._tags = tags
         self._now = now
 
     def status(self, request: Request) -> Reply:
@@ -158,7 +166,8 @@ class LibraryApi:
 
     def hashes(self, request: Request) -> Reply:
         """Every matching hash for Select matching, in the gallery's order."""
-        found = self._catalog.hashes(_narrowing(request, self._albums), HASH_LIMIT + 1)
+        found = self._catalog.hashes(_narrowing(request, self._albums, self._tags),
+                                     HASH_LIMIT + 1)
         return json_reply({"hashes": found[:HASH_LIMIT], "truncated": len(found) > HASH_LIMIT})
 
     def storage(self, request: Request) -> Reply:
@@ -185,7 +194,7 @@ class LibraryApi:
             raise HarborError("the page offset is too large",
                               f"offsets are at most {MAX_ROW_ID}",
                               "start from the first page and load more", status=400)
-        records = self._catalog.page(offset, limit, _narrowing(request, self._albums))
+        records = self._catalog.page(offset, limit, _narrowing(request, self._albums, self._tags))
         return json_reply({"photos": [photo_json(r) for r in records],
                            "next": offset + len(records) if len(records) == limit else None})
 

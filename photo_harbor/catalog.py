@@ -82,6 +82,10 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
         clauses.append("EXISTS (SELECT 1 FROM album_photos a JOIN albums al ON al.id = a.album_id"
                        " WHERE a.album_id = ? AND al.profile = ? AND a.sha256 = p.sha256)")
         params.extend((narrow.album, narrow.viewer))
+    if narrow.tag is not None:
+        clauses.append("EXISTS (SELECT 1 FROM photo_tags pt JOIN tags t ON t.id = pt.tag_id"
+                       " WHERE pt.tag_id = ? AND t.profile = ? AND pt.sha256 = p.sha256)")
+        params.extend((narrow.tag, narrow.viewer))
     return (" WHERE " + " AND ".join(clauses) if clauses else ""), params
 
 

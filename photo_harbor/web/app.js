@@ -5,11 +5,11 @@ const BATCH = 500;
 const $ = (id) => document.getElementById(id);
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(),
-  scope: { kind: null, month: null, favorite: false, album: null, start: null, end: null,
-    day: null, archived: false, order: "newest" },
+  scope: { kind: null, month: null, favorite: false, album: null, tag: null, start: null,
+    end: null, day: null, archived: false, order: "newest" },
   query: "",
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
-  owner: false, favorites: 0, albums: [], selecting: false, selected: new Set(),
+  owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
   viewerReturnFocus: null,
 };
 
@@ -202,6 +202,7 @@ function filterParams() {
   if (state.scope.favorite) params.set("favorite", "1");
   if (state.scope.archived) params.set("archived", "1");
   if (state.scope.album) params.set("album", String(state.scope.album));
+  if (state.scope.tag) params.set("tag", String(state.scope.tag));
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
   if (state.scope.day) params.set("day", state.scope.day);
@@ -255,6 +256,10 @@ function currentAlbum() {
   return state.albums.find((album) => album.id === state.scope.album) || null;
 }
 
+function currentTag() {
+  return state.tags.find((tag) => tag.id === state.scope.tag) || null;
+}
+
 function dateTitle() {
   const start = state.scope.start
     ? dateOnlyFormat.format(new Date(`${state.scope.start}T00:00:00`)) : null;
@@ -270,6 +275,7 @@ function scopeTitle() {
   const album = currentAlbum();
   let base = "All photos";
   if (album) base = album.name;
+  else if (state.scope.tag) base = currentTag()?.name || "Tag";
   else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
@@ -283,12 +289,13 @@ function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
     || state.scope.end || state.scope.day || state.query);
   const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
-    || state.scope.archived);
+    || state.scope.tag || state.scope.archived);
   const shown = state.photos.length;
   const title = state.query ? `${scopeTitle()} · “${state.query}”` : scopeTitle();
   $("scope-title").textContent = state.profile ? `${personName(state.profile)} · ${title}` : title;
   if (extra) $("scope-count").textContent = state.next === null ? shown.toLocaleString() : `${shown.toLocaleString()}+`;
   else if (state.scope.album) $("scope-count").textContent = (currentAlbum()?.count ?? shown).toLocaleString();
+  else if (state.scope.tag) $("scope-count").textContent = (currentTag()?.count ?? shown).toLocaleString();
   else if (state.scope.archived) $("scope-count").textContent = state.archived.toLocaleString();
   else if (state.scope.favorite) $("scope-count").textContent = state.favorites.toLocaleString();
   else if (!narrowed && !state.profile) $("scope-count").textContent = state.visible.toLocaleString();
@@ -305,9 +312,11 @@ function renderScope() {
     $("empty-title").textContent = narrowed ? "Nothing here" : "No photos yet";
     $("empty-text").textContent = state.scope.album
       ? "This album is empty. Open a photo and choose Add to album."
-      : state.scope.favorite
-        ? "No favorites yet. Open a photo and press ♡ Favorite."
-        : state.scope.archived
+      : state.scope.tag
+        ? "No photos with this tag yet. Open a photo and choose Add tag…"
+        : state.scope.favorite
+          ? "No favorites yet. Open a photo and press ♡ Favorite."
+          : state.scope.archived
           ? "Nothing archived. Open a photo and choose Archive to hide it from the timeline."
           : state.scope.day
             ? "No photos from this day in other years."
@@ -319,7 +328,7 @@ function renderScope() {
 }
 
 function markScope() {
-  const active = state.scope.album ? null
+  const active = state.scope.album || state.scope.tag ? null
     : state.scope.archived ? "archive"
       : state.scope.day ? "memories"
         : state.scope.favorite ? "favorite"
@@ -330,14 +339,17 @@ function markScope() {
   for (const item of document.querySelectorAll("[data-album]")) {
     item.setAttribute("aria-pressed", String(Number(item.dataset.album) === state.scope.album));
   }
+  for (const item of document.querySelectorAll("[data-tag]")) {
+    item.setAttribute("aria-pressed", String(Number(item.dataset.tag) === state.scope.tag));
+  }
   $("date-filter").setAttribute("aria-pressed",
     String(Boolean(state.scope.start || state.scope.end)));
 }
 
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
-  state.scope = { kind, month, favorite: false, album: null, start: null, end: null,
-    day: null, archived: false, order: state.scope.order || "newest", ...extra };
+  state.scope = { kind, month, favorite: false, album: null, tag: null, start: null,
+    end: null, day: null, archived: false, order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
   window.scrollTo({ top: 0 });
@@ -431,8 +443,8 @@ function selectPerson(id) {
   for (const item of document.querySelectorAll("[data-person]")) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
-  state.scope = { kind: null, month: null, favorite: false, album: null, start: null, end: null,
-    day: null, archived: false, order: state.scope.order || "newest" };
+  state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
+    start: null, end: null, day: null, archived: false, order: state.scope.order || "newest" };
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -508,6 +520,47 @@ async function loadAlbums() {
   renderViewerCollections();
 }
 
+function selectTag(id) {
+  if (!state.tags.some((tag) => tag.id === id)) return;
+  clearPersonScope();
+  setScope(null, null, { tag: id });
+  renderScope();
+}
+
+async function loadTags() {
+  const listing = await api("/api/tags");
+  state.tags = listing.tags || [];
+  const rail = $("rail-tags");
+  rail.replaceChildren();
+  if (state.tags.length) {
+    rail.append(el("h4", "rail-year", "Tags"));
+  }
+  for (const tag of state.tags) {
+    const button = el("button", "rail-item");
+    button.type = "button";
+    button.dataset.tag = String(tag.id);
+    button.setAttribute("aria-pressed", String(tag.id === state.scope.tag));
+    button.append(el("span", "", tag.name), el("b", "", tag.count.toLocaleString()));
+    button.addEventListener("click", () => selectTag(tag.id));
+    rail.append(button);
+  }
+  markScope();
+  renderScope();
+  renderViewerCollections();
+}
+
+async function newTag() {
+  const name = prompt("Name for the new tag:");
+  if (!name) return;
+  try {
+    const tag = await post("/api/tags", { name });
+    await loadTags();
+    toast(`Tag “${tag.name}” created; open a photo to add it`);
+  } catch (error) {
+    handle(error);
+  }
+}
+
 async function newAlbum() {
   const name = prompt("Name for the new album:");
   if (!name) return;
@@ -540,8 +593,8 @@ async function deleteAlbum() {
   if (!confirm(`Delete the album “${album.name}”? The photos stay in the library.`)) return;
   try {
     await post(`/api/albums/${album.id}`, { delete: true });
-    state.scope = { kind: null, month: null, favorite: false, album: null, day: null,
-      archived: false, order: state.scope.order || "newest" };
+    state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
+      day: null, archived: false, order: state.scope.order || "newest" };
     markScope();
     await loadAlbums();
     resetPhotos();
@@ -600,15 +653,23 @@ function hideSelectAlbums() {
   $("select-album").setAttribute("aria-expanded", "false");
 }
 
+function hideSelectTags() {
+  $("select-tags").hidden = true;
+  $("select-tag").setAttribute("aria-expanded", "false");
+}
+
 function renderSelection() {
   const count = state.selected.size;
   $("select-count").textContent = `${count.toLocaleString()} selected`;
   $("select-archive").textContent = state.scope.archived ? "Unarchive" : "Archive";
   for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-trash",
-    "select-album", "select-archive", "select-clear"]) {
+    "select-album", "select-tag", "select-archive", "select-clear"]) {
     $(id).disabled = count === 0;
   }
-  if (count === 0) hideSelectAlbums();
+  if (count === 0) {
+    hideSelectAlbums();
+    hideSelectTags();
+  }
 }
 
 function selectLoaded() {
@@ -672,7 +733,7 @@ async function bulkArchive(archived) {
       changed += (await post("/api/archive", { sha256s: batch, archived })).changed;
     }
     const leaving = archived !== Boolean(state.scope.archived);
-    await loadOutline();
+    await Promise.all([loadOutline(), loadTags()]);
     if (leaving) {
       setSelecting(false);
       closeViewer();
@@ -696,6 +757,35 @@ async function bulkAlbum(album) {
     hideSelectAlbums();
     toast(`${changed} photo${changed === 1 ? "" : "s"} added to “${album.name}”`);
     await loadAlbums();
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function bulkTag(tag) {
+  const sha256s = [...state.selected];
+  if (sha256s.length === 0) return;
+  try {
+    let changed = 0;
+    for (const batch of batches(sha256s)) {
+      changed += (await post("/api/photo-tags",
+        { tag: tag.id, sha256s: batch, member: true })).changed;
+    }
+    hideSelectTags();
+    toast(`${changed} photo${changed === 1 ? "" : "s"} tagged “${tag.name}”`);
+    await loadTags();
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function createTagForSelection() {
+  const name = prompt("Name for the new tag:");
+  if (!name) return;
+  try {
+    const tag = await post("/api/tags", { name });
+    await loadTags();
+    await bulkTag(tag);
   } catch (error) {
     handle(error);
   }
@@ -771,7 +861,7 @@ async function trashPhotos(sha256s) {
     setSelecting(false);
     closeViewer();
     resetPhotos();
-    await Promise.all([loadAlbums(), loadOutline(), refreshStatus()]);
+    await Promise.all([loadAlbums(), loadOutline(), loadTags(), refreshStatus()]);
     toast(`${items(moved)} moved to Trash`);
     if (!$("view-trash").hidden) loadTrash().catch(handle);
   } catch (error) {
@@ -787,7 +877,7 @@ function trashCurrent() {
 async function restoreTrash(id) {
   try {
     await post(`/api/trash/${id}`, { restore: true });
-    await Promise.all([loadTrash(), loadOutline(), loadAlbums(), refreshStatus()]);
+    await Promise.all([loadTrash(), loadOutline(), loadAlbums(), loadTags(), refreshStatus()]);
     resetPhotos();
     toast("Photo restored");
   } catch (error) {
@@ -834,6 +924,7 @@ function toggleSelectAlbums() {
     hideSelectAlbums();
     return;
   }
+  hideSelectTags();
   box.replaceChildren();
   const create = el("button", "ghost", "New album…");
   create.type = "button";
@@ -849,6 +940,30 @@ function toggleSelectAlbums() {
   }
   box.hidden = false;
   $("select-album").setAttribute("aria-expanded", "true");
+}
+
+function toggleSelectTags() {
+  const box = $("select-tags");
+  if (!box.hidden) {
+    hideSelectTags();
+    return;
+  }
+  hideSelectAlbums();
+  box.replaceChildren();
+  const create = el("button", "ghost", "New tag…");
+  create.type = "button";
+  create.setAttribute("role", "menuitem");
+  create.addEventListener("click", createTagForSelection);
+  box.append(create);
+  for (const tag of state.tags) {
+    const button = el("button", "ghost", tag.name);
+    button.type = "button";
+    button.setAttribute("role", "menuitem");
+    button.addEventListener("click", () => bulkTag(tag));
+    box.append(button);
+  }
+  box.hidden = false;
+  $("select-tag").setAttribute("aria-expanded", "true");
 }
 
 function keyRow(person) {
@@ -979,6 +1094,7 @@ function wireBrowser() {
   document.querySelector('[data-scope="archive"]').addEventListener("click", selectArchive);
   $("select-archive").addEventListener("click", () => bulkArchive(!state.scope.archived));
   $("album-new").addEventListener("click", newAlbum);
+  $("tag-new").addEventListener("click", newTag);
   $("album-rename").addEventListener("click", renameAlbum);
   $("album-delete").addEventListener("click", deleteAlbum);
   $("album-download").addEventListener("click", downloadAlbum);
@@ -1000,8 +1116,12 @@ function wireBrowser() {
   $("select-download").addEventListener("click", downloadSelection);
   $("select-trash").addEventListener("click", () => trashPhotos([...state.selected]));
   $("select-album").addEventListener("click", toggleSelectAlbums);
+  $("select-tag").addEventListener("click", toggleSelectTags);
   document.addEventListener("click", (event) => {
-    if (!event.target.closest(".select-album-wrap")) hideSelectAlbums();
+    if (!event.target.closest(".select-album-wrap")) {
+      hideSelectAlbums();
+      hideSelectTags();
+    }
     if (!event.target.closest("#date-panel") && event.target.id !== "date-filter") {
       hideDatePanel();
     }
@@ -1217,8 +1337,12 @@ function renderViewerCollections() {
   $("viewer-album-remove").hidden = !photo || !state.scope.album;
   $("viewer-cover").hidden = !photo || !state.scope.album;
   $("viewer-archive").textContent = state.scope.archived ? "Unarchive" : "Archive";
+  $("viewer-tag-add").hidden = !photo;
+  $("viewer-tag-add").setAttribute("aria-expanded", "false");
   $("viewer-albums").hidden = true;
   $("viewer-albums").replaceChildren();
+  $("viewer-tags").hidden = true;
+  $("viewer-tags").replaceChildren();
 }
 
 function hideDetails() {
@@ -1264,6 +1388,9 @@ async function toggleDetails() {
     renderDetails(details);
     $("viewer-albums").hidden = true;
     $("viewer-albums").replaceChildren();
+    $("viewer-tags").hidden = true;
+    $("viewer-tags").replaceChildren();
+    $("viewer-tag-add").setAttribute("aria-expanded", "false");
     $("viewer-album-add").setAttribute("aria-expanded", "false");
     box.hidden = false;
     $("viewer-info").textContent = "Hide details";
@@ -1299,7 +1426,7 @@ async function toggleArchiveCurrent() {
   try {
     await post("/api/archive", { sha256: photo.sha256, archived });
     const leaving = archived !== Boolean(state.scope.archived);
-    await loadOutline();
+    await Promise.all([loadOutline(), loadTags()]);
     if (leaving) {
       closeViewer();
       resetPhotos();
@@ -1317,6 +1444,8 @@ function toggleAlbumMenu() {
     return;
   }
   hideDetails();
+  $("viewer-tags").hidden = true;
+  $("viewer-tag-add").setAttribute("aria-expanded", "false");
   const photo = state.photos[state.viewing];
   if (!photo) return;
   box.replaceChildren();
@@ -1337,6 +1466,70 @@ function toggleAlbumMenu() {
     box.append(button);
   }
   box.hidden = false;
+}
+
+async function toggleTagMenu() {
+  const box = $("viewer-tags");
+  if (!box.hidden) {
+    box.hidden = true;
+    $("viewer-tag-add").setAttribute("aria-expanded", "false");
+    return;
+  }
+  hideDetails();
+  $("viewer-albums").hidden = true;
+  const photo = state.photos[state.viewing];
+  if (!photo) return;
+  try {
+    const listing = await api(`/api/tags?sha256=${photo.sha256}`);
+    box.replaceChildren();
+    const create = el("button", "ghost", "New tag…");
+    create.type = "button";
+    create.addEventListener("click", createViewerTag);
+    box.append(create);
+    for (const tag of listing.tags) {
+      const button = el("button", "ghost", `${tag.member ? "✓ " : ""}${tag.name}`);
+      button.type = "button";
+      button.addEventListener("click", async () => {
+        try {
+          const result = await post("/api/photo-tags",
+            { tag: tag.id, sha256: photo.sha256, member: !tag.member });
+          box.hidden = true;
+          $("viewer-tag-add").setAttribute("aria-expanded", "false");
+          await loadTags();
+          if (state.scope.tag === tag.id && tag.member) {
+            closeViewer();
+            resetPhotos();
+          }
+          toast(result.changed
+            ? `${tag.member ? "Removed" : "Added"} tag “${tag.name}”`
+            : `Already ${tag.member ? "without" : "with"} “${tag.name}”`);
+        } catch (error) {
+          handle(error);
+        }
+      });
+      box.append(button);
+    }
+    box.hidden = false;
+    $("viewer-tag-add").setAttribute("aria-expanded", "true");
+  } catch (error) {
+    handle(error);
+  }
+}
+
+async function createViewerTag() {
+  const photo = state.photos[state.viewing];
+  if (!photo) return;
+  const name = prompt("Name for the new tag:");
+  if (!name) return;
+  try {
+    const tag = await post("/api/tags", { name, sha256: photo.sha256 });
+    $("viewer-tags").hidden = true;
+    $("viewer-tag-add").setAttribute("aria-expanded", "false");
+    await loadTags();
+    toast(`Tagged “${tag.name}”`);
+  } catch (error) {
+    handle(error);
+  }
 }
 
 async function setAlbumCover() {
@@ -1372,6 +1565,8 @@ function closeViewer() {
   const target = state.viewerReturnFocus;
   state.viewerReturnFocus = null;
   hideDetails();
+  $("viewer-tags").hidden = true;
+  $("viewer-tags").replaceChildren();
   $("viewer").hidden = true;
   $("viewer-stage").replaceChildren();
   document.body.style.overflow = "";
@@ -1392,6 +1587,7 @@ function wireViewer() {
   $("viewer-next").addEventListener("click", () => step(1));
   $("viewer-favorite").addEventListener("click", toggleFavorite);
   $("viewer-album-add").addEventListener("click", toggleAlbumMenu);
+  $("viewer-tag-add").addEventListener("click", toggleTagMenu);
   $("viewer-album-remove").addEventListener("click", removeFromAlbum);
   $("viewer-cover").addEventListener("click", setAlbumCover);
   $("viewer-archive").addEventListener("click", toggleArchiveCurrent);
@@ -1618,6 +1814,7 @@ function wireShell() {
     if (event.key !== "Escape" || state.viewing >= 0) return;
     hideDatePanel();
     hideSelectAlbums();
+    hideSelectTags();
     hideDetails();
   });
 }
@@ -1686,6 +1883,7 @@ async function start() {
   loadPeople().catch(handle);
   loadOutline().catch(handle);
   loadAlbums().catch(handle);
+  loadTags().catch(handle);
   resetPhotos();
 }
 

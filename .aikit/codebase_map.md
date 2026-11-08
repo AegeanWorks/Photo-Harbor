@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `66`
-- **Total Classes**: `124`
-- **Total Top-Level Functions**: `104`
-- **Total Class Methods**: `531`
-- **Total Source Lines**: `8829`
+- **Total Python Modules**: `69`
+- **Total Classes**: `130`
+- **Total Top-Level Functions**: `108`
+- **Total Class Methods**: `556`
+- **Total Source Lines**: `9267`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `228` lines (`11369` bytes)
+**Size**: `238` lines (`11789` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -144,7 +144,7 @@
   - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
-  - Method `._register(sync, library, people, albums, archive, downloads, trash, backup, setup)`
+  - Method `._register(sync, library, people, albums, archive, tags, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `279` lines (`14239` bytes)
+**Size**: `283` lines (`14505` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -382,7 +382,7 @@
 ### [`photo_harbor/copies.py`](photo_harbor/copies.py)
 > *Whose folder holds which photo. One file can sit in several people's folders (hard links).*
 
-**Size**: `71` lines (`3540` bytes)
+**Size**: `75` lines (`3834` bytes)
 
 **Classes:**
 - `class CopyIndex`
@@ -398,7 +398,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `262` lines (`9384` bytes)
+**Size**: `283` lines (`10037` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -564,11 +564,11 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `231` lines (`11000` bytes)
+**Size**: `240` lines (`11455` bytes)
 
 **Classes:**
 - `class LibraryApi`
-  - Method `.__init__(store, catalog, journal, thumbs, albums, now)`
+  - Method `.__init__(store, catalog, journal, thumbs, albums, tags, now)`
   - Method `.status(request)`
   - Method `.hashes(request)` - *Every matching hash for Select matching, in the gallery's order.*
   - Method `.storage(request)` - *Counts, bytes, per-person shares and the largest files the caller may see.*
@@ -587,7 +587,7 @@
 - `def photo_json(record)`
 - `def _profile_arg(request)`
 - `def _visible_profile(request)` - *The owner may look at anyone (or, with no ?profile=, everyone); others see only*
-- `def _narrowing(request, albums)`
+- `def _narrowing(request, albums, tags)`
 
 ---
 
@@ -681,7 +681,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `162` lines (`3946` bytes)
+**Size**: `172` lines (`4151` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -693,6 +693,7 @@
 - `class PhotoFilter` - *Gallery narrowing: ``month`` is ``YYYY-MM``, ``start``/``end`` are inclusive*
 - `class Outline` - *What the browser sidebar lists: ``(YYYY-MM, count)`` newest first, the video count and the*
 - `class Album` - *One person's named collection; ``cover`` is the newest member's SHA-256, if any.*
+- `class Tag` - *One person's label; ``count`` is how many visible photos carry it.*
 - `class PersonStorage` - *One person's share: shared photos count in each person's share.*
 - `class StorageFile` - *One row of the largest-files list.*
 - `class StorageReport` - *Disk use for one profile, or for the whole library when ``profile`` is None.*
@@ -837,6 +838,49 @@
 - `def _stamp(moment)`
 - `def _comparable(moment, now)` - *Put a stored or phone timestamp and the PC clock into one timezone frame.*
 - `def _target_profile(request, book)` - *A person's own profile; the owner may upload for anyone with ``X-Profile``.*
+
+---
+
+### [`photo_harbor/tags.py`](photo_harbor/tags.py)
+> *Personal tags: named marks on photos that never move or copy a file.*
+
+**Size**: `152` lines (`6521` bytes)
+
+**Classes:**
+- `class TagBook` - *Tags belong to one person; a tag marks a photo without touching its folder.*
+  - Method `.__init__(db, now)`
+  - Method `.summary(profile)` - *The person's tags and how many non-archived photos each one marks.*
+  - Method `.create(profile, name)` - *Return the person's tag with this name, creating it once; matching is case-insensitive.*
+  - Method `.rename(profile, ident, name)`
+  - Method `.delete(profile, ident)`
+  - Method `.owned(profile, ident)` - *Whether this person owns the tag; a bad id is a 400, a missing one is False.*
+  - Method `.members(profile, sha256)` - *The ids of this person's tags on one photo.*
+  - Method `.add(profile, ident, sha256, member)` - *Put a tag on a photo or take it off; True when the mark changed.*
+  - Method `.add_many(profile, ident, sha256s, member)` - *Mark or unmark several photos in one lock; returns how many rows changed.*
+  - Method `._owned(profile, tag)`
+
+**Functions:**
+- `def _clean_name(value)`
+- `def _tag_id(value)`
+
+---
+
+### [`photo_harbor/tags_api.py`](photo_harbor/tags_api.py)
+> *Endpoints for personal tags; every write stays inside the caller's profile.*
+
+**Size**: `74` lines (`2973` bytes)
+
+**Classes:**
+- `class TagApi`
+  - Method `.__init__(tags, catalog)`
+  - Method `.listing(request)` - *Every tag and, when ?sha256= is present, whether it is on that photo.*
+  - Method `.create(request)`
+  - Method `.update(request, ident)`
+  - Method `.membership(request)`
+
+**Functions:**
+- `def _flag(body, name)`
+- `def _sha_arg(request)`
 
 ---
 
@@ -1054,7 +1098,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `814` lines (`46231` bytes)
+**Size**: `857` lines (`48896` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1089,6 +1133,7 @@
   - Method `.test_a_date_range_narrows_the_gallery()`
   - Method `.test_a_month_day_matches_each_year()`
   - Method `.test_archive_hides_restores_and_stays_out_of_the_timeline()`
+  - Method `.test_tags_are_personal_and_filter_the_gallery()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1142,7 +1187,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `605` lines (`26888` bytes)
+**Size**: `622` lines (`27780` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1182,6 +1227,8 @@
   - Method `.test_prune_removes_only_previews_of_photos_that_are_gone()`
 - `class ArchiveUiTest`
   - Method `.test_gallery_archive_is_reachable_and_wired()`
+- `class TagUiTest`
+  - Method `.test_gallery_tags_are_reachable_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
@@ -1368,6 +1415,23 @@
   - Method `.test_a_rival_file_at_the_chosen_name_is_never_overwritten()`
   - Method `.test_linking_a_second_copy_never_overwrites()`
   - Method `.test_a_connection_error_mid_upload_is_a_clear_failure()`
+
+---
+
+### [`tests/test_tags.py`](tests/test_tags.py)
+**Size**: `94` lines (`4852` bytes)
+
+**Classes:**
+- `class TagBookTest`
+  - Method `.setUp()`
+  - Method `.test_creating_a_tag_is_case_insensitive_and_idempotent()`
+  - Method `.test_tagging_filters_the_gallery_and_renaming_keeps_marks()`
+  - Method `.test_tags_are_private_to_the_person_who_made_them()`
+  - Method `.test_archived_photos_leave_the_tag_count_and_delete_removes_marks()`
+  - Method `.test_a_batch_changes_each_row_once()`
+  - Method `.test_forgetting_a_copy_drops_only_that_persons_marks()`
+- `class TagMigrationTest`
+  - Method `.test_a_format_8_catalog_gains_the_tag_tables()`
 
 ---
 

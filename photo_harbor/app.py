@@ -32,6 +32,8 @@ from .scan import LibraryScanner, ScanSchedule
 from .setup_api import SetupApi
 from .store import PhotoStore, local_now
 from .sync_api import SyncApi
+from .tags import TagBook
+from .tags_api import TagApi
 from .thumbs import PreviewWarmer, Thumbnailer
 from .trash import TrashBook
 from .trash_api import TrashApi
@@ -70,6 +72,7 @@ class HarborApp:
         journal = SyncJournal(self.db)
         self.albums = AlbumBook(self.db, now)
         self.archive = ArchiveBook(self.db, now)
+        self.tags = TagBook(self.db, now)
         self.downloads = Downloads(settings.state_dir)
         self.profiles = ProfileBook(self.db, settings.key)
         self.copies = CopyIndex(self.db)
@@ -97,11 +100,13 @@ class HarborApp:
         self.guard = KeyGuard(self.profiles, self.passwords, self.sessions, brake=self.brake)
         self.router = Router()
         self._register(SyncApi(self.store, journal, self.profiles, now),
-                       LibraryApi(self.store, catalog, journal, thumbs, self.albums, now),
+                       LibraryApi(self.store, catalog, journal, thumbs, self.albums,
+                                  self.tags, now),
                        ProfilesApi(self.profiles, catalog, journal, self.passwords,
                                    self.sessions, self.layout, brake=self.brake),
                        AlbumsApi(self.albums, catalog),
                        ArchiveApi(self.archive, catalog),
+                       TagApi(self.tags, catalog),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),
                        BackupApi(lambda: self.backup),
@@ -173,8 +178,9 @@ class HarborApp:
                      headers=NO_CACHE, file=path)
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
-                  albums: AlbumsApi, archive: ArchiveApi, downloads: DownloadsApi,
-                  trash: TrashApi, backup: BackupApi, setup: SetupApi) -> None:
+                  albums: AlbumsApi, archive: ArchiveApi, tags: TagApi,
+                  downloads: DownloadsApi, trash: TrashApi, backup: BackupApi,
+                  setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -211,6 +217,10 @@ class HarborApp:
         add("POST", "/api/album-photos", albums.membership)
         add("POST", "/api/favorite", albums.favorite)
         add("POST", "/api/archive", archive.update)
+        add("GET", "/api/tags", tags.listing)
+        add("POST", "/api/tags", tags.create)
+        add("POST", "/api/tags/", tags.update)
+        add("POST", "/api/photo-tags", tags.membership)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/trash", trash.listing)
