@@ -6,16 +6,27 @@ const TILE_MIN = 150;
 const DAY_HEADER = 42;
 const DAY_GAP = 18;
 const $ = (id) => document.getElementById(id);
+// One definition of "no filter", used by the initial state and every scope rebuild, so the
+// field list cannot drift. Three hand-written literals had silently lost `format` and
+// `missing`, leaving an invisible filter active after switching person or deleting an album.
+function blankScope(overrides = {}) {
+  return {
+    kind: null, month: null, favorite: false, album: null, tag: null, place: null,
+    camera: null, lens: null, missing: null, format: null, start: null, end: null,
+    day: null, archived: false, order: "newest", ...overrides,
+  };
+}
+
 const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(), dayList: [],
+  paging: "idle",
   dayWindowFrame: null,
-  scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
-    camera: null, lens: null, missing: null, format: null, start: null, end: null, day: null,
-    archived: false, order: "newest" },
+  scope: blankScope(),
   query: "",
   months: [],
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
+  bulkBusy: false,
   viewerReturnFocus: null, compareReturnFocus: null, similarTimer: null,
 };
 
@@ -340,19 +351,28 @@ function photosUrl() {
 }
 
 async function loadMore() {
-  if (state.loading || state.next === null) return;
+  if (state.loading || state.next === null || state.paging === "failed") return;
   state.loading = true;
+  state.paging = "loading";
   const generation = state.generation;
   try {
     const page = await api(photosUrl());
     if (generation !== state.generation) return;
     addPhotos(page.photos);
     state.next = page.next;
+    state.paging = page.next === null ? "exhausted" : "idle";
     renderScope();
   } catch (error) {
+    // A failed page has no "more" to fetch: without this the finally block re-enters
+    // loadMore forever while the sentinel stays near the bottom.
+    if (generation === state.generation) {
+      state.paging = "failed";
+      renderPagingError();
+    }
     handle(error);
   } finally {
     state.loading = false;
+    if (state.paging === "failed") return;
     // A filter changed while this page was loading: load the first page of the new view.
     // On a tall screen one page may not reach the observer's margin, so keep going.
     const nearEnd = $("sentinel").getBoundingClientRect().top < window.innerHeight + 1200;
@@ -360,8 +380,26 @@ async function loadMore() {
   }
 }
 
+function renderPagingError() {
+  const box = $("paging-error");
+  box.hidden = false;
+  box.replaceChildren(
+    el("p", "", "Could not load more photos. The server may be busy."),
+    el("button", "primary", "Try again"));
+  box.lastChild.addEventListener("click", () => {
+    box.hidden = true;
+    state.paging = "idle";
+    loadMore();
+  });
+}
+
 function resetPhotos() {
+  // state.viewing is an index into state.photos, so it cannot outlive the list it indexes:
+  // every viewer action reads state.photos[state.viewing] and silently no-ops when stale.
+  if (state.viewing >= 0) closeViewer();
   if (state.selected.size || document.querySelector(".tile.selected")) clearSelected();
+  state.paging = "idle";
+  $("paging-error").hidden = true;
   state.generation += 1;
   state.photos = [];
   state.next = 0;
@@ -517,9 +555,7 @@ function markScope() {
 
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
-  state.scope = { kind, month, favorite: false, album: null, tag: null, place: null,
-    camera: null, lens: null, missing: null, format: null, start: null, end: null, day: null,
-    archived: false, order: state.scope.order || "newest", ...extra };
+  state.scope = blankScope({ kind, month, order: state.scope.order || "newest", ...extra });
   hideDatePanel();
   markScope();
   renderScrubber();
@@ -697,9 +733,7 @@ function selectPerson(id) {
   for (const item of document.querySelectorAll("[data-person]")) {
     item.setAttribute("aria-pressed", String(item.dataset.person === (id || "")));
   }
-  state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-    place: null, camera: null, lens: null, start: null, end: null, day: null,
-    archived: false, order: state.scope.order || "newest" };
+  state.scope = blankScope({ order: state.scope.order || "newest" });
   markScope();
   window.scrollTo({ top: 0 });
   loadOutline().catch(handle);
@@ -1139,9 +1173,7 @@ async function deleteAlbum() {
   if (!confirm(`Delete the album “${album.name}”? The photos stay in the library.`)) return;
   try {
     await post(`/api/albums/${album.id}`, { delete: true });
-    state.scope = { kind: null, month: null, favorite: false, album: null, tag: null,
-      place: null, camera: null, lens: null, day: null, archived: false,
-      order: state.scope.order || "newest" };
+    state.scope = blankScope({ order: state.scope.order || "newest" });
     markScope();
     await loadAlbums();
     resetPhotos();
@@ -1210,13 +1242,29 @@ function hideSelectSidecars() {
   $("select-sidecar").setAttribute("aria-expanded", "false");
 }
 
+// A bulk action loops over batches of POSTs, so it owns a busy state: a second click while
+// the first is in flight would repeat the whole sequence (two confirms, two identical writes).
+async function withBulkBusy(action) {
+  if (state.bulkBusy) return;
+  state.bulkBusy = true;
+  renderSelection();
+  try {
+    await action();
+  } finally {
+    state.bulkBusy = false;
+    renderSelection();
+  }
+}
+
 function renderSelection() {
   const count = state.selected.size;
   $("select-count").textContent = `${count.toLocaleString()} selected`;
   $("select-archive").textContent = state.scope.archived ? "Unarchive" : "Archive";
   for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-trash",
     "select-album", "select-tag", "select-sidecar", "select-archive", "select-clear"]) {
-    $(id).disabled = count === 0;
+    // A bulk action is a loop of POSTs; disabling only on an empty selection lets a second
+    // click run the whole sequence again while the first is still in flight.
+    $(id).disabled = count === 0 || state.bulkBusy;
   }
   if (count === 0) {
     hideSelectAlbums();
@@ -1256,6 +1304,7 @@ function batches(items) {
 async function bulkFavorite(favorite) {
   const sha256s = [...state.selected];
   if (sha256s.length === 0) return;
+  await withBulkBusy(async () => {
   try {
     let changed = 0;
     for (const batch of batches(sha256s)) {
@@ -1275,11 +1324,13 @@ async function bulkFavorite(favorite) {
   } catch (error) {
     handle(error);
   }
+  });
 }
 
 async function bulkArchive(archived) {
   const sha256s = [...state.selected];
   if (sha256s.length === 0) return;
+  await withBulkBusy(async () => {
   try {
     let changed = 0;
     for (const batch of batches(sha256s)) {
@@ -1296,11 +1347,13 @@ async function bulkArchive(archived) {
   } catch (error) {
     handle(error);
   }
+  });
 }
 
 async function bulkAlbum(album) {
   const sha256s = [...state.selected];
   if (sha256s.length === 0) return;
+  await withBulkBusy(async () => {
   try {
     let changed = 0;
     for (const batch of batches(sha256s)) {
@@ -1313,11 +1366,13 @@ async function bulkAlbum(album) {
   } catch (error) {
     handle(error);
   }
+  });
 }
 
 async function bulkTag(tag) {
   const sha256s = [...state.selected];
   if (sha256s.length === 0) return;
+  await withBulkBusy(async () => {
   try {
     let changed = 0;
     for (const batch of batches(sha256s)) {
@@ -1330,6 +1385,7 @@ async function bulkTag(tag) {
   } catch (error) {
     handle(error);
   }
+  });
 }
 
 async function createTagForSelection() {
@@ -1440,6 +1496,7 @@ async function loadTrash() {
 async function trashPhotos(sha256s) {
   if (sha256s.length === 0) return;
   if (!confirm(`Move ${items(sha256s.length)} to Trash? You can restore them from the Trash tab.`)) return;
+  await withBulkBusy(async () => {
   try {
     let moved = 0;
     for (const batch of batches(sha256s)) {
@@ -1454,6 +1511,7 @@ async function trashPhotos(sha256s) {
   } catch (error) {
     handle(error);
   }
+  });
 }
 
 function trashCurrent() {
@@ -2820,9 +2878,26 @@ function renderLogin() {
   $("login-mode").textContent = login.useKey ? "Sign in with my name and password" : "Sign in with a key instead";
 }
 
-async function showLogin() {
+async function showLogin(notice = "") {
+  // Every overlay is fixed-position and paints above the static #login card, so a session
+  // that expires with the viewer open would otherwise show a form the user cannot see.
+  if (state.viewing >= 0) closeViewer();
+  closeCompare();
+  $("uploads").hidden = true;
+  $("drop").hidden = true;
+  $("upload-menu").hidden = true;
+  $("account-menu").hidden = true;
+  // Identity survives in state across a sign-in as someone else unless it is cleared here.
+  state.profile = null;
+  state.me = null;
+  state.owner = false;
+  if (state.selecting) setSelecting(false);
+  state.selected.clear();
+  login.profile = null;
+  login.useKey = false;
   $("shell").hidden = true;
   $("login").hidden = false;
+  $("login-error").textContent = notice;
   let people = [];
   try { people = (await api("/api/people")).profiles; } catch (_) { /* the key still works */ }
   const box = $("login-people");
@@ -2852,7 +2927,13 @@ async function start() {
   try {
     await refreshStatus();
   } catch (error) {
-    handle(error);
+    // Nothing is on screen yet, so a toast would be the only trace of the failure. The
+    // sign-in screen is the one screen that can retry for itself.
+    if (error instanceof Unauthorised) {
+      showLogin();
+    } else {
+      showLogin("Harbor is not answering. Check the server window, then reload.");
+    }
     return;
   }
   $("login").hidden = true;

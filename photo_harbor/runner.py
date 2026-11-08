@@ -67,14 +67,20 @@ class ServerRunner:
             self._thread = threading.Thread(target=server.serve_forever, name="harbor-server",
                                             kwargs={"poll_interval": 0.25}, daemon=True)
             self._thread.start()
-            if app.warmer is not None:
-                app.warmer.start()
-            app.schedule.log = self._log  # scan results reach the window's Activity log
-            app.schedule.start()
-            if self._backup_to is not None:
-                self._backup = DailyBackup(self._library, self._backup_to, self._log)
-                app.backup = self._backup
-                self._backup.start()
+            try:
+                if app.warmer is not None:
+                    app.warmer.start()
+                app.schedule.log = self._log  # scan results reach the window's Activity log
+                app.schedule.start()
+                if self._backup_to is not None:
+                    self._backup = DailyBackup(self._library, self._backup_to, self._log)
+                    app.backup = self._backup
+                    self._backup.start()
+            except Exception:
+                # The socket is already bound, so "running" must not survive a failed setup.
+                # ``stop`` takes the lock this method already holds, so unwind inline.
+                self._teardown()
+                raise
             port = server.server_address[1]
             return RunningServer(port, f"http://localhost:{port}", f"http://{lan_address()}:{port}",
                                  self._library, app.previews)
@@ -83,13 +89,17 @@ class ServerRunner:
         with self._lock:
             if self._server is None:
                 return
-            self._server.shutdown()
-            self._server.server_close()
-            self._thread.join(timeout=5)
-            if self._backup is not None:
-                self._backup.stop()
-            self.app.close()
-            self.app = self._server = self._thread = self._backup = None
+            self._teardown()
+
+    def _teardown(self) -> None:
+        """Release everything ``start`` opened. The caller holds ``_lock``."""
+        self._server.shutdown()
+        self._server.server_close()
+        self._thread.join(timeout=5)
+        if self._backup is not None:
+            self._backup.stop()
+        self.app.close()
+        self.app = self._server = self._thread = self._backup = None
 
     def wait(self) -> None:
         """Block until the server stops (Ctrl+C in a console stops it)."""

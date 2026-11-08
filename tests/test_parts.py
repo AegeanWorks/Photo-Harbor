@@ -938,6 +938,69 @@ class ReadmeApiTest(unittest.TestCase):
             self.assertIn(f"{name}=", row, f"?{name}= is missing from the README photos row")
 
 
+class StateMachineTest(unittest.TestCase):
+    """The client state machines named in .aikit/state_machines.md stay explicit."""
+
+    def script(self):
+        root = Path(__file__).resolve().parents[1]
+        return (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+
+    def page(self):
+        root = Path(__file__).resolve().parents[1]
+        return (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+
+    def test_paging_has_a_failed_state_that_stops_the_loop(self):
+        script = self.script()
+        body = script.split("async function loadMore()", 1)[1].split("function renderPagingError", 1)[0]
+        # The guard, the state write, and the early return in finally are the whole fix.
+        self.assertIn('state.paging === "failed"', body.split("state.loading = true", 1)[0])
+        self.assertIn('state.paging = "failed"', body)
+        self.assertIn('if (state.paging === "failed") return;', body)
+        self.assertIn('id="paging-error"', self.page())
+        self.assertIn(".paging-error", (Path(__file__).resolve().parents[1]
+                                        / "photo_harbor" / "web" / "app.css").read_text(encoding="utf-8"))
+
+    def test_replacing_the_photo_list_closes_the_viewer(self):
+        # state.viewing indexes state.photos; every viewer action no-ops when the index is stale.
+        script = self.script()
+        reset = script.split("function resetPhotos()", 1)[1].split("// ----------", 1)[0]
+        self.assertIn("if (state.viewing >= 0) closeViewer();", reset)
+        self.assertLess(reset.index("closeViewer();"), reset.index("state.photos = []"))
+
+    def test_sign_out_closes_overlays_and_clears_identity(self):
+        script = self.script()
+        show = script.split("async function showLogin", 1)[1].split("let people = []", 1)[0]
+        for needed in ("closeViewer()", "closeCompare()", '$("uploads").hidden = true',
+                       '$("drop").hidden = true', "state.profile = null",
+                       "state.me = null", "state.owner = false", "login.profile = null"):
+            self.assertIn(needed, show)
+
+    def test_a_failed_first_status_fetch_still_shows_a_screen(self):
+        script = self.script()
+        start = script.split("async function start()", 1)[1].split("$(\"login\").hidden = true", 1)[0]
+        self.assertIn("showLogin(", start)
+
+    def test_bulk_actions_hold_a_busy_state(self):
+        script = self.script()
+        self.assertIn("async function withBulkBusy", script)
+        self.assertIn("state.bulkBusy", script)
+        for name in ("bulkFavorite", "bulkArchive", "bulkAlbum", "bulkTag", "trashPhotos"):
+            body = script.split(f"async function {name}(", 1)[1].split("\nasync function", 1)[0]
+            self.assertIn("await withBulkBusy(", body.split("try {", 1)[0], name)
+
+    def test_every_scope_rebuild_uses_one_builder(self):
+        script = self.script()
+        self.assertIn("function blankScope(", script)
+        # Exactly one field list may exist: the builder's own. Three hand-written literals had
+        # already drifted, losing `format` and `missing` on two of them.
+        self.assertEqual(script.count("favorite: false, album: null, tag: null"), 1)
+        # A full rebuild must never be a literal; only a spread (a sort change) may be.
+        self.assertEqual(script.count("state.scope = { kind: null"), 0)
+        # Every rebuild goes through the builder and keeps the chosen order.
+        self.assertEqual(script.count("blankScope("), 5,
+                         "definition + init + setScope + person + album")
+
+
 class DamagedConfigTest(unittest.TestCase):
     def test_both_copies_damaged_is_a_clear_error(self):
         library = temp_dir(self)

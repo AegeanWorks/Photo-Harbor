@@ -1,38 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "atomic-temp-unique",
+    "task_id": "implicit-state-machines",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794164175.9863927,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794170462.8109624,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794164213.5868766
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "place-bucket-agreement",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Place buckets agree: 319 tests OK; 4/4 gates; pasted 37.25,23.72 now matches the 37.3,23.7 bucket; reverting either half fails the test; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794159009.4988654,
-      "timestamp_str": "2026-11-08 20:30:09",
-      "agent": "commandcode:vscode"
-    },
-    {
-      "task_id": "place-bucket-agreement",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'place-bucket-agreement' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794159056.078803,
-      "timestamp_str": "2026-11-08 20:30:56",
-      "agent": "commandcode:vscode"
-    },
     {
       "task_id": "docs-photo-filters",
       "phase": "phase 1",
@@ -259,6 +237,34 @@
       "status": "completed",
       "timestamp": 1794164213.5868783,
       "timestamp_str": "2026-11-08 21:56:53",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "implicit-state-machines",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/4] Plan: inventory every implicit state machine (backend + client), verify each claim with probes, propose and rank fixes that lift UX/DX/AX, implement the passing ones, then push",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794169056.207967,
+      "timestamp_str": "2026-11-08 23:17:36",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "State is scattered across booleans, sentinel strings and nullable columns with no single source of truth, which hides reachable bugs (a failed gallery load loops forever; a stale viewer index silently disables every action) and forces each reader to re-derive invariants.",
+        "benefits": "One readable machine registry for developers and agents; the highest-risk reachable states become impossible or recoverable; no behaviour change on healthy paths.",
+        "risks": "contract: client functions change shape, so the static UI tests must be updated; dependency: none; concurrency: the paging generation guard is involved; state: client-only fields.",
+        "mitigation": "behavioural node harnesses against the real shipped functions, failing-first tests, full suite and all four gates before any push."
+      }
+    },
+    {
+      "task_id": "implicit-state-machines",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/4] Inventory, verification and implementation done: 19 machines recorded, 9 proposals verified against code, 8 implemented; 338 tests OK; 4/4 gates; each new test confirmed failing without its fix; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794170462.8109624,
+      "timestamp_str": "2026-11-08 23:41:02",
       "agent": "commandcode:vscode"
     }
   ]

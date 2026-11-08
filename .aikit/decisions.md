@@ -1235,3 +1235,24 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   temporary file regardless of caller.
 - **Consequences**: Concurrent writes to one path each land atomically with no lost or
   mismatched bytes and no stray temp files; the crash-safety guarantee is unchanged.
+### ADR-079: The lifecycles are written down, and four of them become explicit states
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: State was spread across loose booleans, sentinel strings and nullable columns
+  with no single source of truth. Nineteen implicit machines were inventoried in
+  `.aikit/state_machines.md`; two were reachable and severe: one `resetPhotos()` against a
+  failing endpoint issued 61 requests and 61 toasts and starved the event loop, and replacing
+  `state.photos` left `state.viewing` pointing past the list so every viewer action silently
+  no-opped.
+- **Decision**: Record every lifecycle as data (states, transitions, owner, known gap) in
+  `.aikit/state_machines.md`, with the ranked proposals in `state_machine_proposals.md`.
+  Make four machines explicit: `state.paging` gains a `failed` state with a retry control;
+  `resetPhotos` closes the viewer because the index cannot outlive its list; `showLogin` closes
+  every overlay and clears identity; the bulk family holds a `state.bulkBusy` guard. All scope
+  rebuilds go through one `blankScope` builder, and `ScanSchedule._full` becomes an `Event`
+  while `ServerRunner` unwinds a half-started server.
+- **Consequences**: A failing page stops with one message and a retry instead of looping; a
+  filter change cannot leave a dead viewer on screen; a session that expires with an overlay
+  open shows a form the user can actually see; a double-clicked bulk action runs once. The
+  field list for a scope filter can no longer drift: three literals had already lost `format`
+  and `missing`. Deferred: a reducer rewrite and scan cancellation tokens (R1, R2).

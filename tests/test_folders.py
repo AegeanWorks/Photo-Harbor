@@ -128,6 +128,20 @@ class LayoutTest(unittest.TestCase):
         self.assertEqual(person.folder, "Ayşe (2)")
         self.assertFalse((root / person.folder / "not-mine.jpg").exists())
 
+    def test_a_requested_full_check_is_not_lost_between_threads(self):
+        # run_now() is called from the UI thread and the request is consumed on the scan
+        # thread. As a plain bool the set could be cleared before either side observed it.
+        from photo_harbor.scan import ScanSchedule
+        scanner = type("S", (), {"reconcile": lambda self, stop: type(
+            "R", (), {"held_back": 0, "added": 0, "moved": 0, "removed": 0})(),
+            "check": lambda self, stop: type("C", (), {"checked": 0, "damaged": ()})()})()
+        schedule = ScanSchedule(scanner, journal=None, log=lambda text: None)
+        self.assertFalse(schedule._full.is_set())
+        schedule.run_now(full=True)
+        self.assertTrue(schedule._full.is_set(), "the request must stay set until consumed")
+        schedule.run_now()
+        self.assertTrue(schedule._full.is_set(), "a bare wake-up must not clear a pending check")
+
     def test_files_from_the_old_layout_move_into_place(self):
         root = Path(tempfile.mkdtemp(prefix="harbor_legacy_"))
         old = root / "photos" / "main" / "2025" / "07"

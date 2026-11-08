@@ -68,6 +68,28 @@ class RunnerTest(unittest.TestCase):
             inst.close.assert_called_once_with()
         self.assertFalse(runner.running)
 
+    def test_a_failed_post_bind_setup_leaves_nothing_running(self):
+        # The socket is already bound when the warmer and schedule start, so a failure there
+        # would otherwise leave `running` True with a dead server and only stop() to fix it.
+        import photo_harbor.runner as runmod
+        from unittest.mock import patch
+        runner = ServerRunner(self.root / "lib", 0, host="127.0.0.1", verbose=False,
+                              log=lambda text: None)
+        with patch.object(runmod, "HarborApp") as mock_app_cls:
+            inst = mock_app_cls.return_value
+            inst.layout.prepare.return_value = 0
+            inst.previews = False
+            inst.warmer = None
+            inst.schedule.start.side_effect = RuntimeError("schedule boom")
+            with self.assertRaises(RuntimeError):
+                runner.start()
+            inst.close.assert_called_once_with()
+        self.assertFalse(runner.running)
+        # A second start must be possible: nothing is left holding the port.
+        runner.start()
+        self.addCleanup(runner.stop)
+        self.assertTrue(runner.running)
+
 
 class PrefsTest(unittest.TestCase):
     def test_round_trip_and_fallbacks(self):

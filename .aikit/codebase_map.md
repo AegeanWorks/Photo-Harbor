@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `83`
-- **Total Classes**: `174`
+- **Total Classes**: `175`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `713`
-- **Total Source Lines**: `11696`
+- **Total Class Methods**: `724`
+- **Total Source Lines**: `11808`
 
 ---
 
@@ -791,7 +791,7 @@
 ### [`photo_harbor/runner.py`](photo_harbor/runner.py)
 > *Starts and stops one server in the background, for the command line and the Harbor window.*
 
-**Size**: `98` lines (`3866` bytes)
+**Size**: `108` lines (`4294` bytes)
 
 **Classes:**
 - `class RunningServer`
@@ -800,6 +800,7 @@
   - Property `.running`
   - Method `.start()` - *Open the library and serve it on a background thread; HarborError if the port is busy.*
   - Method `.stop()`
+  - Method `._teardown()` - *Release everything ``start`` opened. The caller holds ``_lock``.*
   - Method `.wait()` - *Block until the server stops (Ctrl+C in a console stops it).*
 
 ---
@@ -807,7 +808,7 @@
 ### [`photo_harbor/scan.py`](photo_harbor/scan.py)
 > *Keeping the catalog in step with the folders, and checking that every file is still intact.*
 
-**Size**: `241` lines (`10210` bytes)
+**Size**: `244` lines (`10429` bytes)
 
 **Classes:**
 - `class ScanReport`
@@ -1228,7 +1229,7 @@
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
-**Size**: `211` lines (`9872` bytes)
+**Size**: `225` lines (`10799` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1244,6 +1245,7 @@
   - Method `.test_renaming_a_person_renames_their_folder_and_keeps_every_path()`
   - Method `.test_renaming_into_a_folder_left_on_disk_uses_a_free_name()`
   - Method `.test_a_new_person_does_not_inherit_a_folder_left_on_disk()`
+  - Method `.test_a_requested_full_check_is_not_lost_between_threads()`
   - Method `.test_files_from_the_old_layout_move_into_place()`
 - `class ScannerTest`
   - Method `.test_files_added_moved_and_deleted_in_explorer_are_noticed()`
@@ -1406,7 +1408,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `950` lines (`44799` bytes)
+**Size**: `1013` lines (`48399` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1508,6 +1510,15 @@
 - `class ReadmeApiTest`
   - Method `.test_every_registered_route_is_in_the_http_api_table()`
   - Method `.test_every_photo_filter_is_in_the_photos_row()`
+- `class StateMachineTest` - *The client state machines named in .aikit/state_machines.md stay explicit.*
+  - Method `.script()`
+  - Method `.page()`
+  - Method `.test_paging_has_a_failed_state_that_stops_the_loop()`
+  - Method `.test_replacing_the_photo_list_closes_the_viewer()`
+  - Method `.test_sign_out_closes_overlays_and_clears_identity()`
+  - Method `.test_a_failed_first_status_fetch_still_shows_a_screen()`
+  - Method `.test_bulk_actions_hold_a_busy_state()`
+  - Method `.test_every_scope_rebuild_uses_one_builder()`
 - `class DamagedConfigTest`
   - Method `.test_both_copies_damaged_is_a_clear_error()`
 
@@ -1574,7 +1585,7 @@
 ### [`tests/test_runner.py`](tests/test_runner.py)
 > *The background server the Harbor window and `serve` use, and the window's saved settings.*
 
-**Size**: `86` lines (`3594` bytes)
+**Size**: `108` lines (`4719` bytes)
 
 **Classes:**
 - `class RunnerTest`
@@ -1584,6 +1595,7 @@
   - Method `.test_wait_returns_immediately_when_never_started()`
   - Method `.test_wait_unblocks_after_stop()`
   - Method `.test_prepare_failure_closes_the_library()`
+  - Method `.test_a_failed_post_bind_setup_leaves_nothing_running()`
 - `class PrefsTest`
   - Method `.test_round_trip_and_fallbacks()`
   - Method `.test_mask_shows_only_the_last_four()`

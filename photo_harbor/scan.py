@@ -187,14 +187,17 @@ class ScanSchedule:
         self.log = log
         self._wake = threading.Event()
         self._stop = threading.Event()
-        self._full = False
+        # A full check is requested from the UI thread and consumed on the scan thread, so the
+        # request is an Event: a plain bool could be set and cleared without either side seeing.
+        self._full = threading.Event()
         self._thread = threading.Thread(target=self._run, name="harbor-scan", daemon=True)
 
     def start(self) -> None:
         self._thread.start()
 
     def run_now(self, full: bool = False) -> None:
-        self._full = self._full or full
+        if full:
+            self._full.set()
         self._wake.set()
 
     def stop(self) -> None:
@@ -233,8 +236,8 @@ class ScanSchedule:
         if report.added or report.moved or report.removed:
             self.log(f"Folders: {report.added} added, {report.moved} moved, "
                       f"{report.removed} removed.")
-        if not self._stop.is_set() and (self._full or self._due_check()):
-            self._full = False
+        if not self._stop.is_set() and (self._full.is_set() or self._due_check()):
+            self._full.clear()
             result = self._scanner.check(self._stop)
             self.log(f"File check: {result.checked} files, {len(result.damaged)} damaged.")
             for rel in result.damaged[:10]:

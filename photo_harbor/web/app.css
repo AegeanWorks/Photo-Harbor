@@ -157,6 +157,8 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .empty h2 { font: 600 28px/1.2 var(--serif); margin: 0; }
 .empty p { color: var(--muted); max-width: 420px; margin: 0 0 8px; }
 .sentinel { height: 1px; }
+.paging-error { text-align: center; padding: 24px 16px; display: grid; gap: 10px; justify-items: center; }
+.paging-error p { color: var(--muted); margin: 0; }
 
 /* Sync and setup */
 .cards { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-top: 18px; }

@@ -180,7 +180,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
 - **Jump through the timeline.** A scrubber above the gallery offers **Year** and **Month**
   selects plus **Newer** and **Older** buttons, built from the same month counts as the sidebar.
   It jumps to a month without loading the whole library, and the sidebar and scrubber stay in sync.
-- **Overview tabs.** Albums, tags and people show counts; **Activity** shows recent events; **Health** shows disk, backup, integrity, trash, formats and metadata gaps you can open.
+- **Overview tabs.** Albums, tags and people show counts; **Activity** shows recent events; **Health** shows disk, backup, integrity, trash, formats and metadata gaps.
 - **Explore.** Read-only photo, favorite, video, archive, year, month, place, camera and lens counts; rows open their views.
 - **Read-only folders.** The **Folders** tab mirrors the real `<Person>/<YYYY>/<YYYY-MM>` paths; click a month to open it. Owners see everyone, others themselves.
 - **Read-only sidecars.** Select photos and choose **Sidecars… → JSON** or **XMP** for a metadata
@@ -273,7 +273,7 @@ and exit 1; usage errors exit 2.
 
 ```text
 photo-harbor/
-├── .aikit/                   <- this project's memory: record, ledger, decisions
+├── .aikit/                   <- project memory: record, ledger, decisions, state machines
 ├── .gitignore
 ├── Harbor.pyw                <- double-click: the Harbor window (Start/Stop server)
 ├── LICENSE                   <- Aegean License 1.1 (AL-1.1): free personal use
