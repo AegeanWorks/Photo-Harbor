@@ -246,7 +246,16 @@ audit output and do not extend the numbered target.
 - Finding: none actionable; the assets and disclosure match the current README.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 24 - pushes 9-80
+
+- Range: `b521bc2` (push 9), `0b40870` (push 10), `80ef292` (push 11), plus the last 69
+  pushes.
+- Reviewed: reviewed media captures, rejected captures, topic metadata and the procedural-mark
+  replacement; no application code or tests changed.
+- Finding: none actionable; the committed assets are the approved ones.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 23 (pushes 12-80).
-- Next run: last 72 pushes, adding pushes 9-11.
+- Runs completed: 24 (pushes 9-80).
+- Next run: last 75 pushes, adding pushes 6-8.
