@@ -119,7 +119,17 @@ audit output and do not extend the numbered target.
   and the LIKE escape still protects `%` and `_`.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 11 - pushes 48-80
+
+- Range: `edd9ffb` (push 48), `51194b1` (push 49), `dc86be3` (push 50), plus the last 30
+  pushes.
+- Reviewed: chosen album covers and fallback to newest, cover clearing on removal, format-7
+  migration, the 10,000-hash selection endpoint and its batching in the gallery.
+- Finding: none actionable. Cover validation, fallback and removal are consistent; hashes use
+  the same filters/order and bulk writes stay at 500 per request.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 10 (pushes 51-80).
-- Next run: last 33 pushes, adding pushes 48-50.
+- Runs completed: 11 (pushes 48-80).
+- Next run: last 36 pushes, adding pushes 45-47.
