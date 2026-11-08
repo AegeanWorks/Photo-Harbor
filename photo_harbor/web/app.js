@@ -1181,7 +1181,9 @@ async function loadFolders() {
   for (const folder of data.folders) {
     months += folder.months.length;
     const card = el("article", "card folder-person");
-    card.append(el("h2", "", `${folder.name} · ${folder.folder || folder.profile}`));
+    const label = folder.folder && folder.folder !== folder.name
+      ? `${folder.name} · ${folder.folder}` : folder.name;
+    card.append(el("h2", "", label));
     const years = new Map();
     for (const month of folder.months) {
       const year = month.month.slice(0, 4);
@@ -1195,8 +1197,10 @@ async function loadFolders() {
         const button = el("button", "folder-month");
         button.type = "button";
         button.title = month.path;
+        const monthLabel = capitalise(monthYearFormat.format(monthDate(month.month)));
+        button.setAttribute("aria-label", `${monthLabel}, ${items(month.count)}`);
         button.append(
-          el("span", "", capitalise(monthYearFormat.format(monthDate(month.month)))),
+          el("span", "", monthLabel),
           el("b", "", month.count.toLocaleString()));
         button.addEventListener("click", () => openFolder(folder.profile, month.month));
         row.append(button);
@@ -1205,8 +1209,10 @@ async function loadFolders() {
     }
     box.append(card);
   }
-  $("folders-status").textContent = data.folders.length
-    ? `${data.folders.length.toLocaleString()} people · ${months.toLocaleString()} months`
+  const people = data.folders.length;
+  $("folders-status").textContent = people
+    ? `${people.toLocaleString()} ${people === 1 ? "person" : "people"} ·`
+      + ` ${months.toLocaleString()} ${months === 1 ? "month" : "months"}`
     : "No folders yet";
   if (data.folders.length === 0) {
     box.append(el("p", "hint", "No folders have photos yet."));
