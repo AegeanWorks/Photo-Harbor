@@ -119,6 +119,15 @@ class TagBook:
                 (profile, sha256)).fetchall()
         return [row[0] for row in rows]
 
+    def names(self, profile: str, sha256: str) -> list:
+        """The names of this person's tags on one photo, A-Z."""
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                "SELECT t.name FROM tags t JOIN photo_tags pt ON pt.tag_id = t.id"
+                " WHERE t.profile = ? AND pt.sha256 = ? ORDER BY t.name COLLATE NOCASE",
+                (profile, sha256)).fetchall()
+        return [row[0] for row in rows]
+
     def add(self, profile: str, ident, sha256: str, member: bool) -> bool:
         """Put a tag on a photo or take it off; True when the mark changed."""
         return self.add_many(profile, ident, [sha256], member) == 1

@@ -135,6 +135,13 @@
               <button class="ghost" id="select-tag" type="button" aria-haspopup="menu" aria-expanded="false">Add tag…</button>
               <div class="select-albums" id="select-tags" role="menu" hidden></div>
             </div>
+            <div class="select-album-wrap">
+              <button class="ghost" id="select-sidecar" type="button" aria-haspopup="menu" aria-expanded="false">Sidecars…</button>
+              <div class="select-albums" id="select-sidecars" role="menu" hidden>
+                <button class="ghost" id="sidecar-json" type="button" role="menuitem">JSON sidecars</button>
+                <button class="ghost" id="sidecar-xmp" type="button" role="menuitem">XMP sidecars</button>
+              </div>
+            </div>
             <button class="ghost" id="select-clear" type="button">Clear</button>
           </div>
           <div id="days"></div>
@@ -356,6 +363,7 @@
       <button class="ghost" id="viewer-album-remove" type="button" hidden>Remove from album</button>
       <button class="ghost" id="viewer-cover" type="button" hidden>Use as cover</button>
       <button class="ghost" id="viewer-info" type="button" aria-expanded="false" aria-keyshortcuts="I">Details</button>
+      <button class="ghost" id="viewer-sidecar" type="button" title="Export a JSON sidecar">Sidecar</button>
       <button class="ghost" id="viewer-archive" type="button">Archive</button>
       <button class="ghost" id="viewer-trash" type="button">Move to trash</button>
       <a id="viewer-download" class="ghost" download>Download original</a>

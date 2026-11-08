@@ -33,7 +33,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | Offline support | PWA shell only; Android has local queue state | Medium: offline write queue is a large state machine | Not now |
 | Read-only gallery | No separate role | Medium: could reuse a share token, but conflicts with private profiles | Later |
 | Duplicates utility | Exact SHA-256 dedupe plus read-only dHash Similar review | - | **Implemented now** |
-| XMP sidecars | No | Medium: useful for interoperability; file mutation risk | Later |
+| XMP sidecars | Yes: read-only JSON/XMP ZIP export; originals untouched | - | **Implemented now** |
 | Editing / transcoding / casting / monitoring | No | Low for this lightweight server | Not now |
 
 ## Implemented in this pass: Memories and Archive
@@ -63,6 +63,14 @@ returns coarse one-decimal buckets, the rail lists **Places** with counts, and
 `GET /api/photos?place=LAT,LON` narrows the gallery. The Details panel shows the exact point.
 No map tiles, reverse geocoding or network lookup are involved; archived photos leave the list.
 
+## Implemented in this pass: Sidecars
+
+`POST /api/sidecar` validates selected hashes through the same privacy/selection path as other
+bulk actions and returns a ZIP of per-photo JSON or XMP files. Each sidecar carries the viewer's
+tags, stored GPS point, camera, lens and file facts. The selection bar offers both formats; the
+viewer's **Sidecar** button exports JSON. Originals are never modified and no sidecar is written
+back to the library folders.
+
 ## Implemented in this pass: Offline map
 
 The **Map** tab projects the stored one-decimal Places onto an embedded equirectangular SVG
@@ -90,12 +98,13 @@ facts. Archived photos leave the camera count; no ML, network or file rewrite is
 
 ## Decision summary
 
-Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review and an
-offline map**. All seven reuse local data, avoid ML services and network dependencies, and never
-move or rewrite originals. Archive and Tags add only private per-person marks; Places stores the
-camera's point once; Cameras stores the EXIF make/model and lens once; Similar uses an optional
-perceptual hash cache and is read-only; the map is an embedded SVG outline. They compose with
-the existing person, album, date, kind, name and sort filters.
+Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review, sidecars
+and an offline map**. All eight reuse local data, avoid ML services and network dependencies,
+and never move or rewrite originals. Archive and Tags add only private per-person marks; Places
+stores the camera's point once; Cameras stores the EXIF make/model and lens once; Similar uses
+an optional perceptual hash cache and is read-only; sidecars are generated in memory; the map is
+an embedded SVG outline. They compose with the existing person, album, date, kind, name and sort
+filters.
 
 Deliberately not now:
 

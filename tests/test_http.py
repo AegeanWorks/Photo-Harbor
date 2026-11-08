@@ -533,6 +533,36 @@ class ServerTest(unittest.TestCase):
         response, _ = self.call("POST", "/api/similar/scan", body={"limit": 0})
         self.assertEqual(response.status, 400)
 
+    def test_sidecar_export_is_a_read_only_zip(self):
+        self.upload(b"one", name="one.jpg")
+        one = sha(b"one")
+        with self.app.db.lock:
+            self.app.db.conn.execute(
+                "UPDATE photos SET camera = ?, lens = ?, latitude = ?, longitude = ?"
+                " WHERE sha256 = ?", ("Acme Cam 1", "35 mm", 37.04, 23.72, one))
+        tag = self.app.tags.create("main", "Beach")
+        self.app.tags.add("main", tag.id, one, True)
+        response, body = self.call("POST", "/api/sidecar",
+                                   body={"sha256s": [one], "format": "json"})
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.getheader("Content-Type"), "application/zip")
+        with zipfile.ZipFile(io.BytesIO(body)) as archive:
+            data = json.loads(archive.read("one.json"))
+        self.assertEqual((data["camera"], data["latitude"], data["tags"]),
+                         ("Acme Cam 1", 37.04, ["Beach"]))
+        response, body = self.call("POST", "/api/sidecar",
+                                   body={"sha256s": [one], "format": "xmp"})
+        self.assertEqual(response.status, 200)
+        with zipfile.ZipFile(io.BytesIO(body)) as archive:
+            self.assertIn(b"<tiff:Model>Acme Cam 1</tiff:Model>",
+                          archive.read("one.xmp"))
+        response, _ = self.call("POST", "/api/sidecar",
+                                body={"sha256s": [one], "format": "pdf"})
+        self.assertEqual(response.status, 400)
+        response, _ = self.call("POST", "/api/sidecar",
+                                body={"sha256s": ["f" * 64]})
+        self.assertEqual(response.status, 404)
+
     def test_backup_status_is_visible_only_to_the_owner(self):
         _, body = self.call("GET", "/api/backup")
         self.assertEqual(json.loads(body), {"configured": False})

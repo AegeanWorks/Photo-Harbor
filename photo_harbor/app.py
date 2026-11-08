@@ -30,6 +30,7 @@ from .profiles_api import ProfilesApi
 from .router import Router
 from .scan import LibraryScanner, ScanSchedule
 from .setup_api import SetupApi
+from .sidecar import SidecarApi
 from .similar_api import SimilarApi
 from .store import PhotoStore, local_now
 from .sync_api import SyncApi
@@ -109,6 +110,7 @@ class HarborApp:
                        ArchiveApi(self.archive, catalog),
                        TagApi(self.tags, catalog),
                        SimilarApi(catalog, self.store),
+                       SidecarApi(catalog, self.tags),
                        DownloadsApi(self.downloads, self.albums, catalog, self.store),
                        TrashApi(self.trash, catalog),
                        BackupApi(lambda: self.backup),
@@ -181,8 +183,8 @@ class HarborApp:
 
     def _register(self, sync: SyncApi, library: LibraryApi, people: ProfilesApi,
                   albums: AlbumsApi, archive: ArchiveApi, tags: TagApi, similar: SimilarApi,
-                  downloads: DownloadsApi, trash: TrashApi, backup: BackupApi,
-                  setup: SetupApi) -> None:
+                  sidecar: SidecarApi, downloads: DownloadsApi, trash: TrashApi,
+                  backup: BackupApi, setup: SetupApi) -> None:
         add = self.router.add
         add("GET", "/", static_file, public=True)
         add("GET", "/static/", static_file, public=True)
@@ -226,6 +228,7 @@ class HarborApp:
         add("GET", "/api/similar", similar.listing)
         add("POST", "/api/similar/scan", similar.scan)
         add("POST", "/api/similar/build", similar.build)
+        add("POST", "/api/sidecar", sidecar.export)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/trash", trash.listing)

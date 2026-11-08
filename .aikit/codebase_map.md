@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `76`
-- **Total Classes**: `152`
-- **Total Top-Level Functions**: `119`
-- **Total Class Methods**: `624`
-- **Total Source Lines**: `10307`
+- **Total Python Modules**: `78`
+- **Total Classes**: `155`
+- **Total Top-Level Functions**: `125`
+- **Total Class Methods**: `637`
+- **Total Source Lines**: `10577`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `243` lines (`12066` bytes)
+**Size**: `246` lines (`12226` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -144,7 +144,7 @@
   - Method `.android_metadata(request)` - *The gallery's APK card: built state plus the signed build's sidecar fields.*
   - Method `.android_script(request)`
   - Method `.android_style(request)`
-  - Method `._register(sync, library, people, albums, archive, tags, similar, downloads, trash, backup, setup)`
+  - Method `._register(sync, library, people, albums, archive, tags, similar, sidecar, downloads, trash, backup, setup)`
   - Method `.close()`
 
 **Functions:**
@@ -825,6 +825,26 @@
 
 ---
 
+### [`photo_harbor/sidecar.py`](photo_harbor/sidecar.py)
+> *Read-only JSON and XMP sidecars for selected photos; originals are never touched.*
+
+**Size**: `139` lines (`5237` bytes)
+
+**Classes:**
+- `class SidecarApi`
+  - Method `.__init__(catalog, tags)`
+  - Method `.export(request)`
+
+**Functions:**
+- `def _entry_key(name)`
+- `def _sidecar_name(record, suffix, used)`
+- `def json_sidecar(record, tags)`
+- `def _gps(value, positive, negative)`
+- `def xmp_sidecar(record, tags)`
+- `def sidecar_zip(entries, fmt)` - *Build a ZIP of JSON or XMP sidecars; ``entries`` are ``(record, tag names)`` pairs.*
+
+---
+
 ### [`photo_harbor/similar_api.py`](photo_harbor/similar_api.py)
 > *Read-only Similar review: perceptual hashes, no automatic deletion.*
 
@@ -909,7 +929,7 @@
 ### [`photo_harbor/tags.py`](photo_harbor/tags.py)
 > *Personal tags: named marks on photos that never move or copy a file.*
 
-**Size**: `152` lines (`6521` bytes)
+**Size**: `161` lines (`6971` bytes)
 
 **Classes:**
 - `class TagBook` - *Tags belong to one person; a tag marks a photo without touching its folder.*
@@ -920,6 +940,7 @@
   - Method `.delete(profile, ident)`
   - Method `.owned(profile, ident)` - *Whether this person owns the tag; a bad id is a 400, a missing one is False.*
   - Method `.members(profile, sha256)` - *The ids of this person's tags on one photo.*
+  - Method `.names(profile, sha256)` - *The names of this person's tags on one photo, A-Z.*
   - Method `.add(profile, ident, sha256, member)` - *Put a tag on a photo or take it off; True when the mark changed.*
   - Method `.add_many(profile, ident, sha256s, member)` - *Mark or unmark several photos in one lock; returns how many rows changed.*
   - Method `._owned(profile, tag)`
@@ -1192,7 +1213,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `911` lines (`51625` bytes)
+**Size**: `941` lines (`53305` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1231,6 +1252,7 @@
   - Method `.test_places_group_and_filter_a_gps_point()`
   - Method `.test_camera_metadata_groups_and_filters()`
   - Method `.test_similar_review_groups_hashes_without_deleting()`
+  - Method `.test_sidecar_export_is_a_read_only_zip()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
   - Method `.test_storage_report_follows_the_signed_in_person()`
   - Method `.test_media_serves_ranges_for_video_scrubbing()`
@@ -1284,7 +1306,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `681` lines (`30710` bytes)
+**Size**: `695` lines (`31423` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1334,6 +1356,8 @@
   - Method `.test_similar_review_is_read_only_and_wired()`
 - `class MapUiTest`
   - Method `.test_offline_map_is_embedded_and_wired()`
+- `class SidecarUiTest`
+  - Method `.test_sidecar_export_is_reachable_for_selection_and_viewer()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`
@@ -1479,6 +1503,22 @@
   - Method `.test_search_combines_with_other_narrowing()`
   - Method `.test_words_past_the_eighth_still_narrow()`
   - Method `.test_like_wildcards_are_literal()`
+
+---
+
+### [`tests/test_sidecar.py`](tests/test_sidecar.py)
+**Size**: `75` lines (`3508` bytes)
+
+**Classes:**
+- `class SidecarTest`
+  - Method `.setUp()`
+  - Method `._request(body)`
+  - Method `._zip(body)`
+  - Method `.test_json_sidecar_contains_tags_place_and_camera()`
+  - Method `.test_xmp_sidecar_escapes_tags_and_writes_gps()`
+  - Method `.test_duplicate_names_get_unique_sidecar_files()`
+  - Method `.test_another_person_cannot_export_someone_elses_photo()`
+  - Method `.test_format_and_empty_selection_are_clear_errors()`
 
 ---
 

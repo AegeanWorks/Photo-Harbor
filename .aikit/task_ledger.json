@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-map",
+    "task_id": "immich-sidecar",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794141531.668077,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794142159.7027774,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794141723.9653292
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-metadata",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Camera metadata: store camera and lens at ingest, camera=LAT-style filter, Cameras rail, tests and docs; [2/2] verify UI, gates and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794134431.3125145,
-      "timestamp_str": "2026-11-08 13:40:31",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The Immich gap matrix leaves camera/lens metadata search as the next worthwhile local gap; users with several cameras cannot narrow the gallery today",
-        "benefits": "A local Cameras rail and camera= filter over existing EXIF facts, with no ML, no network and no file changes",
-        "risks": "contract: new camera filter and outline field; dependency: optional Pillow only; concurrency: unchanged; state: format 11 columns and migration",
-        "mitigation": "Store values once at ingest, keep exact-match SQL parameterized, add unit/HTTP/static tests, update every older-format migration simulation, run 4/4 gates and review the rail in Chromium"
-      },
-      "plan_digest": "9e2aeb8fe12d9e4eeafae0774c80a2aecc27aa4d6f5baa353c23053122832489"
-    },
-    {
-      "task_id": "immich-metadata",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Cameras: format 11 camera/lens columns, EXIF read at ingest, camera=NAME filter, Cameras rail, tests and docs",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794135000.3684053,
-      "timestamp_str": "2026-11-08 13:50:00",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-metadata",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Cameras done: 252 tests OK; 4/4 gates; migration/privacy covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794135003.9326415,
-      "timestamp_str": "2026-11-08 13:50:03",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-metadata",
       "phase": "completed",
@@ -260,6 +219,46 @@
       "status": "completed",
       "timestamp": 1794141723.9653316,
       "timestamp_str": "2026-11-08 15:42:03",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-sidecar",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Read-only sidecars: JSON/XMP export for selected photos with tags, Places and camera; ZIP endpoint and selection UI; [2/2] tests, gates, Chromium review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794141930.5362976,
+      "timestamp_str": "2026-11-08 15:45:30",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The remaining safe interoperability gap is a sidecar export that never rewrites originals",
+        "benefits": "Users can take Harbor tags, GPS and camera metadata into other tools as JSON or XMP, without file mutation or network services",
+        "risks": "contract: new ZIP endpoint and two UI actions; dependency: stdlib zipfile/XML only; concurrency: read-only; state: no schema change",
+        "mitigation": "Validate every hash through selection.visible, keep filenames collision-safe, test JSON/XMP/ZIP and privacy, gate and review"
+      },
+      "plan_digest": "2b48e667bc5611354d8f8d9f0e9ab25412c265744f44acfd2f602fae01411b7c"
+    },
+    {
+      "task_id": "immich-sidecar",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Sidecars: read-only JSON/XMP ZIP export, validated selection, tag/GPS/camera payloads, selection menu and viewer action, tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794142159.1131516,
+      "timestamp_str": "2026-11-08 15:49:19",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-sidecar",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Sidecars done: 273 tests OK; 4/4 gates; JSON/XMP/ZIP/privacy covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794142159.7027774,
+      "timestamp_str": "2026-11-08 15:49:19",
       "agent": "opencode:deepseek"
     }
   ]

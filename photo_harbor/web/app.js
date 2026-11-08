@@ -724,17 +724,23 @@ function hideSelectTags() {
   $("select-tag").setAttribute("aria-expanded", "false");
 }
 
+function hideSelectSidecars() {
+  $("select-sidecars").hidden = true;
+  $("select-sidecar").setAttribute("aria-expanded", "false");
+}
+
 function renderSelection() {
   const count = state.selected.size;
   $("select-count").textContent = `${count.toLocaleString()} selected`;
   $("select-archive").textContent = state.scope.archived ? "Unarchive" : "Archive";
   for (const id of ["select-favorite", "select-unfavorite", "select-download", "select-trash",
-    "select-album", "select-tag", "select-archive", "select-clear"]) {
+    "select-album", "select-tag", "select-sidecar", "select-archive", "select-clear"]) {
     $(id).disabled = count === 0;
   }
   if (count === 0) {
     hideSelectAlbums();
     hideSelectTags();
+    hideSelectSidecars();
   }
 }
 
@@ -871,6 +877,40 @@ async function startDownload(payload, button) {
     button.disabled = false;
     button.textContent = label;
   }
+}
+
+async function downloadSidecars(sha256s, format) {
+  if (sha256s.length === 0) return;
+  try {
+    const response = await fetch("/api/sidecar", {
+      method: "POST",
+      credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sha256s, format }),
+    });
+    if (response.status === 401) throw new Unauthorised();
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.error || `HTTP ${response.status}`);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `harbor-sidecars-${format}.zip`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    toast(`Exported ${items(sha256s.length)} as ${format.toUpperCase()} sidecars`);
+  } catch (error) {
+    handle(error);
+  }
+}
+
+function sidecarCurrent() {
+  const photo = state.photos[state.viewing];
+  if (photo) downloadSidecars([photo.sha256], "json");
 }
 
 function downloadSelection() {
@@ -1123,6 +1163,7 @@ function toggleSelectAlbums() {
     return;
   }
   hideSelectTags();
+  hideSelectSidecars();
   box.replaceChildren();
   const create = el("button", "ghost", "New album…");
   create.type = "button";
@@ -1147,6 +1188,7 @@ function toggleSelectTags() {
     return;
   }
   hideSelectAlbums();
+  hideSelectSidecars();
   box.replaceChildren();
   const create = el("button", "ghost", "New tag…");
   create.type = "button";
@@ -1162,6 +1204,18 @@ function toggleSelectTags() {
   }
   box.hidden = false;
   $("select-tag").setAttribute("aria-expanded", "true");
+}
+
+function toggleSelectSidecars() {
+  const box = $("select-sidecars");
+  if (!box.hidden) {
+    hideSelectSidecars();
+    return;
+  }
+  hideSelectAlbums();
+  hideSelectTags();
+  box.hidden = false;
+  $("select-sidecar").setAttribute("aria-expanded", "true");
 }
 
 function keyRow(person) {
@@ -1315,12 +1369,22 @@ function wireBrowser() {
   $("select-trash").addEventListener("click", () => trashPhotos([...state.selected]));
   $("select-album").addEventListener("click", toggleSelectAlbums);
   $("select-tag").addEventListener("click", toggleSelectTags);
+  $("select-sidecar").addEventListener("click", toggleSelectSidecars);
+  $("sidecar-json").addEventListener("click", () => {
+    hideSelectSidecars();
+    downloadSidecars([...state.selected], "json");
+  });
+  $("sidecar-xmp").addEventListener("click", () => {
+    hideSelectSidecars();
+    downloadSidecars([...state.selected], "xmp");
+  });
   $("similar-scan").addEventListener("click", scanSimilar);
   $("similar-build").addEventListener("click", startSimilarBuild);
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".select-album-wrap")) {
       hideSelectAlbums();
       hideSelectTags();
+      hideSelectSidecars();
     }
     if (!event.target.closest("#date-panel") && event.target.id !== "date-filter") {
       hideDatePanel();
@@ -1792,6 +1856,7 @@ function wireViewer() {
   $("viewer-tag-add").addEventListener("click", toggleTagMenu);
   $("viewer-album-remove").addEventListener("click", removeFromAlbum);
   $("viewer-cover").addEventListener("click", setAlbumCover);
+  $("viewer-sidecar").addEventListener("click", sidecarCurrent);
   $("viewer-archive").addEventListener("click", toggleArchiveCurrent);
   $("viewer-info").addEventListener("click", toggleDetails);
   $("viewer-trash").addEventListener("click", trashCurrent);
@@ -2023,6 +2088,7 @@ function wireShell() {
     hideDatePanel();
     hideSelectAlbums();
     hideSelectTags();
+    hideSelectSidecars();
     hideDetails();
   });
 }

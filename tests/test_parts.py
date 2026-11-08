@@ -358,6 +358,20 @@ class MapUiTest(unittest.TestCase):
         self.assertNotIn("mapbox", page.lower())
 
 
+class SidecarUiTest(unittest.TestCase):
+    def test_sidecar_export_is_reachable_for_selection_and_viewer(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('id="select-sidecar"', 'id="select-sidecars"',
+                        'id="sidecar-json"', 'id="sidecar-xmp"',
+                        'id="viewer-sidecar"'):
+            self.assertIn(element, page)
+        self.assertIn("/api/sidecar", script)
+        self.assertIn("downloadSidecars", script)
+        self.assertIn("sidecarCurrent", script)
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

@@ -174,6 +174,10 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   **Cameras** rail lists each camera with a count and clicking it narrows the gallery to that
   camera; **Details** shows the camera and lens too. This needs Pillow for the EXIF read, works
   fully offline, and composes with the other filters.
+- **Read-only sidecars.** Select photos and choose **Sidecars… → JSON sidecars** or **XMP
+  sidecars** to download a ZIP of metadata. The viewer's **Sidecar** button exports JSON for the
+  current photo. Sidecars include the viewer's tags, the stored GPS point, camera, lens and file
+  facts; originals are never rewritten.
 - **Offline photo map.** The **Map** tab draws an embedded SVG world outline and plots the
   stored one-decimal Places as markers; clicking a place opens its gallery view. There are no
   map tiles, CDN calls or network lookups, so the map works entirely on the home server.
@@ -249,6 +253,7 @@ and exit 1; usage errors exit 2.
 | `GET /api/tags`, `POST /api/tags` | your tags with visible counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
 | `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
 | `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | read-only cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200 photos per call; build starts the background group rebuild |
+| `POST /api/sidecar` | `{sha256 \| sha256s, format: json\|xmp}` returns a ZIP of read-only metadata sidecars |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
@@ -314,6 +319,7 @@ photo-harbor/
 │   ├── scan.py               <- keeping up with File Explorer; weekly file check
 │   ├── selection.py          <- bulk hash parsing and all-or-nothing validation
 │   ├── setup_api.py          <- address and key for the Setup tab
+│   ├── sidecar.py            <- read-only JSON/XMP sidecar ZIPs
 │   ├── similar_api.py        <- read-only perceptual-hash groups and on-demand scan
 │   ├── similar_builder.py    <- background cached-group rebuild
 │   ├── store.py              <- hash-verified ingest, re-verification, stale upload cleanup
@@ -343,6 +349,7 @@ photo-harbor/
     ├── test_runner.py
     ├── test_scale.py
     ├── test_search.py       <- multi-word search inside the active filters
+    ├── test_sidecar.py      <- JSON/XMP sidecar ZIPs
     ├── test_similar.py      <- perceptual hashes, read-only groups and format 11 migration
     ├── test_sort.py         <- newest, oldest, largest and smallest order
     ├── test_tags.py         <- personal tags and format 8 migration

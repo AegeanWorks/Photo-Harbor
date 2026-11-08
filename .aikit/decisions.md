@@ -959,3 +959,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: The household gets a read-only global map that works fully offline and
   follows the signed-in person's visible photos. The outline is deliberately coarse rather than
   a cartographic basemap; no geocoding, labels or tiles are claimed.
+
+### ADR-056: Sidecars are read-only JSON/XMP ZIPs
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: XMP sidecars are useful for interoperability, but writing beside originals risks
+  changing the library and needs per-folder permissions and rollback rules.
+- **Decision**: Add `POST /api/sidecar` with validated selected hashes and `format=json|xmp`.
+  It builds a ZIP in memory with one sidecar per photo; JSON carries tags, GPS, camera, lens and
+  file facts, while XMP carries Dublin Core subject tags plus EXIF GPS and camera fields. The
+  selection bar offers JSON and XMP; the viewer's **Sidecar** button exports JSON. Nothing is
+  written into the photo folders and no schema changes are needed.
+- **Consequences**: Users can move metadata into other tools without mutating originals. The
+  export inherits the same per-person visibility and 500-hash batch limit as other bulk actions.
