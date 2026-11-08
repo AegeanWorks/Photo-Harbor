@@ -1,56 +1,22 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "push-audit-band-3",
-    "last_phase": "verification",
-    "active_phase": 4,
+    "task_id": "push-audit-band-4",
+    "last_phase": "planning",
+    "active_phase": 2,
     "status": "in_progress",
-    "updated_at": 1794112485.0994651,
+    "updated_at": 1794112553.394319,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "impact_assessment": {
+      "why": "The audit must continue past push 36 to the beginning; band 4 covers the remaining feature and governance pushes down to push 18",
+      "benefits": "Every remaining push in this band is checked against the current tree with a durable record and attributed fixes",
+      "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+      "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
+    }
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-retrospective",
-      "phase": "planning",
-      "phase_num": 2,
-      "description": "[1/6] Retrospective push audit in expanding windows: last 3, 6, 9 ... all 80 pushes, newest to oldest; Run 1 (pushes 78-80) found case-only ZIP collisions, fix with failing-first test, ADR-035, then push",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794107678.7626314,
-      "timestamp_str": "2026-11-08 06:14:38",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The user asked for push-by-push verification in expanding windows; Run 1 covers pushes 78-80, including the ZIP entry-name counter added by push 79. Downloads._entry_name treats IMG.jpg and img.jpg as distinct, but Windows extraction is case-insensitive, so one photo can overwrite another in the delivered ZIP",
-        "benefits": "Downloads stay lossless on Windows and every later audit run starts from a proven baseline; each finding is attributed to its push range",
-        "risks": "contract: ZIP entry names can gain a hash suffix for case-only collisions; dependency: stdlib only; concurrency: unchanged; state: no schema change",
-        "mitigation": "Casefold the used-name set, add a real two-photo ZIP regression, keep existing collision tests green, run 209+ tests and 4/4 gates, record ADR-035, commit and publish Run 1"
-      },
-      "plan_digest": "17a6c3acb8d00b245d521339464bc83a13709dea29d7d08e06f80dd1b33ee26f"
-    },
-    {
-      "task_id": "push-audit-retrospective",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[2/6] Run 1 (pushes 78-80): case-only ZIP names now deduplicated by casefold; 210 tests; 4/4 gates; checklists: passed; audit log records the finding and ADR-035",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794108501.819336,
-      "timestamp_str": "2026-11-08 06:28:21",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "push-audit-retrospective",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[3/6] Run 2 (pushes 75-80): Unicode normalization added to ZIP name keys; 211 tests; 4/4 gates; checklists: passed; ADR-036 and audit log updated",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794108743.7944033,
-      "timestamp_str": "2026-11-08 06:32:23",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-retrospective",
       "phase": "verification",
@@ -249,6 +215,45 @@
       "timestamp": 1794112485.0994651,
       "timestamp_str": "2026-11-08 07:34:45",
       "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[6/6] Run 15 (pushes 36-80): storage totals and per-person shares reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794112546.8815036,
+      "timestamp_str": "2026-11-08 07:35:46",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-3",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'push-audit-band-3' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794112547.202878,
+      "timestamp_str": "2026-11-08 07:35:47",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-band-4",
+      "phase": "planning",
+      "phase_num": 2,
+      "description": "[1/6] Audit band 4: runs 16-21, expanding from the newest 48 to the newest 63 historical pushes (pushes 18-80); review downloads, details, batch selection, albums, reforge and licensing/UI metadata, fix defects, verify and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794112553.394319,
+      "timestamp_str": "2026-11-08 07:35:53",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The audit must continue past push 36 to the beginning; band 4 covers the remaining feature and governance pushes down to push 18",
+        "benefits": "Every remaining push in this band is checked against the current tree with a durable record and attributed fixes",
+        "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
+        "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
+      },
+      "plan_digest": "dcfaa7cc15d7f4626ca1cb093310c5e916d2e31fcaa9c1ac0453c84d8e6cd8ca"
     }
   ]
 }

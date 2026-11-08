@@ -161,7 +161,17 @@ audit output and do not extend the numbered target.
   the CLI. ADR-042.
 - Verification: 216 tests OK; project check 4/4 gates.
 
+## Run 15 - pushes 36-80
+
+- Range: `6b8bb89` (push 36), `07031b2` (push 37), `8f9e2dd` (push 38), plus the last 42
+  pushes.
+- Reviewed: whole-library and per-person storage totals, shared-photo counting, largest files,
+  disk warning and album cover/selection creation.
+- Finding: none actionable. The whole library counts distinct files once; per-person shares count
+  copies and flag sharing; trash is excluded from both.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 14 (pushes 39-80).
-- Next run: last 45 pushes, adding pushes 36-38.
+- Runs completed: 15 (pushes 36-80).
+- Next run: last 48 pushes, adding pushes 33-35.
