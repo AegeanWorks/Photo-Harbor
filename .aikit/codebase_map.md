@@ -7,10 +7,10 @@
 
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `76`
-- **Total Classes**: `151`
+- **Total Classes**: `152`
 - **Total Top-Level Functions**: `119`
-- **Total Class Methods**: `623`
-- **Total Source Lines**: `10291`
+- **Total Class Methods**: `624`
+- **Total Source Lines**: `10307`
 
 ---
 
@@ -1284,7 +1284,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `665` lines (`29919` bytes)
+**Size**: `681` lines (`30710` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1332,6 +1332,8 @@
   - Method `.test_gallery_cameras_are_reachable_and_wired()`
 - `class SimilarUiTest`
   - Method `.test_similar_review_is_read_only_and_wired()`
+- `class MapUiTest`
+  - Method `.test_offline_map_is_embedded_and_wired()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

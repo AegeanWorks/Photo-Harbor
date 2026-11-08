@@ -174,6 +174,9 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   **Cameras** rail lists each camera with a count and clicking it narrows the gallery to that
   camera; **Details** shows the camera and lens too. This needs Pillow for the EXIF read, works
   fully offline, and composes with the other filters.
+- **Offline photo map.** The **Map** tab draws an embedded SVG world outline and plots the
+  stored one-decimal Places as markers; clicking a place opens its gallery view. There are no
+  map tiles, CDN calls or network lookups, so the map works entirely on the home server.
 - **Read-only Similar review.** The **Similar** tab indexes optional perceptual hashes on
   demand and lists connected groups whose hashes differ by at most 8 bits. **Scan library**
   hashes up to 10,000 photos per press; **Build groups** (started automatically after a scan)

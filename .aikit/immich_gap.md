@@ -24,7 +24,7 @@ machine-learning worker; Photo-Harbor is a stdlib-only Windows server that keeps
 | User-defined storage structure | Fixed readable `<Person>/<YYYY>/<YYYY-MM>` layout | Low: the plain layout is a deliberate feature | Not now |
 | Archive | Yes: per-person hidden state, rail view, single/bulk restore | - | **Implemented now** |
 | Favorites | Yes | - | Keep |
-| Global Map | Coarse Places list; no map surface | Medium: needs an offline tile story; GPS is now stored | Later |
+| Global Map | Offline SVG outline with Places markers | - | **Implemented now** |
 | Partner sharing | No | Low: per-person folders already cover the household use case | Not now |
 | Facial recognition/clustering | No | Low here: ML worker, model downloads and training data | Not now |
 | Memories (x years ago) | No | High: one filter over existing dates, high user value | **Implemented now** |
@@ -63,6 +63,13 @@ returns coarse one-decimal buckets, the rail lists **Places** with counts, and
 `GET /api/photos?place=LAT,LON` narrows the gallery. The Details panel shows the exact point.
 No map tiles, reverse geocoding or network lookup are involved; archived photos leave the list.
 
+## Implemented in this pass: Offline map
+
+The **Map** tab projects the stored one-decimal Places onto an embedded equirectangular SVG
+world outline. Markers use the same `/api/outline` data as the Places rail, scale with photo
+counts, and a clickable list opens a place's gallery view. No tiles, CDN, reverse geocoding or
+network lookup are used; the map is read-only and respects the signed-in person's visible pairs.
+
 ## Implemented in this pass: Similar review
 
 Format 12 adds a `photo_hashes` cache. **Similar** is a separate tab: **Scan library** computes
@@ -83,17 +90,15 @@ facts. Archived photos leave the camera count; no ML, network or file rewrite is
 
 ## Decision summary
 
-Implemented in this pass: **Memories, Archive, Tags, Places, Cameras and Similar review**. All
-six reuse local data, avoid ML services and network dependencies, and never move or rewrite
-originals. Archive and Tags add only private per-person marks; Places stores the camera's point
-once; Cameras stores the EXIF make/model and lens once; Similar uses an optional perceptual hash
-cache and is read-only. They compose with the existing person, album, date, kind, name and sort
-filters.
+Implemented in this pass: **Memories, Archive, Tags, Places, Cameras, Similar review and an
+offline map**. All seven reuse local data, avoid ML services and network dependencies, and never
+move or rewrite originals. Archive and Tags add only private per-person marks; Places stores the
+camera's point once; Cameras stores the EXIF make/model and lens once; Similar uses an optional
+perceptual hash cache and is read-only; the map is an embedded SVG outline. They compose with
+the existing person, album, date, kind, name and sort filters.
 
 Deliberately not now:
 
-- **Global map** - needs an offline tile story; the Places rail already exposes the stored
-  coordinates without sending them anywhere.
 - **Sharing, OAuth, RAW/360/LivePhoto, storage templates, transcoding and offline write queues**
   - each breaks the home-network privacy or plain-folder/lightweight-server promise, or is a
   much larger state machine than the value justifies here.

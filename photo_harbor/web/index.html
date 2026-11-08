@@ -43,6 +43,7 @@
         <button role="tab" data-view="sync" aria-selected="false">Sync</button>
         <button role="tab" data-view="setup" aria-selected="false">Setup</button>
         <button role="tab" data-view="similar" aria-selected="false">Similar</button>
+        <button role="tab" data-view="map" aria-selected="false">Map</button>
         <button role="tab" data-view="trash" aria-selected="false">Trash</button>
       </nav>
       <label class="search">
@@ -289,6 +290,44 @@
         </div>
         <p class="hint">Groups are linked when their perceptual hashes differ by at most <b id="similar-threshold">8</b> bits. This is a review only: nothing is deleted here. Open a photo to compare it in full size.</p>
         <div id="similar-groups" class="similar-groups"></div>
+      </section>
+
+      <section id="view-map" class="view narrow" hidden>
+        <div class="scope">
+          <h1>Photo map</h1>
+          <span id="map-status" aria-live="polite"></span>
+        </div>
+        <p class="hint">An offline world outline with markers for the stored one-decimal Places. No map tiles, CDN or network lookup are used. Click a place below to open its gallery view.</p>
+        <div class="map-wrap">
+          <svg id="photo-map" class="photo-map" viewBox="0 0 800 400" role="img" aria-label="Offline world map of photo locations">
+            <rect class="map-ocean" width="800" height="400" rx="18"></rect>
+            <g class="map-graticule" aria-hidden="true">
+              <line x1="0" y1="100" x2="800" y2="100"></line>
+              <line x1="0" y1="200" x2="800" y2="200"></line>
+              <line x1="0" y1="300" x2="800" y2="300"></line>
+              <line x1="133" y1="0" x2="133" y2="400"></line>
+              <line x1="267" y1="0" x2="267" y2="400"></line>
+              <line x1="400" y1="0" x2="400" y2="400"></line>
+              <line x1="533" y1="0" x2="533" y2="400"></line>
+              <line x1="667" y1="0" x2="667" y2="400"></line>
+            </g>
+            <g class="map-land" aria-hidden="true">
+              <path d="M26.7,55.6 L88.9,44.4 L177.8,40.0 L244.4,62.2 L277.8,84.4 L255.6,100.0 L222.2,144.4 L166.7,155.6 L122.2,111.1 L66.7,71.1 Z"></path>
+              <path d="M222.2,177.8 L266.7,173.3 L322.2,211.1 L315.6,244.4 L277.8,322.2 L244.4,322.2 L233.3,266.7 L222.2,211.1 Z"></path>
+              <path d="M377.8,120.0 L377.8,44.4 L466.7,44.4 L533.3,33.3 L711.1,44.4 L777.8,66.7 L755.6,100.0 L711.1,122.2 L666.7,144.4 L622.2,188.9 L566.7,177.8 L522.2,144.4 L488.9,100.0 L455.6,122.2 L422.2,115.6 L388.9,104.4 Z"></path>
+              <path d="M362.2,117.8 L422.2,117.8 L477.8,133.3 L511.1,173.3 L493.3,233.3 L444.4,277.8 L422.2,277.8 L388.9,222.2 L362.2,177.8 Z"></path>
+              <path d="M651.1,248.9 L688.9,226.7 L740.0,255.6 L724.4,284.4 L671.1,277.8 L651.1,266.7 Z"></path>
+              <path d="M300.0,66.7 L355.6,66.7 L355.6,15.6 L277.8,15.6 L266.7,44.4 Z"></path>
+              <path d="M0,355.6 L133.3,366.7 L266.7,355.6 L400,366.7 L533.3,355.6 L666.7,366.7 L800,355.6 L800,400 L0,400 Z"></path>
+              <path d="M382.2,88.9 L404.4,88.9 L404.4,71.1 L382.2,71.1 Z"></path>
+              <path d="M688.9,128.9 L711.1,122.2 L722.2,100.0 L711.1,106.7 L693.3,122.2 Z"></path>
+              <path d="M495.6,226.7 L511.1,233.3 L506.7,255.6 L495.6,244.4 Z"></path>
+              <path d="M768.9,275.6 L795.6,284.4 L786.7,302.2 L768.9,293.3 Z"></path>
+            </g>
+            <g id="map-points"></g>
+          </svg>
+          <ul id="map-list" class="map-list"></ul>
+        </div>
       </section>
 
       <section id="view-trash" class="view narrow" hidden>

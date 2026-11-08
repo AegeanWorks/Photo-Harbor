@@ -946,3 +946,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   50k-photo cache with 25k groups loaded in 0.87 s. The one-time radius-8 computation is paid in
   an explicit background build with visible progress; existing format-12 caches are rebuilt by
   the first build. A hash is never re-grouped on page load.
+
+### ADR-055: The global map is an embedded SVG outline, not network tiles
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: GPS points and coarse Places are stored locally, but map tiles would add a
+  network/CDN dependency and break the home-network privacy promise.
+- **Decision**: Add a **Map** tab with a hand-embedded equirectangular SVG world outline and
+  graticule. It reads the existing `/api/outline` Places, projects each point with
+  `x=(lon+180)/360*800`, `y=(90-lat)/180*400`, scales marker radius by count, and lists places
+  as buttons that open their gallery. No new endpoint, schema or external asset is added.
+- **Consequences**: The household gets a read-only global map that works fully offline and
+  follows the signed-in person's visible photos. The outline is deliberately coarse rather than
+  a cartographic basemap; no geocoding, labels or tiles are claimed.

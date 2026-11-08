@@ -342,6 +342,22 @@ class SimilarUiTest(unittest.TestCase):
         self.assertNotIn("deleteSimilar", script)
 
 
+class MapUiTest(unittest.TestCase):
+    def test_offline_map_is_embedded_and_wired(self):
+        root = Path(__file__).resolve().parents[1]
+        page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for element in ('data-view="map"', 'id="view-map"', 'id="photo-map"',
+                        'id="map-points"', 'id="map-list"', 'id="map-status"'):
+            self.assertIn(element, page)
+        self.assertIn("map-land", page)
+        self.assertIn("loadMap", script)
+        self.assertIn("mapPoint", script)
+        self.assertIn("/api/outline", script)
+        self.assertNotIn("tile.openstreetmap", page)
+        self.assertNotIn("mapbox", page.lower())
+
+
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):
         root = Path(__file__).resolve().parents[1]

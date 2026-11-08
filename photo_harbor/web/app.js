@@ -1062,6 +1062,49 @@ async function startSimilarBuild() {
   }
 }
 
+function mapPoint(lat, lon) {
+  return [((Number(lon) + 180) / 360) * 800, ((90 - Number(lat)) / 180) * 400];
+}
+
+async function loadMap() {
+  const query = state.profile ? `?profile=${encodeURIComponent(state.profile)}` : "";
+  const data = await api(`/api/outline${query}`);
+  const places = data.places || [];
+  const points = $("map-points");
+  points.replaceChildren();
+  const list = $("map-list");
+  list.replaceChildren();
+  const total = places.reduce((sum, place) => sum + place.count, 0);
+  $("map-status").textContent =
+    `${places.length.toLocaleString()} places · ${total.toLocaleString()} photos`;
+  if (places.length === 0) {
+    list.append(el("li", "none", "No GPS places yet. Upload a photo with EXIF GPS."));
+    return;
+  }
+  for (const place of places) {
+    const [x, y] = mapPoint(place.lat, place.lon);
+    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    circle.setAttribute("cx", x.toFixed(1));
+    circle.setAttribute("cy", y.toFixed(1));
+    circle.setAttribute("r", String(4 + Math.min(place.count, 10)));
+    circle.setAttribute("class", "map-point");
+    const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+    title.textContent = `${placeLabel(place.key)} · ${place.count} photos`;
+    circle.append(title);
+    points.append(circle);
+    const item = el("li");
+    const button = el("button", "map-place",
+      `${placeLabel(place.key)} · ${items(place.count)}`);
+    button.type = "button";
+    button.addEventListener("click", () => {
+      selectPlace(place.key);
+      show("photos");
+    });
+    item.append(button);
+    list.append(item);
+  }
+}
+
 async function createAlbumForSelection() {
   const name = prompt("Name for the new album:");
   if (!name) return;
@@ -1928,7 +1971,7 @@ function show(view) {
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }
-  for (const name of ["photos", "sync", "setup", "similar", "trash"]) {
+  for (const name of ["photos", "sync", "setup", "similar", "map", "trash"]) {
     $(`view-${name}`).hidden = name !== view;
   }
   if (view === "sync") {
@@ -1938,6 +1981,7 @@ function show(view) {
   }
   if (view === "setup") loadSetup().catch(handle);
   if (view === "similar") loadSimilar().catch(handle);
+  if (view === "map") loadMap().catch(handle);
   if (view === "trash") loadTrash().catch(handle);
   try { localStorage.setItem("harbor-view", view); } catch (_) { /* private mode */ }
 }

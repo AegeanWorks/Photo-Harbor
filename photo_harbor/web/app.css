@@ -400,6 +400,23 @@ main { padding: 0 20px calc(env(safe-area-inset-bottom) + 40px); max-width: 1680
 .similar-photo img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; background: var(--wash); }
 .similar-photo span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
 
+.map-wrap { display: grid; gap: 14px; margin-top: 14px; }
+.photo-map { width: 100%; height: auto; display: block; border-radius: 18px; background: var(--surface-2); }
+.map-ocean { fill: #dce9e8; }
+.map-land path { fill: #cdbb9d; stroke: #a99472; stroke-width: 1.5; }
+.map-graticule line { stroke: #b8cbc9; stroke-width: 1; stroke-dasharray: 3 5; }
+.map-point { fill: var(--accent); stroke: #fff; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.map-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.map-place { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); padding: 8px 2px; background: none; color: inherit; cursor: pointer; font: inherit; }
+.map-place:hover, .map-place:focus-visible { color: var(--accent); }
+
+@media (prefers-color-scheme: dark) {
+  .map-ocean { fill: #16282b; }
+  .map-land path { fill: #4d473a; stroke: #6d6450; }
+  .map-graticule line { stroke: #294244; }
+  .map-point { stroke: var(--bg); }
+}
+
 .tile.selected { outline: 3px solid var(--accent); outline-offset: -3px; }
 .tile.selected::after {
   content: "✓"; position: absolute; right: 6px; top: 6px; width: 24px; height: 24px;
