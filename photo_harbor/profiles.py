@@ -5,6 +5,7 @@ import secrets
 import sqlite3
 import unicodedata
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 from .database import OWNER_PROFILE, Database
@@ -75,11 +76,13 @@ class ProfileBook:
             row = self._db.conn.execute(f"{_SELECT} WHERE key = ?", (key,)).fetchone()
         return _to_profile(row) if row else None
 
-    def create(self, name: str) -> Profile:
+    def create(self, name: str, root: Optional[Path] = None) -> Profile:
+        """Add a person. With ``root``, a folder already on disk is not reused, so a new
+        person never inherits untracked files that the scanner would adopt."""
         cleaned = clean_name(name)
         with self._db.lock:
             new = Profile(id=profile_id(cleaned), name=cleaned, key=secrets.token_urlsafe(24),  # aikit:allow-secret generated at runtime
-                          folder=self.free_folder(cleaned))
+                          folder=self.free_folder(cleaned, root=root))
             try:
                 self._db.conn.execute(
                     "INSERT INTO profiles (id, name, key, created_at, folder) VALUES (?, ?, ?, ?, ?)",
@@ -111,15 +114,20 @@ class ProfileBook:
                                       (secrets.token_urlsafe(24), ident))
         return self.get(ident)
 
-    def free_folder(self, name: str, keep: Optional[str] = None) -> str:
+    def free_folder(self, name: str, keep: Optional[str] = None,
+                    root: Optional[Path] = None) -> str:
         """``Ayşe``, or ``Ayşe (2)`` when that folder name (any letter case) is already taken.
-        ``keep`` is the person being renamed, whose own current folder does not count."""
+
+        ``keep`` is the person being renamed, whose own current folder does not count. With
+        ``root``, a folder that exists on disk also counts: a leftover copy from a failed
+        deletion or a hand-made folder would otherwise block the rename.
+        """
         with self._db.lock:
             taken = {row[0].lower() for row in self._db.conn.execute(
                 "SELECT folder FROM profiles WHERE folder IS NOT NULL AND id IS NOT ?", (keep,))}
         base = folder_name(name)
         candidate, number = base, 2
-        while candidate.lower() in taken:
+        while candidate.lower() in taken or (root is not None and (root / candidate).exists()):
             candidate, number = f"{base} ({number})", number + 1
         return candidate
 

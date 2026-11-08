@@ -104,6 +104,30 @@ class LayoutTest(unittest.TestCase):
         self.assertEqual(moved[0], root / "Ayşe Yılmaz/2026/2026-03/IMG_0001.heic")
         self.assertFalse((root / "Ayse").exists())
 
+    def test_renaming_into_a_folder_left_on_disk_uses_a_free_name(self):
+        # A folder can exist without a profile: a deletion that failed, a copy made by hand.
+        # Renaming onto it fails, so the name must be free only when the disk agrees.
+        root, app = make_app(self)
+        app.profiles.create("Ayse")
+        put(app, b"hers", profile="ayse")
+        (root / "Ayşe Yılmaz").mkdir()
+        person = app.layout.rename_person("ayse", "Ayşe Yılmaz")
+        self.assertEqual(person.folder, "Ayşe Yılmaz (2)")
+        self.assertTrue((root / "Ayşe Yılmaz (2)").is_dir())
+        self.assertFalse((root / "Ayse").exists())
+
+    def test_a_new_person_does_not_inherit_a_folder_left_on_disk(self):
+        # A leftover folder may hold untracked files the scanner would adopt; the new
+        # person must get a fresh folder instead.
+        root, app = make_app(self)
+        stray = root / "Ayşe"
+        stray.mkdir()
+        (stray / "not-mine.jpg").write_bytes(b"someone else's")
+        person = app.layout.create_person("Ayşe")
+        app.layout.prepare()
+        self.assertEqual(person.folder, "Ayşe (2)")
+        self.assertFalse((root / person.folder / "not-mine.jpg").exists())
+
     def test_files_from_the_old_layout_move_into_place(self):
         root = Path(tempfile.mkdtemp(prefix="harbor_legacy_"))
         old = root / "photos" / "main" / "2025" / "07"

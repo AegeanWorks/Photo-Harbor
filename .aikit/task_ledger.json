@@ -1,38 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "shrink-close-connection",
+    "task_id": "folder-name-disk-check",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794163262.3865244,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794163858.642684,
     "owner": "commandcode:vscode",
     "started_by": "commandcode:vscode",
-    "continuations": [],
-    "completed_at": 1794163372.7663765
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "docs-api-table-coverage",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[2/2] Docs done: 316 tests OK; 4/4 gates; new ReadmeApiTest fails without the rows and passes with them; 42 routes now all documented; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794155642.7839782,
-      "timestamp_str": "2026-11-08 19:34:02",
-      "agent": "commandcode:vscode"
-    },
-    {
-      "task_id": "docs-api-table-coverage",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'docs-api-table-coverage' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794155673.5867596,
-      "timestamp_str": "2026-11-08 19:34:33",
-      "agent": "commandcode:vscode"
-    },
     {
       "task_id": "integrity-repair-clears-damage",
       "phase": "phase 1",
@@ -259,6 +237,34 @@
       "status": "completed",
       "timestamp": 1794163372.766378,
       "timestamp_str": "2026-11-08 21:42:52",
+      "agent": "commandcode:vscode"
+    },
+    {
+      "task_id": "folder-name-disk-check",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/2] Plan: treat a person's folder name as taken when that folder exists on disk, for both rename and create",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794163849.1343703,
+      "timestamp_str": "2026-11-08 21:50:49",
+      "agent": "commandcode:vscode",
+      "impact_assessment": {
+        "why": "free_folder only checked the profiles table, so a leftover folder made a rename fail with a misleading WinError 5 message and let a new person adopt untracked files.",
+        "benefits": "Renames onto leftovers succeed with Name (2); new people start empty; no schema change.",
+        "risks": "contract: create() and free_folder() gain a root argument; dependency: none; concurrency: same lock; state: none.",
+        "mitigation": "failing-first tests for both paths, single create_person entry point, ADR-077, gates."
+      }
+    },
+    {
+      "task_id": "folder-name-disk-check",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/2] Disk-aware folders: 329 tests OK; 4/4 gates; both tests fail without the fix and pass with it; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794163858.642684,
+      "timestamp_str": "2026-11-08 21:50:58",
       "agent": "commandcode:vscode"
     }
   ]

@@ -52,7 +52,7 @@ class ProfilesApi:
         password = body.get("password")
         if password:
             check_new_password(password)
-        profile = self._book.create(str(body.get("name", "")))
+        profile = self._layout.create_person(str(body.get("name", "")))
         self._layout.prepare()
         if password:
             self._passwords.set(profile.id, password)

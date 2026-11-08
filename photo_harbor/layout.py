@@ -81,13 +81,17 @@ class LibraryLayout:
             (self._root / profile.folder).mkdir(parents=True, exist_ok=True)
         return self._move_legacy()
 
+    def create_person(self, name: str) -> Profile:
+        """Add a person, picking a folder no one holds and that is not already on disk."""
+        return self._profiles.create(name, root=self._root)
+
     def rename_person(self, ident: str, name: str) -> Profile:
         """Rename a person and their folder; every catalogued path inside it follows."""
         from .profiles import clean_name
 
         person = self._profiles.get(ident)
         name = clean_name(name)
-        new_folder = self._profiles.free_folder(name, keep=ident)
+        new_folder = self._profiles.free_folder(name, keep=ident, root=self._root)
         with self._store.lock:
             if new_folder != person.folder:
                 old_dir, new_dir = self._root / person.folder, self._root / new_folder

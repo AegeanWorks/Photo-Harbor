@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `174`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `709`
-- **Total Source Lines**: `11635`
+- **Total Class Methods**: `712`
+- **Total Source Lines**: `11671`
 
 ---
 
@@ -596,12 +596,13 @@
 ### [`photo_harbor/layout.py`](photo_harbor/layout.py)
 > *The library as people see it in File Explorer: one folder per person, a year folder, a month*
 
-**Size**: `148` lines (`6416` bytes)
+**Size**: `152` lines (`6636` bytes)
 
 **Classes:**
 - `class LibraryLayout`
   - Method `.__init__(root, db, copies, profiles, store)`
   - Method `.prepare()` - *Guide file, hidden .harbor, a folder for everyone, and files from the old photos/*
+  - Method `.create_person(name)` - *Add a person, picking a folder no one holds and that is not already on disk.*
   - Method `.rename_person(ident, name)` - *Rename a person and their folder; every catalogued path inside it follows.*
   - Method `._repoint(old, new)`
   - Method `._move_legacy()` - *Move each file still under photos/ into its owner's folder, one at a time, so an*
@@ -708,7 +709,7 @@
 ### [`photo_harbor/profiles.py`](photo_harbor/profiles.py)
 > *The people a library belongs to: a name, an id, a folder in the library and a Shortcut key.*
 
-**Size**: `128` lines (`5840` bytes)
+**Size**: `136` lines (`6354` bytes)
 
 **Classes:**
 - `class ProfileBook`
@@ -716,9 +717,9 @@
   - Method `.all()` - *Owner first, then the others by name.*
   - Method `.get(ident)`
   - Method `.by_key(key)`
-  - Method `.create(name)`
+  - Method `.create(name, root)` - *Add a person. With ``root``, a folder already on disk is not reused, so a new*
   - Method `.update(ident, name, new_key, folder)` - *Rename a person (``folder`` is set by the layout once their folder has moved), or give*
-  - Method `.free_folder(name, keep)` - *``Ayşe``, or ``Ayşe (2)`` when that folder name (any letter case) is already taken.*
+  - Method `.free_folder(name, keep, root)` - *``Ayşe``, or ``Ayşe (2)`` when that folder name (any letter case) is already taken.*
 
 **Functions:**
 - `def profile_id(name)` - *A URL-safe id: ``Ayşe Yılmaz`` becomes ``ayse-yilmaz``.*
@@ -731,7 +732,7 @@
 ### [`photo_harbor/profiles_api.py`](photo_harbor/profiles_api.py)
 > *Listing people and, for the library owner, adding, renaming and re-keying them.*
 
-**Size**: `88` lines (`4111` bytes)
+**Size**: `88` lines (`4120` bytes)
 
 **Classes:**
 - `class ProfilesApi`
@@ -1227,7 +1228,7 @@
 ### [`tests/test_folders.py`](tests/test_folders.py)
 > *The library as people see it in File Explorer, and Harbor keeping up with changes made there.*
 
-**Size**: `187` lines (`8654` bytes)
+**Size**: `211` lines (`9872` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1241,6 +1242,8 @@
   - Method `.test_a_shared_photo_is_in_both_folders_but_stored_once()`
   - Method `.test_has_links_a_photo_the_pc_already_has_into_the_askers_folder()`
   - Method `.test_renaming_a_person_renames_their_folder_and_keeps_every_path()`
+  - Method `.test_renaming_into_a_folder_left_on_disk_uses_a_free_name()`
+  - Method `.test_a_new_person_does_not_inherit_a_folder_left_on_disk()`
   - Method `.test_files_from_the_old_layout_move_into_place()`
 - `class ScannerTest`
   - Method `.test_files_added_moved_and_deleted_in_explorer_are_noticed()`

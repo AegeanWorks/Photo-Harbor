@@ -1209,3 +1209,16 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: HEAD reports the same status, Content-Length and Content-Range as GET for
   the gallery, API JSON, originals, previews and one-time downloads, with no body and no file
   read. A download link still works exactly once, for the real GET.
+### ADR-077: A person's folder name must be free on disk as well as in the catalog
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: `free_folder` only consulted the `profiles` table. A folder can exist without a
+  profile - a delete that failed, a folder copied in by hand, the leftovers of an interrupted
+  rename - and renaming onto it failed with `WinError 5` ("close any program using it"), while
+  a newly added person silently adopted the folder and any files in it.
+- **Decision**: Accept the library root in `free_folder`, `create` and `rename_person`, and
+  treat a name as taken when that folder already exists on disk. `LibraryLayout.create_person`
+  is the single entry point, so the root is always supplied.
+- **Consequences**: A rename onto a leftover folder picks `Name (2)` and succeeds; a new person
+  gets a fresh empty folder instead of inheriting untracked files the scanner would adopt.
+  Deleting a folder on disk frees its name for reuse.
