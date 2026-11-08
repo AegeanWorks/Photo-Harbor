@@ -217,7 +217,17 @@ audit output and do not extend the numbered target.
 - Finding: none; the records are consistent and the current gates are green.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 21 - pushes 18-80
+
+- Range: `4a3f4d8` (push 18), `75dde7f` (push 19), `bb1739d` (push 20), plus the last 60
+  pushes.
+- Reviewed: per-person `last_day` counts, rename-before-folder validation, copy re-verification,
+  viewer next-page enabling and the reforge repairs.
+- Finding: none actionable. Status counts are scoped to the viewer; an owner's no-profile view
+  still sees everyone; rename validation happens before the folder move.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 20 (pushes 21-80).
-- Next run: last 63 pushes, adding pushes 18-20.
+- Runs completed: 21 (pushes 18-80).
+- Next run: last 66 pushes, adding pushes 15-17.

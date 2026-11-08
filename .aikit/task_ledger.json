@@ -2,32 +2,15 @@
   "version": 1,
   "active_task": {
     "task_id": "push-audit-band-5",
-    "last_phase": "planning",
-    "active_phase": 2,
+    "last_phase": "verification",
+    "active_phase": 4,
     "status": "in_progress",
-    "updated_at": 1794112900.673616,
+    "updated_at": 1794112981.242119,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "impact_assessment": {
-      "why": "Only the oldest pushes remain; band 5 completes the retrospective down to push 1",
-      "benefits": "The original feature commit and all intermediate pushes are verified against today's tree with a durable record",
-      "risks": "contract: none expected beyond found defects; dependency: stdlib only; concurrency: unchanged; state: audit log and ADRs only",
-      "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
-    }
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-2",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[4/6] Run 8 (pushes 57-80): unknown-size Android shares use chunked upload; APK 1.1/2 rebuilt and verified; version and sidecar integrity pinned; 215 tests; 4/4 gates; checklists: passed; ADR-041",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794111142.9906886,
-      "timestamp_str": "2026-11-08 07:12:22",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-2",
       "phase": "verification",
@@ -254,6 +237,17 @@
         "mitigation": "Review each three-push batch, probe current code, failing-first test any fix, keep six runs per band, run the full suite and 4/4 gates, publish each run"
       },
       "plan_digest": "20cd0eb1856bb816c629903129a8b77e8c6b0f4b9536d47cf41c98af5f3529b5"
+    },
+    {
+      "task_id": "push-audit-band-5",
+      "phase": "verification",
+      "phase_num": 4,
+      "description": "[2/6] Run 21 (pushes 18-80): reforge fixes and per-person status reviewed; no actionable defect; 215 tests; 4/4 gates; checklists: passed",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794112981.242119,
+      "timestamp_str": "2026-11-08 07:43:01",
+      "agent": "opencode:deepseek"
     }
   ]
 }
