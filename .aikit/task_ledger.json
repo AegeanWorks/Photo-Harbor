@@ -4,24 +4,14 @@
     "task_id": "android-download-ui",
     "last_phase": "delivery",
     "active_phase": 5,
-    "status": "in_progress",
+    "status": "completed",
     "updated_at": 1794127593.534552,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": []
+    "continuations": [],
+    "completed_at": 1794127880.0961792
   },
   "checkpoints": [
-    {
-      "task_id": "push-audit-band-4",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[6/6] Run 20 (pushes 21-80): reforge bookkeeping reviewed; no code change; 215 tests; 4/4 gates; checklists: passed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794112893.644516,
-      "timestamp_str": "2026-11-08 07:41:33",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "push-audit-band-4",
       "phase": "completed",
@@ -253,6 +243,16 @@
       "status": "in_progress",
       "timestamp": 1794127593.534552,
       "timestamp_str": "2026-11-08 11:46:33",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "android-download-ui",
+      "phase": "completed",
+      "phase_num": 5,
+      "description": "Task 'android-download-ui' completed successfully.",
+      "status": "completed",
+      "timestamp": 1794127880.0961814,
+      "timestamp_str": "2026-11-08 11:51:20",
       "agent": "opencode:deepseek"
     }
   ]
