@@ -715,3 +715,15 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   backup failure by `DailyBackup`, and the CLI exits 1.
 - **Consequences**: The backup status can no longer claim success for a library it never read.
   A target that is missing is still refused separately (ADR-016); only a real source is copied.
+
+### ADR-039: PWA installation is documented for secure contexts only
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The PWA bullet said Chrome or Edge could install `http://<pc>:8642/` and run its
+  service worker. Browsers require a secure context for both; a LAN address over plain HTTP is
+  not one, so the claim holds only at `http://localhost` on the PC or behind HTTPS.
+- **Decision**: Document the secure-context boundary: localhost on the PC can install and cache
+  the shell; a phone on plain HTTP still gets the gallery but uses the Android app or HTTPS for
+  an installed app. The service worker registration stays harmless where the browser refuses it.
+- **Consequences**: The README no longer promises an install that a phone browser rejects. The
+  gallery itself and the Android client are unchanged.

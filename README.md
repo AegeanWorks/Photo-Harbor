@@ -81,9 +81,12 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   re-running adds only new photos.
 - **No iPhone app.** Two Shortcuts built in Apple's Shortcuts app call the server. The gallery's
   **Setup** tab lists every action, with the server address and key ready to copy.
-- **Install the gallery too.** Chrome or Edge can install `http://<pc>:8642/` as a standalone
-  web app using the 192 and 512 pixel icons. A service worker caches only the page shell for an
-  offline start; `/api`, `/media` and `/thumb` are never cached.
+- **Install the gallery too.** On the PC, `http://localhost:8642/` is a secure context, so Chrome
+  or Edge can install it as a standalone web app using the 192 and 512 pixel icons. A service
+  worker caches only the page shell for an offline start; `/api`, `/media` and `/thumb` are
+  never cached. A phone opening `http://<pc>:8642/` over plain HTTP still gets the gallery, but
+  browsers refuse service workers and PWA installation on a non-secure origin: use the Android
+  app, or put Harbor behind HTTPS for an installed phone app.
 - **Android app too.** A small native Android 8+ client can be installed from
   `http://<pc>:8642/android/`; it sends new photos and videos with the same hash-first protocol,
   keeps the phone's copy, can run every 6 hours on Wi-Fi, and appears in Android's share sheet

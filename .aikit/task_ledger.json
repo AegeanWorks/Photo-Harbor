@@ -2,26 +2,15 @@
   "version": 1,
   "active_task": {
     "task_id": "push-audit-retrospective",
-    "last_phase": "verification",
-    "active_phase": 4,
+    "last_phase": "delivery",
+    "active_phase": 5,
     "status": "in_progress",
-    "updated_at": 1794109228.0438838,
+    "updated_at": 1794109758.1880236,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
     "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "harbor-hardening-31",
-      "phase": "verification",
-      "phase_num": 4,
-      "description": "[4/6] JSON replies now carry Cache-Control: no-store; README explains the no-overwrite and no-cache behaviour; ADR-031 recorded; codebase map refreshed",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794093343.3090506,
-      "timestamp_str": "2026-11-08 02:15:43",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "harbor-hardening-31",
       "phase": "verification",
@@ -253,6 +242,17 @@
       "status": "in_progress",
       "timestamp": 1794109228.0438838,
       "timestamp_str": "2026-11-08 06:40:28",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "push-audit-retrospective",
+      "phase": "delivery",
+      "phase_num": 5,
+      "description": "[6/6] Run 5 (pushes 66-80): PWA/secure-context claim corrected; 213 tests; 4/4 gates; checklists: passed; ADR-039 and audit log updated",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794109758.1880236,
+      "timestamp_str": "2026-11-08 06:49:18",
       "agent": "opencode:deepseek"
     }
   ]

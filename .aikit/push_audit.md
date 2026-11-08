@@ -51,7 +51,18 @@ Push numbers are the `update by push` entries in `git reflog show origin/master`
   CLI exits 1. ADR-038.
 - Verification: 213 tests OK; project check 4/4 gates.
 
+## Run 5 - pushes 66-80
+
+- Range: `366b391` (push 66), `88f0d92` (push 67), `63dc39d` (push 68), plus the last 12 pushes.
+- Reviewed: Android update check and metadata, PWA manifest/icons/service worker, secure-context
+  registration, plus the previous runs.
+- Finding: the README claimed a phone could install `http://<pc>:8642/` and use its service
+  worker; browsers require HTTPS or localhost for both.
+- Fix: document the secure-context boundary and the Android/HTTPS alternatives. ADR-039.
+  The code path was already harmless (registration failure is caught).
+- Verification: 213 tests OK; project check 4/4 gates.
+
 ## Status
 
-- Runs completed: 4 (pushes 69-80).
-- Next run: last 15 pushes, adding pushes 66-68.
+- Runs completed: 5 (pushes 66-80).
+- Next run: last 18 pushes, adding pushes 63-65.
