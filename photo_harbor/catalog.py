@@ -4,6 +4,7 @@ import sqlite3
 from typing import Optional
 
 from .database import Database, MAX_ROW_ID
+from .phash import hash_components
 from .records import (LibraryStats, Outline, PersonStorage, PhotoFilter, PhotoRecord,
                       StorageFile, StorageReport)
 
@@ -254,8 +255,8 @@ class Catalog:
                 (sha256, dhash))
 
     def similar_groups(self, profile: Optional[str] = None, viewer: str = "main",
-                       limit: int = 200) -> list:
-        """Read-only groups of visible photos sharing one exact perceptual hash."""
+                       radius: int = 4, limit: int = 200) -> list:
+        """Read-only groups of visible photos linked by hashes within ``radius`` bits."""
         narrow = PhotoFilter(profile=profile, viewer=viewer)
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
@@ -271,7 +272,11 @@ class Catalog:
             values = dict(row)
             dhash = values.pop("dhash")
             grouped.setdefault(dhash, []).append(_to_record(values))
-        groups = [(dhash, records) for dhash, records in grouped.items() if len(records) > 1]
+        groups = []
+        for component in hash_components(grouped.keys(), radius=radius):
+            records = [record for dhash in component for record in grouped[dhash]]
+            if len(records) > 1:
+                groups.append((tuple(sorted(component)), records))
         groups.sort(key=lambda item: (-len(item[1]), item[0]))
         return groups[:limit]
 

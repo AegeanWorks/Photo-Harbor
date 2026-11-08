@@ -915,3 +915,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   without SHA-256 equality, and nothing is deleted automatically. Crops or edits that change
   the hash need a future Hamming-distance pass; that can build on the same cache without a
   migration of originals.
+
+### ADR-053: Similar review links hashes within four bits
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: Exact dHash groups miss re-encoded or resized copies whose hash changes by a
+  few bits. A full radius-8 pass was measured at 268 s for 50k hashes; the page must stay
+  responsive.
+- **Decision**: Treat the cached 64-bit hashes as a Hamming metric and build connected groups
+  with radius 4. Split 64 bits into five bands of about 13 bits: a pair within four bits must
+  share at least one exact band, so a band index finds every candidate without an O(n²) scan.
+  The API reports `threshold: 4`; the UI explains the distance. No schema change and no delete
+  action.
+- **Consequences**: A 50k-hash grouping takes about 2.1 s on the development PC and catches
+  small re-encode/resize changes. Wider-radius grouping would need a cached or precomputed
+  index; the cache format leaves that open.

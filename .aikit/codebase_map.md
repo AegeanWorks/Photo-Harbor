@@ -8,9 +8,9 @@
 ## 📊 Codebase Metrics
 - **Total Python Modules**: `75`
 - **Total Classes**: `150`
-- **Total Top-Level Functions**: `115`
-- **Total Class Methods**: `612`
-- **Total Source Lines**: `10025`
+- **Total Top-Level Functions**: `118`
+- **Total Class Methods**: `613`
+- **Total Source Lines**: `10121`
 
 ---
 
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `369` lines (`19074` bytes)
+**Size**: `374` lines (`19314` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -309,7 +309,7 @@
   - Method `.similar_status(profile, viewer)` - *How many visible photos have a perceptual hash, a skip or no entry yet.*
   - Method `.missing_hashes(profile, viewer, limit)` - *Visible photo hashes that have no perceptual-hash row yet, newest first.*
   - Method `.set_hash(sha256, dhash)` - *Cache one perceptual hash or the ``skip`` marker for an unreadable file.*
-  - Method `.similar_groups(profile, viewer, limit)` - *Read-only groups of visible photos sharing one exact perceptual hash.*
+  - Method `.similar_groups(profile, viewer, radius, limit)` - *Read-only groups of visible photos linked by hashes within ``radius`` bits.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
@@ -648,10 +648,13 @@
 ### [`photo_harbor/phash.py`](photo_harbor/phash.py)
 > *A small perceptual difference hash for the read-only Similar review.*
 
-**Size**: `37` lines (`1248` bytes)
+**Size**: `107` lines (`3555` bytes)
 
 **Functions:**
 - `def hash_pixels(pixels)` - *A 64-bit difference hash as 16 hex digits, or None for the wrong pixel count.*
+- `def hamming(left, right)` - *How many bits differ between two 16-hex perceptual hashes.*
+- `def _bands(radius)` - *Split 64 bits into radius+1 bands, so a pair within radius shares one band.*
+- `def hash_components(hashes, radius)` - *Connected groups of valid hashes whose bits differ by at most ``radius``.*
 - `def read_dhash(path)` - *Perceptual hash from the original, or None without Pillow or a readable image.*
 
 ---
@@ -823,7 +826,7 @@
 ### [`photo_harbor/similar_api.py`](photo_harbor/similar_api.py)
 > *Read-only Similar review: perceptual hashes, no automatic deletion.*
 
-**Size**: `59` lines (`2469` bytes)
+**Size**: `63` lines (`2627` bytes)
 
 **Classes:**
 - `class SimilarApi`
@@ -1171,7 +1174,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `904` lines (`51326` bytes)
+**Size**: `905` lines (`51376` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1263,7 +1266,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `660` lines (`29649` bytes)
+**Size**: `662` lines (`29747` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1460,11 +1463,12 @@
 ---
 
 ### [`tests/test_similar.py`](tests/test_similar.py)
-**Size**: `102` lines (`5062` bytes)
+**Size**: `116` lines (`6031` bytes)
 
 **Classes:**
 - `class HashTest`
   - Method `.test_a_gradient_becomes_a_hex_difference_hash()`
+  - Method `.test_hamming_distance_and_connected_groups()`
 - `class SimilarCatalogTest`
   - Method `.setUp()`
   - Method `.test_status_and_groups_are_read_only()`

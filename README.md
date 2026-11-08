@@ -175,7 +175,7 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   camera; **Details** shows the camera and lens too. This needs Pillow for the EXIF read, works
   fully offline, and composes with the other filters.
 - **Read-only Similar review.** The **Similar** tab indexes optional perceptual hashes on
-  demand and lists groups whose hashes match exactly. It is a review only: every photo opens
+  demand and lists connected groups whose hashes differ by at most 4 bits. It is a review only: every photo opens
   in full size and there is no delete action. **Scan library** processes up to 10,000 photos per
   press; unreadable files and videos are marked skipped so they are not retried forever.
   It needs Pillow for the hash and never changes an original.
@@ -242,7 +242,7 @@ and exit 1; usage errors exit 2.
 | `POST /api/archive` | `{sha256 \| sha256s, archived: true\|false}` hides or restores your copies; at most 500 hashes per call |
 | `GET /api/tags`, `POST /api/tags` | your tags with visible counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
 | `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
-| `GET /api/similar`, `POST /api/similar/scan` | read-only perceptual-hash groups and index status; `{limit}` scans up to 200 photos per call |
+| `GET /api/similar`, `POST /api/similar/scan` | read-only perceptual-hash groups within 4 bits and index status; `{limit}` scans up to 200 photos per call |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |

@@ -5,7 +5,7 @@ import unittest
 from photo_harbor.archive import ArchiveBook
 from photo_harbor.database import SCHEMA_VERSION, Database
 from photo_harbor.messages import Request
-from photo_harbor.phash import hash_pixels
+from photo_harbor.phash import hash_components, hash_pixels, hamming
 from photo_harbor.records import Identity
 from photo_harbor.similar_api import SimilarApi
 from tests.library_fixture import FIXED_NOW, Library, sha
@@ -18,6 +18,19 @@ class HashTest(unittest.TestCase):
                          "ffffffffffffffff")
         self.assertIsNone(hash_pixels([0] * 71))
 
+    def test_hamming_distance_and_connected_groups(self):
+        self.assertEqual(hamming("0000000000000000", "0000000000000000"), 0)
+        self.assertEqual(hamming("0000000000000000", "0000000000000001"), 1)
+        self.assertEqual(hamming("0000000000000000", "000000000000000f"), 4)
+        self.assertEqual(hamming("0000000000000000", "00000000000000ff"), 8)
+        self.assertEqual(hamming("0000000000000000", "00000000000001ff"), 9)
+        groups = hash_components(["0000000000000000", "000000000000000f",
+                                   "1111111111111111"], radius=4)
+        self.assertEqual(sorted(len(group) for group in groups), [1, 2])
+        self.assertEqual(hash_components(["0000000000000000",
+                                          "00000000000001ff"], radius=4),
+                         [["0000000000000000"], ["00000000000001ff"]])
+
 
 class SimilarCatalogTest(unittest.TestCase):
     def setUp(self):
@@ -27,7 +40,7 @@ class SimilarCatalogTest(unittest.TestCase):
         self.three = self.lib.put(b"three", name="three.jpg").record.sha256
         self.four = self.lib.put(b"four", name="four.jpg").record.sha256
         self.lib.catalog.set_hash(self.one, "aaaaaaaaaaaaaaaa")
-        self.lib.catalog.set_hash(self.two, "aaaaaaaaaaaaaaaa")
+        self.lib.catalog.set_hash(self.two, "aaaaaaaaaaaaaaab")
         self.lib.catalog.set_hash(self.three, "bbbbbbbbbbbbbbbb")
         self.lib.catalog.set_hash(self.four, "skip")
 
@@ -36,8 +49,8 @@ class SimilarCatalogTest(unittest.TestCase):
         self.assertEqual(status, {"total": 4, "missing": 0, "skipped": 1, "indexed": 3})
         groups = self.lib.catalog.similar_groups(viewer="main")
         self.assertEqual(len(groups), 1)
-        dhash, records = groups[0]
-        self.assertEqual(dhash, "aaaaaaaaaaaaaaaa")
+        hashes, records = groups[0]
+        self.assertEqual(set(hashes), {"aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaab"})
         self.assertEqual({record.sha256 for record in records}, {self.one, self.two})
         self.assertEqual(self.lib.catalog.stats().count, 4)
 
@@ -71,6 +84,7 @@ class SimilarApiTest(unittest.TestCase):
         self.assertEqual((scan["processed"], scan["indexed"], scan["skipped"]), (2, 2, 0))
         listing = json.loads(self.api.listing(self._request()).body)
         self.assertEqual(listing["status"]["indexed"], 2)
+        self.assertEqual(listing["threshold"], 4)
         self.assertEqual(listing["groups"][0]["count"], 2)
         self.assertEqual({photo["sha256"] for photo in listing["groups"][0]["photos"]},
                          {self.one, self.two})

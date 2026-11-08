@@ -9,6 +9,7 @@ from .store import PhotoStore
 
 SCAN_DEFAULT = 50
 SCAN_MAX = 200
+RADIUS = 4
 
 
 class SimilarApi:
@@ -25,12 +26,15 @@ class SimilarApi:
 
     def listing(self, request: Request) -> Reply:
         profile = self._profile(request)
-        groups = self._catalog.similar_groups(profile, viewer=request.profile)
+        groups = self._catalog.similar_groups(profile, viewer=request.profile,
+                                              radius=RADIUS)
         return json_reply({
             "status": self._status(request),
-            "groups": [{"hash": dhash, "count": len(records),
+            "threshold": RADIUS,
+            "groups": [{"hash": hashes[0], "hashes": list(hashes),
+                        "count": len(records),
                         "photos": [photo_json(record) for record in records]}
-                       for dhash, records in groups],
+                       for hashes, records in groups],
         })
 
     def scan(self, request: Request) -> Reply:

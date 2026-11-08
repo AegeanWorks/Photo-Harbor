@@ -328,12 +328,14 @@ class SimilarUiTest(unittest.TestCase):
         page = (root / "photo_harbor" / "web" / "index.html").read_text(encoding="utf-8")
         script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
         for element in ('data-view="similar"', 'id="view-similar"',
-                        'id="similar-scan"', 'id="similar-groups"'):
+                        'id="similar-scan"', 'id="similar-groups"',
+                        'id="similar-threshold"'):
             self.assertIn(element, page)
         self.assertIn("/api/similar", script)
         self.assertIn("/api/similar/scan", script)
         self.assertIn("loadSimilar", script)
         self.assertIn("scanSimilar", script)
+        self.assertIn("data.threshold", script)
         self.assertNotIn("deleteSimilar", script)
 
 

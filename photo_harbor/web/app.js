@@ -976,6 +976,7 @@ async function emptyTrash() {
 async function loadSimilar() {
   const data = await api("/api/similar");
   const status = data.status;
+  $("similar-threshold").textContent = data.threshold;
   $("similar-status").textContent =
     `${status.indexed.toLocaleString()} indexed · ${status.missing.toLocaleString()} not scanned`
     + ` · ${status.skipped.toLocaleString()} skipped`;
