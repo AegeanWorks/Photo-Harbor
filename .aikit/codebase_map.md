@@ -10,7 +10,7 @@
 - **Total Classes**: `118`
 - **Total Top-Level Functions**: `103`
 - **Total Class Methods**: `510`
-- **Total Source Lines**: `8445`
+- **Total Source Lines**: `8448`
 
 ---
 
@@ -1010,7 +1010,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `756` lines (`42737` bytes)
+**Size**: `759` lines (`42843` bytes)
 
 **Classes:**
 - `class _NoPreviews`
