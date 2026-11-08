@@ -918,7 +918,7 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 
 ### ADR-053: Similar review links hashes within four bits
 - **Date**: 2026-11-08
-- **Status**: Accepted
+- **Status**: Superseded by ADR-054
 - **Context**: Exact dHash groups miss re-encoded or resized copies whose hash changes by a
   few bits. A full radius-8 pass was measured at 268 s for 50k hashes; the page must stay
   responsive.
@@ -930,3 +930,18 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
 - **Consequences**: A 50k-hash grouping takes about 2.1 s on the development PC and catches
   small re-encode/resize changes. Wider-radius grouping would need a cached or precomputed
   index; the cache format leaves that open.
+
+### ADR-054: Similar review caches radius-8 groups in a background worker
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: ADR-053 chose radius 4 because a radius-8 all-at-once pass took 268 s for 50k
+  hashes. The Similar page should support the wider radius without making every page load pay
+  that comparison cost.
+- **Decision**: Add format 13 tables `hash_groups` and `photo_groups`. **Scan library** only
+  hashes photos in bounded batches; **Build groups** starts a background worker that computes
+  connected components with `hash_components(..., radius=8)` and replaces the cache. `GET
+  /api/similar` reads that cache with SQL and reports `threshold: 8`; the UI polls while the
+  worker runs. No delete action and no originals are changed.
+- **Consequences**: Opening Similar is a fast SQL group-by even for a large library. The one-time
+  radius-8 computation is paid in an explicit background build with visible progress; existing
+  format-12 caches are rebuilt by the first build. A hash is never re-grouped on page load.

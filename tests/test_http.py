@@ -516,11 +516,17 @@ class ServerTest(unittest.TestCase):
         with self.app.db.lock:
             self.app.db.conn.executemany(
                 "INSERT INTO photo_hashes (sha256, dhash) VALUES (?, ?)",
-                [(one, "aaaaaaaaaaaaaaaa"), (two, "aaaaaaaaaaaaaaab")])
-        _, body = self.call("GET", "/api/similar")
-        listing = json.loads(body)
+                [(one, "aaaaaaaaaaaaaaaa"), (two, "aaaaaaaaaaaa0000")])
+        response, body = self.call("POST", "/api/similar/build", body={})
+        self.assertEqual(response.status, 200)
+        for _ in range(100):
+            _, body = self.call("GET", "/api/similar")
+            listing = json.loads(body)
+            if not listing["building"]:
+                break
+            time.sleep(0.05)
         self.assertEqual(listing["status"]["indexed"], 2)
-        self.assertEqual(listing["threshold"], 4)
+        self.assertEqual(listing["threshold"], 8)
         self.assertEqual(listing["groups"][0]["count"], 2)
         self.assertEqual({photo["name"] for photo in listing["groups"][0]["photos"]},
                          {"one.jpg", "two.jpg"})

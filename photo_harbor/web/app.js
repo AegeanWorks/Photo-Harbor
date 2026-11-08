@@ -10,7 +10,7 @@ const state = {
   query: "",
   generation: 0, total: 0, visible: 0, archived: 0, profile: null, people: [], me: null,
   owner: false, favorites: 0, albums: [], tags: [], selecting: false, selected: new Set(),
-  viewerReturnFocus: null,
+  viewerReturnFocus: null, similarTimer: null,
 };
 
 function personName(id) {
@@ -978,14 +978,26 @@ async function loadSimilar() {
   const status = data.status;
   $("similar-threshold").textContent = data.threshold;
   $("similar-status").textContent =
-    `${status.indexed.toLocaleString()} indexed · ${status.missing.toLocaleString()} not scanned`
-    + ` · ${status.skipped.toLocaleString()} skipped`;
+    `${status.indexed.toLocaleString()} hashed · ${status.grouped.toLocaleString()} grouped`
+    + ` · ${status.ungrouped.toLocaleString()} waiting · ${status.missing.toLocaleString()} unscanned`
+    + ` · ${status.skipped.toLocaleString()} skipped`
+    + (data.building ? " · grouping…" : data.build_error ? ` · ${data.build_error}` : "");
+  const build = $("similar-build");
+  build.disabled = data.building;
+  build.textContent = data.building ? "Grouping…" : "Build groups";
+  clearTimeout(state.similarTimer);
+  state.similarTimer = null;
+  if (data.building) {
+    state.similarTimer = setTimeout(() => loadSimilar().catch(handle), 2000);
+  }
   const box = $("similar-groups");
   box.replaceChildren();
   if (data.groups.length === 0) {
     box.append(el("p", "hint", status.missing
       ? "No matching groups yet. Press Scan library to index more photos."
-      : "No similar photos found in the indexed photos."));
+      : status.ungrouped
+        ? "Hashes are ready. Press Build groups to group them."
+        : "No similar photos found in the indexed photos."));
     return;
   }
   for (const group of data.groups) {
@@ -1017,17 +1029,20 @@ async function scanSimilar() {
   let processed = 0;
   let indexed = 0;
   let skipped = 0;
+  let status = null;
   try {
     for (let batch = 0; batch < 100; batch += 1) {
       const result = await post("/api/similar/scan", { limit: 100 });
       processed += result.processed;
       indexed += result.indexed;
       skipped += result.skipped;
+      status = result.status;
       $("similar-status").textContent = `Scanned ${processed.toLocaleString()}…`
-        + ` ${result.status.missing.toLocaleString()} left`;
-      if (result.processed === 0 || result.status.missing === 0) break;
+        + ` ${status.missing.toLocaleString()} unscanned`;
+      if (result.processed === 0 || status.missing === 0) break;
     }
     await loadSimilar();
+    if (status && status.ungrouped > 0) await startSimilarBuild();
     toast(`Scanned ${processed.toLocaleString()}; ${indexed.toLocaleString()} hashed,`
       + ` ${skipped.toLocaleString()} skipped`);
   } catch (error) {
@@ -1035,6 +1050,15 @@ async function scanSimilar() {
   } finally {
     button.disabled = false;
     button.textContent = label;
+  }
+}
+
+async function startSimilarBuild() {
+  try {
+    await post("/api/similar/build", {});
+    await loadSimilar();
+  } catch (error) {
+    handle(error);
   }
 }
 
@@ -1249,6 +1273,7 @@ function wireBrowser() {
   $("select-album").addEventListener("click", toggleSelectAlbums);
   $("select-tag").addEventListener("click", toggleSelectTags);
   $("similar-scan").addEventListener("click", scanSimilar);
+  $("similar-build").addEventListener("click", startSimilarBuild);
   document.addEventListener("click", (event) => {
     if (!event.target.closest(".select-album-wrap")) {
       hideSelectAlbums();
@@ -1896,6 +1921,10 @@ function wireStartup() {
 function show(view) {
   if (view !== "photos" && state.selecting) setSelecting(false);
   if (view !== "photos") hideDatePanel();
+  if (view !== "similar") {
+    clearTimeout(state.similarTimer);
+    state.similarTimer = null;
+  }
   for (const tab of document.querySelectorAll("[role=tab]")) {
     tab.setAttribute("aria-selected", String(tab.dataset.view === view));
   }

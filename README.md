@@ -175,10 +175,13 @@ Self-hosted photo server for Windows: an iPhone sends new photos over home Wi-Fi
   camera; **Details** shows the camera and lens too. This needs Pillow for the EXIF read, works
   fully offline, and composes with the other filters.
 - **Read-only Similar review.** The **Similar** tab indexes optional perceptual hashes on
-  demand and lists connected groups whose hashes differ by at most 4 bits. It is a review only: every photo opens
-  in full size and there is no delete action. **Scan library** processes up to 10,000 photos per
-  press; unreadable files and videos are marked skipped so they are not retried forever.
-  It needs Pillow for the hash and never changes an original.
+  demand and lists connected groups whose hashes differ by at most 8 bits. **Scan library**
+  hashes up to 10,000 photos per press; **Build groups** (started automatically after a scan)
+  recomputes the SQLite group cache in the background while the tab polls. Opening the tab then
+  only reads cached groups instead of comparing every hash again. It is a review only: every
+  photo opens in full size and there is no delete action. Unreadable files and videos are marked
+  skipped so they are not retried forever. It needs Pillow for the hash and never changes an
+  original.
 - **Archive without moving files.** Open a photo or select several and press **Archive** to hide
   them from the timeline. The **Archive** rail view shows only your hidden photos, with
   **Unarchive** to bring them back. Archiving is private to each person, never moves, copies or
@@ -242,7 +245,7 @@ and exit 1; usage errors exit 2.
 | `POST /api/archive` | `{sha256 \| sha256s, archived: true\|false}` hides or restores your copies; at most 500 hashes per call |
 | `GET /api/tags`, `POST /api/tags` | your tags with visible counts, or `?sha256=` with membership; create `{name}`, optionally with `{sha256 \| sha256s}` |
 | `POST /api/tags/<id>`, `POST /api/photo-tags` | rename `{name}` or delete `{delete: true}` one tag; `{tag, sha256 \| sha256s, member}` marks or unmarks a tag |
-| `GET /api/similar`, `POST /api/similar/scan` | read-only perceptual-hash groups within 4 bits and index status; `{limit}` scans up to 200 photos per call |
+| `GET /api/similar`, `POST /api/similar/scan`, `POST /api/similar/build` | read-only cached perceptual-hash groups within 8 bits and index status; `{limit}` hashes up to 200 photos per call; build starts the background group rebuild |
 | `GET /api/trash`, `POST /api/trash` | list your trash; `{sha256s}` moves your copies there |
 | `POST /api/trash/<id>`, `POST /api/trash/empty` | `{restore: true}` or `{delete: true}` one entry; empty the whole tab |
 | `GET /api/details/<sha256>` | file facts always; dimensions and camera/EXIF fields when Pillow can read the original |
@@ -309,6 +312,7 @@ photo-harbor/
 │   ├── selection.py          <- bulk hash parsing and all-or-nothing validation
 │   ├── setup_api.py          <- address and key for the Setup tab
 │   ├── similar_api.py        <- read-only perceptual-hash groups and on-demand scan
+│   ├── similar_builder.py    <- background cached-group rebuild
 │   ├── store.py              <- hash-verified ingest, re-verification, stale upload cleanup
 │   ├── sync_api.py           <- the endpoints the Shortcuts call
 │   ├── tags.py               <- personal tags and their photo marks
@@ -347,7 +351,7 @@ photo-harbor/
 Library layout: `<Person>\<YYYY>\<YYYY-MM>\<original name>` holds the originals untouched, next
 to `READ ME - Harbor.txt`. Libraries from earlier versions (`photos\...`) are moved into this
 layout file by file the first time the server starts. The hidden `.harbor\` holds
-`config.json`, `catalog.sqlite3` (format 12; an older catalog is upgraded in place after a copy
+`config.json`, `catalog.sqlite3` (format 13; an older catalog is upgraded in place after a copy
 to `catalog.sqlite3.v<N>.bak`), `incoming\`, `thumbs\` and `trash\`.
 
 ## 🚀 Performance

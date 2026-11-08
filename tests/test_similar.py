@@ -5,7 +5,7 @@ import unittest
 from photo_harbor.archive import ArchiveBook
 from photo_harbor.database import SCHEMA_VERSION, Database
 from photo_harbor.messages import Request
-from photo_harbor.phash import hash_components, hash_pixels, hamming
+from photo_harbor.phash import hash_bands, hash_components, hash_pixels, hamming
 from photo_harbor.records import Identity
 from photo_harbor.similar_api import SimilarApi
 from tests.library_fixture import FIXED_NOW, Library, sha
@@ -30,6 +30,10 @@ class HashTest(unittest.TestCase):
         self.assertEqual(hash_components(["0000000000000000",
                                           "00000000000001ff"], radius=4),
                          [["0000000000000000"], ["00000000000001ff"]])
+        self.assertEqual(len(hash_bands("0000000000000000", radius=8)), 10)
+        self.assertEqual(hash_components(["0000000000000000",
+                                          "0101010101010101"], radius=8),
+                         [["0000000000000000", "0101010101010101"]])
 
 
 class SimilarCatalogTest(unittest.TestCase):
@@ -40,21 +44,37 @@ class SimilarCatalogTest(unittest.TestCase):
         self.three = self.lib.put(b"three", name="three.jpg").record.sha256
         self.four = self.lib.put(b"four", name="four.jpg").record.sha256
         self.lib.catalog.set_hash(self.one, "aaaaaaaaaaaaaaaa")
-        self.lib.catalog.set_hash(self.two, "aaaaaaaaaaaaaaab")
+        self.lib.catalog.set_hash(self.two, "aaaaaaaaaaaa0000")
         self.lib.catalog.set_hash(self.three, "bbbbbbbbbbbbbbbb")
         self.lib.catalog.set_hash(self.four, "skip")
 
-    def test_status_and_groups_are_read_only(self):
+    def test_status_and_cached_groups_are_read_only(self):
         status = self.lib.catalog.similar_status(viewer="main")
-        self.assertEqual(status, {"total": 4, "missing": 0, "skipped": 1, "indexed": 3})
+        self.assertEqual(status, {"total": 4, "missing": 0, "skipped": 1, "indexed": 3,
+                                  "ungrouped": 3, "grouped": 0})
+        self.assertEqual(self.lib.catalog.rebuild_groups(radius=8), 2)
+        status = self.lib.catalog.similar_status(viewer="main")
+        self.assertEqual((status["ungrouped"], status["grouped"]), (0, 3))
         groups = self.lib.catalog.similar_groups(viewer="main")
         self.assertEqual(len(groups), 1)
-        hashes, records = groups[0]
-        self.assertEqual(set(hashes), {"aaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaab"})
+        _, records = groups[0]
         self.assertEqual({record.sha256 for record in records}, {self.one, self.two})
         self.assertEqual(self.lib.catalog.stats().count, 4)
 
+    def test_existing_hashes_are_grouped_by_a_rebuild(self):
+        lib = Library(self)
+        one = lib.put(b"one", name="one.jpg").record.sha256
+        two = lib.put(b"two", name="two.jpg").record.sha256
+        with lib.db.lock:
+            lib.db.conn.executemany(
+                "INSERT INTO photo_hashes (sha256, dhash) VALUES (?, ?)",
+                [(one, "aaaaaaaaaaaaaaaa"), (two, "aaaaaaaaaaaa0000")])
+        self.assertEqual(lib.catalog.rebuild_groups(radius=8), 1)
+        self.assertEqual(lib.catalog.similar_status(viewer="main")["ungrouped"], 0)
+        self.assertEqual(len(lib.catalog.similar_groups(viewer="main")), 1)
+
     def test_archiving_removes_a_photo_from_the_review(self):
+        self.lib.catalog.rebuild_groups(radius=8)
         ArchiveBook(self.lib.db, now=lambda: FIXED_NOW).set("main", self.one, True)
         self.assertEqual(self.lib.catalog.similar_groups(viewer="main"), [])
         self.assertEqual(self.lib.catalog.similar_status(viewer="main")["total"], 3)
@@ -82,12 +102,34 @@ class SimilarApiTest(unittest.TestCase):
         scan = json.loads(self.api.scan(self._request("POST", "/api/similar/scan",
                                                       {"limit": 10})).body)
         self.assertEqual((scan["processed"], scan["indexed"], scan["skipped"]), (2, 2, 0))
+        self.lib.catalog.rebuild_groups(radius=8)
         listing = json.loads(self.api.listing(self._request()).body)
         self.assertEqual(listing["status"]["indexed"], 2)
-        self.assertEqual(listing["threshold"], 4)
+        self.assertEqual(listing["threshold"], 8)
         self.assertEqual(listing["groups"][0]["count"], 2)
         self.assertEqual({photo["sha256"] for photo in listing["groups"][0]["photos"]},
                          {self.one, self.two})
+
+    def test_build_endpoint_starts_the_background_worker(self):
+        class _Builder:
+            def __init__(self):
+                self.started = 0
+
+            def start(self):
+                self.started += 1
+                return True
+
+            def running(self):
+                return False
+
+            def error(self):
+                return None
+
+        builder = _Builder()
+        api = SimilarApi(self.lib.catalog, self.lib.store,
+                         dhash=lambda path: None, builder=builder)
+        result = json.loads(api.build(self._request("POST", "/api/similar/build")).body)
+        self.assertEqual((result["started"], builder.started), (True, 1))
 
     def test_unreadable_files_are_skipped_once(self):
         api = SimilarApi(self.lib.catalog, self.lib.store, dhash=lambda path: None)
@@ -114,3 +156,19 @@ class SimilarMigrationTest(unittest.TestCase):
             "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='photo_hashes'"
         ).fetchone()[0], 1)
         self.assertTrue((lib.root / "v11.sqlite3.v11.bak").exists())
+
+    def test_a_format_12_catalog_gains_the_cached_group_tables(self):
+        lib = Library(self)
+        path = lib.root / "v12.sqlite3"
+        old = Database(path)
+        old.conn.executescript("DROP TABLE photo_groups;"
+                               "DROP TABLE hash_groups; PRAGMA user_version=12;")
+        old.close()
+        db = Database(path)
+        self.addCleanup(db.close)
+        self.assertEqual(db.conn.execute("PRAGMA user_version").fetchone()[0], SCHEMA_VERSION)
+        for table in ("hash_groups", "photo_groups"):
+            self.assertEqual(db.conn.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?",
+                (table,)).fetchone()[0], 1)
+        self.assertTrue((lib.root / "v12.sqlite3.v12.bak").exists())

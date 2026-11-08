@@ -27,8 +27,8 @@ def hamming(left: str, right: str) -> int:
 
 
 def _bands(radius: int) -> list:
-    """Split 64 bits into radius+1 bands, so a pair within radius shares one band."""
-    width = max(1, (64 + radius) // (radius + 1))
+    """Split 64 bits into more than ``radius`` bands, so a pair within radius shares one band."""
+    width = max(1, 64 // (radius + 1))
     bands = []
     shift = 0
     left = 64
@@ -38,6 +38,13 @@ def _bands(radius: int) -> list:
         shift += take
         left -= take
     return bands
+
+
+def hash_bands(dhash: str, radius: int = 8) -> list:
+    """``(band, signature)`` keys for the cached radius-8 candidate index."""
+    value = int(dhash, 16)
+    return [(number, (value >> shift) & mask)
+            for number, (shift, mask) in enumerate(_bands(radius))]
 
 
 def hash_components(hashes, radius: int = 4) -> list:

@@ -214,7 +214,7 @@ class Catalog:
         return [row[0] for row in rows]
 
     def similar_status(self, profile: Optional[str] = None, viewer: str = "main") -> dict:
-        """How many visible photos have a perceptual hash, a skip or no entry yet."""
+        """How many visible photos are hashed, skipped, ungrouped or missing a hash."""
         narrow = PhotoFilter(profile=profile, viewer=viewer)
         table, _, owner = _source(narrow)
         where, params = _where(narrow, owner)
@@ -222,12 +222,17 @@ class Catalog:
             row = self._db.conn.execute(
                 f"SELECT COUNT(*),"
                 " COALESCE(SUM(CASE WHEN ph.sha256 IS NULL THEN 1 ELSE 0 END), 0),"
-                " COALESCE(SUM(CASE WHEN ph.dhash = 'skip' THEN 1 ELSE 0 END), 0)"
-                f" FROM {table} LEFT JOIN photo_hashes ph ON ph.sha256 = p.sha256{where}",
-                params).fetchone()
-        total, missing, skipped = row
+                " COALESCE(SUM(CASE WHEN ph.dhash = 'skip' THEN 1 ELSE 0 END), 0),"
+                " COALESCE(SUM(CASE WHEN ph.sha256 IS NOT NULL AND ph.dhash <> 'skip'"
+                "  AND pg.sha256 IS NULL THEN 1 ELSE 0 END), 0)"
+                f" FROM {table} LEFT JOIN photo_hashes ph ON ph.sha256 = p.sha256"
+                " LEFT JOIN photo_groups pg ON pg.sha256 = p.sha256"
+                f"{where}", params).fetchone()
+        total, missing, skipped, ungrouped = row
+        indexed = total - missing - skipped
         return {"total": total, "missing": missing, "skipped": skipped,
-                "indexed": total - missing - skipped}
+                "indexed": indexed, "ungrouped": ungrouped,
+                "grouped": indexed - ungrouped}
 
     def missing_hashes(self, profile: Optional[str] = None, viewer: str = "main",
                        limit: int = 100) -> list:
@@ -247,36 +252,60 @@ class Catalog:
         return [row[0] for row in rows]
 
     def set_hash(self, sha256: str, dhash: str) -> None:
-        """Cache one perceptual hash or the ``skip`` marker for an unreadable file."""
+        """Cache one perceptual hash or the ``skip`` marker; groups wait for a rebuild."""
         with self._db.lock:
             self._db.conn.execute(
                 "INSERT INTO photo_hashes (sha256, dhash) VALUES (?, ?)"
                 " ON CONFLICT(sha256) DO UPDATE SET dhash = excluded.dhash",
                 (sha256, dhash))
+            self._db.conn.execute("DELETE FROM photo_groups WHERE sha256 = ?", (sha256,))
+
+    def rebuild_groups(self, radius: int = 8) -> int:
+        """Recompute cached radius groups from every valid hash; returns hash groups."""
+        with self._db.lock:
+            rows = self._db.conn.execute(
+                "SELECT DISTINCT dhash FROM photo_hashes WHERE dhash <> 'skip'").fetchall()
+        components = hash_components((row[0] for row in rows), radius=radius)
+        with self._db.lock:
+            self._db.conn.execute("SAVEPOINT rebuild_groups")
+            try:
+                self._db.conn.execute("DELETE FROM hash_groups")
+                self._db.conn.execute("DELETE FROM photo_groups")
+                hash_rows = [(dhash, group_id) for group_id, component in
+                             enumerate(components, 1) for dhash in component]
+                self._db.conn.executemany(
+                    "INSERT INTO hash_groups (dhash, group_id) VALUES (?, ?)", hash_rows)
+                self._db.conn.execute(
+                    "INSERT OR REPLACE INTO photo_groups (sha256, group_id)"
+                    " SELECT ph.sha256, hg.group_id FROM photo_hashes ph"
+                    " JOIN hash_groups hg ON hg.dhash = ph.dhash WHERE ph.dhash <> 'skip'")
+            except sqlite3.Error:
+                self._db.conn.execute("ROLLBACK TO rebuild_groups")
+                self._db.conn.execute("RELEASE rebuild_groups")
+                raise
+            self._db.conn.execute("RELEASE rebuild_groups")
+        return len(components)
 
     def similar_groups(self, profile: Optional[str] = None, viewer: str = "main",
-                       radius: int = 4, limit: int = 200) -> list:
-        """Read-only groups of visible photos linked by hashes within ``radius`` bits."""
+                       limit: int = 200) -> list:
+        """Read-only cached groups of visible photos."""
         narrow = PhotoFilter(profile=profile, viewer=viewer)
         table, columns, owner = _source(narrow)
         where, params = _where(narrow, owner)
         order = _ORDERS["newest"].format(owner=owner)
         with self._db.lock:
             rows = self._db.conn.execute(
-                f"SELECT {columns}, ph.dhash FROM {table}"
-                f" JOIN photo_hashes ph ON ph.sha256 = p.sha256{where}"
-                " AND ph.dhash <> 'skip'"
+                f"SELECT {columns}, pg.group_id FROM {table}"
+                f" JOIN photo_hashes ph ON ph.sha256 = p.sha256"
+                " JOIN photo_groups pg ON pg.sha256 = p.sha256"
+                f"{where} AND ph.dhash <> 'skip'"
                 f" ORDER BY {order}", params).fetchall()
         grouped = {}
         for row in rows:
             values = dict(row)
-            dhash = values.pop("dhash")
-            grouped.setdefault(dhash, []).append(_to_record(values))
-        groups = []
-        for component in hash_components(grouped.keys(), radius=radius):
-            records = [record for dhash in component for record in grouped[dhash]]
-            if len(records) > 1:
-                groups.append((tuple(sorted(component)), records))
+            group = values.pop("group_id")
+            grouped.setdefault(group, []).append(_to_record(values))
+        groups = [(group, records) for group, records in grouped.items() if len(records) > 1]
         groups.sort(key=lambda item: (-len(item[1]), item[0]))
         return groups[:limit]
 

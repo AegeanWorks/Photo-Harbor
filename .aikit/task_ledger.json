@@ -1,56 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-similar-distance",
+    "task_id": "immich-similar-cache",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794139287.7945516,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794140839.0958047,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794139437.6778507
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-gap",
-      "phase": "completed",
-      "phase_num": 5,
-      "description": "Task 'immich-gap' completed successfully.",
-      "status": "completed",
-      "timestamp": 1794130786.6488929,
-      "timestamp_str": "2026-11-08 12:39:46",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-gap-2",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/3] Archive: per-person hidden state (format 8), archived=1 filter, POST /api/archive, rail/viewer/selection UI, tests and docs; next: review UI, then Tags",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794131968.9663258,
-      "timestamp_str": "2026-11-08 12:59:28",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "The Immich gap matrix ranks Archive next: users need to hide photos from the timeline without moving or deleting files",
-        "benefits": "A private, reversible archive with bulk and single-photo actions, no file movement and no ML",
-        "risks": "contract: new archived filter and endpoint; dependency: stdlib only; concurrency: existing database lock; state: format 8 migration and per-person marks",
-        "mitigation": "Unit/HTTP/static tests, format-7 migration test, 4/4 project gates, Chromium review, explicit staging"
-      },
-      "plan_digest": "a9031d1cdff36f4d7c741de8bf07a62e53f40cffcac52c0b458382b90d364d27"
-    },
-    {
-      "task_id": "immich-gap-2",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/3] Archive done: 229 tests OK; 4/4 gates; format-7 migration covered; checklists: passed; UI review next, then Tags",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794131975.6882184,
-      "timestamp_str": "2026-11-08 12:59:35",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-gap-2",
       "phase": "phase 3",
@@ -253,6 +213,46 @@
       "status": "completed",
       "timestamp": 1794139437.677853,
       "timestamp_str": "2026-11-08 15:03:57",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-similar-cache",
+      "phase": "phase 2",
+      "phase_num": 2,
+      "description": "[1/2] Similar cache: radius-8 cached group tables, background Build groups worker, build API and UI polling, migration/tests; [2/2] gates, UI review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794140756.506158,
+      "timestamp_str": "2026-11-08 15:25:56",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "Radius-8 grouping is too slow at page load, so the groups must be precomputed and only read by the Similar tab",
+        "benefits": "Responsive Similar page at radius 8 for large libraries, with background progress and no automatic deletion",
+        "risks": "contract: new build endpoint and table cache; dependency: stdlib threads; concurrency: background writer under the database lock; state: format 13 and a rebuild that can be interrupted by shutdown",
+        "mitigation": "Keep the page read-only, compute outside the read lock and swap the cache in one savepoint, poll status, test migration/privacy/build, run 4/4 gates and Chromium review"
+      },
+      "plan_digest": "1461a8433f1c930a85ab056391853cddf2849b4d4bb35915acc6640c7180425b"
+    },
+    {
+      "task_id": "immich-similar-cache",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[1/2] Similar cache: format 13 group tables, background radius-8 rebuild worker, build API, UI polling and build button, tests",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794140838.458789,
+      "timestamp_str": "2026-11-08 15:27:18",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-similar-cache",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[1/2] Similar cache done: 265 tests OK; 4/4 gates; 20k cached groups load in 0.76 s; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794140839.0958047,
+      "timestamp_str": "2026-11-08 15:27:19",
       "agent": "opencode:deepseek"
     }
   ]

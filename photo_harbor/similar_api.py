@@ -5,18 +5,21 @@ from .errors import HarborError
 from .library_api import photo_json
 from .messages import Reply, Request, json_reply
 from .phash import read_dhash
+from .similar_builder import SimilarBuilder
 from .store import PhotoStore
 
 SCAN_DEFAULT = 50
 SCAN_MAX = 200
-RADIUS = 4
+RADIUS = 8
 
 
 class SimilarApi:
-    def __init__(self, catalog: Catalog, store: PhotoStore, dhash=read_dhash) -> None:
+    def __init__(self, catalog: Catalog, store: PhotoStore, dhash=read_dhash,
+                 builder=None) -> None:
         self._catalog = catalog
         self._store = store
         self._dhash = dhash
+        self._builder = builder or SimilarBuilder(catalog, radius=RADIUS)
 
     def _profile(self, request: Request):
         return None if request.owner else request.profile
@@ -26,16 +29,21 @@ class SimilarApi:
 
     def listing(self, request: Request) -> Reply:
         profile = self._profile(request)
-        groups = self._catalog.similar_groups(profile, viewer=request.profile,
-                                              radius=RADIUS)
+        groups = self._catalog.similar_groups(profile, viewer=request.profile)
         return json_reply({
             "status": self._status(request),
             "threshold": RADIUS,
-            "groups": [{"hash": hashes[0], "hashes": list(hashes),
-                        "count": len(records),
+            "building": self._builder.running(),
+            "build_error": self._builder.error(),
+            "groups": [{"group": group, "count": len(records),
                         "photos": [photo_json(record) for record in records]}
-                       for hashes, records in groups],
+                       for group, records in groups],
         })
+
+    def build(self, request: Request) -> Reply:
+        """Start the background group rebuild; the caller polls the listing."""
+        return json_reply({"started": self._builder.start(),
+                           "building": self._builder.running()})
 
     def scan(self, request: Request) -> Reply:
         body = request.json()

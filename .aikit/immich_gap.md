@@ -67,11 +67,11 @@ No map tiles, reverse geocoding or network lookup are involved; archived photos 
 
 Format 12 adds a `photo_hashes` cache. **Similar** is a separate tab: **Scan library** computes
 an optional Pillow difference hash for visible photos in batches, unreadable files are marked
-`skip`, and groups are connected components whose 64-bit hashes differ by at most 4 bits. The
-view is read-only: each photo links to its original and there is no delete action. This catches
-re-encoded or resized copies that SHA-256 dedupe misses, without automatic deletion. The 4-bit
-width keeps a 50k-hash grouping fast (about 2.1 s on the development PC); a wider radius would
-need a cached/precomputed index.
+`skip`, and groups are cached connected components whose 64-bit hashes differ by at most 8
+bits. **Scan library** hashes in bounded batches; **Build groups** recomputes the SQLite cache in
+a background worker, and **Similar** reads SQL groups instead of comparing hashes on page load.
+The view is read-only: each photo links to its original and there is no delete action. This
+catches re-encoded or resized copies that SHA-256 dedupe misses, without automatic deletion.
 
 ## Implemented in this pass: Cameras
 

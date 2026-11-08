@@ -225,6 +225,7 @@ class HarborApp:
         add("POST", "/api/photo-tags", tags.membership)
         add("GET", "/api/similar", similar.listing)
         add("POST", "/api/similar/scan", similar.scan)
+        add("POST", "/api/similar/build", similar.build)
         add("POST", "/api/download", downloads.prepare)
         add("GET", "/api/download/", downloads.serve)
         add("GET", "/api/trash", trash.listing)

@@ -6,11 +6,11 @@
 ---
 
 ## 📊 Codebase Metrics
-- **Total Python Modules**: `75`
-- **Total Classes**: `150`
-- **Total Top-Level Functions**: `118`
-- **Total Class Methods**: `613`
-- **Total Source Lines**: `10121`
+- **Total Python Modules**: `76`
+- **Total Classes**: `151`
+- **Total Top-Level Functions**: `119`
+- **Total Class Methods**: `623`
+- **Total Source Lines**: `10291`
 
 ---
 
@@ -132,7 +132,7 @@
 ### [`photo_harbor/app.py`](photo_harbor/app.py)
 > *Wires one library's storage, APIs and web page into a Router.*
 
-**Size**: `242` lines (`12009` bytes)
+**Size**: `243` lines (`12066` bytes)
 
 **Classes:**
 - `class HarborApp` - *Owns the database connection; ``close`` releases it.*
@@ -294,7 +294,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `374` lines (`19314` bytes)
+**Size**: `403` lines (`21052` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -306,10 +306,11 @@
   - Method `.copies_of(profile, sha256s)` - *The hashes in ``sha256s`` that sit in ``profile``'s folder, in one query.*
   - Method `.page(offset, limit, narrow)` - *Records in the requested order, newest first by default (taken time, then received).*
   - Method `.hashes(narrow, limit)` - *Every matching hash in the same order as the gallery, capped by ``limit``.*
-  - Method `.similar_status(profile, viewer)` - *How many visible photos have a perceptual hash, a skip or no entry yet.*
+  - Method `.similar_status(profile, viewer)` - *How many visible photos are hashed, skipped, ungrouped or missing a hash.*
   - Method `.missing_hashes(profile, viewer, limit)` - *Visible photo hashes that have no perceptual-hash row yet, newest first.*
-  - Method `.set_hash(sha256, dhash)` - *Cache one perceptual hash or the ``skip`` marker for an unreadable file.*
-  - Method `.similar_groups(profile, viewer, radius, limit)` - *Read-only groups of visible photos linked by hashes within ``radius`` bits.*
+  - Method `.set_hash(sha256, dhash)` - *Cache one perceptual hash or the ``skip`` marker; groups wait for a rebuild.*
+  - Method `.rebuild_groups(radius)` - *Recompute cached radius groups from every valid hash; returns hash groups.*
+  - Method `.similar_groups(profile, viewer, limit)` - *Read-only cached groups of visible photos.*
   - Method `.outline(profile, viewer)` - *Months and video count, for one profile or (None) everyone, plus the viewer's*
   - Method `.stats(profile)`
   - Method `.storage(profile)` - *Disk use and the ten largest files; one person's share or the whole library.*
@@ -402,7 +403,7 @@
 ### [`photo_harbor/database.py`](photo_harbor/database.py)
 > *The SQLite file behind the catalog, people, copies, sign-ins, journal and import list.*
 
-**Size**: `314` lines (`11121` bytes)
+**Size**: `334` lines (`11820` bytes)
 
 **Classes:**
 - `class Database` - *One shared connection; every statement runs under ``lock`` so server threads take turns.*
@@ -648,12 +649,13 @@
 ### [`photo_harbor/phash.py`](photo_harbor/phash.py)
 > *A small perceptual difference hash for the read-only Similar review.*
 
-**Size**: `107` lines (`3555` bytes)
+**Size**: `114` lines (`3830` bytes)
 
 **Functions:**
 - `def hash_pixels(pixels)` - *A 64-bit difference hash as 16 hex digits, or None for the wrong pixel count.*
 - `def hamming(left, right)` - *How many bits differ between two 16-hex perceptual hashes.*
-- `def _bands(radius)` - *Split 64 bits into radius+1 bands, so a pair within radius shares one band.*
+- `def _bands(radius)` - *Split 64 bits into more than ``radius`` bands, so a pair within radius shares one band.*
+- `def hash_bands(dhash, radius)` - *``(band, signature)`` keys for the cached radius-8 candidate index.*
 - `def hash_components(hashes, radius)` - *Connected groups of valid hashes whose bits differ by at most ``radius``.*
 - `def read_dhash(path)` - *Perceptual hash from the original, or None without Pillow or a readable image.*
 
@@ -826,15 +828,31 @@
 ### [`photo_harbor/similar_api.py`](photo_harbor/similar_api.py)
 > *Read-only Similar review: perceptual hashes, no automatic deletion.*
 
-**Size**: `63` lines (`2627` bytes)
+**Size**: `71` lines (`3017` bytes)
 
 **Classes:**
 - `class SimilarApi`
-  - Method `.__init__(catalog, store, dhash)`
+  - Method `.__init__(catalog, store, dhash, builder)`
   - Method `._profile(request)`
   - Method `._status(request)`
   - Method `.listing(request)`
+  - Method `.build(request)` - *Start the background group rebuild; the caller polls the listing.*
   - Method `.scan(request)`
+
+---
+
+### [`photo_harbor/similar_builder.py`](photo_harbor/similar_builder.py)
+> *One background rebuild of the cached Similar groups.*
+
+**Size**: `38` lines (`1268` bytes)
+
+**Classes:**
+- `class SimilarBuilder`
+  - Method `.__init__(catalog, radius)`
+  - Method `.start()` - *Start a rebuild unless one is already running; True when this call started it.*
+  - Method `.running()`
+  - Method `.error()`
+  - Method `._run()`
 
 ---
 
@@ -1174,7 +1192,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `905` lines (`51376` bytes)
+**Size**: `911` lines (`51625` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1266,7 +1284,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `662` lines (`29747` bytes)
+**Size**: `665` lines (`29919` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1463,7 +1481,7 @@
 ---
 
 ### [`tests/test_similar.py`](tests/test_similar.py)
-**Size**: `116` lines (`6031` bytes)
+**Size**: `174` lines (`8731` bytes)
 
 **Classes:**
 - `class HashTest`
@@ -1471,16 +1489,19 @@
   - Method `.test_hamming_distance_and_connected_groups()`
 - `class SimilarCatalogTest`
   - Method `.setUp()`
-  - Method `.test_status_and_groups_are_read_only()`
+  - Method `.test_status_and_cached_groups_are_read_only()`
+  - Method `.test_existing_hashes_are_grouped_by_a_rebuild()`
   - Method `.test_archiving_removes_a_photo_from_the_review()`
   - Method `.test_another_person_sees_only_their_copies()`
 - `class SimilarApiTest`
   - Method `.setUp()`
   - Method `._request(method, path, body)`
   - Method `.test_scan_indexes_visible_photos_and_listing_groups_them()`
+  - Method `.test_build_endpoint_starts_the_background_worker()`
   - Method `.test_unreadable_files_are_skipped_once()`
 - `class SimilarMigrationTest`
   - Method `.test_a_format_11_catalog_gains_the_hash_cache()`
+  - Method `.test_a_format_12_catalog_gains_the_cached_group_tables()`
 
 ---
 
