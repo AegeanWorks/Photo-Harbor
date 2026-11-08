@@ -181,7 +181,17 @@ audit output and do not extend the numbered target.
   normalization-safe; an empty, oversized or vanished selection gives a clear refusal.
 - Verification: 215 tests OK; project check 4/4 gates; no code change.
 
+## Run 17 - pushes 30-80
+
+- Range: `a4b0eb5` (push 30), `b25061a` (push 31), `ba5a978` (push 32), plus the last 48
+  pushes.
+- Reviewed: batch favorite/album/trash/download flows, the 500-hash server cap, selection
+  clearing, and file/EXIF details with and without Pillow.
+- Finding: none actionable. Batch writes validate the whole chunk before writing; details fail
+  soft to file facts when Pillow or EXIF is unavailable.
+- Verification: 215 tests OK; project check 4/4 gates; no code change.
+
 ## Status
 
-- Runs completed: 16 (pushes 33-80).
-- Next run: last 51 pushes, adding pushes 30-32.
+- Runs completed: 17 (pushes 30-80).
+- Next run: last 54 pushes, adding pushes 27-29.
