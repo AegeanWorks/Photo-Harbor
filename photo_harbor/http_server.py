@@ -15,6 +15,7 @@ from .messages import Reply, Request, error_reply, parse_range
 from .router import Router
 
 COPY_CHUNK = 1 << 20
+DRAIN_LIMIT = 1 << 20
 SOCKET_TIMEOUT = 120
 BASE_HEADERS = (("X-Content-Type-Options", "nosniff"), ("Referrer-Policy", "no-referrer"))
 HTML_POLICY = ("default-src 'self'; img-src 'self' blob: data:; media-src 'self'; "
@@ -98,6 +99,8 @@ class HarborHandler(BaseHTTPRequestHandler):
         return Request(method, path, dict(parse_qsl(query)), headers, cookies, self._body, length)
 
     def _send(self, reply: Reply) -> None:
+        if self._body is not None and not self._body.exhausted:
+            self._drain()
         if self._body is None or not self._body.exhausted:
             self.close_connection = True
         if reply.file is not None:
@@ -108,6 +111,23 @@ class HarborHandler(BaseHTTPRequestHandler):
         self.end_headers()
         if self.command != "HEAD":
             self.wfile.write(reply.body)
+
+    def _drain(self) -> None:
+        """Read a small unread body before closing, so Windows does not reset the reply."""
+        body = self._body
+        if body is None or body.exhausted:
+            return
+        remaining = getattr(body, "remaining", None)
+        if remaining is None or remaining > DRAIN_LIMIT:
+            return
+        try:
+            while remaining > 0:
+                block = body.read(min(COPY_CHUNK, remaining))
+                if not block:
+                    break
+                remaining -= len(block)
+        except (OSError, HarborError):  # hygiene: allow a rejected body may already be broken
+            pass
 
     def _send_file(self, reply: Reply) -> None:
         try:

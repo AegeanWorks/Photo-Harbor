@@ -888,6 +888,15 @@ class ServerTest(unittest.TestCase):
         self.assertEqual((listing["me"], listing["owner"]), ("ayse", False))
         self.assertEqual([p["id"] for p in listing["profiles"]], ["ayse"])
 
+    def test_a_rejected_upload_drains_its_body_before_closing(self):
+        ayse = self.add_person()
+        body = b"x" * (128 * 1024)
+        response, reply = self.call(
+            "POST", "/api/upload", body=body, key=False,
+            headers={"X-Harbor-Key": ayse["key"], "X-Name": "a.jpg", "X-Profile": "main"})
+        self.assertEqual(response.status, 403)
+        self.assertIn("own profile", json.loads(reply)["error"])
+
     def test_a_rejected_profile_write_changes_nothing(self):
         self.add_person()
         response, _ = self.call("POST", "/api/profiles/ayse",

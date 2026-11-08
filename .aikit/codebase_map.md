@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `173`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `684`
-- **Total Source Lines**: `11261`
+- **Total Class Methods**: `687`
+- **Total Source Lines**: `11295`
 
 ---
 
@@ -287,12 +287,13 @@
 ### [`photo_harbor/body_readers.py`](photo_harbor/body_readers.py)
 > *Request-body readers that know when the body is used up, so a keep-alive connection is only*
 
-**Size**: `73` lines (`2361` bytes)
+**Size**: `78` lines (`2569` bytes)
 
 **Classes:**
 - `class LengthReader` - *At most ``length`` bytes of a ``Content-Length`` body.*
   - Method `.__init__(raw, length)`
   - Property `.exhausted`
+  - Property `.remaining` - *Bytes still owed, or None when the peer closed before sending them all.*
   - Method `.read(size)`
 - `class ChunkedReader` - *The decoded bytes of a ``Transfer-Encoding: chunked`` body.*
   - Method `.__init__(raw)`
@@ -529,7 +530,7 @@
 ### [`photo_harbor/http_server.py`](photo_harbor/http_server.py)
 > *The socket side: turns HTTP into a Request, runs the matched endpoint and sends its Reply.*
 
-**Size**: `166` lines (`7469` bytes)
+**Size**: `186` lines (`8237` bytes)
 
 **Classes:**
 - `class HarborHandler` - *Built per connection by ThreadingHTTPServer; ``router`` and ``guard`` come from the server.*
@@ -540,6 +541,7 @@
   - Method `._dispatch(method)`
   - Method `._request(method, path, query)`
   - Method `._send(reply)`
+  - Method `._drain()` - *Read a small unread body before closing, so Windows does not reset the reply.*
   - Method `._send_file(reply)`
   - Method `._headers(reply, length)`
 - `class HarborServer`
@@ -1266,7 +1268,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1139` lines (`64191` bytes)
+**Size**: `1148` lines (`64626` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1332,6 +1334,7 @@
   - Method `.add_person(name)`
   - Method `.test_a_persons_key_uploads_into_their_own_profile()`
   - Method `.test_only_the_owner_may_target_or_manage_other_profiles()`
+  - Method `.test_a_rejected_upload_drains_its_body_before_closing()`
   - Method `.test_a_rejected_profile_write_changes_nothing()`
   - Method `.test_a_retired_key_is_refused()`
   - Method `.test_a_client_hanging_up_prints_no_traceback()`

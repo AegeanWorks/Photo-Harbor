@@ -1,57 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "immich-format-breakdown",
+    "task_id": "harbor-reject-drain",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794151023.2305038,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794151564.5032272,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794151187.6500027
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-health",
-      "phase": "phase 2",
-      "phase_num": 2,
-      "description": "[1/2] Storage/Health overview: aggregate status, storage, backup and trash into read-only cards/panels; [2/2] static/HTTP tests, gates, Chromium review and publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794148532.821215,
-      "timestamp_str": "2026-11-08 17:35:32",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "Health data exists across several endpoints; a single read-only overview makes disk, backup, trash and sync state legible without new storage",
-        "benefits": "One dashboard for storage, disk, backup, trash, missing reports and previews, composed from tested APIs",
-        "risks": "contract: new Health tab; dependency: browser only; concurrency: read-only parallel fetches; state: none",
-        "mitigation": "Call only existing endpoints, hide owner-only backup from non-owners gracefully, add static/HTTP coverage, gate and review"
-      },
-      "plan_digest": "2a8e2d3c5a2552bfe79e3479ad439471db1f101ae446885a69de97bfa6bff32e"
-    },
-    {
-      "task_id": "immich-health",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[1/2] Health: cards/panels aggregating status, storage, backup and trash, owner-only backup handling, static/HTTP tests",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794148699.3312716,
-      "timestamp_str": "2026-11-08 17:38:19",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-health",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[1/2] Health done: 301 tests OK; 4/4 gates; API source permissions covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794148700.3835025,
-      "timestamp_str": "2026-11-08 17:38:20",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-health",
       "phase": "completed",
@@ -256,6 +215,45 @@
       "status": "completed",
       "timestamp": 1794151187.6500046,
       "timestamp_str": "2026-11-08 18:19:47",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-reject-drain",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/3] Plan: drain small unread request bodies before an early rejection reply so Windows does not reset the connection; add a regression test",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794151296.6658583,
+      "timestamp_str": "2026-11-08 18:21:36",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "A rejected upload can close with unread body bytes, intermittently turning a valid 403 into ConnectionAbortedError and flaking the gate.",
+        "benefits": "Deterministic rejection replies on Windows; no API or schema change; protects keep-alive semantics.",
+        "risks": "Draining attacker-controlled bodies; blocking on slow clients; response ordering.",
+        "mitigation": "bound the drain to 1 MiB, keep the socket timeout, close when the body is larger or chunked, and add a large-body 403 regression test."
+      }
+    },
+    {
+      "task_id": "harbor-reject-drain",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Drain: LengthReader remaining, bounded _drain before close, 128 KiB rejected-upload regression test",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794151396.2882617,
+      "timestamp_str": "2026-11-08 18:23:16",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "harbor-reject-drain",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/3] Drain done: 309 tests OK; 4/4 gates; 128 KiB rejected-upload reply covered; hygiene allow documented; checklists: passed; no UI change",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794151564.5032272,
+      "timestamp_str": "2026-11-08 18:26:04",
       "agent": "opencode:deepseek"
     }
   ]

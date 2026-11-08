@@ -1,7 +1,7 @@
 """Request-body readers that know when the body is used up, so a keep-alive connection is only
 reused once nothing of the previous request is left unread."""
 
-from typing import BinaryIO
+from typing import BinaryIO, Optional
 
 from .errors import HarborError
 
@@ -18,6 +18,11 @@ class LengthReader:
     @property
     def exhausted(self) -> bool:
         return self._left == 0
+
+    @property
+    def remaining(self) -> Optional[int]:
+        """Bytes still owed, or None when the peer closed before sending them all."""
+        return self._left if self._left >= 0 else None
 
     def read(self, size: int = -1) -> bytes:
         want = self._left if size < 0 else min(size, self._left)
