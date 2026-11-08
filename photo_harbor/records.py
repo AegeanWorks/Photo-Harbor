@@ -64,7 +64,8 @@ class PhotoFilter:
     whitespace-separated words that must all match the file name, ``kind`` is ``photo`` or
     ``video``. ``viewer`` is whose favorites, albums and tags are read; ``favorite``, ``album``
     and ``tag`` narrow to that viewer's marks. ``camera`` and ``lens`` exact-match stored EXIF
-    strings. ``missing`` selects rows lacking ``date``, ``place``, ``camera`` or ``lens``.
+    strings. ``missing`` selects rows lacking ``date``, ``place``, ``camera`` or ``lens``;
+    ``media_format`` exact-matches a stored media type such as ``image/png``.
     ``archived`` shows only the viewer's archived photos; false hides them. ``order``
     is newest, oldest, largest or smallest. None means no narrowing on that axis."""
 
@@ -80,6 +81,7 @@ class PhotoFilter:
     camera: Optional[str] = None
     lens: Optional[str] = None
     missing: Optional[str] = None
+    media_format: Optional[str] = None
     start: Optional[str] = None
     end: Optional[str] = None
     day: Optional[str] = None

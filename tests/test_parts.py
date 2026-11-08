@@ -543,6 +543,13 @@ class HealthUiTest(unittest.TestCase):
             self.assertIn(text, script)
         self.assertIn(".health-action", styles)
 
+    def test_health_format_rows_open_format_filters(self):
+        root = Path(__file__).resolve().parents[1]
+        script = (root / "photo_harbor" / "web" / "app.js").read_text(encoding="utf-8")
+        for text in ('params.set("format"', "selectFormat", "formatLabel",
+                     "Click a format to see those files."):
+            self.assertIn(text, script)
+
 
 class AndroidVersionTest(unittest.TestCase):
     def test_gallery_android_card_has_live_download_controls(self):

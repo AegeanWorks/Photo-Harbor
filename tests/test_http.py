@@ -727,6 +727,17 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(coverage, {"total": 2, "missing_dates": 1, "missing_places": 1,
                                     "missing_cameras": 1, "missing_lenses": 1})
 
+    def test_format_filter_lists_one_media_type(self):
+        self.upload(b"jpeg", name="one.jpg")
+        self.upload(b"png", name="two.png")
+        _, body = self.call("GET", "/api/photos?format=image/png")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["two.png"])
+        _, body = self.call("GET", "/api/photos?format=image/jpeg")
+        self.assertEqual([p["name"] for p in json.loads(body)["photos"]], ["one.jpg"])
+        response, body = self.call("GET", "/api/photos?format=PNG")
+        self.assertEqual(response.status, 400)
+        self.assertIn("media type", json.loads(body)["error"])
+
     def test_missing_metadata_filter_narrows_to_gaps(self):
         self.call("POST", "/api/upload", body=b"undated",
                   headers={"X-Name": "undated.jpg", "X-Sha256": sha(b"undated")})

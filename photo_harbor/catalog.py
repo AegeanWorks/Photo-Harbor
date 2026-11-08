@@ -105,6 +105,9 @@ def _where(narrow: PhotoFilter, owner: str) -> tuple:
     if narrow.lens:
         clauses.append("p.lens = ?")
         params.append(narrow.lens)
+    if narrow.media_format:
+        clauses.append("p.media_type = ?")
+        params.append(narrow.media_format)
     if narrow.missing is not None:
         missing_clauses = {
             "date": "p.taken_at IS NULL",

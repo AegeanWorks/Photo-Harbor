@@ -26,6 +26,7 @@ MONTH = re.compile(r"^\d{4}-(0[1-9]|1[0-2])$")
 DATE = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
 DAY = re.compile(r"^\d{2}-\d{2}$")
 PLACE = re.compile(r"^(-?\d{1,3}(?:\.\d+)?),(-?\d{1,3}(?:\.\d+)?)$")
+MEDIA_TYPE = re.compile(r"^[a-z0-9][a-z0-9.+-]*/[a-z0-9][a-z0-9.+-]*$")
 
 
 def _valid_date(value: str) -> bool:
@@ -51,6 +52,7 @@ def _valid_day(value: str) -> bool:
 MAX_QUERY = 100
 MAX_CAMERA = 80
 MAX_LENS = 80
+MAX_FORMAT = 80
 LOW_DISK_BYTES = 20 * 1024 ** 3     # warn under 20 GB free...
 LOW_DISK_SHARE = 0.10               # ...or under 10 % of the drive, whichever is larger
 PROFILE_ID = re.compile(r"^[a-z0-9-]{1,40}$")
@@ -107,6 +109,7 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     place = request.arg("place") or None
     camera = request.arg("camera").strip()[:MAX_CAMERA] or None
     lens = request.arg("lens").strip()[:MAX_LENS] or None
+    media_format = request.arg("format").strip()[:MAX_FORMAT] or None
     missing = request.arg("missing") or None
     start = request.arg("from").strip() or None
     end = request.arg("to").strip() or None
@@ -136,6 +139,10 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
         raise HarborError(f"{missing!r} is not a metadata gap",
                           "missing is date, place, camera or lens",
                           "use ?missing=date, or leave it out")
+    if media_format is not None and not MEDIA_TYPE.match(media_format):
+        raise HarborError(f"{media_format!r} is not a media type",
+                          "formats are written type/subtype, such as image/png",
+                          "use ?format=image/png, or leave it out")
     if album is not None:
         if not albums.owned(request.profile, album):
             raise HarborError(f"no album {album}", "it was deleted or belongs to someone else",
@@ -160,7 +167,8 @@ def _narrowing(request: Request, albums: AlbumBook, tags: TagBook) -> PhotoFilte
     return PhotoFilter(month=month, query=query, kind=kind, profile=_visible_profile(request),
                        viewer=request.profile, favorite=favorite, album=album, tag=tag,
                        place=place, camera=camera, lens=lens, missing=missing,
-                       start=start, end=end, day=day, archived=archived, order=order)
+                       media_format=media_format, start=start, end=end, day=day,
+                       archived=archived, order=order)
 
 
 class LibraryApi:

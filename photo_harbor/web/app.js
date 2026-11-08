@@ -10,7 +10,7 @@ const state = {
   photos: [], next: 0, loading: false, viewing: -1, dayEls: new Map(), dayList: [],
   dayWindowFrame: null,
   scope: { kind: null, month: null, favorite: false, album: null, tag: null, place: null,
-    camera: null, lens: null, missing: null, start: null, end: null, day: null,
+    camera: null, lens: null, missing: null, format: null, start: null, end: null, day: null,
     archived: false, order: "newest" },
   query: "",
   months: [],
@@ -322,6 +322,7 @@ function filterParams() {
   if (state.scope.camera) params.set("camera", state.scope.camera);
   if (state.scope.lens) params.set("lens", state.scope.lens);
   if (state.scope.missing) params.set("missing", state.scope.missing);
+  if (state.scope.format) params.set("format", state.scope.format);
   if (state.scope.start) params.set("from", state.scope.start);
   if (state.scope.end) params.set("to", state.scope.end);
   if (state.scope.day) params.set("day", state.scope.day);
@@ -415,6 +416,7 @@ function scopeTitle() {
   else if (state.scope.missing === "place") base = "Missing places";
   else if (state.scope.missing === "camera") base = "Missing cameras";
   else if (state.scope.missing === "lens") base = "Missing lenses";
+  else if (state.scope.format) base = `${formatLabel(state.scope.format)} files`;
   else if (state.scope.archived) base = "Archive";
   else if (state.scope.favorite) base = "Favorites";
   else if (state.scope.day) base = "On this day";
@@ -427,7 +429,7 @@ function scopeTitle() {
 function renderScope() {
   const extra = Boolean(state.scope.month || state.scope.kind || state.scope.start
     || state.scope.end || state.scope.day || state.scope.place || state.scope.camera
-    || state.scope.lens || state.scope.missing || state.query);
+    || state.scope.lens || state.scope.missing || state.scope.format || state.query);
   const narrowed = Boolean(extra || state.scope.favorite || state.scope.album
     || state.scope.tag || state.scope.archived);
   const shown = state.photos.length;
@@ -472,7 +474,9 @@ function renderScope() {
                       ? "Every photo names its camera."
                       : state.scope.missing === "lens"
                         ? "Every photo names its lens."
-                        : state.scope.day
+                        : state.scope.format
+                          ? `No ${formatLabel(state.scope.format)} files here.`
+                          : state.scope.day
                 ? "No photos from this day in other years."
                 : narrowed
               ? "No photo matches. Try another month or search."
@@ -483,7 +487,8 @@ function renderScope() {
 
 function markScope() {
   const active = state.scope.album || state.scope.tag || state.scope.place
-    || state.scope.camera || state.scope.lens || state.scope.missing ? null
+    || state.scope.camera || state.scope.lens || state.scope.missing
+    || state.scope.format ? null
     : state.scope.archived ? "archive"
       : state.scope.day ? "memories"
         : state.scope.favorite ? "favorite"
@@ -513,7 +518,7 @@ function markScope() {
 function setScope(kind, month, extra = {}) {
   if (state.selecting) setSelecting(false);
   state.scope = { kind, month, favorite: false, album: null, tag: null, place: null,
-    camera: null, lens: null, missing: null, start: null, end: null, day: null,
+    camera: null, lens: null, missing: null, format: null, start: null, end: null, day: null,
     archived: false, order: state.scope.order || "newest", ...extra };
   hideDatePanel();
   markScope();
@@ -753,6 +758,12 @@ function selectMissing(field) {
   show("photos");
 }
 
+function selectFormat(type) {
+  clearPersonScope();
+  setScope(null, null, { format: type });
+  show("photos");
+}
+
 function selectAlbum(id) {
   if (!state.albums.some((album) => album.id === id)) return;
   clearPersonScope();
@@ -942,9 +953,10 @@ async function loadHealth() {
     formatsPanel.append(el("p", "hint", "No files yet."));
   } else {
     for (const item of storage.formats.slice(0, 12)) {
-      formatsPanel.append(healthRow(formatLabel(item.media_type),
-        `${items(item.count)} · ${bytes(item.bytes)}`));
+      formatsPanel.append(healthAction(formatLabel(item.media_type),
+        `${items(item.count)} · ${bytes(item.bytes)}`, () => selectFormat(item.media_type)));
     }
+    formatsPanel.append(el("p", "hint", "Click a format to see those files."));
     if (storage.formats.length > 12) {
       formatsPanel.append(el("p", "hint", `${storage.formats.length - 12} more formats.`));
     }

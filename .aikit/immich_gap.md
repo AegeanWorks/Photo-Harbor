@@ -122,7 +122,8 @@ names are rejected with a 400. No schema or new endpoint is added.
 
 `GET /api/storage` adds a `formats` list grouped by stored media type, with visible count and
 bytes, using one aggregate query over photos (or one person's copies). The **Health** tab renders
-a **Formats** panel. No schema or new endpoint is added.
+a **Formats** panel; each row opens `GET /api/photos?format=type/subtype`. No schema or new
+endpoint is added.
 
 ## Implemented in this pass: Activity overview
 

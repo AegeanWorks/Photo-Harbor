@@ -9,8 +9,8 @@
 - **Total Python Modules**: `83`
 - **Total Classes**: `173`
 - **Total Top-Level Functions**: `126`
-- **Total Class Methods**: `687`
-- **Total Source Lines**: `11295`
+- **Total Class Methods**: `689`
+- **Total Source Lines**: `11326`
 
 ---
 
@@ -307,7 +307,7 @@
 ### [`photo_harbor/catalog.py`](photo_harbor/catalog.py)
 > *The index of stored originals: one row per distinct file, keyed by SHA-256.*
 
-**Size**: `458` lines (`24046` bytes)
+**Size**: `461` lines (`24160` bytes)
 
 **Classes:**
 - `class Catalog`
@@ -612,7 +612,7 @@
 ### [`photo_harbor/library_api.py`](photo_harbor/library_api.py)
 > *The endpoints the gallery reads: status, the photo list, originals and previews.*
 
-**Size**: `278` lines (`13676` bytes)
+**Size**: `286` lines (`14172` bytes)
 
 **Classes:**
 - `class LibraryApi`
@@ -744,7 +744,7 @@
 ### [`photo_harbor/records.py`](photo_harbor/records.py)
 > *Immutable values passed between the store, the catalog and the web layer.*
 
-**Size**: `205` lines (`5049` bytes)
+**Size**: `207` lines (`5166` bytes)
 
 **Classes:**
 - `class PhotoRecord` - *One stored original, identified by the SHA-256 of its bytes.*
@@ -1268,7 +1268,7 @@
 ### [`tests/test_http.py`](tests/test_http.py)
 > *The server over a real socket on 127.0.0.1, as the Shortcut and the gallery use it.*
 
-**Size**: `1148` lines (`64626` bytes)
+**Size**: `1159` lines (`65258` bytes)
 
 **Classes:**
 - `class _NoPreviews`
@@ -1319,6 +1319,7 @@
   - Method `.test_activity_journal_is_recent_and_private()`
   - Method `.test_health_overview_sources_are_ready()`
   - Method `.test_status_reports_metadata_coverage()`
+  - Method `.test_format_filter_lists_one_media_type()`
   - Method `.test_missing_metadata_filter_narrows_to_gaps()`
   - Method `.test_missing_metadata_filter_respects_person_scope()`
   - Method `.test_backup_status_is_visible_only_to_the_owner()`
@@ -1388,7 +1389,7 @@
 ---
 
 ### [`tests/test_parts.py`](tests/test_parts.py)
-**Size**: `867` lines (`40301` bytes)
+**Size**: `874` lines (`40675` bytes)
 
 **Classes:**
 - `class RangeTest`
@@ -1463,6 +1464,7 @@
 - `class HealthUiTest`
   - Method `.test_health_overview_is_read_only_and_aggregates_apis()`
   - Method `.test_health_coverage_rows_open_missing_filters()`
+  - Method `.test_health_format_rows_open_format_filters()`
 - `class AndroidVersionTest`
   - Method `.test_gallery_android_card_has_live_download_controls()`
   - Method `.test_android_page_loads_its_script_from_a_csp_allowed_file()`

@@ -1148,3 +1148,13 @@ contract, a dependency, a data format or the architecture; IDs are consecutive a
   returns it and the **Health** tab renders a **Formats** panel. No schema or new endpoint is added.
 - **Consequences**: The format split follows the same owner/self scope as storage. The panel is
   read-only and bounded to twelve rows; unknown types still show their subtype.
+### ADR-072: Format rows open their matching gallery subset
+- **Date**: 2026-11-08
+- **Status**: Accepted
+- **Context**: The Formats panel showed media-type counts but not the files, and the gallery
+  already has a filter pipeline over the same visible rows.
+- **Decision**: Add ormat=type/subtype to GET /api/photos, implemented as an exact
+  PhotoFilter.media_format match. Health format rows open the Photos view with that filter;
+  values are capped and validated as MIME types. No schema or endpoint is added.
+- **Consequences**: The format split is actionable and composes with person, date, kind, name
+  and sort filters; unknown or malformed values are rejected with a 400.

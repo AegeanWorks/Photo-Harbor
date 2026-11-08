@@ -1,56 +1,16 @@
 {
   "version": 1,
   "active_task": {
-    "task_id": "harbor-reject-drain",
+    "task_id": "immich-format-filter",
     "last_phase": "phase 4",
-    "active_phase": 5,
-    "status": "completed",
-    "updated_at": 1794151564.5032272,
+    "active_phase": 4,
+    "status": "in_progress",
+    "updated_at": 1794151899.694339,
     "owner": "opencode:deepseek",
     "started_by": "opencode:deepseek",
-    "continuations": [],
-    "completed_at": 1794151638.8586273
+    "continuations": []
   },
   "checkpoints": [
-    {
-      "task_id": "immich-coverage",
-      "phase": "phase 1",
-      "phase_num": 1,
-      "description": "[1/5] Plan: add metadata coverage panel to Health using one aggregate catalog query; test unit+HTTP+static; verify UI; publish",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794149134.3352368,
-      "timestamp_str": "2026-11-08 17:45:34",
-      "agent": "opencode:deepseek",
-      "impact_assessment": {
-        "why": "Photos lacking dates/places/cameras/lenses are invisible today; a coverage panel turns existing metadata gaps into actionable library health without new sources of truth.",
-        "benefits": "One query, no schema change; surfaces curation gaps beside existing Health cards.",
-        "risks": "Aggregate query cost on large libraries; UI clutter; README size near limit.",
-        "mitigation": "Single indexed GROUP BY pass with LIMIT-free scalar subqueries; place panel in Health; trim README if needed."
-      }
-    },
-    {
-      "task_id": "immich-coverage",
-      "phase": "phase 3",
-      "phase_num": 3,
-      "description": "[2/5] Metadata coverage: Catalog.coverage aggregate, /api/status coverage object, Health panel with four missing-metadata rows, HTTP/static tests and README note",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794149443.5484178,
-      "timestamp_str": "2026-11-08 17:50:43",
-      "agent": "opencode:deepseek"
-    },
-    {
-      "task_id": "immich-coverage",
-      "phase": "phase 4",
-      "phase_num": 4,
-      "description": "[3/5] Coverage done: 302 tests OK; 4/4 gates; all four missing axes covered; checklists: passed; UI review next",
-      "files_affected": [],
-      "status": "in_progress",
-      "timestamp": 1794149450.2067356,
-      "timestamp_str": "2026-11-08 17:50:50",
-      "agent": "opencode:deepseek"
-    },
     {
       "task_id": "immich-coverage",
       "phase": "completed",
@@ -255,6 +215,45 @@
       "status": "completed",
       "timestamp": 1794151638.8586295,
       "timestamp_str": "2026-11-08 18:27:18",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-format-filter",
+      "phase": "phase 1",
+      "phase_num": 1,
+      "description": "[1/3] Plan: add format=MEDIA_TYPE to the gallery and make Formats rows open those photos; test backend/UI; review and publish",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794151741.2071989,
+      "timestamp_str": "2026-11-08 18:29:01",
+      "agent": "opencode:deepseek",
+      "impact_assessment": {
+        "why": "The Formats panel shows which media types fill the library but cannot list them; existing filter plumbing can make each row actionable without new state.",
+        "benefits": "One exact-match filter, no schema change; format rows open the matching gallery subset and reuse privacy/order rules.",
+        "risks": "Unvalidated media-type strings; empty-state clarity; README limit.",
+        "mitigation": "trim and cap the value at the API boundary, reuse PhotoFilter, add HTTP/static tests, keep the panel read-only."
+      }
+    },
+    {
+      "task_id": "immich-format-filter",
+      "phase": "phase 3",
+      "phase_num": 3,
+      "description": "[2/3] Format filter: PhotoFilter.media_format, API format=type/subtype validation, clickable Formats rows, HTTP/static tests, gap/ADR-072",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794151853.1918821,
+      "timestamp_str": "2026-11-08 18:30:53",
+      "agent": "opencode:deepseek"
+    },
+    {
+      "task_id": "immich-format-filter",
+      "phase": "phase 4",
+      "phase_num": 4,
+      "description": "[2/3] Format filter done: 311 tests OK; 4/4 gates; jpeg/png and invalid values covered; checklists: passed; UI review next",
+      "files_affected": [],
+      "status": "in_progress",
+      "timestamp": 1794151899.694339,
+      "timestamp_str": "2026-11-08 18:31:39",
       "agent": "opencode:deepseek"
     }
   ]
